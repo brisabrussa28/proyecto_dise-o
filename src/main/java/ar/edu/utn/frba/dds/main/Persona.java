@@ -1,23 +1,19 @@
 package ar.edu.utn.frba.dds.main;
 
-public class Persona {
-}
+public abstract class Persona {
+  protected String nombre;
+  protected String email;
 
-class Administrador {
-
-  void crearColeccion() {}
-}
-
-class Visualizador { //No requiere dejar datos personales y puede subir hechos, esto lo vuelve un contribuyente.
-
-}
-
-class Contribuyente { //También se las considera personas humanas (se podría tener una etiqueta para identificar contribuyentes???)
-  String nombre;
-
-  Contribuyente(String nombre) {
+  public Persona(String nombre, String email) {
     this.nombre = nombre;
+    this.email = email;
+  }
+
+  public String getNombre() {
+    return nombre;
+  }
+
+  public String getEmail() {
+    return email;
   }
 }
-
-

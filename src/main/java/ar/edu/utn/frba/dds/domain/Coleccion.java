@@ -3,15 +3,25 @@ package ar.edu.utn.frba.dds.domain;
 import java.util.List;
 
 public class Coleccion {
-  List<Hecho> hechos;
-  String titulo;
+  private List<Hecho> hechos;
+  private String titulo;
 
   public Coleccion(String titulo, List<Hecho> hechos) {
     this.titulo = titulo;
     this.hechos = hechos;
   }
 
-  boolean contieneA(Hecho unHecho) {
+  public void agregarHecho(Hecho hecho) {
+    if (!hechos.contains(hecho)) {
+      hechos.add(hecho);
+    }
+  }
+
+  public List<Hecho> getHechos() {
+    return hechos;
+  }
+
+  public boolean contieneA(Hecho unHecho) {
     return hechos.contains(unHecho);
   }
 }

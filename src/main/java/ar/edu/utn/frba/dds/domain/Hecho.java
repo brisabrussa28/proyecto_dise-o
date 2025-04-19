@@ -1,17 +1,54 @@
 package ar.edu.utn.frba.dds.domain;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 public class Hecho {
-  String titulo;
-  String descripcion;
-  //contenidoMultimedia (opcional)
-  String lugar;
-  LocalDate fecha;
-  //origen -> Si viene de un data set o de un contribuyente.
+  private String titulo;
+  private String descripcion;
+  private String categoria;
+  private String ubicacion;
+  private LocalDateTime fecha;
+  private Fuente origen;
+  private List<String> etiquetas;
 
-  public Hecho() {
+  public Hecho(String titulo, String descripcion, String categoria, String ubicacion,
+               LocalDateTime fecha, Fuente origen, List<String> etiquetas) {
+    this.titulo = titulo;
+    this.descripcion = descripcion;
+    this.categoria = categoria;
+    this.ubicacion = ubicacion;
+    this.fecha = fecha;
+    this.origen = origen;
+    this.etiquetas = etiquetas;
+  }
 
+  public String getTitulo() {
+    return titulo;
+  }
+
+  public String getDescripcion() {
+    return descripcion;
+  }
+
+  public String getCategoria() {
+    return categoria;
+  }
+
+  public String getUbicacion() {
+    return ubicacion;
+  }
+
+  public LocalDateTime getFecha() {
+    return fecha;
+  }
+
+  public Fuente getOrigen() {
+    return origen;
+  }
+
+  public List<String> getEtiquetas() {
+    return etiquetas;
   }
 
   boolean perteneceA(Coleccion unaColeccion) {

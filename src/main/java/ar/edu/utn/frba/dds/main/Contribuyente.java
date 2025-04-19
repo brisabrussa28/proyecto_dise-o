@@ -1,0 +1,26 @@
+package ar.edu.utn.frba.dds.main;
+
+import ar.edu.utn.frba.dds.domain.FuenteDinamica;
+import ar.edu.utn.frba.dds.domain.Hecho;
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class Contribuyente extends Persona {
+  public Contribuyente(String nombre, String email) {
+    super(nombre, email);
+  }
+
+  public boolean esAnonimo() {
+    return (this.getNombre() == null || this.getNombre().isBlank()) && (this.getEmail() == null || this.getEmail().isBlank());
+  }
+
+  public Hecho crearHecho(String titulo, String descripcion, String categoria,
+                          String ubicacion, LocalDateTime fecha,
+                          List<String> etiquetas, FuenteDinamica fuente) {
+    Hecho hecho = new Hecho(titulo, descripcion, categoria, ubicacion, fecha, fuente, etiquetas);
+    fuente.agregarHecho(hecho);
+    return hecho;
+  }
+
+  //TODO solicitarEliminacion(Hecho hecho, String motivo)  esto instanciaria una solicitud
+}
