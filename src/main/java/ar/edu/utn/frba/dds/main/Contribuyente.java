@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds.main;
 
 import ar.edu.utn.frba.dds.domain.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.Hecho;
+import ar.edu.utn.frba.dds.domain.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,9 +16,9 @@ public class Contribuyente extends Persona {
   }
 
   public Hecho crearHecho(String titulo, String descripcion, String categoria,
-                          String ubicacion, LocalDateTime fecha,
+                          String direccion, PuntoGeografico ubicacion, LocalDateTime fecha,
                           List<String> etiquetas, FuenteDinamica fuente) {
-    Hecho hecho = new Hecho(titulo, descripcion, categoria, ubicacion, fecha, fuente, etiquetas);
+    Hecho hecho = new Hecho(titulo, descripcion, categoria, direccion, ubicacion, fecha, fuente, etiquetas);
     fuente.agregarHecho(hecho);
     return hecho;
   }

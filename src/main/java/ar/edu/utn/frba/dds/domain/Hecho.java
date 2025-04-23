@@ -7,17 +7,19 @@ public class Hecho {
   private String titulo;
   private String descripcion;
   private String categoria;
-  private String ubicacion;
+  private String Direcccion;
   private LocalDateTime fecha;
   private Fuente origen;
   private List<String> etiquetas;
+  private PuntoGeografico ubicacion;
 
-  public Hecho(String titulo, String descripcion, String categoria, String ubicacion,
+  public Hecho(String titulo, String descripcion, String categoria, String Direcccion,PuntoGeografico ubicacion,
                LocalDateTime fecha, Fuente origen, List<String> etiquetas) {
     this.titulo = titulo;
     this.descripcion = descripcion;
     this.categoria = categoria;
     this.ubicacion = ubicacion;
+    this.Direcccion = Direcccion;
     this.fecha = fecha;
     this.origen = origen;
     this.etiquetas = etiquetas;
@@ -35,7 +37,11 @@ public class Hecho {
     return categoria;
   }
 
-  public String getUbicacion() {
+  public String getDirecccion() {
+    return Direcccion;
+  }
+
+  public PuntoGeografico getUbicacion() {
     return ubicacion;
   }
 
