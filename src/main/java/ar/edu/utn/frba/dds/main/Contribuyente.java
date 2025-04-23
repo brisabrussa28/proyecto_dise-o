@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.main;
 import ar.edu.utn.frba.dds.domain.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.Hecho;
 import ar.edu.utn.frba.dds.domain.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.Solicitud;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,13 +16,32 @@ public class Contribuyente extends Persona {
     return (this.getNombre() == null || this.getNombre().isBlank()) && (this.getEmail() == null || this.getEmail().isBlank());
   }
 
-  public Hecho crearHecho(String titulo, String descripcion, String categoria,
-                          String direccion, PuntoGeografico ubicacion, LocalDateTime fecha,
-                          List<String> etiquetas, FuenteDinamica fuente) {
+  public Hecho crearHecho(
+      String titulo,
+      String descripcion,
+      String categoria,
+      String direccion,
+      PuntoGeografico ubicacion,
+      LocalDateTime fecha,
+      List<String> etiquetas,
+      FuenteDinamica fuente
+  ) {
     Hecho hecho = new Hecho(titulo, descripcion, categoria, direccion, ubicacion, fecha, fuente, etiquetas);
     fuente.agregarHecho(hecho);
     return hecho;
   }
 
-  //TODO solicitarEliminacion(Hecho hecho, String motivo)  esto instanciaria una solicitud
+  void solicitarEliminacion(Hecho hecho, String motivo) {
+    Solicitud solicitudEliminacion = new Solicitud(hecho, motivo);
+    //
+  }
+}
+
+
+
+class MotivoException extends RuntimeException {
+  String motivo;
+  public MotivoException(String motivo) {
+    super(motivo);
+  }
 }

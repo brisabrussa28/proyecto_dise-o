@@ -2,6 +2,8 @@ package ar.edu.utn.frba.dds.domain;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+
 
 public class Hecho {
   private String titulo;
@@ -12,9 +14,18 @@ public class Hecho {
   private Fuente origen;
   private List<String> etiquetas;
   private PuntoGeografico ubicacion;
+  private UUID id;
 
-  public Hecho(String titulo, String descripcion, String categoria, String Direcccion,PuntoGeografico ubicacion,
-               LocalDateTime fecha, Fuente origen, List<String> etiquetas) {
+  public Hecho
+      (String titulo,
+       String descripcion,
+       String categoria,
+       String Direcccion,
+       PuntoGeografico ubicacion,
+       LocalDateTime fecha,
+       Fuente origen,
+       List<String> etiquetas
+      ) {
     this.titulo = titulo;
     this.descripcion = descripcion;
     this.categoria = categoria;
@@ -23,6 +34,11 @@ public class Hecho {
     this.fecha = fecha;
     this.origen = origen;
     this.etiquetas = etiquetas;
+    this.id = UUID.randomUUID();
+  }
+
+  public UUID getId() {
+    return id;
   }
 
   public String getTitulo() {

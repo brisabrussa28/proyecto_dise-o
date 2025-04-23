@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds.main;
 
 import ar.edu.utn.frba.dds.domain.Coleccion;
 import ar.edu.utn.frba.dds.domain.Hecho;
+import ar.edu.utn.frba.dds.domain.Solicitud;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,12 @@ public class Administrador extends Persona {
     return new ArrayList<>();
   }
 
-  //TODO procesarSolicitud(SolicitudEliminacion solicitud)
+  public void consultarSolicitudes() {
+
+  }
+
+  public void procesarSolicitud(Solicitud solicitudEliminacion) {
+
+  }
 }
 
