@@ -4,12 +4,12 @@ import java.util.List;
 
 public class Coleccion {
   private List<Hecho> hechos;
-  private Fuente fuente;
+  //private Fuente fuente;
   private String titulo;
 
-  public Coleccion(String titulo, Fuente fuente, List<Hecho> hechos) {
+  public Coleccion(String titulo /*Fuente fuente*/, List<Hecho> hechos) {
     this.titulo = titulo;
-    this.fuente = fuente;
+    //this.fuente = fuente;
     this.hechos = hechos;
   }
 
