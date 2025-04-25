@@ -4,8 +4,11 @@ import ar.edu.utn.frba.dds.domain.Fuente;
 import ar.edu.utn.frba.dds.domain.Hecho;
 import java.util.List;
 
-public class Visualizador {
+public class Visualizador extends Persona {
 
+  public Visualizador(String nombre, String email) {
+    super(nombre, email);
+  }
   public List<Hecho> visualizarHechos(Fuente fuente) {
     return fuente.obtenerHechos();
   }

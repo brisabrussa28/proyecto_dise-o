@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds.domain;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ServicioDeAgregacion extends Fuente {

@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-
 public class Hecho {
   private String titulo;
   private String descripcion;
@@ -15,17 +14,18 @@ public class Hecho {
   private List<String> etiquetas;
   private PuntoGeografico ubicacion;
   private UUID id;
+  boolean vigencia; // NOTE: Nos va a servir para eliminar hechos :D
 
-  public Hecho
-      (String titulo,
-       String descripcion,
-       String categoria,
-       String Direcccion,
-       PuntoGeografico ubicacion,
-       LocalDateTime fecha,
-       Fuente origen,
-       List<String> etiquetas
-      ) {
+  public Hecho(
+      String titulo,
+      String descripcion,
+      String categoria,
+      String Direcccion,
+      PuntoGeografico ubicacion,
+      LocalDateTime fecha,
+      Fuente origen,
+      List<String> etiquetas
+  ) {
     this.titulo = titulo;
     this.descripcion = descripcion;
     this.categoria = categoria;
@@ -35,6 +35,7 @@ public class Hecho {
     this.origen = origen;
     this.etiquetas = etiquetas;
     this.id = UUID.randomUUID();
+    this.vigencia = true;
   }
 
   public UUID getId() {
