@@ -10,10 +10,11 @@ public class Coleccion {
   private String descripcion;
   //private String criterio;
 
-  public Coleccion(String titulo, Fuente fuente, List<Hecho> hechos) {
+  public Coleccion(String titulo/*, Fuente fuente*/, String descripcion) {
     this.titulo = titulo;
-    this.fuente = fuente;
-    this.hechos = hechos;
+    //this.fuente = fuente;
+    this.descripcion = descripcion;
+    this.hechos = new ArrayList<>();
   }
 
   public void agregarHecho(Hecho hecho) {
@@ -27,8 +28,13 @@ public class Coleccion {
     //Paso 2: agregar todos los hechos a la colección
   }
 
-  public String getTitulo(){return titulo; }
-  public String getDescripcion(){return descripcion; }
+  public String getTitulo() {
+    return titulo;
+  }
+
+  public String getDescripcion() {
+    return descripcion;
+  }
 
   //public String getCriterio(){return criterio; }
   //public void setCriterio(String criterio){this.criterio = criterio; } -- Todo criterio es configurable
@@ -40,6 +46,5 @@ public class Coleccion {
   public boolean contieneA(Hecho unHecho) {
     return hechos.contains(unHecho);
   }
-
 }
 
