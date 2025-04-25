@@ -4,9 +4,11 @@ import java.util.List;
 
 public abstract class Fuente {
   protected String nombre;
+  List<Hecho> hechos;
 
-  public Fuente(String nombre) {
+  public Fuente(String nombre, List<Hecho> hechos) {
     this.nombre = nombre;
+    this.hechos = hechos;
   }
 
   public abstract List<Hecho> obtenerHechos();

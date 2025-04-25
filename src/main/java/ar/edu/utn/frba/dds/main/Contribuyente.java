@@ -7,7 +7,13 @@ import ar.edu.utn.frba.dds.domain.Solicitud;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class Contribuyente extends Persona {
+
+//NOTE: Contribuyente deberia extender de Visualizador
+// ya que tiene el mismo comportamiento que el visualizador además de poder cargar archivos, y
+// necesitamos almacenar sí o sí el nombre sin importar que esté registrado o no y tmb otros
+// datos que están en el enunciado que no son obligatorios.
+
+public class Contribuyente extends Visualizador {
   public Contribuyente(String nombre, String email) {
     super(nombre, email);
   }

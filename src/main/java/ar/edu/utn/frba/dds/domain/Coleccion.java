@@ -5,17 +5,15 @@ import java.util.List;
 
 public class Coleccion {
   private List<Hecho> hechos;
-  //private Fuente fuente;
+  private Fuente fuente;
   private String titulo;
   private String descripcion;
   //private String criterio;
 
-  public Coleccion(String titulo /*Fuente fuente*/, String descripcion) {
+  public Coleccion(String titulo, Fuente fuente, List<Hecho> hechos) {
     this.titulo = titulo;
-    //this.fuente = fuente;
-    this.descripcion = descripcion;
-    this.hechos = new ArrayList<Hecho>();
-    //agregarHechosPorCriterio(); -- Todo hecho relacionado con su criterio hasta la fecha de su fuente debe agregarse automaticamente
+    this.fuente = fuente;
+    this.hechos = hechos;
   }
 
   public void agregarHecho(Hecho hecho) {

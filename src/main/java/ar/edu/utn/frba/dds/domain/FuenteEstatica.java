@@ -8,11 +8,11 @@ import java.util.List;
 
 //Se tiene que leer un archivo .csv que contiene toda la info, no termino de entender si es una clase o como se maneja una fuente estatica.
 public class FuenteEstatica extends Fuente {
-
   private String pathArchivoCSV;
+  List<Hecho> hechos;
 
-  public FuenteEstatica(String nombre, String pathArchivoCSV) {
-    super(nombre);
+  public FuenteEstatica(String nombre, List<Hecho> hechos, String pathArchivoCSV) {
+    super(nombre, hechos);
     this.pathArchivoCSV = pathArchivoCSV;
   }
 

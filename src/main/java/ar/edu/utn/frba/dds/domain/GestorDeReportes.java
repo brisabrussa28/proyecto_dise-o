@@ -29,7 +29,12 @@ public class GestorDeReportes {
   private void eliminarHechoColeccion(Hecho hecho) {
     // Acá se implementaría la lógica real para eliminar el hecho
     // Habria que agregar el atributo "coleccion" al hecho para que este conozca a que coleccion pertenece y asi pedirle que lo saque.
+    // Preguntarle a hecho su fuente y buscar la coleccion que tenga esa fuente???
+    // Consultar qué colección tiene a la fuente del hecho
 
+    Fuente fuente = hecho.getOrigen();
+    List<Coleccion> coleccionesConFuente = colecciones.filter(coleccion -> coleccion.contiene(fuente)); /* 👀 */
+    coleccionesConFuente.stream().map(coleccion -> coleccion.eliminar(hecho));
     System.out.println("Hecho eliminado: " + hecho.getTitulo());
   }
 

@@ -5,10 +5,11 @@ import java.util.List;
 
 public class FuenteDinamica extends Fuente {
   private List<Hecho> hechosCargados;
+  List<Hecho> hechos;
 
-  public FuenteDinamica(String nombre) {
-    super(nombre);
-    this.hechosCargados = new ArrayList<>();
+  public FuenteDinamica(String nombre, List<Hecho> hechos) {
+    super(nombre, hechos);
+    //this.hechosCargados = new ArrayList<>();
   }
 
   public void agregarHecho(Hecho hecho) {
