@@ -2,23 +2,30 @@ package ar.edu.utn.frba.dds.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Coleccion {
   private List<Hecho> hechos;
   private Fuente fuente;
   private String titulo;
   private String descripcion;
+  private String categoria;
   //private String criterio;
 
-  public Coleccion(String titulo/*, Fuente fuente*/, String descripcion) {
+  public Coleccion(String titulo/*, Fuente fuente*/, String descripcion, String categoria) {
     this.titulo = titulo;
     //this.fuente = fuente;
     this.descripcion = descripcion;
     this.hechos = new ArrayList<>();
+    this.categoria = categoria;
+  }
+
+  public boolean cumpleCriterioDePertenencia(Hecho hecho) {
+    return Objects.equals(hecho.getCategoria(), this.categoria);
   }
 
   public void agregarHecho(Hecho hecho) {
-    if (!hechos.contains(hecho)) {
+    if (!hechos.contains(hecho) && cumpleCriterioDePertenencia(hecho)) {
       hechos.add(hecho);
     }
   }
@@ -34,6 +41,10 @@ public class Coleccion {
 
   public String getDescripcion() {
     return descripcion;
+  }
+
+  public String getCategoria() {
+    return categoria;
   }
 
   //public String getCriterio(){return criterio; }

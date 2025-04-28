@@ -52,7 +52,8 @@ public class TPATest {
         Objects.equals(hechoTest.getCategoria(), "ROBO") &&
         Objects.equals(hechoTest.getDirecccion(), "Avenida Siempreviva 742") &&
         hechoTest.getUbicacion() == pgAux &&
-        Objects.equals(hechoTest.getFecha(), LocalDate.now().atStartOfDay()) &&
+        Objects.equals(hechoTest.getFechaSuceso(), LocalDate.now().atStartOfDay()) &&
+        Objects.equals(hechoTest.getFechaCarga(), LocalDate.now().atStartOfDay()) &&
         hechoTest.getEtiquetas() == etiquetasAux &&
         hechoTest.getOrigen() == fuenteAuxD);
     assertTrue(igual); //Si "igual" es true es que estan correctos los datos
@@ -69,8 +70,10 @@ public class TPATest {
   //Se crea la colección correctamente
   @Test
   public void coleccionCreadaCorrectamente() {
-    Coleccion bonaerense = iluminati.crearColeccion("Robos", "Un día más siendo del conurbano");
-    boolean igual = (Objects.equals(bonaerense.getTitulo(), "Robos") && Objects.equals(bonaerense.getDescripcion(), "Un día más siendo del conurbano"));
+    Coleccion bonaerense = iluminati.crearColeccion("Robos", "Un día más siendo del conurbano", "Robos");
+    boolean igual = (Objects.equals(bonaerense.getTitulo(), "Robos") &&
+        Objects.equals(bonaerense.getDescripcion(), "Un día más siendo del conurbano") &&
+        Objects.equals(bonaerense.getCategoria(), "Robos"));
     assertTrue(igual);
   }
   //Se importan hechos correctamente

@@ -11,8 +11,8 @@ public class Administrador extends Persona {
     super(nombre, email);
   }
 
-  public Coleccion crearColeccion(String titulo, String descripcion) {
-    return new Coleccion(titulo, descripcion);
+  public Coleccion crearColeccion(String titulo, String descripcion, String categoria) {
+    return new Coleccion(titulo, descripcion, categoria);
   }
 
   public List<Hecho> importarDesdeCSV(String rutaCSV) {

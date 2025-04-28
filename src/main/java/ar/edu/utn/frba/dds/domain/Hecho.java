@@ -9,7 +9,8 @@ public class Hecho {
   private String descripcion;
   private String categoria;
   private String Direcccion;
-  private LocalDateTime fecha;
+  private LocalDateTime fechaSuceso;
+  private LocalDateTime fechaCarga;
   private Fuente origen;
   private List<String> etiquetas;
   private PuntoGeografico ubicacion;
@@ -22,7 +23,8 @@ public class Hecho {
       String categoria,
       String Direcccion,
       PuntoGeografico ubicacion,
-      LocalDateTime fecha,
+      LocalDateTime fechaSuceso,
+      LocalDateTime fechaCarga,
       Fuente origen,
       List<String> etiquetas
   ) {
@@ -31,7 +33,8 @@ public class Hecho {
     this.categoria = categoria;
     this.ubicacion = ubicacion;
     this.Direcccion = Direcccion;
-    this.fecha = fecha;
+    this.fechaSuceso = fechaSuceso;
+    this.fechaCarga = fechaCarga;
     this.origen = origen;
     this.etiquetas = etiquetas;
     this.id = UUID.randomUUID();
@@ -62,9 +65,14 @@ public class Hecho {
     return ubicacion;
   }
 
-  public LocalDateTime getFecha() {
-    return fecha;
+  public LocalDateTime getFechaSuceso() {
+    return fechaSuceso;
   }
+
+  public LocalDateTime getFechaCarga() {
+    return fechaCarga;
+  }
+
 
   public Fuente getOrigen() {
     return origen;
