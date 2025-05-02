@@ -12,7 +12,7 @@ public class Hecho {
   private LocalDateTime fechaSuceso;
   private LocalDateTime fechaCarga;
   private Fuente origen;
-  private List<String> etiquetas;
+  private List<Etiqueta> etiquetas;
   private PuntoGeografico ubicacion;
   private UUID id;
   boolean vigencia; // NOTE: Nos va a servir para eliminar hechos :D
@@ -26,7 +26,7 @@ public class Hecho {
       LocalDateTime fechaSuceso,
       LocalDateTime fechaCarga,
       Fuente origen,
-      List<String> etiquetas
+      List<Etiqueta> etiquetas
   ) {
     this.titulo = titulo;
     this.descripcion = descripcion;
@@ -78,7 +78,7 @@ public class Hecho {
     return origen;
   }
 
-  public List<String> getEtiquetas() {
+  public List<Etiqueta> getEtiquetas() {
     return etiquetas;
   }
 

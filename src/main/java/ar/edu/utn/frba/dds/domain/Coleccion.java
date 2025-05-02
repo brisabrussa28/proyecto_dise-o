@@ -30,6 +30,12 @@ public class Coleccion {
     }
   }
 
+  public void eliminarHecho(Hecho hecho) {
+    if(hechos.contains(hecho)){
+      hechos.remove(hecho);
+    }
+  }
+
   public void agregarHechosPorCriterio(){ //Si toda colección está asociada a una fuente esta función podría realizarla también la fuente.
     //Paso 1: Buscar los hechos de la fuente que coincidan con el criterio
     //Paso 2: agregar todos los hechos a la colección

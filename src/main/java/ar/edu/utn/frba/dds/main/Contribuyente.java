@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.main;
 
+import ar.edu.utn.frba.dds.domain.Etiqueta;
 import ar.edu.utn.frba.dds.domain.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.Hecho;
 import ar.edu.utn.frba.dds.domain.PuntoGeografico;
@@ -29,25 +30,20 @@ public class Contribuyente extends Visualizador {
       String direccion,
       PuntoGeografico ubicacion,
       LocalDateTime fecha,
-      List<String> etiquetas,
+      List<Etiqueta> etiquetas,
       FuenteDinamica fuente
   ) {
-    Hecho hecho = new Hecho(titulo, descripcion, categoria, direccion, ubicacion, fecha, fuente, etiquetas);
+    Hecho hecho = new Hecho(titulo, descripcion, categoria, direccion, ubicacion, fecha, LocalDateTime.now() , fuente, etiquetas);
     fuente.agregarHecho(hecho);
     return hecho;
   }
 
-  void solicitarEliminacion(Hecho hecho, String motivo) {
-    Solicitud solicitudEliminacion = new Solicitud(hecho, motivo);
-    //
+  public Solicitud solicitarEliminacion(Hecho hecho, String motivo) {
+    if (hecho == null || motivo == null || motivo.isBlank()) {
+      throw new IllegalArgumentException("Hecho y motivo deben estar definidos");
+    }
+
+    return new Solicitud(this, hecho, motivo);
   }
-}
 
-
-
-class MotivoException extends RuntimeException {
-  String motivo;
-  public MotivoException(String motivo) {
-    super(motivo);
-  }
 }

@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.domain;
 
+import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,12 +41,5 @@ public class GestorDeReportes {
 
   public List<Solicitud> getSolicitudes() {
     return solicitudes;
-  }
-}
-
-
-class SolicitudInexistenteException extends RuntimeException {
-  public SolicitudInexistenteException(String mensaje) {
-    super(mensaje);
   }
 }

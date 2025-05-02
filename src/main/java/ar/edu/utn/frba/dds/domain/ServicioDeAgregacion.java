@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 public class ServicioDeAgregacion extends Fuente {
   private List<Fuente> fuentesCargadas;
-  List<Hecho> hechos;
 
   public ServicioDeAgregacion(String nombre, List<Hecho> hechos) {
     super(nombre, hechos);
@@ -14,7 +13,7 @@ public class ServicioDeAgregacion extends Fuente {
   }
 
   public void agregarFuente(Fuente fuente) {
-    fuentesCargadas.add(fuente);
+    this.fuentesCargadas.add(fuente);
   }
 
   @Override

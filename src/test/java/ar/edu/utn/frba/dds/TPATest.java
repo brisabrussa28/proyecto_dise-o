@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds;
 
+import ar.edu.utn.frba.dds.domain.Etiqueta;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,8 +19,14 @@ public class TPATest {
   //Recursos utilizados
   Contribuyente contribuyenteA = new Contribuyente(null, null);
   Contribuyente contribuyenteB = new Contribuyente("Roberto", "roberto@gmail.com");
-  FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar");
-  List<String> etiquetasAux = List.of("#ancianita", "#robo_a_mano_armada", "#violencia", "#leyDeProtecciónALasAncianitas", "#NOalaVIOLENCIAcontraABUELITAS");
+  FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
+  List<Etiqueta> etiquetasAux = List.of(
+      new Etiqueta("#ancianita"),
+      new Etiqueta("#robo_a_mano_armada"),
+      new Etiqueta("#violencia"),
+      new Etiqueta("#leyDeProtecciónALasAncianitas"),
+      new Etiqueta("#NOalaVIOLENCIAcontraABUELITAS")
+  );
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   Administrador iluminati = new Administrador("△", "libellumcipher@incognito.com");
 
