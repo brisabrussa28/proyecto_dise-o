@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FuenteDinamica extends Fuente {
-  private List<Hecho> hechosCargados;
-  List<Hecho> hechos;
+//  private List<Hecho> hechosCargados;
+//  List<Hecho> hechos;
 
   public FuenteDinamica(String nombre, List<Hecho> hechos) {
     super(nombre, hechos);
@@ -13,11 +13,11 @@ public class FuenteDinamica extends Fuente {
   }
 
   public void agregarHecho(Hecho hecho) {
-    hechosCargados.add(hecho);
+    this.hechos.add(hecho);
   }
 
   @Override
   public List<Hecho> obtenerHechos() {
-    return hechosCargados;
+    return this.hechos;
   }
 }

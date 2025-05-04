@@ -5,7 +5,7 @@ import java.util.List;
 public class FuenteProxy extends Fuente {
 
   public FuenteProxy(String nombre) {
-    super(nombre);
+    super(nombre, null);
   }
 
   @Override

@@ -29,7 +29,7 @@ public class Administrador extends Persona {
 
   public List<Hecho> importarDesdeCSV(String rutaCSV) {
     List<Hecho> hechosImportados = new ArrayList<>();
-     final String NombreFuenteCSV = "Fuente CSV";
+    final String NombreFuenteCSV = "Fuente CSV";
     final String SeparadorColumna = ";";
     final String SeparadorEtiquetas = ",";
 
@@ -47,10 +47,10 @@ public class Administrador extends Persona {
             String direccion = campos[3];
             double latitud = Double.parseDouble(campos[4]);
             double longitud = Double.parseDouble(campos[5]);
-            LocalDateTime fecha;
+            LocalDateTime fechaSuceso;
 
             try {
-              fecha = LocalDateTime.parse(campos[6]);
+              fechaSuceso = LocalDateTime.parse(campos[6]);
             } catch (Exception e) {
               throw new FechaInvalidaException("Formato de fecha incorrecto en CSV: " + campos[6], e);
             }
@@ -62,7 +62,7 @@ public class Administrador extends Persona {
             FuenteDinamica fuenteTemporal = new FuenteDinamica(NombreFuenteCSV, new ArrayList<>());
 
             Hecho hecho = new Hecho(
-                titulo, descripcion, categoria, direccion, ubicacion, fecha, LocalDateTime.now(), fuenteTemporal, etiquetas
+                titulo, descripcion, categoria, direccion, ubicacion, fechaSuceso, LocalDateTime.now(), fuenteTemporal, etiquetas
             );
 
             fuenteTemporal.agregarHecho(hecho);

@@ -2,9 +2,12 @@ package ar.edu.utn.frba.dds;
 
 import ar.edu.utn.frba.dds.domain.Etiqueta;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import ar.edu.utn.frba.dds.domain.Coleccion;
@@ -83,7 +86,50 @@ public class TPATest {
         Objects.equals(bonaerense.getCategoria(), "Robos"));
     assertTrue(igual);
   }
+
   //Se importan hechos correctamente
+  @Test
+  public void testImportarDesdeCSV() {
+    Administrador admin = new Administrador("Admin", "admin@mail.com");
+
+    // Ruta relativa al proyecto
+    String rutaCSV = "src/test/resources/testHechos.csv";
+
+    List<Hecho> hechos = admin.importarDesdeCSV(rutaCSV);
+
+    assertEquals(3, hechos.size());
+
+    Hecho primerHecho = hechos.get(0);
+    assertEquals("Inundación en zona sur", primerHecho.getTitulo());
+    assertEquals("Calles anegadas por lluvias", primerHecho.getDescripcion());
+    assertEquals("Clima", primerHecho.getCategoria());
+    assertEquals("Av. Siempreviva 123", primerHecho.getDireccion());
+    assertEquals(-34.6037, primerHecho.getUbicacion().getLatitud());
+    assertEquals(-58.3816, primerHecho.getUbicacion().getLongitud());
+    assertEquals(LocalDateTime.of(2024, 5, 1, 14, 30), primerHecho.getFechaSuceso());
+    assertEquals(2, primerHecho.getEtiquetas().size());
+
+    Hecho segundoHecho = hechos.get(1);
+    assertEquals("Corte de luz masivo", segundoHecho.getTitulo());
+    assertEquals("Sin servicio eléctrico en varios barrios", segundoHecho.getDescripcion());
+    assertEquals("Infraestructura", segundoHecho.getCategoria());
+    assertEquals("Calle Falsa 456", segundoHecho.getDireccion());
+    assertEquals(-34.6090, segundoHecho.getUbicacion().getLatitud());
+    assertEquals(-58.3923, segundoHecho.getUbicacion().getLongitud());
+    assertEquals(LocalDateTime.of(2024, 5, 2, 9, 0), segundoHecho.getFechaSuceso());
+    assertEquals(3, segundoHecho.getEtiquetas().size());
+
+    Hecho tercerHecho = hechos.get(2);
+    assertEquals("Protesta estudiantil", tercerHecho.getTitulo());
+    assertEquals("Estudiantes reclaman mejoras edilicias", tercerHecho.getDescripcion());
+    assertEquals("Social", tercerHecho.getCategoria());
+    assertEquals("Av. de Mayo 789", tercerHecho.getDireccion());
+    assertEquals(-34.6071, tercerHecho.getUbicacion().getLatitud());
+    assertEquals(-58.3802, tercerHecho.getUbicacion().getLongitud());
+    assertEquals(LocalDateTime.of(2024, 5, 3, 17, 45), tercerHecho.getFechaSuceso());
+    assertEquals(2, tercerHecho.getEtiquetas().size());
+  }
+
   //Se procesa la solicitud correctamente
 
   //TEST VISUALIZADOR

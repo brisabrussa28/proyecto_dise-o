@@ -11,7 +11,7 @@ import java.util.List;
 
 public class FuenteEstatica extends Fuente {
   private String pathArchivoCSV;
-  List<Hecho> hechos;
+  //List<Hecho> hechos;
 
   public FuenteEstatica(String nombre, List<Hecho> hechos, String pathArchivoCSV) {
     super(nombre, hechos);
