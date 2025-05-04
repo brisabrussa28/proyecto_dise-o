@@ -34,8 +34,8 @@ public class GestorDeReportes {
     // Consultar qué colección tiene a la fuente del hecho
 
     Fuente fuente = hecho.getOrigen();
-    List<Coleccion> coleccionesConFuente = colecciones.filter(coleccion -> coleccion.contiene(fuente)); /* 👀 */
-    coleccionesConFuente.stream().map(coleccion -> coleccion.eliminar(hecho));
+    List<Coleccion> coleccionesDeLaFuente = fuente.colecciones;
+    coleccionesDeLaFuente.stream().forEach(coleccion -> coleccion.eliminarHecho(hecho));
     System.out.println("Hecho eliminado: " + hecho.getTitulo());
   }
 

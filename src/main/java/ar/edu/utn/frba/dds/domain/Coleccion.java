@@ -60,6 +60,10 @@ public class Coleccion {
     return hechos;
   }
 
+  public boolean contieneFuente(Fuente unaFuente) {
+    return fuente == unaFuente;
+  }
+
   public boolean contieneA(Hecho unHecho) {
     return hechos.contains(unHecho);
   }
