@@ -1,7 +1,6 @@
 package ar.edu.utn.frba.dds.main;
 
 import ar.edu.utn.frba.dds.domain.Coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.fuentes.*;
 import ar.edu.utn.frba.dds.domain.CSV.LectorCSV;
 import ar.edu.utn.frba.dds.domain.CSV.MapeoCSV;

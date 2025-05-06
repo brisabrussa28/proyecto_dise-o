@@ -19,12 +19,13 @@ public class Hecho {
   private String titulo;
   private String descripcion;
   private String categoria;
-  private String Direccion;
+  private String direccion;
+  private PuntoGeografico ubicacion;
   private LocalDateTime fechaSuceso;
   private LocalDateTime fechaCarga;
   private String FuenteOrigen;
+  private String origen;
   private List<Etiqueta> etiquetas;
-  private PuntoGeografico ubicacion;
   private UUID id;
   boolean vigencia; // NOTE: Nos va a servir para eliminar hechos :D
 
@@ -32,7 +33,7 @@ public class Hecho {
       String titulo,
       String descripcion,
       String categoria,
-      String Direccion,
+      String direccion,
       PuntoGeografico ubicacion,
       LocalDateTime fechaSuceso,
       LocalDateTime fechaCarga,
@@ -43,7 +44,7 @@ public class Hecho {
     this.descripcion = descripcion;
     this.categoria = categoria;
     this.ubicacion = ubicacion;
-    this.Direccion = Direccion;
+    this.direccion = direccion;
     this.fechaSuceso = fechaSuceso;
     this.fechaCarga = fechaCarga;
     this.FuenteOrigen = FuenteOrigen;
@@ -69,7 +70,7 @@ public class Hecho {
   }
 
   public String getDireccion() {
-    return Direccion;
+    return direccion;
   }
 
   public PuntoGeografico getUbicacion() {
