@@ -1,0 +1,4 @@
+titulo;descripcion;categoria;direccion;latitud;longitud;fecha;etiquetas
+Inundación en zona sur;Calles anegadas por lluvias;Clima;Av. Siempreviva 123;-34.6037;-58.3816;2024-05-01T14:30;#lluvia,#emergencia
+Corte de luz masivo;Sin servicio eléctrico en varios barrios;Infraestructura;Calle Falsa 456;-34.6090;-58.3923;2024-05-02T09:00;#corte,#luz,#emergencia
+Protesta estudiantil;Estudiantes reclaman mejoras edilicias;Social;Av. de Mayo 789;-34.6071;-58.3802;2024-05-03T17:45;#educacion,#protesta

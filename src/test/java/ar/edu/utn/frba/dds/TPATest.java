@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds;
 
 import ar.edu.utn.frba.dds.domain.Etiqueta;
+import ar.edu.utn.frba.dds.domain.MapeoCSV;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,8 +9,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import ar.edu.utn.frba.dds.domain.Coleccion;
 import ar.edu.utn.frba.dds.domain.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.Hecho;
@@ -60,7 +67,7 @@ public class TPATest {
     boolean igual = (Objects.equals(hechoTest.getTitulo(), "Robo") &&
         Objects.equals(hechoTest.getDescripcion(), "Hombre blanco asalta ancianita indefensa") &&
         Objects.equals(hechoTest.getCategoria(), "ROBO") &&
-        Objects.equals(hechoTest.getDirecccion(), "Avenida Siempreviva 742") &&
+        Objects.equals(hechoTest.getDireccion(), "Avenida Siempreviva 742") &&
         hechoTest.getUbicacion() == pgAux &&
         Objects.equals(hechoTest.getFechaSuceso(), LocalDate.now().atStartOfDay()) &&
         Objects.equals(hechoTest.getFechaCarga(), LocalDate.now().atStartOfDay()) &&
@@ -87,47 +94,113 @@ public class TPATest {
     assertTrue(igual);
   }
 
-  //Se importan hechos correctamente
+  //Se importan hechos correctamente Incidentes Vehiculares
   @Test
-  public void testImportarDesdeCSV() {
+  public void testImportarDesdeCSVIncidentesVehicular() {
     Administrador admin = new Administrador("Admin", "admin@mail.com");
+    String rutaCSV = "src/test/resources/SAT-MV-BU_2017-2023.csv";
+    String separador = ";";
+    String nombreFuente = "Fuente de Prueba";
 
-    // Ruta relativa al proyecto
-    String rutaCSV = "src/test/resources/testHechos.csv";
+    //Definicion de Mapeo
+    MapeoCSV mapeo = new MapeoCSV();
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy HH:mm:ss");
 
-    List<Hecho> hechos = admin.importarDesdeCSV(rutaCSV);
+    mapeo.obtenerTitulo = fila -> "Hecho " + fila.get("id_hecho");
+    mapeo.obtenerDescripcion = fila -> "Tipo de persona: " + fila.get("tipo_persona") + ". " +
+                                                        "Tipo de lugar: " + fila.get("tipo_lugar") + ". " +
+                                                        "Calle interseccion: " + fila.get("calle_interseccion_nombre") + ". " +
+                                                        "Estado de semaforo: " + fila.get("semaforo_estado") + ". " +
+                                                        "Modo de produccion del Hecho: " + fila.get("modo_produccion_hecho_ampliada") + ". " + fila.get("modo_produccion_hecho_otro") + ". " +
+                                                        "Condicion del Clima: " + fila.get("clima_condicion") + ". " + fila.get("clima_otro") + ". " +
+                                                        "Motivo origen de registro: " + fila.get("motivo_origen_registro") + ". " + fila.get("motivo_origen_registro_otro") + ". " +
+                                                        "Vehiculo de la victima: " + fila.get("victima_vehiculo_ampliado") + ". " +
+                                                        "Identidad de genero de la Victima: " + fila.get("victima_identidad_genero") + ". " +
+                                                        "Rango de edad de la Victima: : " + fila.get("victima_tr_edad") + ". " +
+                                                        "Vehiculo del inculpado: " + fila.get("inculpado_vehiculo") + ". " +
+                                                        "Identidad de genero del inculpado: : " + fila.get("inculpado_identidad_genero") + ". " +
+                                                        "Rango de edad del inculpado: : " + fila.get("inculpado_tr_edad") + ". ";
+    mapeo.obtenerDireccion = fila -> fila.get("calle_nombre") + " " + fila.get("calle_altura") + ", " + fila.get("localidad_nombre") + ", " + fila.get("departamento_nombre") + ", " + fila.get("provincia_nombre");
+    mapeo.obtenerFecha = fila -> {
+      String fecha = fila.get("fecha_hecho").trim();
+      String hora = fila.get("hora_hecho").trim();
+      try {
+        return LocalDateTime.parse(fecha + " " + hora, formatter);
+      } catch (DateTimeParseException e) {
+        throw new RuntimeException("Fecha inválida: " + fila.get("fecha_hora"));
+      }
+    };
+    mapeo.obtenerUbicacion = fila -> new PuntoGeografico(
+        Double.parseDouble(fila.get("latitud")),
+        Double.parseDouble(fila.get("longitud"))
+    );
+    mapeo.obtenerEtiquetas = fila -> {
+      List<Etiqueta> etiquetas = new ArrayList<>();
 
-    assertEquals(3, hechos.size());
+      // valores simples
+      Stream.of(
+              fila.get("tipo_persona"),
+              fila.get("provincia_"),
+              fila.get("localidad_nombre"),
+              fila.get("semaforo_estado"),
+              fila.get("tipo_lugar")
+          ).filter(v -> v != null && !v.isBlank())
+          .forEach(v -> etiquetas.add(new Etiqueta(v)));
+
+      // Agregar (si no es "No corresponde")
+      String victimaClase = fila.get("victima_clase");
+      if (victimaClase != null && !victimaClase.isBlank() && !victimaClase.equalsIgnoreCase("No corresponde")) {
+        etiquetas.add(new Etiqueta("victima " + victimaClase));
+      }
+
+      // Agregar (si no es "No corresponde")
+      String victimaVehiculo = fila.get("victima_vehiculo_ampliado");
+      if (victimaVehiculo != null && !victimaVehiculo.isBlank() && !victimaVehiculo.equalsIgnoreCase("No corresponde")) {
+        etiquetas.add(new Etiqueta(victimaVehiculo));
+      }
+
+      // Agregar (si no es "No corresponde")
+      String inculpadoVehiculo = fila.get("inculpado_vehiculo_ampliado");
+      if (inculpadoVehiculo != null && !inculpadoVehiculo.isBlank() && !inculpadoVehiculo.equalsIgnoreCase("No corresponde")) {
+        etiquetas.add(new Etiqueta(inculpadoVehiculo));
+      }
+
+      return etiquetas;
+    };
+
+
+    List<Hecho> hechos = admin.importarDesdeCSV(rutaCSV, mapeo, separador, nombreFuente, "accidentes vehiculares");
+    assertEquals(52027, hechos.size());
 
     Hecho primerHecho = hechos.get(0);
-    assertEquals("Inundación en zona sur", primerHecho.getTitulo());
-    assertEquals("Calles anegadas por lluvias", primerHecho.getDescripcion());
-    assertEquals("Clima", primerHecho.getCategoria());
-    assertEquals("Av. Siempreviva 123", primerHecho.getDireccion());
-    assertEquals(-34.6037, primerHecho.getUbicacion().getLatitud());
-    assertEquals(-58.3816, primerHecho.getUbicacion().getLongitud());
-    assertEquals(LocalDateTime.of(2024, 5, 1, 14, 30), primerHecho.getFechaSuceso());
-    assertEquals(2, primerHecho.getEtiquetas().size());
+    assertEquals("Hecho 15448", primerHecho.getTitulo());
+    assertEquals("Tipo de persona: Imputado. Tipo de lugar: Ruta Provincial. Calle interseccion: EX PEAJE. Estado de semaforo: Sin semáforo. Modo de produccion del Hecho: Colisión vehículo-vehículo. . Condicion del Clima: Bueno. . Motivo origen de registro: Intervención policial. . Vehiculo de la victima: -----. Identidad de genero de la Victima: No corresponde. Rango de edad de la Victima: : No corresponde. Vehiculo del inculpado: Camioneta. Identidad de genero del inculpado: : Varón. Rango de edad del inculpado: : 25-29.", primerHecho.getDescripcion());
+    assertEquals("accidentes vehiculares", primerHecho.getCategoria());
+    assertEquals("RUTA PROVINCIAL 7 , Neuquén, Confluencia, Neuquén", primerHecho.getDireccion());
+    assertEquals(-39, primerHecho.getUbicacion().getLatitud());
+    assertEquals(-68, primerHecho.getUbicacion().getLongitud());
+    assertEquals(LocalDateTime.of(2017, 1, 5, 8, 30), primerHecho.getFechaSuceso());
+    assertEquals(5, primerHecho.getEtiquetas().size());
 
     Hecho segundoHecho = hechos.get(1);
-    assertEquals("Corte de luz masivo", segundoHecho.getTitulo());
-    assertEquals("Sin servicio eléctrico en varios barrios", segundoHecho.getDescripcion());
-    assertEquals("Infraestructura", segundoHecho.getCategoria());
-    assertEquals("Calle Falsa 456", segundoHecho.getDireccion());
-    assertEquals(-34.6090, segundoHecho.getUbicacion().getLatitud());
-    assertEquals(-58.3923, segundoHecho.getUbicacion().getLongitud());
-    assertEquals(LocalDateTime.of(2024, 5, 2, 9, 0), segundoHecho.getFechaSuceso());
-    assertEquals(3, segundoHecho.getEtiquetas().size());
+    assertEquals("Hecho 13161", segundoHecho.getTitulo());
+    assertEquals("Tipo de persona: Víctima. Tipo de lugar: Ruta Provincial. Calle interseccion: EX PEAJE. Estado de semaforo: Sin semáforo. Modo de produccion del Hecho: Colisión vehículo-vehículo. . Condicion del Clima: Bueno. . Motivo origen de registro: Intervención policial. . Vehiculo de la victima: Camioneta. Identidad de genero de la Victima: Varón. Rango de edad de la Victima: : 30-34. Vehiculo del inculpado: No corresponde. Identidad de genero del inculpado: : No corresponde. Rango de edad del inculpado: : No corresponde.", segundoHecho.getDescripcion());
+    assertEquals("accidentes vehiculares", segundoHecho.getCategoria());
+    assertEquals("RUTA PROVINCIAL 7 , Neuquén, Confluencia, Neuquén", segundoHecho.getDireccion());
+    assertEquals(-39, segundoHecho.getUbicacion().getLatitud());
+    assertEquals(-68, segundoHecho.getUbicacion().getLongitud());
+    assertEquals(LocalDateTime.of(2017, 1, 5, 8, 30), segundoHecho.getFechaSuceso());
+    assertEquals(6, segundoHecho.getEtiquetas().size());
 
     Hecho tercerHecho = hechos.get(2);
-    assertEquals("Protesta estudiantil", tercerHecho.getTitulo());
-    assertEquals("Estudiantes reclaman mejoras edilicias", tercerHecho.getDescripcion());
-    assertEquals("Social", tercerHecho.getCategoria());
-    assertEquals("Av. de Mayo 789", tercerHecho.getDireccion());
+    assertEquals("Hecho 13161", tercerHecho.getTitulo());
+    assertEquals("Tipo de persona: Imputado. Tipo de lugar: Calle. Calle interseccion: REPUBLICA DE ITALIA. Estado de semaforo: Sin semáforo. Modo de produccion del Hecho: Colisión vehículo-vehículo. . Condicion del Clima: Bueno. . Motivo origen de registro: Intervención policial. . Vehiculo de la victima: -----. Identidad de genero de la Victima: No corresponde. Rango de edad de la Victima: : No corresponde. Vehiculo del inculpado: Automóvil. Identidad de genero del inculpado: : Mujer. Rango de edad del inculpado: : 30-34.", tercerHecho.getDescripcion());
+    assertEquals("accidentes vehiculares", tercerHecho.getCategoria());
+    assertEquals("PICUN LEUFU , Neuquén, Confluencia, Neuquén", tercerHecho.getDireccion());
     assertEquals(-34.6071, tercerHecho.getUbicacion().getLatitud());
     assertEquals(-58.3802, tercerHecho.getUbicacion().getLongitud());
-    assertEquals(LocalDateTime.of(2024, 5, 3, 17, 45), tercerHecho.getFechaSuceso());
-    assertEquals(2, tercerHecho.getEtiquetas().size());
+    assertEquals(LocalDateTime.of(2017, 1, 27, 19, 37), tercerHecho.getFechaSuceso());
+    assertEquals(5, tercerHecho.getEtiquetas().size());
   }
 
   //Se procesa la solicitud correctamente

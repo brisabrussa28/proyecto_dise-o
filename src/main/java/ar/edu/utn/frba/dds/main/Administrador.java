@@ -1,9 +1,12 @@
 package ar.edu.utn.frba.dds.main;
 
 import ar.edu.utn.frba.dds.domain.Coleccion;
+import ar.edu.utn.frba.dds.domain.ErrorCSV;
 import ar.edu.utn.frba.dds.domain.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.Hecho;
 import ar.edu.utn.frba.dds.domain.Etiqueta;
+import ar.edu.utn.frba.dds.domain.LectorCSV;
+import ar.edu.utn.frba.dds.domain.MapeoCSV;
 import ar.edu.utn.frba.dds.domain.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.Solicitud;
 import ar.edu.utn.frba.dds.domain.exceptions.ErrorLecturaCSVException;
@@ -14,7 +17,9 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,52 +32,38 @@ public class Administrador extends Persona {
     return new Coleccion(titulo, descripcion, categoria);
   }
 
-  public List<Hecho> importarDesdeCSV(String rutaCSV) {
-    List<Hecho> hechosImportados = new ArrayList<>();
-    final String NombreFuenteCSV = "Fuente CSV";
-    final String SeparadorColumna = ";";
-    final String SeparadorEtiquetas = ",";
+  public List<Hecho> importarDesdeCSV(String rutaCSV, MapeoCSV mapeo, String separador, String nombreFuente, String categoria ) {
+    LectorCSV lector = new LectorCSV();
+    lector.importar(rutaCSV, mapeo, separador, nombreFuente, categoria);
 
-    try (Stream<String> lineas = Files.lines(Paths.get(rutaCSV))) {
-      lineas
-          .skip(1) // salteamos encabezado
-          .forEach(linea -> {
-            String[] campos = linea.split(SeparadorColumna, -1);
+    System.out.println("Importación completada. Se importaron " + lector.getHechosImportados().size() + " hechos.");
 
-            if (campos.length < 8) return;
+    if (lector.hasErrores()) {
+      System.out.println("Se encontraron " + lector.getErrores().size() + " errores durante la importación:");
+      //for (ErrorCSV error : lector.getErrores()) {
+      //System.out.println("  Línea " + error.getNumeroFila() + ": " + error.getMensaje());
+      //}
 
-            String titulo = campos[0];
-            String descripcion = campos[1];
-            String categoria = campos[2];
-            String direccion = campos[3];
-            double latitud = Double.parseDouble(campos[4]);
-            double longitud = Double.parseDouble(campos[5]);
-            LocalDateTime fechaSuceso;
+      // Agrupar errores por mensaje
+      Map<String, List<Integer>> erroresAgrupados = new LinkedHashMap<>();
+      for (ErrorCSV error : lector.getErrores()) {
+        erroresAgrupados
+            .computeIfAbsent(error.getMensaje(), k -> new ArrayList<>())
+            .add(error.getNumeroFila());
+      }
 
-            try {
-              fechaSuceso = LocalDateTime.parse(campos[6]);
-            } catch (Exception e) {
-              throw new FechaInvalidaException("Formato de fecha incorrecto en CSV: " + campos[6], e);
-            }
-
-            List<Etiqueta> etiquetas = Arrays.stream(campos[7].split(SeparadorEtiquetas)).map(Etiqueta::new).collect(Collectors.toList());
-
-            PuntoGeografico ubicacion = new PuntoGeografico(latitud, longitud);
-
-            FuenteDinamica fuenteTemporal = new FuenteDinamica(NombreFuenteCSV, new ArrayList<>());
-
-            Hecho hecho = new Hecho(
-                titulo, descripcion, categoria, direccion, ubicacion, fechaSuceso, LocalDateTime.now(), fuenteTemporal, etiquetas
-            );
-
-            fuenteTemporal.agregarHecho(hecho);
-            hechosImportados.add(hecho);
-          });
-    } catch (IOException e) {
-      throw new ErrorLecturaCSVException("Error al leer el archivo CSV: " + rutaCSV, e);
+      // Imprimir errores agrupados
+      for (Map.Entry<String, List<Integer>> entry : erroresAgrupados.entrySet()) {
+        String mensaje = entry.getKey();
+        List<Integer> lineas = entry.getValue();
+        System.out.println("Mensaje: " + mensaje);
+        System.out.println("  Líneas: " + lineas.stream()
+            .map(String::valueOf)
+            .collect(Collectors.joining(", ")));
+      }
     }
 
-    return hechosImportados;
+    return lector.getHechosImportados();
   }
 
   public void aceptarSolicitud(Solicitud solicitud, Coleccion coleccion) {
