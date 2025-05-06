@@ -1,8 +1,10 @@
 package ar.edu.utn.frba.dds.main;
 
 import ar.edu.utn.frba.dds.domain.Coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.Origen.Origen;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.Etiqueta;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class Visualizador extends Persona {
@@ -10,10 +12,11 @@ public class Visualizador extends Persona {
   public Visualizador(String nombre, String email) {
     super(nombre, email);
   }
-/*
-  - Como persona visualizadora, deseo navegar todos los hechos disponibles de una colección.
-  - Como persona visualizadora, deseo navegar los hechos disponibles de una colección, aplicando filtros.
-*/
+
+  /*
+    - Como persona visualizadora, deseo navegar todos los hechos disponibles de una colección.
+    - Como persona visualizadora, deseo navegar los hechos disponibles de una colección, aplicando filtros.
+  */
   public List<Hecho> visualizarHechos(Coleccion coleccion) {
     return coleccion.getHechos();
   }
@@ -33,7 +36,35 @@ public class Visualizador extends Persona {
         .toList();
   }
 
+  public List<Hecho> filtrarPorTitulo(List<Hecho> hechos, String titulo) {
+    return hechos.stream()
+        .filter(hecho -> hecho.esDeTitulo(titulo))
+        .toList();
+  }
 
+  public List<Hecho> filtrarPorLugar(List<Hecho> hechos, String direccion) {
+    return hechos.stream()
+        .filter(hecho -> hecho.sucedioEn(direccion))
+        .toList();
+  }
+
+  public List<Hecho> filtrarPorFecha(List<Hecho> hechos, LocalDateTime fecha) {
+    return hechos.stream()
+        .filter(hecho -> hecho.esDeFecha(fecha))
+        .toList();
+  }
+
+  public List<Hecho> filtrarPorFechaDeCarga(List<Hecho> hechos, LocalDateTime fechaDeCarga) {
+    return hechos.stream()
+        .filter(hecho -> hecho.seCargoEn(fechaDeCarga))
+        .toList();
+  }
+
+  public List<Hecho> filtrarPorOrigen(List<Hecho> hechos, Origen origen) {
+    return hechos.stream()
+        .filter(hecho -> hecho.esDeOrigen(origen))
+        .toList();
+  }
   // No requerirá identificarse, y podrá subir hechos si así lo quisiera manteniendo su anonimato
 }
 /*

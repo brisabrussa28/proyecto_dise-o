@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
 import ar.edu.utn.frba.dds.domain.Coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.Origen.Origen;
 import ar.edu.utn.frba.dds.domain.info.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
@@ -23,8 +24,7 @@ public class Hecho {
   private PuntoGeografico ubicacion;
   private LocalDateTime fechaSuceso;
   private LocalDateTime fechaCarga;
-  private String FuenteOrigen;
-  private String origen;
+  private Origen fuenteOrigen;
   private List<Etiqueta> etiquetas;
   private UUID id;
   boolean vigencia; // NOTE: Nos va a servir para eliminar hechos :D
@@ -37,7 +37,7 @@ public class Hecho {
       PuntoGeografico ubicacion,
       LocalDateTime fechaSuceso,
       LocalDateTime fechaCarga,
-      String FuenteOrigen,
+      Origen fuenteOrigen,
       List<Etiqueta> etiquetas
   ) {
     this.titulo = titulo;
@@ -47,7 +47,7 @@ public class Hecho {
     this.direccion = direccion;
     this.fechaSuceso = fechaSuceso;
     this.fechaCarga = fechaCarga;
-    this.FuenteOrigen = FuenteOrigen;
+    this.fuenteOrigen = fuenteOrigen;
     this.etiquetas = etiquetas;
     this.id = UUID.randomUUID();
     this.vigencia = true;
@@ -86,8 +86,8 @@ public class Hecho {
   }
 
 
-  public String getOrigen() {
-    return FuenteOrigen;
+  public Origen getOrigen() {
+    return fuenteOrigen;
   }
 
   public boolean esDeCategoria(String categoria) {
@@ -98,6 +98,26 @@ public class Hecho {
     return this.etiquetas.contains(unaEtiqueta);
   }
 
+  public boolean esDeTitulo(String unTitulo) {
+    return this.titulo.equals(unTitulo);
+  }
+
+  public boolean sucedioEn(String unaDireccion) {
+    return this.direccion.equals(unaDireccion);
+  }
+
+  public boolean esDeFecha(LocalDateTime unaFecha) {
+    return this.fechaSuceso.equals(unaFecha);
+  }
+
+  public boolean seCargoEn(LocalDateTime unaFecha) {
+    return this.fechaCarga.equals(unaFecha);
+  }
+
+  public boolean esDeOrigen(Origen unaOrigen) {
+    return this.fuenteOrigen.equals(unaOrigen);
+  }
+
   public List<Etiqueta> getEtiquetas() {
     return etiquetas;
   }
@@ -106,7 +126,8 @@ public class Hecho {
     return unaColeccion.contieneA(this);
   }
 
-  public void setOrigen(String origen) {
-    this.FuenteOrigen = origen;
+  public void setOrigen(Origen origen) {
+    this.fuenteOrigen = origen;
   }
+
 }
