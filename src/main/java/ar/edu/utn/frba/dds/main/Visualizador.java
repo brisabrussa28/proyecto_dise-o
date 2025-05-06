@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds.main;
 
 import ar.edu.utn.frba.dds.domain.Coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.Origen.Origen;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.Etiqueta;
 import java.time.LocalDateTime;
@@ -20,15 +21,20 @@ public class Visualizador extends Persona {
   public List<Hecho> visualizarHechos(Coleccion coleccion) {
     return coleccion.getHechos();
   }
-  //TODO: no debe visualizar hechos de una fuente sino de una coleccion.
+  //[✔️] TODO: no debe visualizar hechos de una fuente sino de una coleccion.
 
+// No requerirá identificarse, y podrá subir hechos si así lo quisiera manteniendo su anonimato
+
+  public void agregarHechoAFuente(FuenteDinamica fuente, Hecho hecho) {
+    fuente.agregarHecho(hecho);
+  }
 
   public List<Hecho> filtrarPorEtiqueta(List<Hecho> hechos, Etiqueta etiqueta) {
     return hechos.stream()
         .filter(h -> h.tieneEtiqueta(etiqueta))
         .toList();
   }
-  //TODO: El filtro y la aplicacion del mismo debe gestionarlo coleccion. El filtro debe ser un booleano que actua en un filter sobre los hechos
+  //[✔️] TODO: El filtro y la aplicacion del mismo debe gestionarlo coleccion. El filtro debe ser un booleano que actua en un filter sobre los hechos
 
   public List<Hecho> filtrarPorCategoria(List<Hecho> hechos, String categoria) {
     return hechos.stream()
@@ -65,7 +71,7 @@ public class Visualizador extends Persona {
         .filter(hecho -> hecho.esDeOrigen(origen))
         .toList();
   }
-  // No requerirá identificarse, y podrá subir hechos si así lo quisiera manteniendo su anonimato
+
 }
 /*
 Cada hecho representa una pieza de información, la cual debe contener mínimamente: título, descripción, categoría,

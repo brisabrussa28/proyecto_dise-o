@@ -4,12 +4,9 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 
 public class FuenteDinamica extends Fuente {
-//  private List<Hecho> hechosCargados;
-//  List<Hecho> hechos;
 
   public FuenteDinamica(String nombre, List<Hecho> hechos) {
     super(nombre, hechos);
-    //this.hechosCargados = new ArrayList<>();
   }
 
   public void agregarHecho(Hecho hecho) {

@@ -13,8 +13,8 @@ public class Administrador extends Persona {
     super(nombre, email);
   }
 
-  public Coleccion crearColeccion(String titulo, String descripcion, String categoria/*, fuente fuente,criterio*/) {
-    return new Coleccion(titulo, descripcion, categoria); //NOTE: Agregar fuente
+  public Coleccion crearColeccion(String titulo, String descripcion, String categoria, Fuente fuente /*,criterio*/) {
+    return new Coleccion(titulo, fuente, descripcion, categoria); //NOTE: Agregar fuente
   }
   //a este de coleccion le falta la fuente y el criterio.
 

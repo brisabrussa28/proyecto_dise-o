@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.main;
 
+import ar.edu.utn.frba.dds.domain.Origen.Origen;
 import ar.edu.utn.frba.dds.domain.info.Etiqueta;
 import ar.edu.utn.frba.dds.domain.fuentes.*;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
@@ -33,7 +34,7 @@ public class Contribuyente extends Visualizador {
       List<Etiqueta> etiquetas,
       FuenteDinamica fuente
   ) {
-    Hecho hecho = new Hecho(titulo, descripcion, categoria, direccion, ubicacion, fecha, LocalDateTime.now() , fuente.getNombre(), etiquetas);
+    Hecho hecho = new Hecho(titulo, descripcion, categoria, direccion, ubicacion, fecha, LocalDateTime.now(), Origen.PROVISTO_CONTRIBUYENTE, etiquetas);
     fuente.agregarHecho(hecho);
     return hecho;
   }

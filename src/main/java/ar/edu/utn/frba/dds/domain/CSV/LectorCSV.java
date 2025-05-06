@@ -1,5 +1,7 @@
 package ar.edu.utn.frba.dds.domain.CSV;
 
+import ar.edu.utn.frba.dds.domain.Origen.Origen;
+import ar.edu.utn.frba.dds.domain.exceptions.ArchivoVacioException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
@@ -20,7 +22,7 @@ public class LectorCSV {
   public FuenteEstatica importar(String rutaCSV, MapeoCSV mapeo, String separador, String nombreFuente) {
     try (BufferedReader br = new BufferedReader(new FileReader(rutaCSV))) {
       String headerLine = br.readLine();
-      if (headerLine == null) throw new IllegalArgumentException("El archivo CSV está vacío.");
+      if (headerLine == null) throw new ArchivoVacioException("El mensaje se encuentra vacio.");
 
       String[] columnas = headerLine.split(separador);
       Set<String> columnasSet = new HashSet<>(Arrays.asList(columnas));
@@ -84,7 +86,7 @@ public class LectorCSV {
             ubicacion,
             fechaSuceso,
             LocalDateTime.now(), // fecha de carga actual
-            nombreFuente,
+            Origen.DATASET,
             etiquetasVacias
         );
 

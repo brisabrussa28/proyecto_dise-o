@@ -35,7 +35,7 @@ public class Coleccion {
   private String categoria;
   //private String criterio;
 
-  public Coleccion(String titulo/*, Fuente fuente*/, String descripcion, String categoria) {
+  public Coleccion(String titulo, Fuente fuente, String descripcion, String categoria) {
     this.titulo = titulo;
     this.fuente = fuente;
     this.descripcion = descripcion;
