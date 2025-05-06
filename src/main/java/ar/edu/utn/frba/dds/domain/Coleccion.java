@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.domain;
 
+import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

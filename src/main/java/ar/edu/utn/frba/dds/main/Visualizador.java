@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.main;
 
-import ar.edu.utn.frba.dds.domain.Fuente;
+import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.Hecho;
 import java.util.List;
 

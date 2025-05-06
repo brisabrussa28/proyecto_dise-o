@@ -1,6 +1,6 @@
-package ar.edu.utn.frba.dds.domain;
+package ar.edu.utn.frba.dds.domain.fuentes;
 
-import java.util.ArrayList;
+import ar.edu.utn.frba.dds.domain.Hecho;
 import java.util.List;
 
 public class FuenteDinamica extends Fuente {

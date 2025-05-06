@@ -1,5 +1,6 @@
-package ar.edu.utn.frba.dds.domain;
+package ar.edu.utn.frba.dds.domain.fuentes;
 
+import ar.edu.utn.frba.dds.domain.Hecho;
 import java.util.List;
 
 public class FuenteProxy extends Fuente {

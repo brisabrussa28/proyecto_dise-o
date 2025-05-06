@@ -1,6 +1,8 @@
 package ar.edu.utn.frba.dds.domain;
 
 import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
+import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
+import ar.edu.utn.frba.dds.domain.Coleccion;
 import java.util.ArrayList;
 import java.util.List;
 

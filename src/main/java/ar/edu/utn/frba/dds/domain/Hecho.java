@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.domain;
 
+import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -11,7 +12,7 @@ public class Hecho {
   private String Direccion;
   private LocalDateTime fechaSuceso;
   private LocalDateTime fechaCarga;
-  private Fuente origen;
+  private String FuenteOrigen;
   private List<Etiqueta> etiquetas;
   private PuntoGeografico ubicacion;
   private UUID id;
@@ -25,7 +26,7 @@ public class Hecho {
       PuntoGeografico ubicacion,
       LocalDateTime fechaSuceso,
       LocalDateTime fechaCarga,
-      Fuente origen,
+      String FuenteOrigen,
       List<Etiqueta> etiquetas
   ) {
     this.titulo = titulo;
@@ -35,7 +36,7 @@ public class Hecho {
     this.Direccion = Direccion;
     this.fechaSuceso = fechaSuceso;
     this.fechaCarga = fechaCarga;
-    this.origen = origen;
+    this.FuenteOrigen = FuenteOrigen;
     this.etiquetas = etiquetas;
     this.id = UUID.randomUUID();
     this.vigencia = true;
@@ -74,8 +75,8 @@ public class Hecho {
   }
 
 
-  public Fuente getOrigen() {
-    return origen;
+  public String getOrigen() {
+    return FuenteOrigen;
   }
 
   public List<Etiqueta> getEtiquetas() {
@@ -84,5 +85,9 @@ public class Hecho {
 
   boolean perteneceA(Coleccion unaColeccion) {
     return unaColeccion.contieneA(this);
+  }
+
+  public void setOrigen(String origen) {
+    this.FuenteOrigen = origen;
   }
 }

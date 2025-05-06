@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds;
 
 import ar.edu.utn.frba.dds.domain.Etiqueta;
-import ar.edu.utn.frba.dds.domain.MapeoCSV;
+import ar.edu.utn.frba.dds.domain.CSV.MapeoCSV;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,14 +12,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import ar.edu.utn.frba.dds.domain.Coleccion;
-import ar.edu.utn.frba.dds.domain.FuenteDinamica;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.Hecho;
+import ar.edu.utn.frba.dds.domain.fuentes.*;
 import ar.edu.utn.frba.dds.domain.PuntoGeografico;
 import ar.edu.utn.frba.dds.main.Administrador;
 import ar.edu.utn.frba.dds.main.Contribuyente;
@@ -72,7 +71,7 @@ public class TPATest {
         Objects.equals(hechoTest.getFechaSuceso(), LocalDate.now().atStartOfDay()) &&
         Objects.equals(hechoTest.getFechaCarga(), LocalDate.now().atStartOfDay()) &&
         hechoTest.getEtiquetas() == etiquetasAux &&
-        hechoTest.getOrigen() == fuenteAuxD);
+        hechoTest.getOrigen().equals(fuenteAuxD.getNombre()));
     assertTrue(igual); //Si "igual" es true es que estan correctos los datos
   }
   //Se confecciona la solicitud correctamente
@@ -169,7 +168,8 @@ public class TPATest {
     };
 
 
-    List<Hecho> hechos = admin.importarDesdeCSV(rutaCSV, mapeo, separador, nombreFuente, "accidentes vehiculares");
+    FuenteEstatica fuente = admin.importarDesdeCSV(rutaCSV, mapeo, separador, nombreFuente, "accidentes vehiculares");
+    List<Hecho> hechos = fuente.obtenerHechos();
     assertEquals(52027, hechos.size());
 
     Hecho primerHecho = hechos.get(0);

@@ -1,5 +1,7 @@
-package ar.edu.utn.frba.dds.domain;
+package ar.edu.utn.frba.dds.domain.CSV;
 
+import ar.edu.utn.frba.dds.domain.Etiqueta;
+import ar.edu.utn.frba.dds.domain.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;

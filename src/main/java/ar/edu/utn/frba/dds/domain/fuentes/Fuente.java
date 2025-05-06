@@ -1,5 +1,7 @@
-package ar.edu.utn.frba.dds.domain;
+package ar.edu.utn.frba.dds.domain.fuentes;
 
+import ar.edu.utn.frba.dds.domain.Coleccion;
+import ar.edu.utn.frba.dds.domain.Hecho;
 import java.util.ArrayList;
 import java.util.List;
 
