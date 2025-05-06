@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain;
+package ar.edu.utn.frba.dds.domain.info;
 
 public class PuntoGeografico {
   private double latitud;

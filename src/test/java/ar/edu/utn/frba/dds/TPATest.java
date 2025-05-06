@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds;
 
-import ar.edu.utn.frba.dds.domain.Etiqueta;
+import ar.edu.utn.frba.dds.domain.info.Etiqueta;
 import ar.edu.utn.frba.dds.domain.CSV.MapeoCSV;
 import org.junit.jupiter.api.Test;
 
@@ -15,11 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-import ar.edu.utn.frba.dds.domain.Coleccion;
+import ar.edu.utn.frba.dds.domain.Coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
-import ar.edu.utn.frba.dds.domain.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.fuentes.*;
-import ar.edu.utn.frba.dds.domain.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.main.Administrador;
 import ar.edu.utn.frba.dds.main.Contribuyente;
 
@@ -165,10 +165,11 @@ public class TPATest {
       }
 
       return etiquetas;
+
     };
 
 
-    FuenteEstatica fuente = admin.importarDesdeCSV(rutaCSV, mapeo, separador, nombreFuente, "accidentes vehiculares");
+    FuenteEstatica fuente = admin.importarDesdeCSV(rutaCSV, mapeo, separador, nombreFuente);
     List<Hecho> hechos = fuente.obtenerHechos();
     assertEquals(52027, hechos.size());
 

@@ -1,5 +1,7 @@
-package ar.edu.utn.frba.dds.domain;
+package ar.edu.utn.frba.dds.domain.reportes;
 
+import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.main.Contribuyente;
 
@@ -7,9 +9,10 @@ public class Solicitud {
   private final Contribuyente solicitante;
   private final Hecho hechoSolicitado;
   private final String razonEliminacion;
-  public Solicitud(Contribuyente solicitante, Hecho hechoSolicitado, String motivo) {
+  private final Fuente fuente;
+  public Solicitud(Contribuyente solicitante, Hecho hechoSolicitado, Fuente fuente, String motivo) {
     this.validarMotivo(motivo);
-
+    this.fuente= fuente;
     this.solicitante = solicitante;
     this.hechoSolicitado = hechoSolicitado;
     this.razonEliminacion = motivo;
@@ -21,6 +24,10 @@ public class Solicitud {
 
   public Hecho getHechoSolicitado() {
     return hechoSolicitado;
+  }
+
+  public Fuente getFuente() {
+    return fuente;
   }
 
   public String getRazonEliminacion() {

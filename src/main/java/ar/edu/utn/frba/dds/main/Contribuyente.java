@@ -1,10 +1,10 @@
 package ar.edu.utn.frba.dds.main;
 
-import ar.edu.utn.frba.dds.domain.Etiqueta;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
-import ar.edu.utn.frba.dds.domain.Hecho;
-import ar.edu.utn.frba.dds.domain.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.Solicitud;
+import ar.edu.utn.frba.dds.domain.info.Etiqueta;
+import ar.edu.utn.frba.dds.domain.fuentes.*;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.reportes.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -38,12 +38,14 @@ public class Contribuyente extends Visualizador {
     return hecho;
   }
 
-  public Solicitud solicitarEliminacion(Hecho hecho, String motivo) {
+  public Solicitud solicitarEliminacion(Hecho hecho, String motivo, Fuente fuente) {
     if (hecho == null || motivo == null || motivo.isBlank()) {
       throw new IllegalArgumentException("Hecho y motivo deben estar definidos");
     }
 
-    return new Solicitud(this, hecho, motivo);
+    Solicitud solicitud = new Solicitud(this, hecho, fuente, motivo);
+    GestorDeReportes.getInstancia().agregarSolicitud(solicitud); // Singleton (ver patronescreacionales si no entendes que hago aca)
+    return solicitud;
   }
 
 }

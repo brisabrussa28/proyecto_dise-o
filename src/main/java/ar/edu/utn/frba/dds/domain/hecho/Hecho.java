@@ -1,9 +1,19 @@
-package ar.edu.utn.frba.dds.domain;
+package ar.edu.utn.frba.dds.domain.hecho;
 
-import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
+import ar.edu.utn.frba.dds.domain.Coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.info.Etiqueta;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+/*
+Falta agregar el tipo de origen
+Cada hecho representa una pieza de información, la cual debe contener mínimamente:
+título, descripción, categoría, contenido multimedia opcional, lugar y fecha del acontecimiento,
+fecha de carga y su origen (carga manual, proveniente de un dataset o provisto por un contribuyente).
+*/
+
 
 public class Hecho {
   private String titulo;
@@ -77,6 +87,14 @@ public class Hecho {
 
   public String getOrigen() {
     return FuenteOrigen;
+  }
+
+  public boolean esDeCategoria(String categoria) {
+    return this.categoria.equals(categoria);
+  }
+
+  public boolean tieneEtiqueta(Etiqueta unaEtiqueta) {
+    return this.etiquetas.contains(unaEtiqueta);
   }
 
   public List<Etiqueta> getEtiquetas() {

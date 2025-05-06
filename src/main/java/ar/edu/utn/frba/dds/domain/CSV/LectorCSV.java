@@ -1,10 +1,9 @@
 package ar.edu.utn.frba.dds.domain.CSV;
 
-import ar.edu.utn.frba.dds.domain.Etiqueta;
-import ar.edu.utn.frba.dds.domain.Hecho;
-import ar.edu.utn.frba.dds.domain.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
+import ar.edu.utn.frba.dds.domain.info.Etiqueta;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -12,11 +11,13 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
+//NOTE: Este lector tiene en cuenta que no piden un campo etiquetas en los csv (enunciado) sino que pide un campo categoria
+
 public class LectorCSV {
 
   private List<Hecho> hechosImportados = new ArrayList<>();
 
-  public FuenteEstatica importar(String rutaCSV, MapeoCSV mapeo, String separador, String nombreFuente, String categoria) {
+  public FuenteEstatica importar(String rutaCSV, MapeoCSV mapeo, String separador, String nombreFuente) {
     try (BufferedReader br = new BufferedReader(new FileReader(rutaCSV))) {
       String headerLine = br.readLine();
       if (headerLine == null) throw new IllegalArgumentException("El archivo CSV está vacío.");
@@ -26,7 +27,7 @@ public class LectorCSV {
 
       // Columnas obligatorias
       List<String> columnasNecesarias = List.of(
-          "titulo", "descripcion", "direccion", "latitud", "longitud", "fechaSuceso", "etiqueta"
+          "titulo", "descripcion", "latitud", "longitud", "fechaSuceso", "categoria"
       );
 
       // Chequear si faltan columnas obligatorias
@@ -46,7 +47,7 @@ public class LectorCSV {
           filaMap.put(columnas[i], i < valores.length ? valores[i] : "");
         }
 
-        // Chequear que los campos obligatorios no estén vacíos
+        // Chequear campos obligatorios no vacíos
         for (String col : columnasNecesarias) {
           String valor = filaMap.get(col);
           if (valor == null || valor.trim().isEmpty()) {
@@ -68,9 +69,12 @@ public class LectorCSV {
         // Mapear usando MapeoCSV
         String titulo = mapeo.obtenerTitulo.apply(filaMap);
         String descripcion = mapeo.obtenerDescripcion.apply(filaMap);
-        String direccion = mapeo.obtenerDireccion.apply(filaMap);
+        String direccion = columnasSet.contains("direccion") ? mapeo.obtenerDireccion.apply(filaMap) : null;
+        String categoria = mapeo.obtenerCategoria.apply(filaMap);
         LocalDateTime fechaSuceso = mapeo.obtenerFecha.apply(filaMap);
-        List<Etiqueta> etiquetas = mapeo.obtenerEtiquetas.apply(filaMap);
+
+        // Crear lista vacía de etiquetas
+        List<Etiqueta> etiquetasVacias = new ArrayList<>();
 
         Hecho hecho = new Hecho(
             titulo,
@@ -81,7 +85,7 @@ public class LectorCSV {
             fechaSuceso,
             LocalDateTime.now(), // fecha de carga actual
             nombreFuente,
-            etiquetas
+            etiquetasVacias
         );
 
         hechosImportados.add(hecho);
@@ -91,7 +95,7 @@ public class LectorCSV {
         throw new IllegalStateException("No se creó ningún hecho. El archivo podría estar vacío o mal formado.");
       }
 
-      return new FuenteEstatica(nombreFuente, hechosImportados, rutaCSV);
+      return new FuenteEstatica(nombreFuente, hechosImportados);
 
     } catch (IOException e) {
       throw new RuntimeException("Error al leer el archivo CSV: " + e.getMessage(), e);

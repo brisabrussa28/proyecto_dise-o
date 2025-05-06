@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain;
+package ar.edu.utn.frba.dds.domain.info;
 
 import ar.edu.utn.frba.dds.domain.exceptions.EtiquetaInvalidaException;
 

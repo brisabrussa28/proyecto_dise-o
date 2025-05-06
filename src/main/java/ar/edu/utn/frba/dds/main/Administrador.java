@@ -1,33 +1,39 @@
 package ar.edu.utn.frba.dds.main;
 
-import ar.edu.utn.frba.dds.domain.Coleccion;
-import ar.edu.utn.frba.dds.domain.Hecho;
+import ar.edu.utn.frba.dds.domain.Coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.fuentes.*;
 import ar.edu.utn.frba.dds.domain.CSV.LectorCSV;
 import ar.edu.utn.frba.dds.domain.CSV.MapeoCSV;
-import ar.edu.utn.frba.dds.domain.Solicitud;
-import java.util.List;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
+import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
+
 
 public class Administrador extends Persona {
   public Administrador(String nombre, String email) {
     super(nombre, email);
   }
 
-  public Coleccion crearColeccion(String titulo, String descripcion, String categoria) {
-    return new Coleccion(titulo, descripcion, categoria);
+  public Coleccion crearColeccion(String titulo, String descripcion, String categoria/*, fuente fuente,criterio*/) {
+    return new Coleccion(titulo, descripcion, categoria); //NOTE: Agregar fuente
   }
+  //a este de coleccion le falta la fuente y el criterio.
 
-  public FuenteEstatica importarDesdeCSV(String rutaCSV, MapeoCSV mapeo, String separador, String nombreFuente, String categoria ) {
+  public FuenteEstatica importarDesdeCSV(String rutaCSV, MapeoCSV mapeo, String separador, String nombreFuente) {
     LectorCSV lector = new LectorCSV();
-    return lector.importar(rutaCSV, mapeo, separador, nombreFuente, categoria);
+    return lector.importar(rutaCSV, mapeo, separador, nombreFuente);
   }
 
-  public void GestionarSolicitud(Solicitud solicitud, Coleccion coleccion) {
-    /// /
+  public Solicitud obtenerSolicitud() {
+    return GestorDeReportes.getInstancia().obtenerSolicitud();
   }
 
-  public List<Hecho> EtiquetarHecho(List<Hecho> hechos, String etiqueta) {
-    /// /
+  public Solicitud obtenerSolicitudPorPosicion(int posicion) {
+    return GestorDeReportes.getInstancia().obtenerSolicitudPorPosicion(posicion);
+  }
+
+  public void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud) {
+    GestorDeReportes.getInstancia().gestionarSolicitud(solicitud, aceptarSolicitud);
   }
 
 }
