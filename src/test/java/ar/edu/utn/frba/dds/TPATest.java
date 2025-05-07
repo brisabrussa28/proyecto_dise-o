@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds;
 
+import ar.edu.utn.frba.dds.domain.Origen.Origen;
 import ar.edu.utn.frba.dds.domain.exceptions.ArchivoVacioException;
 import ar.edu.utn.frba.dds.domain.info.Etiqueta;
 import ar.edu.utn.frba.dds.domain.CSV.MapeoCSV;
@@ -58,26 +59,28 @@ public class TPATest {
   }
   //Se crea un hecho correctamente
 
-
   @Test
   public void hechoCreadoCorrectamente() {
-    Hecho hechoTest = contribuyenteA.crearHecho( "Robo",
+    Hecho hechoTest = contribuyenteA.crearHecho(
+        "Robo",
         "Hombre blanco asalta ancianita indefensa",
         "ROBO",
         "Avenida Siempreviva 742",
-        pgAux,
-        LocalDate.now().atStartOfDay(),
-        etiquetasAux,
-        fuenteAuxD);
+        pgAux, //Ubicación
+        LocalDate.now().atStartOfDay(), //Fecha
+        etiquetasAux,  //Etiquetas
+        fuenteAuxD); //Fuente
 
-    boolean igual = (Objects.equals(hechoTest.getTitulo(), "Robo") &&
+    boolean igual = (
+        Objects.equals(hechoTest.getTitulo(), "Robo") &&
         Objects.equals(hechoTest.getDescripcion(), "Hombre blanco asalta ancianita indefensa") &&
         Objects.equals(hechoTest.getCategoria(), "ROBO") &&
         Objects.equals(hechoTest.getDireccion(), "Avenida Siempreviva 742") &&
         hechoTest.getUbicacion() == pgAux &&
         Objects.equals(hechoTest.getFechaSuceso(), LocalDate.now().atStartOfDay()) &&
-        Objects.equals(hechoTest.getFechaCarga(), LocalDate.now().atStartOfDay()) &&
-        hechoTest.getEtiquetas() == etiquetasAux);
+        Objects.equals(hechoTest.getFechaCarga().toLocalDate(), LocalDate.now()) &&
+        hechoTest.getEtiquetas() == etiquetasAux &&
+        hechoTest.getOrigen() == Origen.PROVISTO_CONTRIBUYENTE);
     assertTrue(igual); //Si "igual" es true es que estan correctos los datos
   }
   //Se confecciona la solicitud correctamente
@@ -219,7 +222,6 @@ public class TPATest {
 
   @Test
   public void seImportaunaFuenteEstaticaCorrectamentePeroVacia() {
-
     assertThrows(ArchivoVacioException.class, () -> iluminati.importarDesdeCSV("src/main/java/ar/edu/utn/frba/dds/domain/CSV/ejemplo.csv", mapeo, ",","datos.gob.ar"));
   }
 
