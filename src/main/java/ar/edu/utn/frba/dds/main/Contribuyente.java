@@ -1,11 +1,12 @@
 package ar.edu.utn.frba.dds.main;
 
 import ar.edu.utn.frba.dds.domain.Origen.Origen;
-import ar.edu.utn.frba.dds.domain.info.Etiqueta;
-import ar.edu.utn.frba.dds.domain.fuentes.*;
+import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.reportes.*;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
+import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class Contribuyente extends Visualizador {
       String direccion,
       PuntoGeografico ubicacion,
       LocalDateTime fecha,
-      List<Etiqueta> etiquetas,
+      List<String> etiquetas,
       FuenteDinamica fuente
   ) {
     Hecho hecho = new Hecho(titulo, descripcion, categoria, direccion, ubicacion, fecha, LocalDateTime.now(), Origen.PROVISTO_CONTRIBUYENTE, etiquetas);

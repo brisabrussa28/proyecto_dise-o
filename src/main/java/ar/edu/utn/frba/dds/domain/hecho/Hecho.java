@@ -2,7 +2,6 @@ package ar.edu.utn.frba.dds.domain.hecho;
 
 import ar.edu.utn.frba.dds.domain.Coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.Origen.Origen;
-import ar.edu.utn.frba.dds.domain.info.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +16,7 @@ fecha de carga y su origen (carga manual, proveniente de un dataset o provisto p
 
 
 public class Hecho {
+  boolean vigencia; // NOTE: Nos va a servir para eliminar hechos :D
   private String titulo;
   private String descripcion;
   private String categoria;
@@ -25,9 +25,8 @@ public class Hecho {
   private LocalDateTime fechaSuceso;
   private LocalDateTime fechaCarga;
   private Origen fuenteOrigen;
-  private List<Etiqueta> etiquetas;
+  private List<String> etiquetas;
   private UUID id;
-  boolean vigencia; // NOTE: Nos va a servir para eliminar hechos :D
 
   public Hecho(
       String titulo,
@@ -38,7 +37,7 @@ public class Hecho {
       LocalDateTime fechaSuceso,
       LocalDateTime fechaCarga,
       Origen fuenteOrigen,
-      List<Etiqueta> etiquetas
+      List<String> etiquetas
   ) {
     this.titulo = titulo;
     this.descripcion = descripcion;
@@ -90,11 +89,15 @@ public class Hecho {
     return fuenteOrigen;
   }
 
+  public void setOrigen(Origen origen) {
+    this.fuenteOrigen = origen;
+  }
+
   public boolean esDeCategoria(String categoria) {
     return this.categoria.equals(categoria);
   }
 
-  public boolean tieneEtiqueta(Etiqueta unaEtiqueta) {
+  public boolean tieneEtiqueta(String unaEtiqueta) {
     return this.etiquetas.contains(unaEtiqueta);
   }
 
@@ -118,16 +121,12 @@ public class Hecho {
     return this.fuenteOrigen.equals(unaOrigen);
   }
 
-  public List<Etiqueta> getEtiquetas() {
+  public List<String> getEtiquetas() {
     return etiquetas;
   }
 
   boolean perteneceA(Coleccion unaColeccion) {
     return unaColeccion.contieneA(this);
-  }
-
-  public void setOrigen(Origen origen) {
-    this.fuenteOrigen = origen;
   }
 
 }

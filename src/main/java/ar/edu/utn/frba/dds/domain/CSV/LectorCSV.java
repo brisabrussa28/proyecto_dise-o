@@ -2,16 +2,20 @@ package ar.edu.utn.frba.dds.domain.CSV;
 
 import ar.edu.utn.frba.dds.domain.Origen.Origen;
 import ar.edu.utn.frba.dds.domain.exceptions.ArchivoVacioException;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
-import ar.edu.utn.frba.dds.domain.info.Etiqueta;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 //NOTE: Este lector tiene en cuenta que no piden un campo etiquetas en los csv (enunciado) sino que pide un campo categoria
 
@@ -76,7 +80,7 @@ public class LectorCSV {
           throw new IllegalArgumentException("Fecha inválida en la fila " + filaNumero);
         }
 
-        List<Etiqueta> etiquetasVacias = new ArrayList<>();
+        List<String> etiquetasVacias = new ArrayList<>();
 
         Hecho hecho = new Hecho(
             titulo,

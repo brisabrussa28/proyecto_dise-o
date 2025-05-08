@@ -1,33 +1,22 @@
 package ar.edu.utn.frba.dds;
 
-import ar.edu.utn.frba.dds.domain.Origen.Origen;
-import ar.edu.utn.frba.dds.domain.exceptions.ArchivoVacioException;
-import ar.edu.utn.frba.dds.domain.info.Etiqueta;
-import ar.edu.utn.frba.dds.domain.CSV.MapeoCSV;
-import ar.edu.utn.frba.dds.main.Persona;
-import java.io.IOException;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
+
 import ar.edu.utn.frba.dds.domain.Coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.Origen.Origen;
+import ar.edu.utn.frba.dds.domain.exceptions.ArchivoVacioException;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.fuentes.*;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.main.Administrador;
 import ar.edu.utn.frba.dds.main.Contribuyente;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import org.junit.jupiter.api.Test;
 
 
 public class TPATest {
@@ -35,17 +24,16 @@ public class TPATest {
   Contribuyente contribuyenteA = new Contribuyente(null, null);
   Contribuyente contribuyenteB = new Contribuyente("Roberto", "roberto@gmail.com");
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
-  List<Etiqueta> etiquetasAux = List.of(
-      new Etiqueta("#ancianita"),
-      new Etiqueta("#robo_a_mano_armada"),
-      new Etiqueta("#violencia"),
-      new Etiqueta("#leyDeProtecciónALasAncianitas"),
-      new Etiqueta("#NOalaVIOLENCIAcontraABUELITAS")
+  List<String> etiquetasAux = List.of(
+      "#ancianita",
+      "#robo_a_mano_armada",
+      "#violencia",
+      "#leyDeProtecciónALasAncianitas",
+      "#NOalaVIOLENCIAcontraABUELITAS"
   );
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   Administrador iluminati = new Administrador("△", "libellumcipher@incognito.com");
-  MapeoCSV mapeo = new MapeoCSV();
-  LocalDateTime horaAux = LocalDateTime.of(2025,5,6,20,9);
+  LocalDateTime horaAux = LocalDateTime.of(2025, 5, 6, 20, 9);
 
   //TEST CONTRIBUYENTE
   //Se determina la identidad (anonimo/registrado) correctamente
@@ -53,6 +41,7 @@ public class TPATest {
   public void identidadDelContribuyenteAEsAnonima() {
     assertTrue(contribuyenteA.esAnonimo());
   }
+
   @Test
   public void identidadDelContribuyenteBEsRegistrado() {
     assertFalse(contribuyenteB.esAnonimo());
@@ -73,14 +62,14 @@ public class TPATest {
 
     boolean igual = (
         Objects.equals(hechoTest.getTitulo(), "Robo") &&
-        Objects.equals(hechoTest.getDescripcion(), "Hombre blanco asalta ancianita indefensa") &&
-        Objects.equals(hechoTest.getCategoria(), "ROBO") &&
-        Objects.equals(hechoTest.getDireccion(), "Avenida Siempreviva 742") &&
-        hechoTest.getUbicacion() == pgAux &&
-        Objects.equals(hechoTest.getFechaSuceso(), LocalDate.now().atStartOfDay()) &&
-        Objects.equals(hechoTest.getFechaCarga().toLocalDate(), LocalDate.now()) &&
-        hechoTest.getEtiquetas() == etiquetasAux &&
-        hechoTest.getOrigen() == Origen.PROVISTO_CONTRIBUYENTE);
+            Objects.equals(hechoTest.getDescripcion(), "Hombre blanco asalta ancianita indefensa") &&
+            Objects.equals(hechoTest.getCategoria(), "ROBO") &&
+            Objects.equals(hechoTest.getDireccion(), "Avenida Siempreviva 742") &&
+            hechoTest.getUbicacion() == pgAux &&
+            Objects.equals(hechoTest.getFechaSuceso(), LocalDate.now().atStartOfDay()) &&
+            Objects.equals(hechoTest.getFechaCarga().toLocalDate(), LocalDate.now()) &&
+            hechoTest.getEtiquetas() == etiquetasAux &&
+            hechoTest.getOrigen() == Origen.PROVISTO_CONTRIBUYENTE);
     assertTrue(igual); //Si "igual" es true es que estan correctos los datos
   }
   //Se confecciona la solicitud correctamente
@@ -95,7 +84,7 @@ public class TPATest {
   //Se crea la colección correctamente
   @Test
   public void coleccionCreadaCorrectamente() {
-    Coleccion bonaerense = iluminati.crearColeccion("Robos","Un día más siendo del conurbano", "Robos", fuenteAuxD);
+    Coleccion bonaerense = iluminati.crearColeccion("Robos", "Un día más siendo del conurbano", "Robos", fuenteAuxD);
     boolean igual = (Objects.equals(bonaerense.getTitulo(), "Robos") &&
         Objects.equals(bonaerense.getDescripcion(), "Un día más siendo del conurbano") &&
         Objects.equals(bonaerense.getCategoria(), "Robos"));
@@ -222,11 +211,11 @@ public class TPATest {
 
   @Test
   public void seImportaunaFuenteEstaticaCorrectamentePeroVacia() {
-    assertThrows(ArchivoVacioException.class, () -> iluminati.importarDesdeCSV("src/main/java/ar/edu/utn/frba/dds/domain/CSV/ejemplo.csv", ",","datos.gob.ar"));
+    assertThrows(ArchivoVacioException.class, () -> iluminati.importarDesdeCSV("src/main/java/ar/edu/utn/frba/dds/domain/CSV/ejemplo.csv", ",", "datos.gob.ar"));
   }
 
   @Test
   public void seImportaUnaFuenteEstaticaIncorrectamente() {
-    assertThrows(RuntimeException.class, () -> iluminati.importarDesdeCSV("src/main/java/ar/edu/utn/frba/dds/domain/CSV/ejemplo2.csv", ",","datos.gob.ar"));
+    assertThrows(RuntimeException.class, () -> iluminati.importarDesdeCSV("src/main/java/ar/edu/utn/frba/dds/domain/CSV/ejemplo2.csv", ",", "datos.gob.ar"));
   }
 }

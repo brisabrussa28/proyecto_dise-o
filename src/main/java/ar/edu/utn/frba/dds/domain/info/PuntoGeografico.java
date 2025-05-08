@@ -12,6 +12,7 @@ public class PuntoGeografico {
   public double getLatitud() {
     return latitud;
   }
+
   public double getLongitud() {
     return longitud;
   }
