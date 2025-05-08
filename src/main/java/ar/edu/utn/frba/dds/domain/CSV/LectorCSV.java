@@ -19,7 +19,7 @@ public class LectorCSV {
 
   private List<Hecho> hechosImportados = new ArrayList<>();
 
-  public FuenteEstatica importar(String rutaCSV, MapeoCSV mapeo, String separador, String nombreFuente) {
+  public FuenteEstatica importar(String rutaCSV, String separador, String nombreFuente) {
     try (BufferedReader br = new BufferedReader(new FileReader(rutaCSV))) {
       String headerLine = br.readLine();
       if (headerLine == null) throw new ArchivoVacioException("El mensaje se encuentra vacio.");
@@ -32,7 +32,6 @@ public class LectorCSV {
           "titulo", "descripcion", "latitud", "longitud", "fechaSuceso", "categoria"
       );
 
-      // Chequear si faltan columnas obligatorias
       for (String col : columnasNecesarias) {
         if (!columnasSet.contains(col)) {
           throw new IllegalArgumentException("Falta la columna obligatoria: " + col);
@@ -40,16 +39,15 @@ public class LectorCSV {
       }
 
       String linea;
-      int filaNumero = 1; // para mensajes de error
+      int filaNumero = 1;
       while ((linea = br.readLine()) != null) {
         filaNumero++;
-        String[] valores = linea.split(separador, -1); // -1 para incluir vacíos
+        String[] valores = linea.split(separador, -1);
         Map<String, String> filaMap = new HashMap<>();
         for (int i = 0; i < columnas.length; i++) {
           filaMap.put(columnas[i], i < valores.length ? valores[i] : "");
         }
 
-        // Chequear campos obligatorios no vacíos
         for (String col : columnasNecesarias) {
           String valor = filaMap.get(col);
           if (valor == null || valor.trim().isEmpty()) {
@@ -57,9 +55,7 @@ public class LectorCSV {
           }
         }
 
-        // Convertir latitud y longitud a double
-        double latitud;
-        double longitud;
+        double latitud, longitud;
         try {
           latitud = Double.parseDouble(filaMap.get("latitud"));
           longitud = Double.parseDouble(filaMap.get("longitud"));
@@ -68,14 +64,18 @@ public class LectorCSV {
         }
         PuntoGeografico ubicacion = new PuntoGeografico(latitud, longitud);
 
-        // Mapear usando MapeoCSV
-        String titulo = mapeo.obtenerTitulo.apply(filaMap);
-        String descripcion = mapeo.obtenerDescripcion.apply(filaMap);
-        String direccion = columnasSet.contains("direccion") ? mapeo.obtenerDireccion.apply(filaMap) : null;
-        String categoria = mapeo.obtenerCategoria.apply(filaMap);
-        LocalDateTime fechaSuceso = mapeo.obtenerFecha.apply(filaMap);
+        String titulo = filaMap.get("titulo");
+        String descripcion = filaMap.get("descripcion");
+        String direccion = columnasSet.contains("direccion") ? filaMap.get("direccion") : null;
+        String categoria = filaMap.get("categoria");
 
-        // Crear lista vacía de etiquetas
+        LocalDateTime fechaSuceso;
+        try {
+          fechaSuceso = LocalDateTime.parse(filaMap.get("fechaSuceso")); // O adaptar si es otro formato
+        } catch (Exception e) {
+          throw new IllegalArgumentException("Fecha inválida en la fila " + filaNumero);
+        }
+
         List<Etiqueta> etiquetasVacias = new ArrayList<>();
 
         Hecho hecho = new Hecho(
@@ -85,7 +85,7 @@ public class LectorCSV {
             direccion,
             ubicacion,
             fechaSuceso,
-            LocalDateTime.now(), // fecha de carga actual
+            LocalDateTime.now(),
             Origen.DATASET,
             etiquetasVacias
         );

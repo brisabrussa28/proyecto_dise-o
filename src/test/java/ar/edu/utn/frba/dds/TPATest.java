@@ -222,11 +222,11 @@ public class TPATest {
 
   @Test
   public void seImportaunaFuenteEstaticaCorrectamentePeroVacia() {
-    assertThrows(ArchivoVacioException.class, () -> iluminati.importarDesdeCSV("src/main/java/ar/edu/utn/frba/dds/domain/CSV/ejemplo.csv", mapeo, ",","datos.gob.ar"));
+    assertThrows(ArchivoVacioException.class, () -> iluminati.importarDesdeCSV("src/main/java/ar/edu/utn/frba/dds/domain/CSV/ejemplo.csv", ",","datos.gob.ar"));
   }
 
   @Test
   public void seImportaUnaFuenteEstaticaIncorrectamente() {
-    assertThrows(RuntimeException.class, () -> iluminati.importarDesdeCSV("src/main/java/ar/edu/utn/frba/dds/domain/CSV/ejemplo2.csv", mapeo, ",","datos.gob.ar"));
+    assertThrows(RuntimeException.class, () -> iluminati.importarDesdeCSV("src/main/java/ar/edu/utn/frba/dds/domain/CSV/ejemplo2.csv", ",","datos.gob.ar"));
   }
 }

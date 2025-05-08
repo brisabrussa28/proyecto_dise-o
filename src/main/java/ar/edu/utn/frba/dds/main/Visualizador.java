@@ -29,7 +29,8 @@ public class Visualizador extends Persona {
     fuente.agregarHecho(hecho);
   }
 
-  public List<Hecho> filtrarPorEtiqueta(List<Hecho> hechos, Etiqueta etiqueta) {
+
+  public List<Hecho> filtrar(List<Hecho> hechos, Etiqueta etiqueta) {
     return hechos.stream()
         .filter(h -> h.tieneEtiqueta(etiqueta))
         .toList();

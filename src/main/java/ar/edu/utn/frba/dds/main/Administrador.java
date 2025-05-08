@@ -18,9 +18,9 @@ public class Administrador extends Persona {
   }
   //a este de coleccion le falta la fuente y el criterio.
 
-  public FuenteEstatica importarDesdeCSV(String rutaCSV, MapeoCSV mapeo, String separador, String nombreFuente) {
+  public FuenteEstatica importarDesdeCSV(String rutaCSV, String separador, String nombreFuente) {
     LectorCSV lector = new LectorCSV();
-    return lector.importar(rutaCSV, mapeo, separador, nombreFuente);
+    return lector.importar(rutaCSV, separador, nombreFuente);
   }
 
   public Solicitud obtenerSolicitud() {
