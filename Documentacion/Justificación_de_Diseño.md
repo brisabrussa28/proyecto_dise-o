@@ -41,7 +41,7 @@ Cada vez que se crea una nueva solicitud se valida con **validarMotivo()** que n
 # Persona  
 Clase abstracta y es padre de `Administrador` y `Visualizador`, ya que ambas comparten los atributos nombre y email.  
 
-## Administrador  
+# Administrador  
 Nace de la documentación. Cada administrador tiene el objetivo de crear colecciones (**crearColección()**), importar los hechos de los datasets (**importarDesdeCSV()**) y gestionar las solicitudes (**obtenerSolicitud()**, **obtenerSolicitudPorPosicion()**, **gestionarSolicitud()**).  
 
 # Visualizador  
