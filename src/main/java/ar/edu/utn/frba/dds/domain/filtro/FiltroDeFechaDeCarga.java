@@ -11,7 +11,8 @@ public class FiltroDeFechaDeCarga extends Filtro {
     this.fecha = fecha;
   }
 
-  public List<Hecho> filtrarPorFechaDeCarga(List<Hecho> hechos) {
-    return hechos.stream().filter(hecho -> hecho.seCargoEn(fecha)).toList();
+  @Override
+  public List<Hecho> filtrar(List<Hecho> hechos) {
+    return hechos.stream().filter(hecho -> hecho.seCargoEl(fecha)).toList();
   }
 }

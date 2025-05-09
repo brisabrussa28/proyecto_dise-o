@@ -5,13 +5,15 @@ import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.util.List;
 
-public class FiltroDeOrigen {
+public class FiltroDeOrigen extends Filtro {
   Origen origen;
 
   public FiltroDeOrigen(Origen origen) {
     this.origen = origen;
   }
-  public List<Hecho> filtrarPorOrigen(List<Hecho> hechos) {
+
+  @Override
+  public List<Hecho> filtrar(List<Hecho> hechos) {
     return hechos.stream().filter(hecho -> hecho.esDeOrigen(origen)).toList();
   }
 }

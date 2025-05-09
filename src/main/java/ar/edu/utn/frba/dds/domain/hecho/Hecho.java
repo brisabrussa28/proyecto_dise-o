@@ -111,8 +111,14 @@ public class Hecho {
     return this.fechaSuceso.equals(unaFecha);
   }
 
-  public boolean seCargoEn(LocalDateTime unaFecha) {
-    return this.fechaCarga.equals(unaFecha);
+  public boolean seCargoEl(LocalDateTime unaFecha) {
+    return this.fechaCarga.getYear() == unaFecha.getYear() &&
+        this.fechaCarga.getMonth() == unaFecha.getMonth() &&
+        this.fechaCarga.getDayOfMonth() == unaFecha.getDayOfMonth();
+  }
+
+  public boolean seCargoAntesDe(LocalDateTime unaFecha) {
+    return this.fechaCarga.isBefore(unaFecha);
   }
 
   public boolean esDeOrigen(Origen unaOrigen) {

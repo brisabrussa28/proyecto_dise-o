@@ -12,7 +12,8 @@ public class FiltroDeLugar extends Filtro {
     this.ubicacion = ubicacion;
   }
 
-  public List<Hecho> filtrarPorLugar(List<Hecho> hechos) {
+  @Override
+  public List<Hecho> filtrar(List<Hecho> hechos) {
     return hechos.stream().filter(hecho -> hecho.esDeLugar(ubicacion)).toList();
   }
 }

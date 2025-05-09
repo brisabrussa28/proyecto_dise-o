@@ -5,6 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeCategoria;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeDireccion;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeEtiqueta;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeFecha;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeFechaDeCarga;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeLugar;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeOrigen;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeTitulo;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.exceptions.ArchivoVacioException;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
@@ -12,6 +20,7 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.main.Administrador;
 import ar.edu.utn.frba.dds.main.Contribuyente;
+import ar.edu.utn.frba.dds.main.Visualizador;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +32,7 @@ public class TPATest {
   //Recursos utilizados
   Contribuyente contribuyenteA = new Contribuyente(null, null);
   Contribuyente contribuyenteB = new Contribuyente("Roberto", "roberto@gmail.com");
+  Visualizador visualizadorA = new Visualizador(null, null);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
   List<String> etiquetasAux = List.of(
       "#ancianita",
@@ -205,9 +215,85 @@ public class TPATest {
   //Se procesa la solicitud correctamente
 
   //TEST VISUALIZADOR
+  public List<Hecho> crearColeccionHechoYDevolverlo(){
+    contribuyenteA.crearHecho("titulo", "Un día más siendo del conurbano", "Robos", "dire", pgAux, horaAux, etiquetasAux, fuenteAuxD);
+    Coleccion bonaerense = iluminati.crearColeccion("Robos","Un día más siendo del conurbano", "Robos", fuenteAuxD);
+    return visualizadorA.visualizarHechos(bonaerense);
+  }
+
+  @Test
+  public void direccionIdentica() {
+    Hecho hecho = new Hecho("titulo", "Un día más siendo del conurbano", "Robos", "dire", pgAux, horaAux, horaAux, null, null);
+    assertFalse(hecho.sucedioEn("Mozart 2300"));
+  }
+
   //Se visualiza correctamente
-  //Se filtra por etiqueta correctamente
+  @Test
+  public void visualizarCorrectamente() {
+    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    assertFalse(hechos.isEmpty());
+  }
+
   //Se filtra por categoria correctamente
+  @Test
+  public void filtraPorCategoriaCorrectamente() {
+    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    FiltroDeCategoria filtroCategoria = new FiltroDeCategoria("Robos");
+    assertFalse(filtroCategoria.filtrar(hechos).isEmpty());
+  }
+
+  //Se filtra por dirección correctamente
+  @Test
+  public void filtraPorDireccionCorrectamente() {
+    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    FiltroDeDireccion filtroDireccion = new FiltroDeDireccion("Mozart 2300");
+    assertTrue(filtroDireccion.filtrar(hechos).isEmpty());
+  }
+
+  //Se filtra por etiqueta correctamente
+  @Test
+  public void filtraPorEtiquetaCorrectamente() {
+    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    FiltroDeEtiqueta filtroEtiqueta = new FiltroDeEtiqueta(etiquetasAux.get(0));
+    assertFalse(filtroEtiqueta.filtrar(hechos).isEmpty());
+  }
+
+  //Se filtra por categoria correctamente
+  @Test
+  public void filtraPorFechaCorrectamente() {
+    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    FiltroDeFecha filtroFecha = new FiltroDeFecha(horaAux);
+    assertFalse(filtroFecha.filtrar(hechos).isEmpty());
+  }
+
+  //Se filtra por categoria correctamente
+  @Test
+  public void filtraPorFechaCargaCorrectamente() {
+    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    FiltroDeFechaDeCarga filtroFecha = new FiltroDeFechaDeCarga(LocalDateTime.now());
+    assertFalse(filtroFecha.filtrar(hechos).isEmpty());
+  }
+  //Se filtra por categoria correctamente
+  @Test
+  public void filtraPorLugarCorrectamente() {
+    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    FiltroDeLugar filtroLugar = new FiltroDeLugar(pgAux);
+    assertFalse(filtroLugar.filtrar(hechos).isEmpty());
+  }
+  //Se filtra por categoria correctamente
+  @Test
+  public void filtraPorOrigenCorrectamente() {
+    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    FiltroDeOrigen filtroOrigen = new FiltroDeOrigen(Origen.CARGA_MANUAL);
+    assertTrue(filtroOrigen.filtrar(hechos).isEmpty());
+  }
+  //Se filtra por categoria correctamente
+  @Test
+  public void filtraPorTituloCorrectamente() {
+    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    FiltroDeTitulo filtroTitulo = new FiltroDeTitulo("titulo");
+    assertFalse(filtroTitulo.filtrar(hechos).isEmpty());
+  }
 
   @Test
   public void seImportaunaFuenteEstaticaCorrectamentePeroVacia() {

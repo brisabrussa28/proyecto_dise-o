@@ -10,7 +10,9 @@ public class FiltroDeFecha extends Filtro {
   public FiltroDeFecha(LocalDateTime fecha) {
     this.fecha = fecha;
   }
-  public List<Hecho> filtrarPorFecha(List<Hecho> hechos) {
+
+  @Override
+  public List<Hecho> filtrar(List<Hecho> hechos) {
     return hechos.stream().filter(hecho -> hecho.esDeFecha(fecha)).toList();
   }
 }
