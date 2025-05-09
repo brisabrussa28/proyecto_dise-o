@@ -1,30 +1,32 @@
 package ar.edu.utn.frba.dds.domain.hecho;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.exceptions.EtiquetaInvalidaException;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 /**
  * Hecho.
- * */
+ */
 public class Hecho {
-  boolean vigencia;
-  private final String titulo;
-  private final String descripcion;
-  private final String categoria;
-  private final String direccion;
-  private final PuntoGeografico ubicacion;
-  private final LocalDateTime fechaSuceso;
-  private final LocalDateTime fechaCarga;
-  private Origen fuenteOrigen;
-  private final List<String> etiquetas;
-  private final UUID id;
+  String titulo;
+  String descripcion;
+  String categoria;
+  String direccion;
+  PuntoGeografico ubicacion;
+  LocalDateTime fechaSuceso;
+  LocalDateTime fechaCarga;
+  Origen fuenteOrigen;
+  List<String> etiquetas;
+  UUID id;
 
   /**
-   * Hecho.
-   * */
+   * Constructor.
+   */
   public Hecho(
       String titulo,
       String descripcion,
@@ -44,11 +46,17 @@ public class Hecho {
     this.fechaSuceso = fechaSuceso;
     this.fechaCarga = fechaCarga;
     this.fuenteOrigen = fuenteOrigen;
-    this.etiquetas = etiquetas;
+    validarEtiquetas(etiquetas);
+    this.etiquetas = new ArrayList<>(etiquetas);
     this.id = UUID.randomUUID();
-    this.vigencia = true;
   }
 
+  private void validarEtiquetas(List<String> etiquetas){
+    if (etiquetas == null) {
+      throw new EtiquetaInvalidaException("No se hallaron etiquetas.");
+    }
+  }
+  
   public UUID getId() {
     return id;
   }
@@ -81,7 +89,6 @@ public class Hecho {
     return fechaCarga;
   }
 
-
   public Origen getOrigen() {
     return fuenteOrigen;
   }
@@ -90,50 +97,83 @@ public class Hecho {
     this.fuenteOrigen = origen;
   }
 
+  /**
+   * Si la categoría es la buscada.
+   */
+  public boolean esElMismo(UUID id) {
+    return this.getId().equals(id);
+  }
+
+  /**
+   * Si la categoria es la buscada.
+   */
   public boolean esDeCategoria(String categoria) {
     return this.categoria.equals(categoria);
   }
 
+  /**
+   * Si la etiqueta es la buscada.
+   */
   public boolean tieneEtiqueta(String unaEtiqueta) {
     return this.etiquetas.contains(unaEtiqueta);
   }
 
+  /**
+   * Si el título es el buscado.
+   */
   public boolean esDeTitulo(String unTitulo) {
     return this.titulo.equals(unTitulo);
   }
 
+  /**
+   * Si la dirección es la buscada.
+   */
   public boolean sucedioEn(String unaDireccion) {
     return this.direccion.equals(unaDireccion);
   }
 
+  /**
+   * Si la fecha del suceso es la buscada.
+   */
   public boolean esDeFecha(LocalDateTime unaFecha) {
     return this.fechaSuceso.equals(unaFecha);
   }
 
+  /**
+   * Si la fecha de carga es la buscada.
+   */
   public boolean seCargoEl(LocalDateTime unaFecha) {
     return this.fechaCarga.getYear() == unaFecha.getYear()
         && this.fechaCarga.getMonth() == unaFecha.getMonth()
         && this.fechaCarga.getDayOfMonth() == unaFecha.getDayOfMonth();
   }
 
+  /**
+   * Si el hecho se cargó antes de la fecha buscada.
+   */
   public boolean seCargoAntesDe(LocalDateTime unaFecha) {
     return this.fechaCarga.isBefore(unaFecha);
   }
 
+  /**
+   * Si el origen es el buscado.
+   */
   public boolean esDeOrigen(Origen unaOrigen) {
     return this.fuenteOrigen.equals(unaOrigen);
   }
 
+  /**
+   * Si el punto geográfico es el buscado.
+   */
   public boolean esDeLugar(PuntoGeografico lugar) {
     return this.ubicacion.equals(lugar);
   }
 
   public List<String> getEtiquetas() {
-    return etiquetas;
+    return new ArrayList<>(this.etiquetas);
   }
 
   boolean perteneceA(Coleccion unaColeccion) {
     return unaColeccion.contieneA(this);
   }
-
 }

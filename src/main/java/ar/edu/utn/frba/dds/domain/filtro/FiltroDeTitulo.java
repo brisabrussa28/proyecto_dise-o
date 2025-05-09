@@ -4,9 +4,15 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.util.List;
 
+/**
+ * Clase de filtro de titulo.
+ */
 public class FiltroDeTitulo extends Filtro {
   String titulo;
 
+  /**
+   * Constructor.
+   */
   public FiltroDeTitulo(String titulo) {
     this.titulo = titulo;
   }

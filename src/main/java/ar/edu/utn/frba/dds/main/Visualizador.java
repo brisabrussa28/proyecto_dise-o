@@ -11,26 +11,30 @@ import java.util.List;
  */
 public class Visualizador extends Persona {
 
+  /**
+   * Constructor Visualizador.
+   */
   public Visualizador(String nombre, String email) {
     super(nombre, email);
   }
 
-  /*
-    - Como persona visualizadora, deseo navegar todos los hechos disponibles de una colección.
-    - Como persona visualizadora, deseo navegar los hechos disponibles de una colección, aplicando filtros.
-  */
+  /**
+   * Visualizar hechos.
+   */
   public List<Hecho> visualizarHechos(Coleccion coleccion) {
     return coleccion.getHechos();
   }
-  //[✔️] TODO: no debe visualizar hechos de una fuente sino de una coleccion.
 
-  // No requerirá identificarse, y podrá subir hechos si así lo quisiera manteniendo su anonimato
-
-  public void agregarHechoAFuente(FuenteDinamica fuente, Hecho hecho) {
+  /**
+   * Agrega un hecho a una fuente.
+   */
+  public void agregarHechoaFuente(FuenteDinamica fuente, Hecho hecho) {
     fuente.agregarHecho(hecho);
   }
 
-
+  /**
+   * Filtrar los hechos.
+   */
   public List<Hecho> filtrar(Coleccion coleccion, Filtro filtro) {
     return filtro.filtrar(coleccion.getHechos());
   }

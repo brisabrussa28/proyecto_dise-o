@@ -5,13 +5,14 @@ import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Gestor de Reportes.
  */
-public final class GestorDeReportes {
-  private static GestorDeReportes instancia; // Singleton instance
-  private final List<Solicitud> solicitudes;
+public class GestorDeReportes {
+  private GestorDeReportes instancia; // Singleton instance
+  private List<Solicitud> solicitudes;
 
   private GestorDeReportes() {
     this.solicitudes = new ArrayList<>();
@@ -20,13 +21,16 @@ public final class GestorDeReportes {
   /**
    * Gestor de Reportes es clase singleton.
    */
-  public static GestorDeReportes getInstancia() {
+  public GestorDeReportes getInstancia() {
     if (instancia == null) {
       instancia = new GestorDeReportes();
     }
     return instancia;
   }
 
+  /**
+   * Agrega una solicitud a la lista.
+   */
   public void agregarSolicitud(Solicitud solicitud) {
     this.solicitudes.add(solicitud);
   }
@@ -43,6 +47,16 @@ public final class GestorDeReportes {
     return solicitudes.get(posicion);
   }
 
+  /**
+   * Función creada para el test, devuelve la cantidad de solicitudes.
+   */
+  public int cantidadSolicitudes() {
+    return solicitudes.size();
+  }
+
+  /**
+   * Obtiene la primera solicitud de la lista.
+   */
   public Solicitud obtenerSolicitud() {
     return this.obtenerSolicitudPorPosicion(0);
   }
@@ -65,11 +79,8 @@ public final class GestorDeReportes {
     }
   }
 
-  private void eliminarHecho(Hecho hecho, Fuente fuente) {
-    fuente.eliminarHecho(hecho);
+  private void eliminarHecho(UUID idHecho, Fuente fuente) {
+    fuente.eliminarHecho(idHecho);
   }
 
-  public List<Solicitud> getSolicitudes() {
-    return solicitudes;
-  }
 }

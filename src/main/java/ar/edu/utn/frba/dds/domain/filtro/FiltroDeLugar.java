@@ -5,9 +5,15 @@ import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Clase de filtro de lugar.
+ */
 public class FiltroDeLugar extends Filtro {
   PuntoGeografico ubicacion;
 
+  /**
+   * Constructor.
+   */
   public FiltroDeLugar(PuntoGeografico ubicacion) {
     this.ubicacion = ubicacion;
   }

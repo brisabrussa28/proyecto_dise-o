@@ -2,25 +2,25 @@ package ar.edu.utn.frba.dds.domain.filtro;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
+import java.util.UUID;
 
 /**
- * Filtro de Categoria.
+ * Clase de filtro de id.
  */
-public class FiltroDeCategoria extends Filtro {
-
-  String categoria;
+public class FiltroDeId extends Filtro {
+  UUID id;
 
   /**
    * Constructor.
    */
-  public FiltroDeCategoria(String categoria) {
-    this.categoria = categoria;
+  public FiltroDeId(UUID id) {
+    this.id = id;
   }
 
   @Override
   public List<Hecho> filtrar(List<Hecho> hechos) {
     return hechos.stream()
-        .filter(h -> h.esDeCategoria(categoria))
+        .filter(hecho -> hecho.esElMismo(id))
         .toList();
   }
 }

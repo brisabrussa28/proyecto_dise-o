@@ -1,6 +1,6 @@
-titulo	descripcion	latitud	longitud	fechaSuceso	categoria	direccion
-sdasd	3332	223.333	-33.222	30/02/3292	auto	ssss
-sdasd	3332	223.333	-33.222	30/02/3293	auto	ssss
-da	3332	223.333	-33.222	30/02/3294	kk	2
-sdasd	3332	223.333	-33.222	30/02/3295	jijo	aa
-sdasd	3332	223.333	-33.222	30/02/3296	buenardo	EL KUKANAUTA
+titulo,descripcion,latitud,longitud,fechaSuceso,categoria,direccion
+sdasd,3332,223.333,-33.222,25/02/2015,auto,ssss
+sdasd,3332,223.333,-33.222,25/02/2015,auto,ssss
+da,3332,223.333,-33.222,25/02/2015,kk,2
+sdasd,3332,223.333,-33.222,25/02/2015,jijo,aa
+sdasd,3332,223.333,-33.222,25/02/2015,buenardo,EL NESTORNAUTA

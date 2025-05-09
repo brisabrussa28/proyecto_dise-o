@@ -7,6 +7,9 @@ public class PuntoGeografico {
   private double latitud;
   private double longitud;
 
+  /**
+   * Constructor Punto Geográfico.
+   */
   public PuntoGeografico(double latitud, double longitud) {
     this.latitud = latitud;
     this.longitud = longitud;

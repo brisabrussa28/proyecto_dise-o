@@ -11,28 +11,50 @@ import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
  * Administrador.
  * */
 public class Administrador extends Persona {
+  /**
+   * Constructor del administrador.
+   * */
   public Administrador(String nombre, String email) {
     super(nombre, email);
   }
 
-  public Coleccion crearColeccion(String titulo, String descripcion, String categoria, Fuente fuente /*,criterio*/) {
-    return new Coleccion(titulo, fuente, descripcion, categoria); //NOTE: Agregar fuente
+  /**
+   * Constructor del administrador.
+   * */
+  public Coleccion crearColeccion(
+      String titulo,
+      String descripcion,
+      String categoria,
+      Fuente fuente
+  ) {
+    return new Coleccion(titulo, fuente, descripcion, categoria);
   }
-  //a este de coleccion le falta la fuente y el criterio.
 
-  public FuenteEstatica importarDesdeCSV(String rutaCSV, String separador, String nombreFuente) {
+  /**
+   * Fuente Estatica.
+   * */
+  public FuenteEstatica importardesdeCsv(String rutaCsv, String separador, String nombreFuente) {
     LectorCsv lector = new LectorCsv();
-    return lector.importar(rutaCSV, separador, nombreFuente);
+    return lector.importar(rutaCsv, separador, nombreFuente);
   }
 
+  /**
+   * Fuente Estatica.
+   * */
   public Solicitud obtenerSolicitud() {
     return GestorDeReportes.getInstancia().obtenerSolicitud();
   }
 
+  /**
+   * Fuente Estatica.
+   * */
   public Solicitud obtenerSolicitudPorPosicion(int posicion) {
     return GestorDeReportes.getInstancia().obtenerSolicitudPorPosicion(posicion);
   }
 
+  /**
+   * Fuente Estatica.
+   * */
   public void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud) {
     GestorDeReportes.getInstancia().gestionarSolicitud(solicitud, aceptarSolicitud);
   }

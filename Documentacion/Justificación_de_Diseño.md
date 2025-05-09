@@ -36,7 +36,7 @@ Nace de la documentación (recepción de denuncias). Es único (por decisión de
 
 # Solicitud  
 Es un documento que contiene al contribuyente que solicitó la eliminación, el hecho involucrado, el motivo de la solicitud.  
-Cada vez que se crea una nueva solicitud se valida con **validarMotivo()** que no esté vacío y no supere los 500 caracteres.  
+Cada vez que se crea una nueva solicitud se valida con **validarMotivo()** que no esté vacío y no tenga menos de 500 caracteres.  
 
 # Persona  
 Clase abstracta y es padre de `Administrador` y `Visualizador`, ya que ambas comparten los atributos nombre y email.  

@@ -1,13 +1,20 @@
 package ar.edu.utn.frba.dds.domain.filtro;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase filtro de lista and.
+ */
 public class FiltroListaAnd extends Filtro {
-  List<Filtro>  filtros;
+  List<Filtro> filtros;
 
+  /**
+   * Constructor.
+   */
   public FiltroListaAnd(List<Filtro> filtros) {
-    this.filtros = filtros;
+    this.filtros = new ArrayList<>(filtros);
   }
 
   @Override
