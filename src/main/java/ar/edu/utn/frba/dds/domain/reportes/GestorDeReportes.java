@@ -2,7 +2,6 @@ package ar.edu.utn.frba.dds.domain.reportes;
 
 import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -11,17 +10,16 @@ import java.util.UUID;
  * Gestor de Reportes.
  */
 public class GestorDeReportes {
-  private GestorDeReportes instancia; // Singleton instance
-  private List<Solicitud> solicitudes;
+  private static GestorDeReportes instancia; // Singleton instance
+  private static List<Solicitud> solicitudes = new ArrayList<>();
 
   private GestorDeReportes() {
-    this.solicitudes = new ArrayList<>();
   }
 
   /**
    * Gestor de Reportes es clase singleton.
    */
-  public GestorDeReportes getInstancia() {
+  public static GestorDeReportes getInstancia() {
     if (instancia == null) {
       instancia = new GestorDeReportes();
     }
@@ -32,7 +30,7 @@ public class GestorDeReportes {
    * Agrega una solicitud a la lista.
    */
   public void agregarSolicitud(Solicitud solicitud) {
-    this.solicitudes.add(solicitud);
+    solicitudes.add(solicitud);
   }
 
   /**
@@ -67,7 +65,7 @@ public class GestorDeReportes {
    * @param solicitud        Solicitud
    * @param aceptarSolicitud boolean
    */
-  public void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud) {
+  public static void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud) {
     if (!solicitudes.contains(solicitud)) {
       throw new SolicitudInexistenteException("La solicitud no existe en el gestor.");
     }
@@ -79,7 +77,7 @@ public class GestorDeReportes {
     }
   }
 
-  private void eliminarHecho(UUID idHecho, Fuente fuente) {
+  private static void eliminarHecho(UUID idHecho, Fuente fuente) {
     fuente.eliminarHecho(idHecho);
   }
 

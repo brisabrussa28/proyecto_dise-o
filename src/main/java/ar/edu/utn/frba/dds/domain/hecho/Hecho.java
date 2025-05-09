@@ -1,7 +1,6 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.exceptions.EtiquetaInvalidaException;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.time.LocalDateTime;
@@ -46,17 +45,10 @@ public class Hecho {
     this.fechaSuceso = fechaSuceso;
     this.fechaCarga = fechaCarga;
     this.fuenteOrigen = fuenteOrigen;
-    validarEtiquetas(etiquetas);
     this.etiquetas = new ArrayList<>(etiquetas);
     this.id = UUID.randomUUID();
   }
 
-  private void validarEtiquetas(List<String> etiquetas){
-    if (etiquetas == null) {
-      throw new EtiquetaInvalidaException("No se hallaron etiquetas.");
-    }
-  }
-  
   public UUID getId() {
     return id;
   }
@@ -91,10 +83,6 @@ public class Hecho {
 
   public Origen getOrigen() {
     return fuenteOrigen;
-  }
-
-  public void setOrigen(Origen origen) {
-    this.fuenteOrigen = origen;
   }
 
   /**

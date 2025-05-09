@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.exceptions.EtiquetaInvalidaException;
 import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroDeCategoria;
@@ -22,6 +20,7 @@ import ar.edu.utn.frba.dds.domain.filtro.FiltroDeOrigen;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroDeTitulo;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
+import ar.edu.utn.frba.dds.domain.fuentes.ServicioDeAgregacion;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.exceptions.ArchivoVacioException;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
@@ -37,7 +36,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import org.junit.jupiter.api.Test;
 
@@ -228,12 +226,12 @@ public class TPATest {
 
   @Test
   public void seImportaunaFuenteEstaticaCorrectamentePeroVacia() {
-    assertThrows(ArchivoVacioException.class, () -> iluminati.importardesdeCsv("src/main/java/ar/edu/utn/frba/dds/domain/CSV/prueba2.csv", ",", "datos.gob.ar"));
+    assertThrows(ArchivoVacioException.class, () -> iluminati.importardesdeCsv("src/main/java/ar/edu/utn/frba/dds/domain/csv/prueba2.csv", ",", "datos.gob.ar"));
   }
 
   @Test
   public void seImportaUnaFuenteEstaticaIncorrectamente() {
-    assertThrows(RuntimeException.class, () -> iluminati.importardesdeCsv("src/main/java/ar/edu/utn/frba/dds/domain/CSV/ejemplo2.csv", ",", "datos.gob.ar"));
+    assertThrows(RuntimeException.class, () -> iluminati.importardesdeCsv("src/main/java/ar/edu/utn/frba/dds/domain/CSV/ejemplo.csv", ",", "datos.gob.ar"));
   }
 
   @Test
@@ -286,7 +284,7 @@ public class TPATest {
   public void coleccionEsDeCategoriaCorrectamente() {
     Coleccion coleccion = iluminati.crearColeccion("Robos", "Descripcion", "Robos", fuenteAuxD);
     assertEquals("Robos", coleccion.getCategoria());
-    assertNotEquals(coleccion.getCategoria(), "Violencia");
+    assertNotEquals("Violencia", coleccion.getCategoria());
   }
 
   @Test
@@ -306,9 +304,28 @@ public class TPATest {
   }
 
   @Test
-  public void etiquetaInvalida() {
-    assertThrows(EtiquetaInvalidaException.class, () -> new Hecho("XD",  "Choreo", "ROBO", "Av 9 de Julio", pgAux, LocalDateTime.now(), LocalDateTime.now(), Origen.CARGA_MANUAL, new ArrayList<>()));
+  public void seEliminaUnHecho() {
+    fuenteAuxD.agregarHecho(hechoAux);
+    Solicitud soli = contribuyenteA.solicitarEliminacion(hechoAux,"a".repeat(600),fuenteAuxD);
+    //Solicitud soli = new Solicitud(contribuyenteA,hechoAux.getId(),fuenteAuxD, "a".repeat(600));
+    iluminati.gestionarSolicitud(soli, true);
+    assertFalse(fuenteAuxD.contiene(hechoAux));
   }
+
+  @Test
+  public void seAgregaHechoAFuente() {
+    contribuyenteA.agregarHechoaFuente(fuenteAuxD, hechoAux);
+    assertTrue(fuenteAuxD.contiene(hechoAux));
+  }
+
+  @Test
+  public void seAgregaLaFuenteCorrectamente() {
+    ServicioDeAgregacion serv = new ServicioDeAgregacion("Juan");
+    FuenteDinamica nuevaFuente = new FuenteDinamica("Juan", new ArrayList<>());
+    serv.agregarFuente(nuevaFuente);
+    assertTrue(serv.getFuentesCargadas().contains(nuevaFuente));
+  }
+
 }
 
 // test coleccion

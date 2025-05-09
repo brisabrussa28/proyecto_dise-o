@@ -54,4 +54,8 @@ public class ServicioDeAgregacion extends Fuente {
     throw new IllegalStateException("El hecho no se encontró: " + hecho);
   }
 
+  public List<Fuente> getFuentesCargadas() {
+    return new ArrayList<>(fuentesCargadas);
+  }
+
 }

@@ -34,6 +34,10 @@ public abstract class Fuente {
     return nombre;
   }
 
+  public boolean contiene(Hecho unHecho) {
+    return hechos.contains(unHecho);
+  }
+
   /**
    * Función que verifica que un hecho exista en la fuente y que no sea nulo.
    */
