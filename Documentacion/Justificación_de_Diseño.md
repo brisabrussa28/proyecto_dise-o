@@ -1,5 +1,6 @@
 # LectorCSV  
-Tiene como fin subir la información de los datasets, convertir la información en hechos y subirla a una fuente estática (**importar()**).  
+Tiene como fin subir la información de los datasets, convertir la información en hechos y subirla a una fuente estática (**importar()**).
+Separa la lógica de importación de datos desde archivos para no mezclar responsabilidades en otras clases
 
 # Colección  
 Nace de la documentación, son conjuntos de hechos. También indica su fuente de origen, categoría (sirve para saber qué hechos de la fuente tomar), título y descripción.  
@@ -24,9 +25,12 @@ Nace de la documentación, combina las fuentes para obtener los hechos cargados 
 Nace de la documentación, pieza de información que almacena título, descripción, categoría, dirección, ubicación (latitud y longitud), fecha del suceso, fecha en la que se cargó, el origen, etiquetas, id y vigencia (este atributo se utiliza a la hora de eliminar hechos).  
 
 # Punto Geográfico  
-Contiene dos atributos, latitud y longitud, los cuales serán vinculados a un hecho para mayor precisión en su ubicación.  
+Contiene dos atributos, latitud y longitud, los cuales serán vinculados a un hecho para mayor precisión en su ubicación.
+Encapsula la información de latitud y longitud
+
 # Origen  
-Es un `enum`, se utiliza para indicar a la hora de crear un hecho cuál es su origen.  
+Es un `enum`, se utiliza para indicar a la hora de crear un hecho cuál es su origen.
+Se define como enum para asegurar que los hechos tengan un origen válido y acotado. Esto evita errores de carga
 Si el hecho fue creado por un contribuyente: **"PROVISTO_CONTRIBUYENTE"**.  
 Si fue cargado de un dataset: **"DATASET"**.  
 Si fue cargado por un administrador: **"CARGA_MANUAL"**.  
