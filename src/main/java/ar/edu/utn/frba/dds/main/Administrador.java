@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds.main;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
+import ar.edu.utn.frba.dds.domain.csv.LectorCsv;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
@@ -21,7 +21,7 @@ public class Administrador extends Persona {
   //a este de coleccion le falta la fuente y el criterio.
 
   public FuenteEstatica importarDesdeCSV(String rutaCSV, String separador, String nombreFuente) {
-    LectorCSV lector = new LectorCSV();
+    LectorCsv lector = new LectorCsv();
     return lector.importar(rutaCSV, separador, nombreFuente);
   }
 

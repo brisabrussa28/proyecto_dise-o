@@ -3,10 +3,10 @@ package ar.edu.utn.frba.dds.domain.filtro;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 
-public class FiltroListaOR extends Filtro {
+public class FiltroListaOr extends Filtro {
   List<Filtro> filtros;
 
-  public FiltroListaOR(List<Filtro> filtros) {
+  public FiltroListaOr(List<Filtro> filtros) {
     this.filtros = filtros;
   }
 

@@ -23,7 +23,7 @@ import java.util.Set;
 /**
  * Lector CSV.
  */
-public class LectorCSV {
+public class LectorCsv {
 
   private final List<Hecho> hechosImportados = new ArrayList<>();
 
@@ -31,11 +31,11 @@ public class LectorCSV {
    * Fuente Estacica.
    *
    * @param nombreFuente String
-   * @param rutaCSV      String
+   * @param rutaCsv      String
    * @param separador    String
    */
-  public FuenteEstatica importar(String rutaCSV, String separador, String nombreFuente) {
-    try (BufferedReader br = new BufferedReader(new FileReader(rutaCSV))) {
+  public FuenteEstatica importar(String rutaCsv, String separador, String nombreFuente) {
+    try (BufferedReader br = new BufferedReader(new FileReader(rutaCsv))) {
       String headerLine = br.readLine();
       if (headerLine == null) {
         throw new ArchivoVacioException("El mensaje se encuentra vacio.");
@@ -67,7 +67,7 @@ public class LectorCSV {
         for (String col : columnasNecesarias) {
           String valor = filaMap.get(col);
           if (valor == null || valor.trim().isEmpty()) {
-            throw new IllegalArgumentException("Campo vacío en columna '" + col + "' en la fila " + filaNumero);
+            throw new IllegalArgumentException("Campo vacío '" + col + filaNumero);
           }
         }
 
@@ -77,7 +77,7 @@ public class LectorCSV {
           latitud = Double.parseDouble(filaMap.get("latitud"));
           longitud = Double.parseDouble(filaMap.get("longitud"));
         } catch (NumberFormatException e) {
-          throw new IllegalArgumentException("Latitud o longitud inválida en la fila " + filaNumero);
+          throw new IllegalArgumentException("Latitud o longitud inválida" + filaNumero);
         }
         PuntoGeografico ubicacion = new PuntoGeografico(latitud, longitud);
 
@@ -112,7 +112,7 @@ public class LectorCSV {
       }
 
       if (hechosImportados.isEmpty()) {
-        throw new IllegalStateException("No se creó ningún hecho. El archivo podría estar vacío o mal formado.");
+        throw new IllegalStateException("No se creó ningún hecho.");
 
       }
 

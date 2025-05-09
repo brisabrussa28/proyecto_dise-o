@@ -1,8 +1,7 @@
 package ar.edu.utn.frba.dds.domain.hecho;
-
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -112,9 +111,9 @@ public class Hecho {
   }
 
   public boolean seCargoEl(LocalDateTime unaFecha) {
-    return this.fechaCarga.getYear() == unaFecha.getYear() &&
-        this.fechaCarga.getMonth() == unaFecha.getMonth() &&
-        this.fechaCarga.getDayOfMonth() == unaFecha.getDayOfMonth();
+    return this.fechaCarga.getYear() == unaFecha.getYear()
+        && this.fechaCarga.getMonth() == unaFecha.getMonth()
+        && this.fechaCarga.getDayOfMonth() == unaFecha.getDayOfMonth();
   }
 
   public boolean seCargoAntesDe(LocalDateTime unaFecha) {

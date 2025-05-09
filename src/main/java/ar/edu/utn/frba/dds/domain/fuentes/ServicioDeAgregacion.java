@@ -38,7 +38,7 @@ public class ServicioDeAgregacion extends Fuente {
         // ignoramos y seguimos buscando en otras fuentes
       }
     }
-    throw new IllegalStateException("El hecho no se encontró en ninguna de las fuentes: " + hecho.getTitulo());
+    throw new IllegalStateException("El hecho no se encontró: " + hecho.getTitulo());
   }
 
   public List<Fuente> getFuentesCargadas() {

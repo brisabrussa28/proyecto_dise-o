@@ -6,6 +6,7 @@ import java.util.List;
 
 public class Filtro {
   public List<Hecho> filtrar(List<Hecho> hechos) {
-      return hechos;
+    return hechos;
   }
 }
+
