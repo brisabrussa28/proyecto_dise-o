@@ -8,13 +8,13 @@ Tiene entre sus funciones almacenar y administrar hechos (**agregarHecho()**, **
 # Fuente  
 Clase abstracta y es padre de `Fuente Estática`, `Fuente Dinámica`, `Fuente Proxy` y el `Servicio de Agregación`, ya que comparten funciones y atributos (**obtenerHechos()**, **eliminarHecho()**, nombre y lista de hechos).  
 
-## Fuente Estática  
+# Fuente Estática  
 Nace de la documentación, es donde se ubican los hechos provenientes de un dataset. Puede haber más de una fuente estática.  
 
-## Fuente Dinámica  
+# Fuente Dinámica  
 Nace de la documentación, es donde se ubican los hechos creados por los contribuyentes. Puede haber más de una fuente dinámica.  
 
-## Fuente Proxy *(no desarrollada)*  
+# Fuente Proxy *(no desarrollada)*  
 Nace de la documentación, tiene como objetivo la integración con servicios de fuentes de datos y datasets provistos por otras ONGs.  
 
 # Servicio de Agregación  
@@ -25,7 +25,6 @@ Nace de la documentación, pieza de información que almacena título, descripci
 
 # Punto Geográfico  
 Contiene dos atributos, latitud y longitud, los cuales serán vinculados a un hecho para mayor precisión en su ubicación.  
-
 # Origen  
 Es un `enum`, se utiliza para indicar a la hora de crear un hecho cuál es su origen.  
 Si el hecho fue creado por un contribuyente: **"PROVISTO_CONTRIBUYENTE"**.  
@@ -45,12 +44,8 @@ Clase abstracta y es padre de `Administrador` y `Visualizador`, ya que ambas com
 ## Administrador  
 Nace de la documentación. Cada administrador tiene el objetivo de crear colecciones (**crearColección()**), importar los hechos de los datasets (**importarDesdeCSV()**) y gestionar las solicitudes (**obtenerSolicitud()**, **obtenerSolicitudPorPosicion()**, **gestionarSolicitud()**).  
 
-## Visualizador  
+# Visualizador  
 Nace de la documentación y es padre de `Contribuyente` (ya que un contribuyente también puede leer información). Puede crear hechos (como anónimo, **agregarHechoAFuente()**), visualizar información (**visualizarHecho()**) y filtrar los hechos (**filtrar()**, **filtrarPorCategoria()**, **filtrarPorLugar()**, etc.).  
 
-## Contribuyente  
+# Contribuyente  
 Nace de la documentación. Cada contribuyente es capaz de crear un hecho (**crearHecho()**) y solicitar la eliminación de un hecho (**solicitarEliminación()**).  
-
-Visualizador: nace de la documentación, es padre de contribuyente (ya que un contribuyente también puede leer información) y puede crear hechos (como anónimo, agregarHechoAFuente()), visualizar información (visualizarHecho()) y filtrar los hechos (entre las funciones para ello: filtrar(), filtrarPorCategoria(), filtrarPorLugar(), etc).
-
-Contribuyente: Es una clase que nace de la documentación, cada contribuyente es capaz de crear un hecho (crearHecho()) y solicitar la eliminación de un hecho (solicitarEliminación())
