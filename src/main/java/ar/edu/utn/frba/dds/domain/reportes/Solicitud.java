@@ -5,12 +5,23 @@ import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.main.Contribuyente;
 
+/**
+ * Solicitud.
+ */
 public class Solicitud {
   private final Contribuyente solicitante;
   private final Hecho hechoSolicitado;
   private final String razonEliminacion;
   private final Fuente fuente;
 
+  /**
+   * Solicitud.
+   *
+   * @param solicitante     Contribuyente
+   * @param hechoSolicitado Hecho
+   * @param fuente          Fuente
+   * @param motivo          String
+   */
   public Solicitud(Contribuyente solicitante, Hecho hechoSolicitado, Fuente fuente, String motivo) {
     this.validarMotivo(motivo);
     this.fuente = fuente;

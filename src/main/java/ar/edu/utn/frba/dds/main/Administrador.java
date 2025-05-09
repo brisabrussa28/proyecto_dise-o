@@ -1,13 +1,15 @@
 package ar.edu.utn.frba.dds.main;
 
-import ar.edu.utn.frba.dds.domain.CSV.LectorCSV;
-import ar.edu.utn.frba.dds.domain.Coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 
-
+/**
+ * Administrador.
+ * */
 public class Administrador extends Persona {
   public Administrador(String nombre, String email) {
     super(nombre, email);

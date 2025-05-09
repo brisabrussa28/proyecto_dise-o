@@ -6,14 +6,20 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GestorDeReportes {
+/**
+ * Gestor de Reportes.
+ */
+public final class GestorDeReportes {
   private static GestorDeReportes instancia; // Singleton instance
-  private List<Solicitud> solicitudes;
+  private final List<Solicitud> solicitudes;
 
   private GestorDeReportes() {
     this.solicitudes = new ArrayList<>();
   }
 
+  /**
+   * Gestor de Reportes es clase singleton.
+   */
   public static GestorDeReportes getInstancia() {
     if (instancia == null) {
       instancia = new GestorDeReportes();
@@ -25,6 +31,11 @@ public class GestorDeReportes {
     this.solicitudes.add(solicitud);
   }
 
+  /**
+   * Solicitud.
+   *
+   * @param posicion int.
+   */
   public Solicitud obtenerSolicitudPorPosicion(int posicion) {
     if (posicion < 0 || posicion >= solicitudes.size()) {
       throw new SolicitudInexistenteException("La posición es inválida o no existe en el gestor.");
@@ -36,7 +47,12 @@ public class GestorDeReportes {
     return this.obtenerSolicitudPorPosicion(0);
   }
 
-
+  /**
+   * Gestionar Solicitud.
+   *
+   * @param solicitud        Solicitud
+   * @param aceptarSolicitud boolean
+   */
   public void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud) {
     if (!solicitudes.contains(solicitud)) {
       throw new SolicitudInexistenteException("La solicitud no existe en el gestor.");

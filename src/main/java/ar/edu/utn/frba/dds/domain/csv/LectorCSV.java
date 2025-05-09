@@ -1,10 +1,10 @@
-package ar.edu.utn.frba.dds.domain.CSV;
+package ar.edu.utn.frba.dds.domain.csv;
 
-import ar.edu.utn.frba.dds.domain.Origen.Origen;
 import ar.edu.utn.frba.dds.domain.exceptions.ArchivoVacioException;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -17,17 +17,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-//NOTE: Este lector tiene en cuenta que no piden un campo etiquetas en los csv (enunciado) sino que pide un campo categoria
+//NOTE: Este lector tiene en cuenta que no piden un campo etiquetas en los csv (enunciado)
+// sino que pide un campo categoria
 
+/**
+ * Lector CSV.
+ */
 public class LectorCSV {
 
-  private List<Hecho> hechosImportados = new ArrayList<>();
+  private final List<Hecho> hechosImportados = new ArrayList<>();
 
+  /**
+   * Fuente Estacica.
+   *
+   * @param nombreFuente String
+   * @param rutaCSV      String
+   * @param separador    String
+   */
   public FuenteEstatica importar(String rutaCSV, String separador, String nombreFuente) {
     try (BufferedReader br = new BufferedReader(new FileReader(rutaCSV))) {
       String headerLine = br.readLine();
-      if (headerLine == null) throw new ArchivoVacioException("El mensaje se encuentra vacio.");
-
+      if (headerLine == null) {
+        throw new ArchivoVacioException("El mensaje se encuentra vacio.");
+      }
       String[] columnas = headerLine.split(separador);
       Set<String> columnasSet = new HashSet<>(Arrays.asList(columnas));
 
@@ -59,7 +71,8 @@ public class LectorCSV {
           }
         }
 
-        double latitud, longitud;
+        double latitud;
+        double longitud;
         try {
           latitud = Double.parseDouble(filaMap.get("latitud"));
           longitud = Double.parseDouble(filaMap.get("longitud"));
@@ -75,7 +88,8 @@ public class LectorCSV {
 
         LocalDateTime fechaSuceso;
         try {
-          fechaSuceso = LocalDateTime.parse(filaMap.get("fechaSuceso")); // O adaptar si es otro formato
+          fechaSuceso = LocalDateTime.parse(filaMap.get("fechaSuceso"));
+
         } catch (Exception e) {
           throw new IllegalArgumentException("Fecha inválida en la fila " + filaNumero);
         }
@@ -99,6 +113,7 @@ public class LectorCSV {
 
       if (hechosImportados.isEmpty()) {
         throw new IllegalStateException("No se creó ningún hecho. El archivo podría estar vacío o mal formado.");
+
       }
 
       return new FuenteEstatica(nombreFuente, hechosImportados);

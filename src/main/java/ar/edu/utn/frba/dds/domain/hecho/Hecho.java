@@ -1,33 +1,31 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
-import ar.edu.utn.frba.dds.domain.Coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.Origen.Origen;
+import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-/*
-Falta agregar el tipo de origen
-Cada hecho representa una pieza de información, la cual debe contener mínimamente:
-título, descripción, categoría, contenido multimedia opcional, lugar y fecha del acontecimiento,
-fecha de carga y su origen (carga manual, proveniente de un dataset o provisto por un contribuyente).
-*/
-
-
+/**
+ * Hecho.
+ * */
 public class Hecho {
-  boolean vigencia; // NOTE: Nos va a servir para eliminar hechos :D
-  private String titulo;
-  private String descripcion;
-  private String categoria;
-  private String direccion;
-  private PuntoGeografico ubicacion;
-  private LocalDateTime fechaSuceso;
-  private LocalDateTime fechaCarga;
+  boolean vigencia;
+  private final String titulo;
+  private final String descripcion;
+  private final String categoria;
+  private final String direccion;
+  private final PuntoGeografico ubicacion;
+  private final LocalDateTime fechaSuceso;
+  private final LocalDateTime fechaCarga;
   private Origen fuenteOrigen;
-  private List<String> etiquetas;
-  private UUID id;
+  private final List<String> etiquetas;
+  private final UUID id;
 
+  /**
+   * Hecho.
+   * */
   public Hecho(
       String titulo,
       String descripcion,
@@ -119,6 +117,10 @@ public class Hecho {
 
   public boolean esDeOrigen(Origen unaOrigen) {
     return this.fuenteOrigen.equals(unaOrigen);
+  }
+
+  public boolean esDeLugar(PuntoGeografico lugar) {
+    return this.ubicacion.equals(lugar);
   }
 
   public List<String> getEtiquetas() {

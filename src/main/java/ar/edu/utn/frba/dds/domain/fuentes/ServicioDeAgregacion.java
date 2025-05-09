@@ -5,8 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+/**
+ * Servicio de Agregacion.
+ */
 public class ServicioDeAgregacion extends Fuente {
-  private List<Fuente> fuentesCargadas;
+  private final List<Fuente> fuentesCargadas;
 
   public ServicioDeAgregacion(String nombre) {
     super(nombre, null); // no usamos una lista fija local

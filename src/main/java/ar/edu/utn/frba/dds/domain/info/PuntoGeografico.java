@@ -1,5 +1,8 @@
 package ar.edu.utn.frba.dds.domain.info;
 
+/**
+ * Punto Geografico.
+ * */
 public class PuntoGeografico {
   private double latitud;
   private double longitud;
