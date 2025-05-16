@@ -1,6 +1,4 @@
 ## [OBSERVACIONES]
-
-==
     - El checkstyle para el tp anual es sugestivo.
     - Cuidado con clases Sistemas
     - Cuidado con las clases Rol
