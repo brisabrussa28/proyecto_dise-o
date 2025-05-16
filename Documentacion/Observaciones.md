@@ -1,0 +1,17 @@
+## [OBSERVACIONES]
+
+==
+    - El checkstyle para el tp anual es sugestivo.
+    - Cuidado con clases Sistemas
+    - Cuidado con las clases Rol
+    - Cuidado con las fachadas
+    - Objeto y sujeto (actor) no son lo mismo, pueden haber casos de sujetos para los que no existen objetos.
+    - Los requerimientos estan en el dominio de un caso de uso
+    - El visualizador no existe porque no tiene comportamiento propio.
+    - NO QUEREMOS EL MAPEO DE UN ROL -> UNA CLASE
+    - Cada operacion que haga una persona va a tener un metodo dentro de un objeto (FACHADA)
+    - No usar assertTrue.
+    - Hacer tests de fuenteEstatica y fuenteDinamica (leer hechos filtrando)
+    - Buscar una lib para leer CSVs
+    - FuenteEstatica debe leer el CSV para buscar hechos
+    - Terminología como visualizar y/o mostrar no se usa, es de presentación.
