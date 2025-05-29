@@ -4,8 +4,10 @@ import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.csv.LectorCsv;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
+import java.util.List;
 
 /**
  * Administrador.
@@ -33,9 +35,8 @@ public class Administrador extends Persona {
   /**
    * Fuente Estatica.
    * */
-  public FuenteEstatica importardesdeCsv(String rutaCsv, String separador, String nombreFuente) {
-    LectorCsv lector = new LectorCsv();
-    return lector.importar(rutaCsv, separador, nombreFuente);
+  public List<Hecho> importardesdeCsv(String rutaCsv, String separador, String nombreFuente) {
+    return null;
   }
 
   /**

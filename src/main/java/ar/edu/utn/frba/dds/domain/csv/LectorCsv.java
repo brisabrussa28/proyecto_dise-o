@@ -1,102 +1,88 @@
 package ar.edu.utn.frba.dds.domain.csv;
 
+import com.opencsv.*;
+import com.opencsv.exceptions.CsvValidationException;
 import ar.edu.utn.frba.dds.domain.exceptions.ArchivoVacioException;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-/**
- * Lector CSV.
- */
 public class LectorCsv {
 
-  private final List<Hecho> hechosImportados = new ArrayList<>();
+  public List<Hecho> importar(String rutaCsv, char separador, Map<CampoHecho, List<String>> mapeoColumnas, String formatoFecha) {
+    List<Hecho> hechosImportados = new ArrayList<>();
 
-  /**
-   * Fuente Estatica.
-   *
-   * @param nombreFuente Nombre de la fuente
-   * @param rutaCsv      Ruta al archivo CSV
-   * @param separador    Separador de campos
-   */
-  public FuenteEstatica importar(String rutaCsv, String separador, String nombreFuente) {
-    try (BufferedReader br = new BufferedReader(
-        new InputStreamReader(new FileInputStream(rutaCsv), StandardCharsets.UTF_8))) {
-
-      String headerLine = br.readLine();
-      if (headerLine == null) {
+    try (CSVReader reader = new CSVReaderBuilder(new FileReader(rutaCsv))
+        .withCSVParser(new CSVParserBuilder().withSeparator(separador).build())
+        .build()) {
+      String[] columnas = reader.readNext();
+      if (columnas == null) {
         throw new ArchivoVacioException("El archivo se encuentra vacío.");
       }
 
-      String[] columnas = headerLine.split(separador);
-      Set<String> columnasSet = new HashSet<>(Arrays.asList(columnas));
-
-      // Columnas obligatorias
-      List<String> columnasNecesarias = List.of(
-          "titulo", "descripcion", "latitud", "longitud", "fechaSuceso", "categoria"
-      );
-
-      for (String col : columnasNecesarias) {
-        if (!columnasSet.contains(col)) {
-          throw new IllegalArgumentException("Falta la columna obligatoria: " + col);
+      // Validar columnas obligatorias
+      for (CampoHecho campo : mapeoColumnas.keySet()) {
+        for (String columna : mapeoColumnas.get(campo)) {
+          if (!List.of(columnas).contains(columna)) {
+            throw new IllegalArgumentException("Falta la columna: " + columna);
+          }
         }
       }
 
-      String linea;
-      int filaNumero = 1;
-      while ((linea = br.readLine()) != null) {
-        filaNumero++;
-        String[] valores = linea.split(separador, -1);
-        Map<String, String> filaMap = new HashMap<>();
-        for (int i = 0; i < columnas.length; i++) {
-          filaMap.put(columnas[i], i < valores.length ? valores[i] : "");
-        }
+      String[] valores;
 
-        for (String col : columnasNecesarias) {
-          String valor = filaMap.get(col);
-          if (valor == null || valor.trim().isEmpty()) {
-            throw new IllegalArgumentException("Campo vacío " + col + " en fila " + filaNumero);
-          }
-        }
+      while ((valores = reader.readNext()) != null) {
+        int indiceLatitud = List.of(columnas).indexOf("latitud");
 
-        double latitud;
-        double longitud;
-        try {
-          latitud = Double.parseDouble(filaMap.get("latitud"));
-          longitud = Double.parseDouble(filaMap.get("longitud"));
-        } catch (NumberFormatException e) {
-          throw new IllegalArgumentException("Latitud o longitud inválida en fila " + filaNumero);
-        }
+
+
+        double latitud = (mapeoColumnas.containsKey(CampoHecho.LATITUD) && valores[List.of(columnas).indexOf("latitud")] != "")
+            ? Double.parseDouble(valores[indiceLatitud].trim())
+            : 0.0;
+
+        int indiceLongitud = List.of(columnas).indexOf("longitud");
+        double longitud = (mapeoColumnas.containsKey(CampoHecho.LONGITUD) && valores[indiceLongitud] != "")
+            ? Double.parseDouble(valores[indiceLongitud].trim())
+            : 0.0;
 
         PuntoGeografico ubicacion = new PuntoGeografico(latitud, longitud);
 
-        String titulo = filaMap.get("titulo");
-        String descripcion = filaMap.get("descripcion");
-        String direccion = columnasSet.contains("direccion") ? filaMap.get("direccion") : null;
-        String categoria = filaMap.get("categoria");
-        String fechaSuceso = filaMap.get("fechaSuceso");
+        String titulo = mapeoColumnas.containsKey(CampoHecho.TITULO)
+            ? concatenarColumnas(mapeoColumnas.get(CampoHecho.TITULO), columnas, valores, " ")
+            : "";
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        LocalDate fecha = LocalDate.parse(fechaSuceso, formatter);
-        LocalDateTime fechaHora = fecha.atStartOfDay();
+        String descripcion = mapeoColumnas.containsKey(CampoHecho.DESCRIPCION)
+            ? concatenarColumnas(mapeoColumnas.get(CampoHecho.DESCRIPCION), columnas, valores, " ")
+            : "";
 
+        String categoria = mapeoColumnas.containsKey(CampoHecho.CATEGORIA)
+            ? concatenarColumnas(mapeoColumnas.get(CampoHecho.CATEGORIA), columnas, valores, " ")
+            : "";
+
+        String fechaSuceso = mapeoColumnas.containsKey(CampoHecho.FECHA_SUCESO) && !valores[List.of(columnas).indexOf("fechaSuceso")].isBlank()
+            ? concatenarColumnas(mapeoColumnas.get(CampoHecho.FECHA_SUCESO), columnas, valores, "/")
+            : null;
+
+        String direccion = mapeoColumnas.containsKey(CampoHecho.DIRECCION)
+            ? concatenarColumnas(mapeoColumnas.get(CampoHecho.DIRECCION), columnas, valores, ", ")
+            : "";
+        // agregar esta validacion para todos los demas campos
+        // el formatter no tiene hora
+        LocalDateTime fechaHora = null;
+        if (fechaSuceso!= null && !fechaSuceso.isBlank()) {
+          DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatoFecha);
+          LocalDate fecha = LocalDate.parse(fechaSuceso, formatter);
+          fechaHora = fecha.atStartOfDay();
+        }
         List<String> etiquetasVacias = new ArrayList<>();
 
         Hecho hecho = new Hecho(
@@ -114,18 +100,28 @@ public class LectorCsv {
         hechosImportados.add(hecho);
       }
 
-      if (hechosImportados.isEmpty()) {
-        throw new IllegalStateException("No se creó ningún hecho.");
-      }
-
-      return new FuenteEstatica(nombreFuente, hechosImportados);
-
-    } catch (IOException e) {
+    } catch (IOException | CsvValidationException e) {
       throw new RuntimeException("Error al leer el archivo CSV: " + e.getMessage(), e);
     }
+
+    if (hechosImportados.isEmpty()) {
+      throw new IllegalStateException("No se creó ningún hecho.");
+    }
+
+    return hechosImportados;
   }
 
-  public List<Hecho> getHechosImportados() {
-    return Collections.unmodifiableList(hechosImportados);
+  private String concatenarColumnas(List<String> columnasMapeadas, String[] columnas, String[] valores, String separadorConcatenacion) {
+    StringBuilder resultado = new StringBuilder();
+    for (String columna : columnasMapeadas) {
+      int indice = List.of(columnas).indexOf(columna);
+      if (indice != -1 && !valores[indice].isBlank()) {
+        if (resultado.length() > 0) {
+          resultado.append(separadorConcatenacion);
+        }
+        resultado.append(valores[indice]);
+      }
+    }
+    return resultado.toString();
   }
 }
