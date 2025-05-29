@@ -20,7 +20,7 @@ import ar.edu.utn.frba.dds.domain.filtro.FiltroDeOrigen;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroDeTitulo;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
-import ar.edu.utn.frba.dds.domain.fuentes.ServicioDeAgregacion;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.exceptions.ArchivoVacioException;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
@@ -320,7 +320,7 @@ public class TPATest {
 
   @Test
   public void seAgregaLaFuenteCorrectamente() {
-    ServicioDeAgregacion serv = new ServicioDeAgregacion("Juan");
+    FuenteDeAgregacion serv = new FuenteDeAgregacion("Juan");
     FuenteDinamica nuevaFuente = new FuenteDinamica("Juan", new ArrayList<>());
     serv.agregarFuente(nuevaFuente);
     assertTrue(serv.getFuentesCargadas().contains(nuevaFuente));

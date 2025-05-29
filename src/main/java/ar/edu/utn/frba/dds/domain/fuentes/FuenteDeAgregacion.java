@@ -10,13 +10,13 @@ import java.util.stream.Collectors;
 /**
  * Servicio de Agregacion.
  */
-public class ServicioDeAgregacion extends Fuente {
+public class FuenteDeAgregacion extends Fuente {
   private final List<Fuente> fuentesCargadas;
 
   /**
    * Constructor Servicio de Agregacion.
    */
-  public ServicioDeAgregacion(String nombre) {
+  public FuenteDeAgregacion(String nombre) {
     super(nombre, null); // no usamos una lista fija local
     this.fuentesCargadas = new ArrayList<>();
   }

@@ -35,8 +35,6 @@ public class Visualizador extends Persona {
   /**
    * Filtrar los hechos.
    */
-  public List<Hecho> filtrar(Coleccion coleccion, Filtro filtro) {
-    return filtro.filtrar(coleccion.getHechos());
-  }
+
 
 }
