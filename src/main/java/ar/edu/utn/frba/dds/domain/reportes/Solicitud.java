@@ -1,26 +1,24 @@
 package ar.edu.utn.frba.dds.domain.reportes;
 
 import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
-import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.main.Contribuyente;
-import java.util.UUID;
 
 /**
  * Solicitud.
  */
 public class Solicitud {
+
   Contribuyente solicitante;
   Hecho hechoSolicitado;
   String razonEliminacion;
 
-
   /**
-   * Solicitud.
+   * Constructor de solicitud.
    *
-   * @param solicitante     Contribuyente
-   * @param hechoSolicitado Hecho
-   * @param motivo          String
+   * @param solicitante     Contribuyente que solicita la eliminación
+   * @param hechoSolicitado Hecho solicitado para eliminar
+   * @param motivo          Razón de la eliminación
    */
   public Solicitud(Contribuyente solicitante,
                    Hecho hechoSolicitado,
@@ -36,17 +34,21 @@ public class Solicitud {
   }
 
   public Hecho getHechoSolicitado() {
-    return this.hechoSolicitado;
+    return hechoSolicitado;
   }
 
   public String getRazonEliminacion() {
     return razonEliminacion;
   }
 
+  /**
+   * Valida que el motivo tenga al menos 500 caracteres.
+   *
+   * @param motivo razón escrita
+   */
   void validarMotivo(String motivo) {
     if (motivo == null || motivo.length() < 500) {
-      throw new RazonInvalidaException("Tiene menos 500 caracteres.");
+      throw new RazonInvalidaException("Tiene menos de 500 caracteres.");
     }
   }
-
 }

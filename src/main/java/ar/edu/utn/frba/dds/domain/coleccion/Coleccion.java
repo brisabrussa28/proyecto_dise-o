@@ -3,8 +3,8 @@ package ar.edu.utn.frba.dds.domain.coleccion;
 import ar.edu.utn.frba.dds.domain.filtro.*;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,13 +70,16 @@ public class Coleccion {
    * Obtiene los hechos filtrados aplicando criterios y exclusiones.
    */
   public List<Hecho> getHechos() {
-    //elimina los hechos que fueron eliminados por el gestor de reportes
+    // Elimina los hechos que fueron eliminados por el gestor de reportes
     List<Filtro> todosLosFiltros = new ArrayList<>(GestorDeReportes.hechosEliminados());
-    //agrega el filtro de la colección
+
+    // Agrega el filtro de la colección
     todosLosFiltros.add(filtro);
-    //genera el filtro and con todos los filtros
+
+    // Genera el filtro AND con todos los filtros
     FiltroListaAnd filtroFinal = new FiltroListaAnd(todosLosFiltros);
-    //filtra los hechos de la colección
+
+    // Filtra los hechos de la colección
     return filtroFinal.filtrar(fuente.obtenerHechos());
   }
 

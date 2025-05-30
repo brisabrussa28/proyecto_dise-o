@@ -40,16 +40,6 @@ public class FuenteTest {
   }
 
   @Test
-  public void seEliminaUnHecho() {
-    FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
-    Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux, horaAux, horaAux, Origen.CARGA_MANUAL, etiquetasAux);
-    fuente.agregarHecho(hecho);
-    Solicitud solicitud = new Solicitud(null, hecho.getId(), fuente, "a".repeat(600));
-    fuente.eliminarHecho(hecho.getId());
-    assertFalse(fuente.contiene(hecho));
-  }
-
-  @Test
   public void seAgregaHechoAFuente() {
     FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
     Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux, horaAux, horaAux, Origen.CARGA_MANUAL, etiquetasAux);

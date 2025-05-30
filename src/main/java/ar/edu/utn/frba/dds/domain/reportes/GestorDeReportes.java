@@ -4,24 +4,25 @@ import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroIgualHecho;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroNot;
-import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Gestor de Reportes.
  */
 public class GestorDeReportes {
-  private static GestorDeReportes instancia; // Singleton instance
+
+  private static GestorDeReportes instancia; // Singleton
   private static List<Solicitud> solicitudes = new ArrayList<>();
   private List<Filtro> HechosEliminados = new ArrayList<>();
 
   private GestorDeReportes() {
   }
+
   /**
-   * Gestor de Reportes es clase singleton.
+   * Devuelve la instancia única del gestor.
    */
   public static GestorDeReportes getInstancia() {
     if (instancia == null) {
@@ -38,9 +39,9 @@ public class GestorDeReportes {
   }
 
   /**
-   * Solicitud.
+   * Devuelve una solicitud por posición.
    *
-   * @param posicion int.
+   * @param posicion índice de la lista
    */
   public Solicitud obtenerSolicitudPorPosicion(int posicion) {
     if (posicion < 0 || posicion >= solicitudes.size()) {
@@ -50,24 +51,24 @@ public class GestorDeReportes {
   }
 
   /**
-   * Función creada para el test, devuelve la cantidad de solicitudes.
+   * Devuelve la cantidad de solicitudes registradas.
    */
   public int cantidadSolicitudes() {
     return solicitudes.size();
   }
 
   /**
-   * Obtiene la primera solicitud de la lista.
+   * Devuelve la primera solicitud de la lista.
    */
   public Solicitud obtenerSolicitud() {
     return this.obtenerSolicitudPorPosicion(0);
   }
 
   /**
-   * Gestionar Solicitud.
+   * Procesa una solicitud: si es aceptada, elimina el hecho.
    *
-   * @param solicitud        Solicitud
-   * @param aceptarSolicitud boolean
+   * @param solicitud        la solicitud a gestionar
+   * @param aceptarSolicitud si se aprueba o no
    */
   public static void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud) {
     if (!solicitudes.contains(solicitud)) {
@@ -81,16 +82,18 @@ public class GestorDeReportes {
     }
   }
 
+  /**
+   * Agrega un filtro para excluir un hecho.
+   */
   public static void eliminarHecho(Hecho hecho) {
     Filtro filtroDeExclusion = new FiltroNot(new FiltroIgualHecho(hecho));
     getInstancia().HechosEliminados.add(filtroDeExclusion);
   }
 
-
+  /**
+   * Devuelve una copia de los filtros de hechos eliminados.
+   */
   public static List<Filtro> hechosEliminados() {
     return new ArrayList<>(getInstancia().HechosEliminados);
   }
-
-
-
 }

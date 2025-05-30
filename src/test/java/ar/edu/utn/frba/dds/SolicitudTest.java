@@ -42,7 +42,7 @@ public class SolicitudTest {
         FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
         fuente.agregarHecho(hecho);
 
-        Solicitud solicitud = new Solicitud(null, hecho.getId(), fuente, motivo);
+        Solicitud solicitud = new Solicitud(null, hecho, motivo);
         GestorDeReportes.getInstancia().agregarSolicitud(solicitud);
 
         assertEquals(1, GestorDeReportes.getInstancia().cantidadSolicitudes());
@@ -56,14 +56,14 @@ public class SolicitudTest {
         fuente.agregarHecho(hecho);
 
         assertThrows(RazonInvalidaException.class, () -> {
-            new Solicitud(null, hecho.getId(), fuente, motivo);
+            new Solicitud(null, hecho, motivo);
         });
     }
 
     @Test
     public void gestorDeReportesNoTieneSolicitud() {
         String motivo = "perú es clave".repeat(50);
-        Solicitud solicitud = new Solicitud(null, null, null, motivo);
+        Solicitud solicitud = new Solicitud(null, null, motivo);
 
         assertThrows(SolicitudInexistenteException.class, () -> {
             GestorDeReportes.gestionarSolicitud(solicitud, true);

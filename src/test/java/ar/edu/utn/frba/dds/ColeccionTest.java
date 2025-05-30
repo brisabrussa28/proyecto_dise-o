@@ -4,12 +4,15 @@ import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.origen.Origen;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.main.Administrador;
-import java.time.ZoneId;
-import java.util.Date;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,15 +33,22 @@ public class ColeccionTest {
       "#NOalaVIOLENCIAcontraABUELITAS"
   );
 
-
   @Test
   public void coleccionCreadaCorrectamente() {
-      Coleccion bonaerense = iluminati.crearColeccion("Robos", "Un día más siendo del conurbano", "Robos", fuenteAuxD);
-      boolean igual = bonaerense.getTitulo().equals("Robos") &&
-          bonaerense.getDescripcion().equals("Un día más siendo del conurbano") &&
-          bonaerense.getCategoria().equals("Robos");
-      assertTrue(igual);
+    Coleccion bonaerense = iluminati.crearColeccion(
+        "Robos",
+        "Un día más siendo del conurbano",
+        "Robos",
+        fuenteAuxD
+    );
+
+    boolean igual = bonaerense.getTitulo().equals("Robos") &&
+        bonaerense.getDescripcion().equals("Un día más siendo del conurbano") &&
+        bonaerense.getCategoria().equals("Robos");
+
+    assertTrue(igual);
   }
+
   @Test
   public void coleccionContieneUnHecho() {
     Coleccion coleccion = iluminati.crearColeccion("Robos", "Descripcion", "Robos", fuenteAuxD);
@@ -58,5 +68,20 @@ public class ColeccionTest {
   public void nombreColeccionNoEsNull() {
     Coleccion coleccion = iluminati.crearColeccion("Robos", "Descripcion", "Robos", fuenteAuxD);
     assertNotNull(coleccion.getTitulo());
+  }
+
+  @Test
+  public void coleccionYaNoContieneHechoEliminadoPorGestor() {
+    Coleccion coleccion = iluminati.crearColeccion("Robos", "Descripcion", "Robos", fuenteAuxD);
+    Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux, horaAux, horaAux, Origen.CARGA_MANUAL, etiquetasAux);
+    fuenteAuxD.agregarHecho(hecho);
+    GestorDeReportes.getInstancia().eliminarHecho(hecho);
+    assertFalse(coleccion.contieneA(hecho));
+  }
+
+  @Test
+  public void coleccionContieneFuenteCorrecta() {
+    Coleccion coleccion = iluminati.crearColeccion("Robos", "Descripcion", "Robos", fuenteAuxD);
+    assertTrue(coleccion.contieneFuente(fuenteAuxD));
   }
 }

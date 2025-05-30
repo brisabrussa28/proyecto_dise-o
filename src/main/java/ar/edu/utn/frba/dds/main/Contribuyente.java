@@ -87,7 +87,7 @@ public class Contribuyente extends Visualizador {
       throw new IllegalArgumentException("Hecho y motivo deben estar definidos");
     }
 
-    Solicitud solicitud = new Solicitud(this, hecho.getId(), fuente, motivo);
+    Solicitud solicitud = new Solicitud(this, hecho, motivo);
     // Singleton (ver patronescreacionales si no entendes que hago aca)
     GestorDeReportes.getInstancia().agregarSolicitud(solicitud);
     return solicitud;

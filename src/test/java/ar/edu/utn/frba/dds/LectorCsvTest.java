@@ -1,21 +1,13 @@
 package ar.edu.utn.frba.dds;
 
-import ar.edu.utn.frba.dds.domain.exceptions.ArchivoVacioException;
-import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroDeDireccion;
 import ar.edu.utn.frba.dds.main.Administrador;
-import ar.edu.utn.frba.dds.domain.csv.UltraBindLector;
+import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
 import org.junit.jupiter.api.Test;
 
 
-
-import ar.edu.utn.frba.dds.domain.csv.UltraBindLector;
-import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import org.junit.jupiter.api.Test;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,12 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class LectorCsvTest {
     Administrador iluminati = new Administrador("△", "libellumcipher@incognito.com");
@@ -46,7 +33,7 @@ public class LectorCsvTest {
             CampoHecho.DIRECCION, List.of("direccion")
         );
 
-        List<Hecho> csv = new UltraBindLector().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/ejemplo.csv", ',', "dd/MM/yyyy",mapeoColumnas);
+        List<Hecho> csv = new LectorCSV().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/ejemplo.csv", ',', "dd/MM/yyyy",mapeoColumnas);
         FiltroDeDireccion filtroDireccion = new FiltroDeDireccion("EL NESTORNAUTA");
         List<Hecho> hechosFiltrados = filtroDireccion.filtrar(csv);
         Hecho hecho = hechosFiltrados.get(0);
@@ -67,7 +54,7 @@ public class LectorCsvTest {
             CampoHecho.DIRECCION, List.of("provincia_nombre","departamento_nombre","localidad_nombre","calle_nombre","calle_altura")
         );
 
-        List<Hecho> csv = new UltraBindLector().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/rarito.csv", ',', "dd-MM-yy",mapeoColumnas);
+        List<Hecho> csv = new LectorCSV().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/rarito.csv", ',', "dd-MM-yy",mapeoColumnas);
         Hecho hecho = csv.get(0);
         System.out.println("Hecho importado:");
         System.out.println(hecho.getTitulo() + " - " + hecho.getDescripcion() + " - " + hecho.getCategoria() + " - " + hecho.getFechaSuceso() + " - " + hecho.getDireccion());
@@ -87,7 +74,7 @@ public class LectorCsvTest {
             CampoHecho.CATEGORIA, List.of("categoria"),
             CampoHecho.DIRECCION, List.of("direccion")
         );
-        List<Hecho> hechos = new UltraBindLector().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/ejemplo.csv", ',', "dd/MM/yyyy", mapeoEjemplo);
+        List<Hecho> hechos = new LectorCSV().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/ejemplo.csv", ',', "dd/MM/yyyy", mapeoEjemplo);
         assertEquals(5, hechos.size());
     }
 
@@ -102,7 +89,7 @@ public class LectorCsvTest {
             CampoHecho.CATEGORIA, List.of("categoria"),
             CampoHecho.DIRECCION, List.of("direccion")
         );
-        List<Hecho> hechos = new UltraBindLector().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/ejemploReordenado.csv", ',', "dd/MM/yyyy", mapeoEjemplo);
+        List<Hecho> hechos = new LectorCSV().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/ejemploReordenado.csv", ',', "dd/MM/yyyy", mapeoEjemplo);
         assertEquals(5, hechos.size());
         assertTrue(hechos.stream().anyMatch(h -> "EL NESTORNAUTA".equals(h.getDireccion())));
     }
@@ -119,7 +106,7 @@ public class LectorCsvTest {
             CampoHecho.DIRECCION, List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura")
         );
 
-        List<Hecho> hechos = new UltraBindLector().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/luciano.csv", ',', "dd-MM-yy", mapeo);
+        List<Hecho> hechos = new LectorCSV().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/luciano.csv", ',', "dd-MM-yy", mapeo);
 
         // Solo debe haber 1 hecho, los otros están vacíos
         assertEquals(1, hechos.size());
@@ -135,7 +122,7 @@ public class LectorCsvTest {
         }
 
         assertThrows(IllegalArgumentException.class, () -> {
-            new UltraBindLector().importar(path, ',', "dd/MM/yyyy", Map.of());
+            new LectorCSV().importar(path, ',', "dd/MM/yyyy", Map.of());
         });
     }
 
@@ -150,7 +137,7 @@ public class LectorCsvTest {
             CampoHecho.TITULO, List.of("columna_que_no_existe")
         );
 
-        List<Hecho> hechos = new UltraBindLector().importar(path, ',', "dd/MM/yyyy", mapeo);
+        List<Hecho> hechos = new LectorCSV().importar(path, ',', "dd/MM/yyyy", mapeo);
         assertEquals(0, hechos.size());
     }
 
@@ -168,7 +155,7 @@ public class LectorCsvTest {
             CampoHecho.FECHA_SUCESO, List.of("fechaSuceso")
         );
 
-        List<Hecho> hechos = new UltraBindLector().importar(path, ',', "dd/MM/yyyy", mapeo);
+        List<Hecho> hechos = new LectorCSV().importar(path, ',', "dd/MM/yyyy", mapeo);
         assertEquals(1, hechos.size()); // Se crea igual porque lat/lon son opcionales
         assertNull(hechos.get(0).getUbicacion());
     }
@@ -185,7 +172,7 @@ public class LectorCsvTest {
             CampoHecho.FECHA_SUCESO, List.of("fechaSuceso")
         );
 
-        List<Hecho> hechos = new UltraBindLector().importar(path, ',', "dd/MM/yyyy", mapeo);
+        List<Hecho> hechos = new LectorCSV().importar(path, ',', "dd/MM/yyyy", mapeo);
         assertEquals(0, hechos.size()); // No se crea por fecha inválida
     }
 
@@ -201,7 +188,7 @@ public class LectorCsvTest {
             CampoHecho.FECHA_SUCESO, List.of("fechaSuceso")
         );
 
-        List<Hecho> hechos = new UltraBindLector().importar(path, ',', "dd/MM/yyyy", mapeo);
+        List<Hecho> hechos = new LectorCSV().importar(path, ',', "dd/MM/yyyy", mapeo);
         assertEquals(1, hechos.size());
     }
 }
