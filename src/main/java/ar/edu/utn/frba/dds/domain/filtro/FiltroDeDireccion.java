@@ -6,18 +6,19 @@ import java.util.List;
 /**
  * Clase filtro de dirección.
  */
-public class FiltroDeDireccion extends Filtro {
-  String direccion;
+import java.util.List;
 
-  /**
-   * Constructor.
-   */
+public class FiltroDeDireccion extends Filtro {
+
+  private final String direccion;
+
   public FiltroDeDireccion(String direccion) {
     this.direccion = direccion;
   }
 
   @Override
-  public List<Hecho> filtrar(List<Hecho> hechos) {
-    return hechos.stream().filter(hecho -> hecho.sucedioEn(direccion)).toList();
+  public boolean cumple(Hecho hecho) {
+    return hecho.getDireccion() != null && hecho.getDireccion().equalsIgnoreCase(direccion);
   }
 }
+

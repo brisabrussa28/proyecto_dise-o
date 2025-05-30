@@ -8,17 +8,14 @@ import java.util.List;
  * Clase filtro de fecha.
  */
 public class FiltroDeFecha extends Filtro {
-  Date fecha;
+  private final java.util.Date fecha;
 
-  /**
-   * Constructor.
-   */
-  public FiltroDeFecha(Date fecha) {
+  public FiltroDeFecha(java.util.Date fecha) {
     this.fecha = fecha;
   }
 
   @Override
-  public List<Hecho> filtrar(List<Hecho> hechos) {
-    return hechos.stream().filter(hecho -> hecho.esDeFecha(fecha)).toList();
+  public boolean cumple(Hecho hecho) {
+    return hecho.getFechaSuceso() != null && hecho.getFechaSuceso().equals(fecha);
   }
 }

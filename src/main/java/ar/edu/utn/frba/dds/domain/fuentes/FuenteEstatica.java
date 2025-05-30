@@ -1,27 +1,35 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-//Para esta iteración, se requiere diseñar e implementar el componente que posibilite la lectura de
-// estos datasets y que extraiga los hechos de los mismos.
-// En esta primera iteración estaremos incorporando un lote de datos estático de tipo archivo .csv.
-
+import ar.edu.utn.frba.dds.domain.csv.UltraBindLector;
+import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- * Clase fuente estática.
+ * Fuente de datos estática basada en archivo CSV.
  */
 public class FuenteEstatica extends Fuente {
 
-  /**
-   * Constructor.
-   */
-  public FuenteEstatica(String nombre, List<Hecho> hechos) {
-    super(nombre, hechos);
+  private final String rutaCsv;
+  private final char separador;
+  private final String formatoFecha;
+  private final Map<CampoHecho, List<String>> mapeo;
+
+  public FuenteEstatica(String nombre, String rutaCsv, char separador, String formatoFecha, Map<CampoHecho, List<String>> mapeo) {
+    super(nombre, null); // no carga los hechos en el constructor
+    this.rutaCsv = rutaCsv;
+    this.separador = separador;
+    this.formatoFecha = formatoFecha;
+    this.mapeo = mapeo;
   }
 
   @Override
   public List<Hecho> obtenerHechos() {
-    return Collections.unmodifiableList(this.hechos);
+    List<Hecho> hechosCrudos = new UltraBindLector().importar(rutaCsv, separador, formatoFecha, mapeo);
+    return hechosCrudos.stream().toList();
   }
 }

@@ -1,8 +1,12 @@
 package ar.edu.utn.frba.dds.domain.coleccion;
 
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroIgualHecho;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroNot;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -15,6 +19,7 @@ public class Coleccion {
   private final String descripcion;
   private final String categoria;
   private Filtro filtro;
+  private List<Filtro> HechosEliminados;
   //private String criterio;
 
   /**
@@ -26,14 +31,16 @@ public class Coleccion {
     this.descripcion = descripcion;
     this.categoria = categoria;
     this.filtro = new Filtro();
+    this.HechosEliminados = new ArrayList<Filtro>();
   }
 
   /**
    * Eliminar hecho de la fuente.
    */
   public void eliminarHecho(Hecho hecho) {
-    fuente.eliminarHecho(hecho.getId());
+    this.HechosEliminados.add(new FiltroNot(new FiltroIgualHecho(hecho)));
   }
+
 
   /**
    * Modificación criterio de la colección.
@@ -41,6 +48,7 @@ public class Coleccion {
   public void agregarCriterio(Filtro nuevoFiltro) {
     this.filtro = nuevoFiltro;
   }
+
 
   /**
    * Filtrar hechos.
@@ -66,7 +74,10 @@ public class Coleccion {
   }
 
   public List<Hecho> getHechos() {
-    return filtro.filtrar(fuente.obtenerHechos());
+    List<Filtro> todosLosFiltros = new ArrayList<>(HechosEliminados);
+    todosLosFiltros.add(filtro); // agrego el filtro adicional
+    FiltroListaAnd filtroFinal = new FiltroListaAnd(todosLosFiltros);
+    return filtroFinal.filtrar(fuente.obtenerHechos());
   }
 
   /**

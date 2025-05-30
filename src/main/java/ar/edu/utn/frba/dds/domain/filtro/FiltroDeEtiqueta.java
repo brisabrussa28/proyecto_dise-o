@@ -7,19 +7,14 @@ import java.util.List;
  * Clase filtro de etiqueta.
  */
 public class FiltroDeEtiqueta extends Filtro {
-  String etiqueta;
+  private final String etiqueta;
 
-  /**
-   * Constructor.
-   */
   public FiltroDeEtiqueta(String etiqueta) {
     this.etiqueta = etiqueta;
   }
 
   @Override
-  public List<Hecho> filtrar(List<Hecho> hechos) {
-    return hechos.stream()
-        .filter(h -> h.tieneEtiqueta(etiqueta))
-        .toList();
+  public boolean cumple(Hecho hecho) {
+    return hecho.getEtiquetas() != null && hecho.getEtiquetas().contains(etiqueta);
   }
 }

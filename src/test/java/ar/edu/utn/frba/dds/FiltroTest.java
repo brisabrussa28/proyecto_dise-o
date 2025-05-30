@@ -72,7 +72,8 @@ public class FiltroTest {
   @Test
   public void filtraPorFechaCargaCorrectamente() {
     List<Hecho> hechos = crearColeccionHechoYDevolverlo();
-    FiltroDeFechaDeCarga filtroFecha = new FiltroDeFechaDeCarga(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+    Date fecha = new Date();
+    FiltroDeFechaDeCarga filtroFecha = new FiltroDeFechaDeCarga(fecha);
     assertFalse(filtroFecha.filtrar(hechos).isEmpty());
   }
 
