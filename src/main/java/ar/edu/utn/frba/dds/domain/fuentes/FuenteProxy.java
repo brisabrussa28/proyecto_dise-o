@@ -12,7 +12,7 @@ public class FuenteProxy extends Fuente {
    * Constructor.
    */
   public FuenteProxy(String nombre) {
-    super(nombre, null);
+    super(nombre);
   }
 
   @Override

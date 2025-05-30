@@ -15,15 +15,21 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Stream;
 
-public class UltraBindLector {
+/**
+ * Lector de archivos CSV a objetos Hecho.
+ */
+public class LectorCSV {
 
-  public List<Hecho> importar(String path, char separator, String dateFormatStr, Map<CampoHecho, List<String>> mapeoColumnas) {
+  public List<Hecho> importar(
+      String path,
+      char separator,
+      String dateFormatStr,
+      Map<CampoHecho, List<String>> mapeoColumnas
+  ) {
     List<Hecho> hechos = new ArrayList<>();
     SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatStr);
-    dateFormat.setLenient(false); // ⛔ Esto lo vuelve estricto
-
+    dateFormat.setLenient(false);
 
     try (CSVReader reader = new CSVReaderBuilder(new FileReader(path))
         .withCSVParser(new CSVParserBuilder().withSeparator(separator).build())
@@ -34,12 +40,13 @@ public class UltraBindLector {
         throw new IllegalArgumentException("El archivo CSV no contiene encabezados");
       }
 
-      Set<String> columnasPresentes = new HashSet<>(Arrays.asList(headers));
-
+      Set<String> columnasPresentes = new HashSet<>(Arrays.asList(headers)); //set evita duplicados
       String[] row;
       int linea = 1;
+
       while ((row = reader.readNext()) != null) {
         linea++;
+
         Map<String, String> fila = new HashMap<>();
         for (int i = 0; i < headers.length && i < row.length; i++) {
           fila.put(headers[i], row[i] != null ? row[i].trim() : null);
@@ -54,7 +61,9 @@ public class UltraBindLector {
         String lonStr = extraerCampo(fila, mapeoColumnas.get(CampoHecho.LONGITUD), columnasPresentes);
         Double latitud = parseDouble(latStr);
         Double longitud = parseDouble(lonStr);
-        PuntoGeografico ubicacion = (latitud != null && longitud != null) ? new PuntoGeografico(latitud, longitud) : null;
+        PuntoGeografico ubicacion = (latitud != null && longitud != null)
+            ? new PuntoGeografico(latitud, longitud)
+            : null;
 
         String fechaStr = extraerCampo(fila, mapeoColumnas.get(CampoHecho.FECHA_SUCESO), columnasPresentes);
         Date fechaSuceso = parseFecha(fechaStr, dateFormat);
@@ -88,10 +97,11 @@ public class UltraBindLector {
 
   private String extraerCampo(Map<String, String> fila, List<String> columnas, Set<String> columnasPresentes) {
     if (columnas == null) return null;
+
     return columnas.stream()
         .peek(col -> {
           if (!columnasPresentes.contains(col)) {
-            System.err.println("Advertencia: columna "+ col +" no encontrada en CSV");
+            System.err.println("Advertencia: columna " + col + " no encontrada en CSV");
           }
         })
         .map(fila::get)

@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,12 +9,13 @@ import java.util.List;
  * Clase fuente dinámica.
  */
 public class FuenteDinamica extends Fuente {
-
+  List<Hecho> hechos;
   /**
    * Constructor.
    */
   public FuenteDinamica(String nombre, List<Hecho> hechos) {
-    super(nombre, hechos);
+    super(nombre);
+    this.hechos = hechos != null ? new ArrayList<>(hechos) : new ArrayList<>();
   }
 
   /**

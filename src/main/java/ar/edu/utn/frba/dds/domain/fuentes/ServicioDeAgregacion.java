@@ -17,7 +17,7 @@ public class ServicioDeAgregacion extends Fuente {
    * Constructor Servicio de Agregacion.
    */
   public ServicioDeAgregacion(String nombre) {
-    super(nombre, null); // no usamos una lista fija local
+    super(nombre);
     this.fuentesCargadas = new ArrayList<>();
   }
 
@@ -39,21 +39,8 @@ public class ServicioDeAgregacion extends Fuente {
   }
 
   /**
-   * Elimina un hecho de una fuente.
+   * muestra las fuentes cargadas.
    */
-  @Override
-  public void eliminarHecho(UUID hecho) {
-    for (Fuente fuente : fuentesCargadas) {
-      try {
-        fuente.eliminarHecho(hecho);
-        return; // eliminado con éxito, salimos
-      } catch (IllegalStateException e) {
-        // ignoramos y seguimos buscando en otras fuentes
-      }
-    }
-    throw new IllegalStateException("El hecho no se encontró: " + hecho);
-  }
-
   public List<Fuente> getFuentesCargadas() {
     return new ArrayList<>(fuentesCargadas);
   }

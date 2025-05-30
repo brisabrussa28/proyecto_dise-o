@@ -1,26 +1,24 @@
 package ar.edu.utn.frba.dds.domain.coleccion;
 
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroIgualHecho;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroNot;
+import ar.edu.utn.frba.dds.domain.filtro.*;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * Clase colección.
  */
 public class Coleccion {
+
   private final Fuente fuente;
   private final String titulo;
   private final String descripcion;
   private final String categoria;
+
   private Filtro filtro;
   private List<Filtro> HechosEliminados;
-  //private String criterio;
 
   /**
    * Constructor.
@@ -31,16 +29,16 @@ public class Coleccion {
     this.descripcion = descripcion;
     this.categoria = categoria;
     this.filtro = new Filtro();
-    this.HechosEliminados = new ArrayList<Filtro>();
+    this.HechosEliminados = new ArrayList<>();
   }
 
   /**
    * Eliminar hecho de la fuente.
    */
   public void eliminarHecho(Hecho hecho) {
-    this.HechosEliminados.add(new FiltroNot(new FiltroIgualHecho(hecho)));
+    Filtro filtroDeExclusion = new FiltroNot(new FiltroIgualHecho(hecho));
+    this.HechosEliminados.add(filtroDeExclusion);
   }
-
 
   /**
    * Modificación criterio de la colección.
@@ -49,39 +47,47 @@ public class Coleccion {
     this.filtro = nuevoFiltro;
   }
 
-
   /**
-   * Filtrar hechos.
+   * Título de la colección.
    */
-  public List<Hecho> filtrar(Coleccion coleccion, Filtro filtro) {
-    return filtro.filtrar(coleccion.getHechos());
-  }
-
   public String getTitulo() {
     return titulo;
   }
 
+  /**
+   * Descripción de la colección.
+   */
   public String getDescripcion() {
     return descripcion;
   }
 
+  /**
+   * Categoría de la colección.
+   */
   public String getCategoria() {
     return categoria;
   }
 
+  /**
+   * Criterio de filtro actual.
+   */
   public Filtro getFiltro() {
     return filtro;
   }
 
+  /**
+   * Obtiene los hechos filtrados aplicando criterios y exclusiones.
+   */
   public List<Hecho> getHechos() {
     List<Filtro> todosLosFiltros = new ArrayList<>(HechosEliminados);
-    todosLosFiltros.add(filtro); // agrego el filtro adicional
+    todosLosFiltros.add(filtro);
+
     FiltroListaAnd filtroFinal = new FiltroListaAnd(todosLosFiltros);
     return filtroFinal.filtrar(fuente.obtenerHechos());
   }
 
   /**
-   * Booleano, indica si la fuente de la colección es la indicadas.
+   * Booleano, indica si la fuente de la colección es la indicada.
    */
   public boolean contieneFuente(Fuente unaFuente) {
     return fuente == unaFuente;
@@ -94,4 +100,3 @@ public class Coleccion {
     return this.getHechos().contains(unHecho);
   }
 }
-

@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-import ar.edu.utn.frba.dds.domain.csv.UltraBindLector;
+import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 
@@ -20,7 +20,7 @@ public class FuenteEstatica extends Fuente {
   private final Map<CampoHecho, List<String>> mapeo;
 
   public FuenteEstatica(String nombre, String rutaCsv, char separador, String formatoFecha, Map<CampoHecho, List<String>> mapeo) {
-    super(nombre, null); // no carga los hechos en el constructor
+    super(nombre); // no carga los hechos en el constructor
     this.rutaCsv = rutaCsv;
     this.separador = separador;
     this.formatoFecha = formatoFecha;
@@ -29,7 +29,7 @@ public class FuenteEstatica extends Fuente {
 
   @Override
   public List<Hecho> obtenerHechos() {
-    List<Hecho> hechosCrudos = new UltraBindLector().importar(rutaCsv, separador, formatoFecha, mapeo);
+    List<Hecho> hechosCrudos = new LectorCSV().importar(rutaCsv, separador, formatoFecha, mapeo);
     return hechosCrudos.stream().toList();
   }
 }
