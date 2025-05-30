@@ -4,6 +4,7 @@ import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,7 +20,7 @@ public class Hecho {
   String direccion;
   PuntoGeografico ubicacion;
   Date fechaSuceso;
-  LocalDateTime fechaCarga;
+  Date fechaCarga;
   Origen fuenteOrigen;
   List<String> etiquetas;
   UUID id;
@@ -34,7 +35,7 @@ public class Hecho {
       String direccion,
       PuntoGeografico ubicacion,
       Date fechaSuceso,
-      LocalDateTime fechaCarga,
+      Date fechaCarga,
       Origen fuenteOrigen,
       List<String> etiquetas
   ) {
@@ -78,7 +79,7 @@ public class Hecho {
     return fechaSuceso;
   }
 
-  public LocalDateTime getFechaCarga() {
+  public Date getFechaCarga() {
     return fechaCarga;
   }
 
@@ -124,24 +125,32 @@ public class Hecho {
   /**
    * Si la fecha del suceso es la buscada.
    */
-  public boolean esDeFecha(LocalDateTime unaFecha) {
+  public boolean esDeFecha(Date unaFecha) {
     return this.fechaSuceso.equals(unaFecha);
   }
 
   /**
    * Si la fecha de carga es la buscada.
    */
-  public boolean seCargoEl(LocalDateTime unaFecha) {
-    return this.fechaCarga.getYear() == unaFecha.getYear()
-        && this.fechaCarga.getMonth() == unaFecha.getMonth()
-        && this.fechaCarga.getDayOfMonth() == unaFecha.getDayOfMonth();
-  }
+  public boolean seCargoEl(Date unaFecha) {return this.fechaCarga.equals(unaFecha);}
 
+  /**
+   * Si no tiene datos.
+   */
+  public boolean estaVacio() {
+    return (titulo == null || titulo.isBlank()) &&
+        (descripcion == null || descripcion.isBlank()) &&
+        (categoria == null || categoria.isBlank()) &&
+        (direccion == null || direccion.isBlank()) &&
+        ubicacion == null &&
+        fechaSuceso == null &&
+        (etiquetas == null || etiquetas.isEmpty());
+  }
   /**
    * Si el hecho se cargó antes de la fecha buscada.
    */
-  public boolean seCargoAntesDe(LocalDateTime unaFecha) {
-    return this.fechaCarga.isBefore(unaFecha);
+  public boolean seCargoAntesDe(Date unaFecha) {
+    return this.fechaCarga.before(unaFecha);
   }
 
   /**

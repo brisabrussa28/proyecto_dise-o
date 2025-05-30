@@ -8,6 +8,7 @@ import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -70,7 +71,7 @@ public class Contribuyente extends Visualizador {
         direccion,
         ubicacion,
         fecha,
-        LocalDateTime.now(),
+        Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()),
         Origen.PROVISTO_CONTRIBUYENTE,
         etiquetas
     );

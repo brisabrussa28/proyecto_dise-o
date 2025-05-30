@@ -12,6 +12,8 @@ import ar.edu.utn.frba.dds.main.Visualizador;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +24,9 @@ public class FiltroTest {
   Contribuyente contribuyenteA = new Contribuyente(null, null);
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
-  LocalDateTime horaAux = LocalDateTime.of(2025, 5, 6, 20, 9);
+  Date horaAux = Date.from(LocalDateTime.of(2025, 5, 6, 20, 9)
+      .atZone(ZoneId.systemDefault())
+      .toInstant());
   List<String> etiquetasAux = List.of(
       "#ancianita",
       "#robo_a_mano_armada",
@@ -68,7 +72,7 @@ public class FiltroTest {
   @Test
   public void filtraPorFechaCargaCorrectamente() {
     List<Hecho> hechos = crearColeccionHechoYDevolverlo();
-    FiltroDeFechaDeCarga filtroFecha = new FiltroDeFechaDeCarga(LocalDateTime.now());
+    FiltroDeFechaDeCarga filtroFecha = new FiltroDeFechaDeCarga(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
     assertFalse(filtroFecha.filtrar(hechos).isEmpty());
   }
 

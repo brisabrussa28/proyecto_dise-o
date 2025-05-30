@@ -1,19 +1,19 @@
 package ar.edu.utn.frba.dds.domain.filtro;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Clase filtro de fecha de carga.
  */
 public class FiltroDeFechaDeCarga extends Filtro {
-  LocalDateTime fecha;
+  Date fecha;
 
   /**
    * Constructor.
    */
-  public FiltroDeFechaDeCarga(LocalDateTime fecha) {
+  public FiltroDeFechaDeCarga(Date fecha) {
     this.fecha = fecha;
   }
 

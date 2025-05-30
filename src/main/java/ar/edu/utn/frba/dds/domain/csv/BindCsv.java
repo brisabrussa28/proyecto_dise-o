@@ -1,5 +1,7 @@
 package ar.edu.utn.frba.dds.domain.csv;
-
+import com.opencsv.bean.CsvBindAndJoinByName;
+import java.util.List;
+import java.util.Map;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
 import com.opencsv.bean.CsvNumber;
@@ -103,4 +105,30 @@ public class BindCsv {
     this.longitud = longitud;
   }
    */
+
+    @CsvBindAndJoinByName(elementType = String.class)
+    private Map<String, String> columnas;
+
+    public String obtenerValorPorColumna(String nombreColumna) {
+      if (columnas != null && columnas.containsKey(nombreColumna)) {
+        return columnas.get(nombreColumna);
+      }
+      return null;
+    }
+
+    public String concatenarColumnas(List<String> nombresColumnas, String separador) {
+      StringBuilder resultado = new StringBuilder();
+      for (String nombreColumna : nombresColumnas) {
+        String valor = obtenerValorPorColumna(nombreColumna);
+        if (valor != null && !valor.isBlank()) {
+          if (resultado.length() > 0) {
+            resultado.append(separador);
+          }
+          resultado.append(valor);
+        }
+      }
+      return resultado.toString();
+    }
 }
+
+

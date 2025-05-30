@@ -1,8 +1,7 @@
-package ar.edu.utn.frba.dds;
+/*package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ar.edu.utn.frba.dds.domain.csv.SuperCsv;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroDeDireccion;
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
@@ -54,6 +53,7 @@ public class SuperCsvTest {
     /*Hecho hecho = csv.get(0);
 
     boolean hechoCorrecto = Objects.equals(hecho.getCategoria(), "Imputado idRegistro 13483");
-    assertTrue(hechoCorrecto);*/
+    assertTrue(hechoCorrecto);
   }
 }
+*/

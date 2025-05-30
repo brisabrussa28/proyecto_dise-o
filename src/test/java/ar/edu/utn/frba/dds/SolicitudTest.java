@@ -12,6 +12,8 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.main.Administrador; //ELIMINAR
 import ar.edu.utn.frba.dds.main.Contribuyente; //ELIMINAR
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +24,9 @@ public class SolicitudTest {
     Administrador iluminati = new Administrador("△", "libellumcipher@incognito.com");
     PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
     FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
-    LocalDateTime horaAux = LocalDateTime.of(2025, 5, 6, 20, 9);
+    Date horaAux = Date.from(LocalDateTime.of(2025, 5, 6, 20, 9)
+        .atZone(ZoneId.systemDefault())
+        .toInstant());
     List<String> etiquetasAux = List.of(
         "#ancianita",
         "#robo_a_mano_armada",
