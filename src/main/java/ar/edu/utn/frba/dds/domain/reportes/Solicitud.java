@@ -11,26 +11,23 @@ import java.util.UUID;
  */
 public class Solicitud {
   Contribuyente solicitante;
-  UUID idhechoSolicitado;
+  Hecho hechoSolicitado;
   String razonEliminacion;
-  Fuente fuente;
+
 
   /**
    * Solicitud.
    *
    * @param solicitante     Contribuyente
-   * @param idhechoSolicitado UUID
-   * @param fuente          Fuente
+   * @param hechoSolicitado Hecho
    * @param motivo          String
    */
   public Solicitud(Contribuyente solicitante,
-                   UUID idhechoSolicitado,
-                   Fuente fuente,
+                   Hecho hechoSolicitado,
                    String motivo) {
     this.validarMotivo(motivo);
-    this.fuente = fuente;
     this.solicitante = solicitante;
-    this.idhechoSolicitado = idhechoSolicitado;
+    this.hechoSolicitado = hechoSolicitado;
     this.razonEliminacion = motivo;
   }
 
@@ -38,12 +35,8 @@ public class Solicitud {
     return solicitante;
   }
 
-  public UUID getHechoSolicitado() {
-    return this.idhechoSolicitado;
-  }
-
-  public Fuente getFuente() {
-    return fuente;
+  public Hecho getHechoSolicitado() {
+    return this.hechoSolicitado;
   }
 
   public String getRazonEliminacion() {

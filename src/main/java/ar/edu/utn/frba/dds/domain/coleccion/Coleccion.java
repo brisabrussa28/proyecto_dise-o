@@ -4,6 +4,7 @@ import ar.edu.utn.frba.dds.domain.filtro.*;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,6 @@ public class Coleccion {
   private final String categoria;
 
   private Filtro filtro;
-  private List<Filtro> HechosEliminados;
 
   /**
    * Constructor.
@@ -29,15 +29,6 @@ public class Coleccion {
     this.descripcion = descripcion;
     this.categoria = categoria;
     this.filtro = new Filtro();
-    this.HechosEliminados = new ArrayList<>();
-  }
-
-  /**
-   * Eliminar hecho de la fuente.
-   */
-  public void eliminarHecho(Hecho hecho) {
-    Filtro filtroDeExclusion = new FiltroNot(new FiltroIgualHecho(hecho));
-    this.HechosEliminados.add(filtroDeExclusion);
   }
 
   /**
@@ -79,10 +70,13 @@ public class Coleccion {
    * Obtiene los hechos filtrados aplicando criterios y exclusiones.
    */
   public List<Hecho> getHechos() {
-    List<Filtro> todosLosFiltros = new ArrayList<>(HechosEliminados);
+    //elimina los hechos que fueron eliminados por el gestor de reportes
+    List<Filtro> todosLosFiltros = new ArrayList<>(GestorDeReportes.hechosEliminados());
+    //agrega el filtro de la colección
     todosLosFiltros.add(filtro);
-
+    //genera el filtro and con todos los filtros
     FiltroListaAnd filtroFinal = new FiltroListaAnd(todosLosFiltros);
+    //filtra los hechos de la colección
     return filtroFinal.filtrar(fuente.obtenerHechos());
   }
 
