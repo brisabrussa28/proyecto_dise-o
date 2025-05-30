@@ -6,6 +6,12 @@ import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
 import com.opencsv.bean.CsvNumber;
 import java.util.Date;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
 
 public class BindCsv {
 
@@ -106,29 +112,34 @@ public class BindCsv {
   }
    */
 
-    @CsvBindAndJoinByName(elementType = String.class)
-    private Map<String, String> columnas;
 
-    public String obtenerValorPorColumna(String nombreColumna) {
-      if (columnas != null && columnas.containsKey(nombreColumna)) {
-        return columnas.get(nombreColumna);
+
+
+    private final List<Map<String, String>> filas = new ArrayList<>();
+
+    public BindCsv(String path, char separator) throws IOException {
+      try (CSVReader reader = new CSVReader(new FileReader(path))) {
+        String[] headers = reader.readNext();
+        if (headers == null) throw new IllegalArgumentException("El archivo CSV no tiene encabezados");
+
+        String[] fila;
+        while ((fila = reader.readNext()) != null) {
+          Map<String, String> filaMap = new HashMap<>();
+          for (int i = 0; i < headers.length && i < fila.length; i++) {
+            filaMap.put(headers[i].trim(), fila[i].trim());
+          }
+          filas.add(filaMap);
+        }
+      } catch (CsvValidationException e) {
+        throw new RuntimeException("Error al parsear el CSV", e);
       }
-      return null;
     }
 
-    public String concatenarColumnas(List<String> nombresColumnas, String separador) {
-      StringBuilder resultado = new StringBuilder();
-      for (String nombreColumna : nombresColumnas) {
-        String valor = obtenerValorPorColumna(nombreColumna);
-        if (valor != null && !valor.isBlank()) {
-          if (resultado.length() > 0) {
-            resultado.append(separador);
-          }
-          resultado.append(valor);
-        }
-      }
-      return resultado.toString();
+    public List<Map<String, String>> getFilas() {
+      return filas;
     }
 }
+
+
 
 
