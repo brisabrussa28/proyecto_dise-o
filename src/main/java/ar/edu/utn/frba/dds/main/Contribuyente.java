@@ -8,6 +8,7 @@ import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 
@@ -58,7 +59,7 @@ public class Contribuyente extends Visualizador {
       String categoria,
       String direccion,
       PuntoGeografico ubicacion,
-      LocalDateTime fecha,
+      Date fecha,
       List<String> etiquetas,
       FuenteDinamica fuente
   ) {

@@ -53,7 +53,7 @@ public class LectorCsvTest {
             CampoHecho.DIRECCION, List.of("provincia_nombre","departamento_nombre","localidad_nombre","calle_nombre","calle_altura")
         );
 
-        List<Hecho> csv = new LectorCsv().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/SAT-MV-BU_2017-2023.csv", ';', mapeoColumnas, "d/M/yyyy");
+        List<Hecho> csv = new LectorCsv().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/rarito.csv", ',', mapeoColumnas, "dd/M/yyyy");
         Hecho hecho = csv.get(0);
 
         boolean hechoCorrecto = Objects.equals(hecho.getCategoria(), "Imputado idRegistro 13483");

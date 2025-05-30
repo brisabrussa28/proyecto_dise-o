@@ -9,10 +9,13 @@ import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +45,6 @@ public class LectorCsv {
 
       while ((valores = reader.readNext()) != null) {
         int indiceLatitud = List.of(columnas).indexOf("latitud");
-
 
 
         double latitud = (mapeoColumnas.containsKey(CampoHecho.LATITUD) && valores[List.of(columnas).indexOf("latitud")] != "")
@@ -78,10 +80,10 @@ public class LectorCsv {
         // agregar esta validacion para todos los demas campos
         // el formatter no tiene hora
         LocalDateTime fechaHora = null;
-        if (fechaSuceso!= null && !fechaSuceso.isBlank()) {
-          DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatoFecha);
-          LocalDate fecha = LocalDate.parse(fechaSuceso, formatter);
-          fechaHora = fecha.atStartOfDay();
+        Date fecha = null;
+        if (fechaSuceso != null && !fechaSuceso.isBlank()) {
+          SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
+          fecha = formato.parse(fechaSuceso);
         }
         List<String> etiquetasVacias = new ArrayList<>();
 
@@ -91,7 +93,7 @@ public class LectorCsv {
             categoria,
             direccion,
             ubicacion,
-            fechaHora,
+            fecha,
             LocalDateTime.now(),
             Origen.DATASET,
             etiquetasVacias
@@ -102,6 +104,8 @@ public class LectorCsv {
 
     } catch (IOException | CsvValidationException e) {
       throw new RuntimeException("Error al leer el archivo CSV: " + e.getMessage(), e);
+    } catch (ParseException e) {
+      throw new RuntimeException(e);
     }
 
     if (hechosImportados.isEmpty()) {

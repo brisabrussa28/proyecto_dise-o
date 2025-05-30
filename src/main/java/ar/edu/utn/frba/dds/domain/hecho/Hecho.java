@@ -5,6 +5,7 @@ import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ public class Hecho {
   String categoria;
   String direccion;
   PuntoGeografico ubicacion;
-  LocalDateTime fechaSuceso;
+  Date fechaSuceso;
   LocalDateTime fechaCarga;
   Origen fuenteOrigen;
   List<String> etiquetas;
@@ -32,7 +33,7 @@ public class Hecho {
       String categoria,
       String direccion,
       PuntoGeografico ubicacion,
-      LocalDateTime fechaSuceso,
+      Date fechaSuceso,
       LocalDateTime fechaCarga,
       Origen fuenteOrigen,
       List<String> etiquetas
@@ -73,7 +74,7 @@ public class Hecho {
     return ubicacion;
   }
 
-  public LocalDateTime getFechaSuceso() {
+  public Date getFechaSuceso() {
     return fechaSuceso;
   }
 
