@@ -12,10 +12,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 public class Usuario {
   protected String nombre;
   protected String email;
+  protected UUID id;
 
   /**
    * Constructor Usuario.
@@ -23,6 +25,7 @@ public class Usuario {
   public Usuario(String nombre, String email) {
     this.nombre = nombre;
     this.email = email;
+    this.id = UUID.randomUUID();
   }
   public Usuario() {
   }
