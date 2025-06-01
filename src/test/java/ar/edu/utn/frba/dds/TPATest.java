@@ -8,8 +8,8 @@ import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.main.Administrador;
-import ar.edu.utn.frba.dds.main.Contribuyente;
+import ar.edu.utn.frba.dds.main.Usuario;
+import ar.edu.utn.frba.dds.main.Usuario;
 import ar.edu.utn.frba.dds.main.Visualizador;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Test;
 
 public class TPATest {
   //Recursos utilizados
-  Contribuyente contribuyenteA = new Contribuyente(null, null);
-  Contribuyente contribuyenteB = new Contribuyente("Roberto", "roberto@gmail.com");
+  Usuario contribuyenteA = new Usuario(null, null);
+  Usuario contribuyenteB = new Usuario("Roberto", "roberto@gmail.com");
   Visualizador visualizadorA = new Visualizador(null, null);
   List<String> etiquetasAux = List.of(
       "#ancianita",
@@ -31,8 +31,8 @@ public class TPATest {
       "#NOalaVIOLENCIAcontraABUELITAS"
   );
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
-  Administrador iluminati = new Administrador("△", "libellumcipher@incognito.com");
-  Administrador admin = new Administrador("pipocapo", "makenipipo@gmail.com");
+  Usuario iluminati = new Usuario("△", "libellumcipher@incognito.com");
+  Usuario admin = new Usuario("pipocapo", "makenipipo@gmail.com");
   Date horaAux = Date.from(LocalDateTime.of(2025, 5, 6, 20, 9)
       .atZone(ZoneId.systemDefault())
       .toInstant());

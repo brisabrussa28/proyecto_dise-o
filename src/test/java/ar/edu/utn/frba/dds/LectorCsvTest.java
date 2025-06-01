@@ -3,7 +3,7 @@ package ar.edu.utn.frba.dds;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroDeDireccion;
-import ar.edu.utn.frba.dds.main.Administrador;
+import ar.edu.utn.frba.dds.main.Usuario;
 import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
 import org.junit.jupiter.api.Test;
 
@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Objects;
 
 public class LectorCsvTest {
-    Administrador iluminati = new Administrador("△", "libellumcipher@incognito.com");
-    Administrador admin = new Administrador("pipocapo", "makenipipo@gmail.com");
+    Usuario iluminati = new Usuario("△", "libellumcipher@incognito.com");
+    Usuario admin = new Usuario("pipocapo", "makenipipo@gmail.com");
 
     @Test
     public void importarCSVformatoCorrecto() {
