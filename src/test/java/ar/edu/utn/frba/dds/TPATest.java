@@ -21,7 +21,6 @@ import ar.edu.utn.frba.dds.domain.filtro.FiltroDeTitulo;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
-import ar.edu.utn.frba.dds.domain.ServicioDeVisualizacion;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.exceptions.ArchivoVacioException;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
@@ -31,6 +30,7 @@ import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.main.Administrador;
 import ar.edu.utn.frba.dds.main.Contribuyente;
+import ar.edu.utn.frba.dds.main.Visualizador;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public class TPATest {
   //Recursos utilizados
   Contribuyente contribuyenteA = new Contribuyente(null, null);
   Contribuyente contribuyenteB = new Contribuyente("Roberto", "roberto@gmail.com");
-  ServicioDeVisualizacion sv = new ServicioDeVisualizacion();
+  Visualizador visualizadorA = new Visualizador(null, null);
   List<String> etiquetasAux = List.of(
       "#ancianita",
       "#robo_a_mano_armada",
@@ -127,7 +127,7 @@ public class TPATest {
   public List<Hecho> crearColeccionHechoYDevolverlo() {
     contribuyenteA.crearHecho("titulo", "Un día más siendo del conurbano", "Robos", "dire", pgAux, horaAux, etiquetasAux, fuenteAuxD);
     Coleccion bonaerense = iluminati.crearColeccion("Robos", "Un día más siendo del conurbano", "Robos", fuenteAuxD);
-    return sv.obtenerHechosColeccion(bonaerense);
+    return visualizadorA.visualizarHechos(bonaerense);
   }
 
   @Test
@@ -141,7 +141,7 @@ public class TPATest {
   public void visualizarCorrectamente() {
     contribuyenteA.crearHecho("titulo", "Un día más siendo del conurbano", "Robos", "dire", pgAux, horaAux, etiquetasAux, fuenteAuxD);
     Coleccion bonaerense = iluminati.crearColeccion("Robos", "Un día más siendo del conurbano", "Robos", fuenteAuxD);
-    List<Hecho> hechos = sv.obtenerHechosColeccion(bonaerense);
+    List<Hecho> hechos = visualizadorA.visualizarHechos(bonaerense);
     assertFalse(hechos.isEmpty());
   }
 
@@ -229,17 +229,16 @@ public class TPATest {
     assertThrows(ArchivoVacioException.class, () -> iluminati.importardesdeCsv("src/main/java/ar/edu/utn/frba/dds/domain/csv/prueba2.csv", ",", "datos.gob.ar"));
   }
 
-  /*
-    @Test
+  @Test
   public void seImportaUnaFuenteEstaticaIncorrectamente() {
     assertThrows(RuntimeException.class, () -> iluminati.importardesdeCsv("src/main/java/ar/edu/utn/frba/dds/domain/CSV/ejemplo.csv", ",", "datos.gob.ar"));
-  }*/
+  }
 
   @Test
   public void visualizadorVeTodosLosHechosDeUnaColeccion() { // FANATICO DE CARLOS
     FuenteDinamica otraFuenteAux = new FuenteDinamica("Calos", listaHechoAux);
     Coleccion coleccionAux = new Coleccion("Pepito", otraFuenteAux, "Pedro", "ROBO");
-    List<Hecho> listaHechos = sv.obtenerHechosColeccion(coleccionAux);
+    List<Hecho> listaHechos = visualizadorA.visualizarHechos(coleccionAux);
     assertFalse(listaHechos.isEmpty());
   }
 

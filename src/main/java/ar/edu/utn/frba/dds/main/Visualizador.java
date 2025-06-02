@@ -19,10 +19,22 @@ public class Visualizador extends Persona {
   }
 
   /**
+   * Visualizar hechos.
+   */
+  public List<Hecho> visualizarHechos(Coleccion coleccion) {
+    return coleccion.getHechos();
+  }
+
+  /**
    * Agrega un hecho a una fuente.
    */
   public void agregarHechoaFuente(FuenteDinamica fuente, Hecho hecho) {
     fuente.agregarHecho(hecho);
   }
+
+  /**
+   * Filtrar los hechos.
+   */
+
 
 }
