@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.domain.hecho;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -198,8 +199,8 @@ public class Hecho {
     return new ArrayList<>(this.etiquetas);
   }
 
-  boolean perteneceA(Coleccion unaColeccion) {
-    return unaColeccion.contieneA(this);
+  boolean perteneceA(Coleccion unaColeccion, GestorDeReportes gestor) {
+    return unaColeccion.contieneA(this,gestor);
   }
 
   public boolean esEditablePor(UUID idUsuarioEditor) {

@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.detectorSpam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
@@ -8,6 +9,7 @@ import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.main.Usuario;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -15,10 +17,11 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ColeccionTest {
-
+  private GestorDeReportes gestor;
   Usuario iluminati = new Usuario("△", "libellumcipher@incognito.com");
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
@@ -32,6 +35,14 @@ public class ColeccionTest {
       "#leyDeProtecciónALasAncianitas",
       "#NOalaVIOLENCIAcontraABUELITAS"
   );
+  private DetectorSpam detectorSpam;
+
+  @BeforeEach
+    void initFileSystem() {
+        detectorSpam = mock(DetectorSpam.class);
+        gestor = new GestorDeReportes(detectorSpam);
+    }
+
 
   @Test
   public void coleccionCreadaCorrectamente() {
@@ -54,7 +65,7 @@ public class ColeccionTest {
     Coleccion coleccion = iluminati.crearColeccion("Robos", "Descripcion", "Robos", fuenteAuxD);
     Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", null, horaAux, horaAux, null, etiquetasAux);
     fuenteAuxD.agregarHecho(hecho);
-    assertTrue(coleccion.contieneA(hecho));
+    assertTrue(coleccion.contieneA(hecho,gestor));
   }
 
   @Test
@@ -75,8 +86,9 @@ public class ColeccionTest {
     Coleccion coleccion = iluminati.crearColeccion("Robos", "Descripcion", "Robos", fuenteAuxD);
     Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux, horaAux, horaAux, Origen.CARGA_MANUAL, etiquetasAux);
     fuenteAuxD.agregarHecho(hecho);
-    GestorDeReportes.getInstancia().eliminarHecho(hecho);
-    assertFalse(coleccion.contieneA(hecho));
+    when (detectorSpam.esSpam(anyString())).thenReturn(false);
+    gestor.eliminarHecho(hecho);
+    assertFalse(coleccion.contieneA(hecho,gestor));
   }
 
   @Test

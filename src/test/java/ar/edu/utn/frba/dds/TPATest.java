@@ -4,10 +4,12 @@ package ar.edu.utn.frba.dds;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.detectorSpam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.main.Usuario;
 import ar.edu.utn.frba.dds.main.Usuario;
 import ar.edu.utn.frba.dds.main.Visualizador;
@@ -39,15 +41,18 @@ public class TPATest {
   Hecho hechoAux = new Hecho("Jorge", "Choreo", "ROBO", "Av 9 de Julio", pgAux, Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), Origen.CARGA_MANUAL, etiquetasAux);
   List <Hecho> listaHechoAux = List.of(hechoAux);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
+  private DetectorSpam detectorSpam;
+  private GestorDeReportes gestor = new GestorDeReportes(detectorSpam);
 
 
 
   //Se visualiza correctamente
   @Test
   public void visualizarCorrectamente() {
+
     contribuyenteA.crearHecho("titulo", "Un día más siendo del conurbano", "Robos", "dire", pgAux, horaAux, etiquetasAux, fuenteAuxD);
     Coleccion bonaerense = iluminati.crearColeccion("Robos", "Un día más siendo del conurbano", "Robos", fuenteAuxD);
-    List<Hecho> hechos = visualizadorA.visualizarHechos(bonaerense);
+    List<Hecho> hechos = visualizadorA.visualizarHechos(bonaerense,gestor);
     assertFalse(hechos.isEmpty());
   }
 
@@ -57,7 +62,7 @@ public class TPATest {
   public void visualizadorVeTodosLosHechosDeUnaColeccion() { // FANATICO DE CARLOS
     FuenteDinamica otraFuenteAux = new FuenteDinamica("Calos", listaHechoAux);
     Coleccion coleccionAux = new Coleccion("Pepito", otraFuenteAux, "Pedro", "ROBO");
-    List<Hecho> listaHechos = visualizadorA.visualizarHechos(coleccionAux);
+    List<Hecho> listaHechos = visualizadorA.visualizarHechos(coleccionAux,gestor);
     assertFalse(listaHechos.isEmpty());
   }
 

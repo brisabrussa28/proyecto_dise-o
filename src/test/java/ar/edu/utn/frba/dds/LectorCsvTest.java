@@ -33,7 +33,7 @@ public class LectorCsvTest {
             CampoHecho.DIRECCION, List.of("direccion")
         );
 
-        List<Hecho> csv = new LectorCSV().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/ejemplo.csv", ',', "dd/MM/yyyy",mapeoColumnas);
+        List<Hecho> csv = new LectorCSV().importar("src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemplo.csv", ',', "dd/MM/yyyy",mapeoColumnas);
         FiltroDeDireccion filtroDireccion = new FiltroDeDireccion("EL NESTORNAUTA");
         List<Hecho> hechosFiltrados = filtroDireccion.filtrar(csv);
         Hecho hecho = hechosFiltrados.get(0);
@@ -54,7 +54,7 @@ public class LectorCsvTest {
             CampoHecho.DIRECCION, List.of("provincia_nombre","departamento_nombre","localidad_nombre","calle_nombre","calle_altura")
         );
 
-        List<Hecho> csv = new LectorCSV().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/rarito.csv", ',', "dd-MM-yy",mapeoColumnas);
+        List<Hecho> csv = new LectorCSV().importar("src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/rarito.csv", ',', "dd-MM-yy",mapeoColumnas);
         Hecho hecho = csv.get(0);
         System.out.println("Hecho importado:");
         System.out.println(hecho.getTitulo() + " - " + hecho.getDescripcion() + " - " + hecho.getCategoria() + " - " + hecho.getFechaSuceso() + " - " + hecho.getDireccion());
@@ -74,7 +74,7 @@ public class LectorCsvTest {
             CampoHecho.CATEGORIA, List.of("categoria"),
             CampoHecho.DIRECCION, List.of("direccion")
         );
-        List<Hecho> hechos = new LectorCSV().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/ejemplo.csv", ',', "dd/MM/yyyy", mapeoEjemplo);
+        List<Hecho> hechos = new LectorCSV().importar("src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemplo.csv", ',', "dd/MM/yyyy", mapeoEjemplo);
         assertEquals(5, hechos.size());
     }
 
@@ -89,7 +89,7 @@ public class LectorCsvTest {
             CampoHecho.CATEGORIA, List.of("categoria"),
             CampoHecho.DIRECCION, List.of("direccion")
         );
-        List<Hecho> hechos = new LectorCSV().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/ejemploReordenado.csv", ',', "dd/MM/yyyy", mapeoEjemplo);
+        List<Hecho> hechos = new LectorCSV().importar("src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemploReordenado.csv", ',', "dd/MM/yyyy", mapeoEjemplo);
         assertEquals(5, hechos.size());
         assertTrue(hechos.stream().anyMatch(h -> "EL NESTORNAUTA".equals(h.getDireccion())));
     }
@@ -106,13 +106,13 @@ public class LectorCsvTest {
             CampoHecho.DIRECCION, List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura")
         );
 
-        List<Hecho> hechos = new LectorCSV().importar("src/main/java/ar/edu/utn/frba/dds/domain/csv/luciano.csv", ',', "dd-MM-yy", mapeo);
+        List<Hecho> hechos = new LectorCSV().importar("src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/luciano.csv", ',', "dd-MM-yy", mapeo);
 
         // Solo debe haber 1 hecho, los otros están vacíos
         assertEquals(1, hechos.size());
         assertEquals("Imputado idRegistro 13483", hechos.get(0).getTitulo());
     }
-    private final String dir = "src/main/java/ar/edu/utn/frba/dds/domain/csv/";
+    private final String dir = "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/";
 
     @Test
     public void testCsvSinEncabezado() throws IOException {

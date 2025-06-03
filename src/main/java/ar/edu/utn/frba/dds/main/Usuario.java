@@ -3,6 +3,8 @@ package ar.edu.utn.frba.dds.main;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
+import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
@@ -12,6 +14,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class Usuario {
@@ -27,8 +30,6 @@ public class Usuario {
     this.email = email;
     this.id = UUID.randomUUID();
   }
-  public Usuario() {
-  }
 
   public Coleccion crearColeccion(
       String titulo,
@@ -42,33 +43,46 @@ public class Usuario {
   /**
    * Fuente Estatica.
    * */
-  public List<Hecho> importardesdeCsv(String rutaCsv, String separador, String nombreFuente) {
-    return null;
+  public FuenteEstatica importardesdeCsv(String rutaCsv, char separador, String nombreFuente,String formatoFecha, Map< CampoHecho, List<String>> mapeo) {
+    if (rutaCsv == null ||  nombreFuente == null) {
+      throw new IllegalArgumentException("Ruta y nombre de fuente deben estar definidos");
+    }
+
+    return new FuenteEstatica(nombreFuente,rutaCsv, separador,formatoFecha,mapeo );
+  }
+  /**
+   * * Fuente Estatica con separador coma.
+   * */
+  public FuenteEstatica importardesdeCsv(String rutaCsv, String nombreFuente,String formatoFecha, Map< CampoHecho, List<String>> mapeo) {
+    if (rutaCsv == null || nombreFuente == null) {
+      throw new IllegalArgumentException("Ruta y nombre de fuente deben estar definidos");
+    }
+    return new FuenteEstatica(nombreFuente,rutaCsv,',',formatoFecha,mapeo );
   }
 
   /**
    * Solicitudes.
    * */
-  public Solicitud obtenerSolicitud() {
-    return GestorDeReportes.getInstancia().obtenerSolicitud();
+  public Solicitud obtenerSolicitud(GestorDeReportes gestorDeReportes) {
+    return gestorDeReportes.obtenerSolicitud();
   }
 
-  public Solicitud obtenerSolicitudPorPosicion(int posicion) {
-    return GestorDeReportes.getInstancia().obtenerSolicitudPorPosicion(posicion);
+  public Solicitud obtenerSolicitudPorPosicion(int posicion,GestorDeReportes gestorDeReportes) {
+    return gestorDeReportes.obtenerSolicitudPorPosicion(posicion);
   }
 
-  public void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud) {
-    GestorDeReportes.getInstancia().gestionarSolicitud(solicitud, aceptarSolicitud);
+  public void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud,GestorDeReportes gestorDeReportes) {
+    gestorDeReportes.gestionarSolicitud(solicitud, aceptarSolicitud);
   }
 
-  public Solicitud solicitarEliminacion(Hecho hecho, String motivo, Fuente fuente) {
+  public Solicitud solicitarEliminacion(Hecho hecho, String motivo, Fuente fuente, GestorDeReportes gestorDeReportes) {
     if (hecho == null || motivo == null || motivo.isBlank()) {
       throw new IllegalArgumentException("Hecho y motivo deben estar definidos");
     }
 
     Solicitud solicitud = new Solicitud(this, hecho, motivo);
     // Singleton (ver patronescreacionales si no entendes que hago aca)
-    GestorDeReportes.getInstancia().agregarSolicitud(solicitud);
+    gestorDeReportes.agregarSolicitud(solicitud);
     return solicitud;
   }
 

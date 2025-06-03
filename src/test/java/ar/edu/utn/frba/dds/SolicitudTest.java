@@ -15,14 +15,14 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-
+import ar.edu.utn.frba.dds.domain.detectorSpam.DetectorSpam;
+import org.junit.jupiter.api.BeforeEach;
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SolicitudTest {
-    Usuario contribuyenteA = new Usuario(null, null);
-    Usuario iluminati = new Usuario("△", "libellumcipher@incognito.com");
+    private GestorDeReportes gestor;
     PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
-    FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
     Date horaAux = Date.from(LocalDateTime.of(2025, 5, 6, 20, 9)
         .atZone(ZoneId.systemDefault())
         .toInstant());
@@ -34,21 +34,31 @@ public class SolicitudTest {
         "#NOalaVIOLENCIAcontraABUELITAS"
     );
 
+    private DetectorSpam detectorSpam;
+
+    @BeforeEach
+    void initFileSystem() {
+        detectorSpam = mock(DetectorSpam.class);
+        gestor = new GestorDeReportes(detectorSpam);
+    }
+
     @Test
     public void solicitarEliminacionDeHechoCorrectamente() {
+        when(detectorSpam.esSpam(anyString())).thenReturn(false);
         String motivo = "a".repeat(600);
         Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux, horaAux, horaAux, Origen.CARGA_MANUAL, etiquetasAux);
         FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
         fuente.agregarHecho(hecho);
 
         Solicitud solicitud = new Solicitud(null, hecho, motivo);
-        GestorDeReportes.getInstancia().agregarSolicitud(solicitud);
+        gestor.agregarSolicitud(solicitud);
 
-        assertEquals(1, GestorDeReportes.getInstancia().cantidadSolicitudes());
+        assertEquals(1, gestor.cantidadSolicitudes());
     }
 
     @Test
     public void gestorDeReportesNoObtieneSolicitudes() {
+        when(detectorSpam.esSpam(anyString())).thenReturn(false);
         String motivo = "a".repeat(5); // motivo inválido
         Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux, horaAux, horaAux, Origen.CARGA_MANUAL, etiquetasAux);
         FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
@@ -61,11 +71,23 @@ public class SolicitudTest {
 
     @Test
     public void gestorDeReportesNoTieneSolicitud() {
+        when(detectorSpam.esSpam(anyString())).thenReturn(false);
         String motivo = "perú es clave".repeat(50);
         Solicitud solicitud = new Solicitud(null, null, motivo);
 
         assertThrows(SolicitudInexistenteException.class, () -> {
-            GestorDeReportes.gestionarSolicitud(solicitud, true);
+            gestor.gestionarSolicitud(solicitud, true);
+        });
+    }
+
+    @Test
+    public void solicitarEliminacionDeHechoConMotivoSpam() {
+        when(detectorSpam.esSpam(anyString())).thenReturn(true);
+        String motivo = "Este motivo contiene spam";
+        Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux, horaAux, horaAux, Origen.CARGA_MANUAL, etiquetasAux);
+
+        assertThrows(RazonInvalidaException.class, () -> {
+            new Solicitud(null, hecho, motivo);
         });
     }
 }

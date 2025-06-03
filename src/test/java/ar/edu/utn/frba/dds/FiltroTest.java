@@ -1,11 +1,13 @@
 package ar.edu.utn.frba.dds;
 
+import ar.edu.utn.frba.dds.domain.detectorSpam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.filtro.*;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.main.Usuario;
 import ar.edu.utn.frba.dds.main.Visualizador;
 import org.junit.jupiter.api.Test;
@@ -19,7 +21,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FiltroTest {
-
+  private DetectorSpam detectorSpam;
+  private GestorDeReportes gestor = new GestorDeReportes(detectorSpam);
   Usuario contribuyenteA = new Usuario(null, null);
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
@@ -37,7 +40,7 @@ public class FiltroTest {
   public List<Hecho> crearColeccionHechoYDevolverlo() {
     contribuyenteA.crearHecho("titulo", "Un día más siendo del conurbano", "Robos", "dire", pgAux, horaAux, etiquetasAux, fuenteAuxD);
     Coleccion bonaerense = new Usuario("△", "libellumcipher@incognito.com").crearColeccion("Robos", "Un día más siendo del conurbano", "Robos", fuenteAuxD);
-    return new Visualizador(null, null).visualizarHechos(bonaerense);
+    return new Visualizador(null, null).visualizarHechos(bonaerense,gestor);
   }
 
   @Test
