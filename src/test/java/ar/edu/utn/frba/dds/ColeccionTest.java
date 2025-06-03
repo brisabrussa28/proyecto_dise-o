@@ -6,7 +6,7 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
-import ar.edu.utn.frba.dds.main.Administrador;
+import ar.edu.utn.frba.dds.main.Usuario;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ColeccionTest {
 
-  Administrador iluminati = new Administrador("△", "libellumcipher@incognito.com");
+  Usuario iluminati = new Usuario("△", "libellumcipher@incognito.com");
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
   Date horaAux = Date.from(LocalDateTime.of(2025, 5, 6, 20, 9)
