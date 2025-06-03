@@ -9,8 +9,7 @@ import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.main.Administrador; //ELIMINAR
-import ar.edu.utn.frba.dds.main.Contribuyente; //ELIMINAR
+import ar.edu.utn.frba.dds.main.Usuario;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -20,8 +19,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SolicitudTest {
-    Contribuyente contribuyenteA = new Contribuyente(null, null); //esta mal tener contribuyentes eliminarlos dsp
-    Administrador iluminati = new Administrador("△", "libellumcipher@incognito.com");
+    Usuario contribuyenteA = new Usuario(null, null);
+    Usuario iluminati = new Usuario("△", "libellumcipher@incognito.com");
     PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
     FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
     Date horaAux = Date.from(LocalDateTime.of(2025, 5, 6, 20, 9)
