@@ -5,7 +5,6 @@ import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroIgualHecho;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroNot;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +13,7 @@ import java.util.List;
  */
 public class GestorDeReportes {
 
-  private static GestorDeReportes instancia; // Singleton
+  private static GestorDeReportes INSTANCE = new GestorDeReportes(); // Singleton
   private static List<Solicitud> solicitudes = new ArrayList<>();
   private List<Filtro> HechosEliminados = new ArrayList<>();
 
@@ -25,43 +24,10 @@ public class GestorDeReportes {
    * Devuelve la instancia única del gestor.
    */
   public static GestorDeReportes getInstancia() {
-    if (instancia == null) {
-      instancia = new GestorDeReportes();
-    }
-    return instancia;
-  }
-
-  /**
-   * Agrega una solicitud a la lista.
-   */
-  public void agregarSolicitud(Solicitud solicitud) {
-    solicitudes.add(solicitud);
-  }
-
-  /**
-   * Devuelve una solicitud por posición.
-   *
-   * @param posicion índice de la lista
-   */
-  public Solicitud obtenerSolicitudPorPosicion(int posicion) {
-    if (posicion < 0 || posicion >= solicitudes.size()) {
-      throw new SolicitudInexistenteException("La posición es inválida o no existe en el gestor.");
-    }
-    return solicitudes.get(posicion);
-  }
-
-  /**
-   * Devuelve la cantidad de solicitudes registradas.
-   */
-  public int cantidadSolicitudes() {
-    return solicitudes.size();
-  }
-
-  /**
-   * Devuelve la primera solicitud de la lista.
-   */
-  public Solicitud obtenerSolicitud() {
-    return this.obtenerSolicitudPorPosicion(0);
+//    if (instancia == null) {
+//      instancia = new GestorDeReportes();
+//    }
+    return INSTANCE;
   }
 
   /**
@@ -95,5 +61,38 @@ public class GestorDeReportes {
    */
   public static List<Filtro> hechosEliminados() {
     return new ArrayList<>(getInstancia().HechosEliminados);
+  }
+
+  /**
+   * Agrega una solicitud a la lista.
+   */
+  public static void agregarSolicitud(Solicitud solicitud) {
+    solicitudes.add(solicitud);
+  }
+
+  /**
+   * Devuelve una solicitud por posición.
+   *
+   * @param posicion índice de la lista
+   */
+  public Solicitud obtenerSolicitudPorPosicion(int posicion) {
+    if (posicion < 0 || posicion >= solicitudes.size()) {
+      throw new SolicitudInexistenteException("La posición es inválida o no existe en el gestor.");
+    }
+    return solicitudes.get(posicion);
+  }
+
+  /**
+   * Devuelve la cantidad de solicitudes registradas.
+   */
+  public int cantidadSolicitudes() {
+    return solicitudes.size();
+  }
+
+  /**
+   * Devuelve la primera solicitud de la lista.
+   */
+  public Solicitud obtenerSolicitud() {
+    return this.obtenerSolicitudPorPosicion(0);
   }
 }

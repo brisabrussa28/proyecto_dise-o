@@ -60,7 +60,7 @@ public class Contribuyente extends Visualizador {
       String categoria,
       String direccion,
       PuntoGeografico ubicacion,
-      Date fecha,
+      LocalDateTime fecha,
       List<String> etiquetas,
       FuenteDinamica fuente
   ) {
@@ -71,7 +71,7 @@ public class Contribuyente extends Visualizador {
         direccion,
         ubicacion,
         fecha,
-        Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()),
+        LocalDateTime.now(),
         Origen.PROVISTO_CONTRIBUYENTE,
         etiquetas
     );
@@ -89,7 +89,7 @@ public class Contribuyente extends Visualizador {
 
     Solicitud solicitud = new Solicitud(this, hecho, motivo);
     // Singleton (ver patronescreacionales si no entendes que hago aca)
-    GestorDeReportes.getInstancia().agregarSolicitud(solicitud);
+    GestorDeReportes.agregarSolicitud(solicitud);
     return solicitud;
   }
 

@@ -1,20 +1,19 @@
 package ar.edu.utn.frba.dds;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
-import ar.edu.utn.frba.dds.main.Contribuyente; //ELIMINAR
+import ar.edu.utn.frba.dds.main.Contribuyente;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class HechoTest {
 
@@ -37,7 +36,8 @@ public class HechoTest {
         "ROBO",
         "Avenida Siempreviva 742",
         pgAux, // Ubicación
-        Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), // Fecha
+        //Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), // Fecha
+        LocalDateTime.now(),
         etiquetasAux,  // Etiquetas
         fuenteAuxD // Fuente
     );
@@ -58,7 +58,16 @@ public class HechoTest {
 
   @Test
   public void direccionIdentica() {
-    Hecho hecho = new Hecho("titulo", "Un día más siendo del conurbano", "Robos", "dire", pgAux, Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), null, etiquetasAux);
+    Hecho hecho = new Hecho(
+        "titulo",
+        "Un día más siendo del conurbano",
+        "Robos",
+        "dire",
+        pgAux,
+        LocalDateTime.now(),/*Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())*/
+        LocalDateTime.now(),
+        null,
+        etiquetasAux);
     assertFalse(hecho.sucedioEn("Mozart 2300"));
   }
 }

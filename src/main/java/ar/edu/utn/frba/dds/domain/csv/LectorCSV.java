@@ -14,6 +14,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -66,7 +68,7 @@ public class LectorCSV {
             : null;
 
         String fechaStr = extraerCampo(fila, mapeoColumnas.get(CampoHecho.FECHA_SUCESO), columnasPresentes);
-        Date fechaSuceso = parseFecha(fechaStr, dateFormat);
+        LocalDateTime fechaSuceso = parseFecha(fechaStr, dateFormat);
 
         boolean datosValidos = titulo != null && fechaSuceso != null;
 
@@ -78,7 +80,7 @@ public class LectorCSV {
               direccion,
               ubicacion,
               fechaSuceso,
-              new Date(),
+              LocalDateTime.now(),
               Origen.DATASET,
               List.of()
           );
@@ -119,9 +121,9 @@ public class LectorCSV {
     }
   }
 
-  private Date parseFecha(String valor, SimpleDateFormat dateFormat) {
+  private LocalDateTime parseFecha(String valor, SimpleDateFormat dateFormat) {
     try {
-      return valor != null ? dateFormat.parse(valor.trim()) : null;
+      return valor != null ? dateFormat.parse(valor.trim()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
     } catch (ParseException e) {
       System.err.println("Error al parsear fecha: '" + valor + "'");
       return null;
