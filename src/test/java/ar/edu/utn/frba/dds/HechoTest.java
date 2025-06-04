@@ -1,20 +1,18 @@
 package ar.edu.utn.frba.dds;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
-import ar.edu.utn.frba.dds.main.Usuario; //ELIMINAR
+import ar.edu.utn.frba.dds.main.Usuario;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class HechoTest {
 
@@ -35,8 +33,8 @@ public class HechoTest {
     String descripcion = "Hombre blanco asalta ancianita indefensa";
     String categoria = "ROBO";
     String direccion = "Avenida Siempreviva 742";
-    Date fechaSuceso = Date.from(LocalDateTime.now().minusDays(5).atZone(ZoneId.systemDefault()).toInstant());
-    LocalDate fechaCarga = LocalDate.now(ZoneId.systemDefault());
+    LocalDateTime fechaSuceso = LocalDateTime.from(LocalDateTime.now().minusDays(5).atZone(ZoneId.systemDefault()).toInstant());
+    LocalDateTime fechaCarga = LocalDateTime.now();
 
     Hecho hechoTest = contribuyenteA.crearHecho(
         titulo,
@@ -49,20 +47,29 @@ public class HechoTest {
         fuenteAuxD // Fuente
     );
 
-    assertEquals(hechoTest.getTitulo(), "Robo");
-    assertEquals(hechoTest.getDescripcion(), "Hombre blanco asalta ancianita indefensa");
-    assertEquals(hechoTest.getCategoria(), "ROBO");
-    assertEquals(hechoTest.getDireccion(), "Avenida Siempreviva 742");
-    assertTrue(hechoTest.getUbicacion() == pgAux);
+    assertEquals("Robo", hechoTest.getTitulo());
+    assertEquals("Hombre blanco asalta ancianita indefensa", hechoTest.getDescripcion());
+    assertEquals("ROBO", hechoTest.getCategoria());
+    assertEquals("Avenida Siempreviva 742", hechoTest.getDireccion());
+    assertEquals(hechoTest.getUbicacion(), pgAux);
     assertEquals(hechoTest.getFechaSuceso(), fechaSuceso);
-    assertEquals(hechoTest.getFechaCarga().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), fechaCarga);
-    assertTrue(hechoTest.getEtiquetas().size() == etiquetasAux.size());
-    assertTrue(hechoTest.getOrigen() == Origen.PROVISTO_CONTRIBUYENTE);
+    assertEquals(hechoTest.getFechaCarga().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(), fechaCarga);
+    assertEquals(hechoTest.getEtiquetas().size(), etiquetasAux.size());
+    assertEquals(hechoTest.getOrigen(), Origen.PROVISTO_CONTRIBUYENTE);
   }
 
   @Test
   public void direccionIdentica() {
-    Hecho hecho = new Hecho("titulo", "Un día más siendo del conurbano", "Robos", "dire", pgAux, Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), null, etiquetasAux);
+    Hecho hecho = new Hecho(
+        "titulo",
+        "Un día más siendo del conurbano",
+        "Robos",
+        "dire",
+        pgAux,
+        LocalDateTime.now(),/*Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())*/
+        LocalDateTime.now(),
+        null,
+        etiquetasAux);
     assertFalse(hecho.sucedioEn("Mozart 2300"));
   }
 }

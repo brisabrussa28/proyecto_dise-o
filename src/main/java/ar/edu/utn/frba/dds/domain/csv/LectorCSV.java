@@ -14,6 +14,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -122,20 +125,30 @@ public class LectorCSV {
         : null;
 
     String fechaStr = extraerCampo(fila, mapeo.get(CampoHecho.FECHA_SUCESO), columnasPresentes, "/");
-    Date fechaSuceso = parseFecha(fechaStr, dateFormat);
+    LocalDateTime fechaSuceso = parseFecha(fechaStr, dateFormat);
 
-    if (titulo != null && fechaSuceso != null) {
-      return new Hecho(
-          titulo,
-          descripcion,
-          categoria,
-          direccion,
-          ubicacion,
-          fechaSuceso,
-          new Date(),
-          Origen.DATASET,
-          List.of()
-      );
+        boolean datosValidos = titulo != null && fechaSuceso != null;
+
+        if (datosValidos) {
+          Hecho hecho = new Hecho(
+              titulo,
+              descripcion,
+              categoria,
+              direccion,
+              ubicacion,
+              fechaSuceso,
+              LocalDateTime.now(),
+              Origen.DATASET,
+              List.of()
+          );
+          hechos.add(hecho);
+        } else {
+          System.err.println("[Línea " + linea + "] Fila descartada por datos insuficientes");
+        }
+      }
+
+    } catch (IOException | CsvException e) {
+      throw new RuntimeException("Error al leer el archivo CSV", e);
     }
     return null;
   }
@@ -186,9 +199,9 @@ public class LectorCSV {
    * @param dateFormat Formato de fecha a utilizar para el parseo.
    * @return Date parseada o null si ocurre un error.
    */
-  private Date parseFecha(String valor, SimpleDateFormat dateFormat) {
+  private LocalDateTime parseFecha(String valor, SimpleDateFormat dateFormat) {
     try {
-      return valor != null ? dateFormat.parse(valor.trim()) : null;
+      return valor != null ? dateFormat.parse(valor.trim()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
     } catch (ParseException e) {
       logger.warning("Error al parsear fecha: '" + valor + "'");
       return null;
