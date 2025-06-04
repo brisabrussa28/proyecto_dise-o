@@ -15,7 +15,14 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+
+/**
+ * Clase Usuario.
+ * Representa a un usuario del sistema, que puede crear colecciones,
+ * importar datos desde CSV, gestionar solicitudes y crear hechos.
+ */
 
 public class Usuario {
   protected String nombre;
@@ -23,14 +30,26 @@ public class Usuario {
   protected UUID id;
 
   /**
-   * Constructor Usuario.
-   * */
+   * Constructor.
+   *
+   * @param nombre Nombre del usuario
+   * @param email  Email del usuario
+   */
   public Usuario(String nombre, String email) {
     this.nombre = nombre;
     this.email = email;
     this.id = UUID.randomUUID();
   }
 
+  /**
+   * Crear una colección de hechos.
+   *
+   * @param titulo      Título de la colección
+   * @param descripcion Descripción de la colección
+   * @param categoria   Categoría de la colección
+   * @param fuente      Fuente de la colección
+   * @return Colección creada
+   */
   public Coleccion crearColeccion(
       String titulo,
       String descripcion,
@@ -41,47 +60,81 @@ public class Usuario {
   }
 
   /**
-   * Fuente Estatica.
-   * */
-  public FuenteEstatica importardesdeCsv(String rutaCsv, char separador, String nombreFuente,String formatoFecha, Map< CampoHecho, List<String>> mapeo) {
-    if (rutaCsv == null ||  nombreFuente == null) {
-      throw new IllegalArgumentException("Ruta y nombre de fuente deben estar definidos");
-    }
-
-    return new FuenteEstatica(nombreFuente,rutaCsv, separador,formatoFecha,mapeo );
-  }
-  /**
-   * * Fuente Estatica con separador coma.
-   * */
-  public FuenteEstatica importardesdeCsv(String rutaCsv, String nombreFuente,String formatoFecha, Map< CampoHecho, List<String>> mapeo) {
+   * Importar datos desde un archivo CSV.
+   *
+   * @param rutaCsv      Ruta del archivo CSV
+   * @param separador    Carácter separador de campos
+   * @param nombreFuente Nombre de la fuente
+   * @param formatoFecha Formato de fecha para los campos de fecha
+   * @param mapeo        Mapeo de campos del hecho a columnas del CSV
+   * @return FuenteEstatica creada a partir del CSV
+   */
+  public FuenteEstatica importardesdeCsv(String rutaCsv, char separador, String nombreFuente, String formatoFecha, Map<CampoHecho, List<String>> mapeo) {
     if (rutaCsv == null || nombreFuente == null) {
       throw new IllegalArgumentException("Ruta y nombre de fuente deben estar definidos");
     }
-    return new FuenteEstatica(nombreFuente,rutaCsv,',',formatoFecha,mapeo );
+    return new FuenteEstatica(nombreFuente, rutaCsv, separador, formatoFecha, mapeo);
   }
 
   /**
-   * Solicitudes.
-   * */
+   * Importar datos desde un archivo CSV con separador por defecto (',').
+   *
+   * @param rutaCsv      Ruta del archivo CSV
+   * @param nombreFuente Nombre de la fuente
+   * @param formatoFecha Formato de fecha para los campos de fecha
+   * @param mapeo        Mapeo de campos del hecho a columnas del CSV
+   * @return FuenteEstatica creada a partir del CSV
+   */
+  public FuenteEstatica importardesdeCsv(String rutaCsv, String nombreFuente, String formatoFecha, Map<CampoHecho, List<String>> mapeo) {
+    return importardesdeCsv(rutaCsv, ',', nombreFuente, formatoFecha, mapeo);
+  }
+
+  /**
+   * Obtener una solicitud del gestor de reportes.
+   *
+   * @param gestorDeReportes
+   * @return Solicitud obtenida del gestor de reportes
+   */
   public Solicitud obtenerSolicitud(GestorDeReportes gestorDeReportes) {
     return gestorDeReportes.obtenerSolicitud();
   }
 
-  public Solicitud obtenerSolicitudPorPosicion(int posicion,GestorDeReportes gestorDeReportes) {
+  /**
+   * Obtener una solicitud por su posición en la lista de solicitudes.
+   *
+   * @param posicion         Posición de la solicitud
+   * @param gestorDeReportes Gestor de reportes para acceder a las solicitudes
+   * @return Solicitud en la posición especificada
+   */
+  public Solicitud obtenerSolicitudPorPosicion(int posicion, GestorDeReportes gestorDeReportes) {
     return gestorDeReportes.obtenerSolicitudPorPosicion(posicion);
   }
 
-  public void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud,GestorDeReportes gestorDeReportes) {
+  /**
+   * Gestionar una solicitud, aceptándola o rechazándola.
+   *
+   * @param solicitud        Solicitud a gestionar
+   * @param aceptarSolicitud Indica si se acepta o rechaza la solicitud
+   * @param gestorDeReportes Gestor de reportes para gestionar la solicitud
+   */
+  public void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud, GestorDeReportes gestorDeReportes) {
     gestorDeReportes.gestionarSolicitud(solicitud, aceptarSolicitud);
   }
 
+  /**
+   * Solicitar la eliminación de un hecho.
+   *
+   * @param hecho            Hecho a eliminar
+   * @param motivo           Motivo de la eliminación
+   * @param fuente           Fuente del hecho
+   * @param gestorDeReportes Gestor de reportes para registrar la solicitud
+   * @return Solicitud creada para la eliminación del hecho
+   */
   public Solicitud solicitarEliminacion(Hecho hecho, String motivo, Fuente fuente, GestorDeReportes gestorDeReportes) {
     if (hecho == null || motivo == null || motivo.isBlank()) {
       throw new IllegalArgumentException("Hecho y motivo deben estar definidos");
     }
-
     Solicitud solicitud = new Solicitud(this, hecho, motivo);
-    // Singleton (ver patronescreacionales si no entendes que hago aca)
     gestorDeReportes.agregarSolicitud(solicitud);
     return solicitud;
   }
@@ -125,7 +178,7 @@ public class Usuario {
 
   /**
    * Geters.
-   * */
+   */
   public String getNombre() {
     return nombre;
   }

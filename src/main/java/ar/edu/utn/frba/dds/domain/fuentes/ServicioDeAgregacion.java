@@ -8,13 +8,16 @@ import java.util.stream.Collectors;
 
 
 /**
- * Servicio de Agregacion.
+ * Servicio de Agregación.
+ * Permite agregar múltiples fuentes y obtener los hechos combinados de todas ellas.
  */
 public class ServicioDeAgregacion extends Fuente {
   private final List<Fuente> fuentesCargadas;
 
   /**
-   * Constructor Servicio de Agregacion.
+   * Constructor del Servicio de Agregación.
+   *
+   * @param nombre Nombre del servicio de agregación
    */
   public ServicioDeAgregacion(String nombre) {
     super(nombre);
@@ -22,14 +25,18 @@ public class ServicioDeAgregacion extends Fuente {
   }
 
   /**
-   * Agrega fuentes a la lista de fuentes cargadas.
+   * agrega una fuente al servicio de agregación.
+   *
+   * @param fuente Fuente a agregar
    */
   public void agregarFuente(Fuente fuente) {
     this.fuentesCargadas.add(fuente);
   }
 
   /**
-   * Obtiene los hechos de una fuente.
+   * obtiene los hechos de todas las fuentes cargadas.
+   *
+   * @return Lista de hechos combinados de todas las fuentes
    */
   @Override
   public List<Hecho> obtenerHechos() {
@@ -39,7 +46,9 @@ public class ServicioDeAgregacion extends Fuente {
   }
 
   /**
-   * muestra las fuentes cargadas.
+   * obtiene las fuentes cargadas en el servicio de agregación.
+   *
+   * @return Lista de fuentes cargadas
    */
   public List<Fuente> getFuentesCargadas() {
     return new ArrayList<>(fuentesCargadas);

@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Clase colección.
+ * Clase Coleccion.
+ * Representa una colección de hechos obtenidos de una fuente específica.
  */
+
 public class Coleccion {
 
   private final Fuente fuente;
@@ -20,8 +22,14 @@ public class Coleccion {
   private Filtro filtro;
 
   /**
-   * Constructor.
+   * Constructor de la colección.
+   *
+   * @param titulo      Título de la colección.
+   * @param fuente      Fuente de la colección.
+   * @param descripcion Descripción de la colección.
+   * @param categoria   Categoría de la colección.
    */
+
   public Coleccion(String titulo, Fuente fuente, String descripcion, String categoria) {
     this.titulo = titulo;
     this.fuente = fuente;
@@ -31,70 +39,90 @@ public class Coleccion {
   }
 
   /**
-   * setter del filtro.
+   * Establece el filtro de la colección.
+   *
+   * @param filtro
    */
+
   public void setFiltro(Filtro filtro) {
     this.filtro = filtro != null ? filtro : new FiltroIdentidad();
   }
+
   /**
-   * Título de la colección.
+   * Obtiene la fuente de la colección.
+   *
+   * @return Fuente de la colección.
    */
   public String getTitulo() {
     return titulo;
   }
 
   /**
-   * Descripción de la colección.
+   * Obtiene la fuente de la colección.
+   *
+   * @return Fuente de la colección.
    */
   public String getDescripcion() {
     return descripcion;
   }
 
   /**
-   * Categoría de la colección.
+   * Obtiene la fuente de la colección.
+   *
+   * @return Fuente de la colección.
    */
   public String getCategoria() {
     return categoria;
   }
 
   /**
-   * Criterio de filtro actual.
+   * Obtiene la fuente de la colección.
+   *
+   * @return Fuente de la colección.
    */
   public Filtro getFiltro() {
     return filtro;
   }
 
   /**
-   * Obtiene los hechos filtrados aplicando el criterio propio y un filtro externo opcional.
+   * Obtiene los hechos de la colección filtrados por el criterio propio y un filtro externo opcional.
+   *
+   * @param gestorDeReportes
+   * @return Lista de hechos filtrados.
    */
   public List<Hecho> getHechos(GestorDeReportes gestorDeReportes) {
-    return filtrarHechos(gestorDeReportes.hechosEliminados()).filtrar(fuente.obtenerHechos());
-  }
-
-  private Filtro filtrarHechos(List<Hecho> hechosEliminados) {
-    Filtro filtroFinal = filtro;
-    Filtro filtroExclusion = new Filtro(hechos ->
-      hechos.stream()
-            .filter(h -> !hechosEliminados.contains(h))
-            .toList()
-    );
-  //Si la lista no está vacia
-  if (hechosEliminados != null && !hechosEliminados.isEmpty()) {
-      filtroFinal = new FiltroListaAnd(List.of(filtro, filtroExclusion));
-    }
-    return filtroFinal;
+    return filtrarHechos(gestorDeReportes.filtroExcluyente()).filtrar(fuente.obtenerHechos());
   }
 
   /**
-   * Booleano, indica si la fuente de la colección es la indicada.
+   * filtra los hechos de la colección aplicando el filtro propio y un filtro excluyente.
+   *
+   * @param filtroExcluyente
+   * @return un nuevo filtro que combina el filtro de la colección con el filtro excluyente.
+   */
+
+  private Filtro filtrarHechos(Filtro filtroExcluyente) {
+    return new FiltroListaAnd(List.of(filtro, filtroExcluyente));
+  }
+
+  /**
+   * Valida si la colección contiene una fuente específica.
+   *
+   * @param unaFuente
+   * @return true si la colección contiene la fuente, false en caso contrario.
    */
   public boolean contieneFuente(Fuente unaFuente) {
     return fuente == unaFuente;
   }
 
   /**
-   * Booleano, indica si el hecho solicitado existe en la colección.
+   * Verifica si un hecho está presente en la colección.
+   *
+   * @param unHecho          Hecho a verificar.
+   * @param gestorDeReportes Gestor de reportes para obtener los hechos.
+   * @return true si el hecho está en la colección, false en caso contrario.
    */
+
   public boolean contieneA(Hecho unHecho, GestorDeReportes gestorDeReportes) {
     return this.getHechos(gestorDeReportes).contains(unHecho);
   }
