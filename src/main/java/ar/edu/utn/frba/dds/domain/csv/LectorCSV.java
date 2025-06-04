@@ -25,7 +25,7 @@ public class LectorCSV {
   private static final Logger logger = Logger.getLogger(LectorCSV.class.getName());
 
   /**
-   * Este método lee un archivo CSV y lo convierte en una lista de hechos.
+   * Este mét0do lee un archivo CSV y lo convierte en una lista de hechos.
    *
    * @param path          Ruta del archivo CSV a leer.
    * @param separator     Carácter separador utilizado en el CSV.
