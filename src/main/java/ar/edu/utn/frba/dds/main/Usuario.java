@@ -14,11 +14,9 @@ import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.rol.Rol;
 import ar.edu.utn.frba.dds.domain.servicioDeVisualizacion.ServicioDeVisualizacion;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -51,7 +49,7 @@ public class Usuario {
    * @param email  Email del usuario
    * @param roles  Conjunto de roles asignados
    */
-  public Usuario(String nombre, String email, java.util.Set<Rol> roles) {
+  public Usuario(String nombre, String email, Set<Rol> roles) {
     this(nombre, email);
     this.roles = roles;
   }
@@ -178,9 +176,30 @@ public class Usuario {
    * @param titulo      String
    * @param ubicacion   PuntoGeografico
    */
-  public Hecho crearHecho(String titulo, String descripcion, String categoria, String direccion, PuntoGeografico ubicacion, Date fecha, List<String> etiquetas, FuenteDinamica fuente) {
-    if (!tieneRol(Rol.CONTRIBUYENTE)) throw new RuntimeException("No tenés permisos para usar este método.");
-    Hecho hecho = new Hecho(titulo, descripcion, categoria, direccion, ubicacion, fecha, Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), Origen.PROVISTO_CONTRIBUYENTE, etiquetas);
+  public Hecho crearHecho(
+      String titulo,
+      String descripcion,
+      String categoria,
+      String direccion,
+      PuntoGeografico ubicacion,
+      LocalDateTime fecha,
+      List<String> etiquetas,
+      FuenteDinamica fuente
+  ) {
+    if (!tieneRol(Rol.CONTRIBUYENTE)) {
+      throw new RuntimeException("No tenés permisos para usar este método.");
+    }
+    Hecho hecho = new Hecho(
+        titulo,
+        descripcion,
+        categoria,
+        direccion,
+        ubicacion,
+        fecha,
+        LocalDateTime.now(),
+        Origen.PROVISTO_CONTRIBUYENTE,
+        etiquetas
+    );
     fuente.agregarHecho(hecho);
     return hecho;
   }
@@ -195,7 +214,11 @@ public class Usuario {
    * @return Lista de hechos visualizados
    */
 
-  public List<Hecho> visualizarHechos(Coleccion coleccion, GestorDeReportes gestor, ServicioDeVisualizacion servicio) {
+  public List<Hecho> visualizarHechos(
+      Coleccion coleccion,
+      GestorDeReportes gestor,
+      ServicioDeVisualizacion servicio
+  ) {
     if (!tieneRol(Rol.VISUALIZADOR)) {
       throw new RuntimeException("No tenés permisos para visualizar hechos.");
     }
@@ -211,7 +234,12 @@ public class Usuario {
    * @param servicio  Servicio de visualización
    * @return Lista de hechos filtrados
    */
-  public List<Hecho> filtrarHechos(Coleccion coleccion, Filtro filtro, GestorDeReportes gestor, ServicioDeVisualizacion servicio) {
+  public List<Hecho> filtrarHechos(
+      Coleccion coleccion,
+      Filtro filtro,
+      GestorDeReportes gestor,
+      ServicioDeVisualizacion servicio
+  ) {
     if (!tieneRol(Rol.VISUALIZADOR)) {
       throw new RuntimeException("No tenés permisos para filtrar hechos.");
     }

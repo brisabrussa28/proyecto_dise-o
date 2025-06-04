@@ -13,8 +13,10 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
+import ar.edu.utn.frba.dds.domain.rol.Rol;
 import ar.edu.utn.frba.dds.main.Usuario;
 
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +29,7 @@ import org.junit.jupiter.api.Test;
 
 public class ColeccionTest {
   private GestorDeReportes gestor;
-  Usuario iluminati = new Usuario("△", "libellumcipher@incognito.com");
+  Usuario iluminati = new Usuario("△", "libellumcipher@incognito.com", Set.of(Rol.ADMINISTRADOR, Rol.CONTRIBUYENTE));
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
   LocalDateTime horaAux = LocalDateTime.of(2025, 5, 6, 20, 9);
@@ -100,7 +102,7 @@ public class ColeccionTest {
     Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux, horaAux, horaAux, Origen.PROVISTO_CONTRIBUYENTE, etiquetasAux);
     fuenteAuxD.agregarHecho(hecho);
     when (detectorSpam.esSpam(anyString())).thenReturn(false);
-    gestor.eliminarHecho(hecho);
+    gestor.marcarComoEliminado(hecho);
     assertFalse(coleccion.contieneA(hecho,gestor));
   }
 

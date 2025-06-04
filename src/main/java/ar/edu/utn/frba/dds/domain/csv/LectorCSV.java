@@ -1,23 +1,26 @@
 package ar.edu.utn.frba.dds.domain.csv;
 
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-import com.opencsv.exceptions.CsvException;
-
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -127,28 +130,18 @@ public class LectorCSV {
     String fechaStr = extraerCampo(fila, mapeo.get(CampoHecho.FECHA_SUCESO), columnasPresentes, "/");
     LocalDateTime fechaSuceso = parseFecha(fechaStr, dateFormat);
 
-        boolean datosValidos = titulo != null && fechaSuceso != null;
-
-        if (datosValidos) {
-          Hecho hecho = new Hecho(
-              titulo,
-              descripcion,
-              categoria,
-              direccion,
-              ubicacion,
-              fechaSuceso,
-              LocalDateTime.now(),
-              Origen.DATASET,
-              List.of()
-          );
-          hechos.add(hecho);
-        } else {
-          System.err.println("[Línea " + linea + "] Fila descartada por datos insuficientes");
-        }
-      }
-
-    } catch (IOException | CsvException e) {
-      throw new RuntimeException("Error al leer el archivo CSV", e);
+    if (titulo != null && fechaSuceso != null) {
+      return new Hecho(
+          titulo,
+          descripcion,
+          categoria,
+          direccion,
+          ubicacion,
+          fechaSuceso,
+          LocalDateTime.now(),
+          Origen.DATASET,
+          List.of()
+      );
     }
     return null;
   }
@@ -201,7 +194,12 @@ public class LectorCSV {
    */
   private LocalDateTime parseFecha(String valor, SimpleDateFormat dateFormat) {
     try {
-      return valor != null ? dateFormat.parse(valor.trim()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+      return valor != null ? dateFormat
+          .parse(valor.trim())
+          .toInstant()
+          .atZone(ZoneId.systemDefault())
+          .toLocalDateTime()
+          : null;
     } catch (ParseException e) {
       logger.warning("Error al parsear fecha: '" + valor + "'");
       return null;

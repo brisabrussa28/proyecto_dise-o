@@ -2,25 +2,27 @@ package ar.edu.utn.frba.dds.domain.hecho;
 
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Hecho.
  */
 public class Hecho {
+  private final List<String> etiquetas;
+  private final UUID id;
+  private final UUID idUsuarioCreador;
   private String titulo;
   private String descripcion;
   private String categoria;
   private String direccion;
   private PuntoGeografico ubicacion;
-  private Date fechaSuceso;
-  private Date fechaCarga;
+  private LocalDateTime fechaSuceso;
+  private LocalDateTime fechaCarga;
   private Origen fuenteOrigen;
-  private final List<String> etiquetas;
-  private final UUID id;
-  private final UUID idUsuarioCreador;
 
   /**
    * Constructor básico.
@@ -30,8 +32,8 @@ public class Hecho {
    * @param categoria    string
    * @param direccion    string
    * @param ubicacion    PuntoGeografico
-   * @param fechaSuceso  Date
-   * @param fechaCarga   Date
+   * @param fechaSuceso  LocalDateTime
+   * @param fechaCarga   LocalDateTime
    * @param fuenteOrigen Origen
    * @param etiquetas    List<String>
    */
@@ -41,8 +43,8 @@ public class Hecho {
       String categoria,
       String direccion,
       PuntoGeografico ubicacion,
-      Date fechaSuceso,
-      Date fechaCarga,
+      LocalDateTime fechaSuceso,
+      LocalDateTime fechaCarga,
       Origen fuenteOrigen,
       List<String> etiquetas
   ) {
@@ -57,8 +59,8 @@ public class Hecho {
    * @param categoria        string
    * @param direccion        string
    * @param ubicacion        PuntoGeografico
-   * @param fechaSuceso      Date
-   * @param fechaCarga       Date
+   * @param fechaSuceso      LocalDateTime
+   * @param fechaCarga       LocalDateTime
    * @param fuenteOrigen     Origen
    * @param etiquetas        List<String>
    * @param idUsuarioCreador UUID
@@ -69,8 +71,8 @@ public class Hecho {
       String categoria,
       String direccion,
       PuntoGeografico ubicacion,
-      Date fechaSuceso,
-      Date fechaCarga,
+      LocalDateTime fechaSuceso,
+      LocalDateTime fechaCarga,
       Origen fuenteOrigen,
       List<String> etiquetas,
       UUID idUsuarioCreador
@@ -147,7 +149,7 @@ public class Hecho {
    *
    * @return Date fecha del suceso
    */
-  public Date getFechaSuceso() {
+  public LocalDateTime getFechaSuceso() {
     return fechaSuceso;
   }
 
@@ -156,7 +158,7 @@ public class Hecho {
    *
    * @return Date fecha de carga del hecho
    */
-  public Date getFechaCarga() {
+  public LocalDateTime getFechaCarga() {
     return fechaCarga;
   }
 
@@ -244,8 +246,8 @@ public class Hecho {
    * @param fecha fecha a verificar
    * @return true si ocurrió antes de la fecha, false en caso contrario
    */
-  public boolean seCargoAntesDe(Date fecha) {
-    return this.fechaCarga.before(fecha);
+  public boolean seCargoAntesDe(LocalDateTime fecha) {
+    return this.fechaCarga.isBefore(fecha);
   }
 
   /**
@@ -296,8 +298,8 @@ public class Hecho {
     if (this.idUsuarioCreador == null || !this.idUsuarioCreador.equals(idUsuarioEditor)) {
       return false;
     }
-    LocalDate hoy = LocalDate.now();
-    LocalDate fechaDeCarga = this.fechaCarga.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    LocalDateTime hoy = LocalDateTime.now();
+    LocalDateTime fechaDeCarga = this.fechaCarga;
     return hoy.isBefore(fechaDeCarga.plusWeeks(1));
   }
 
@@ -324,20 +326,34 @@ public class Hecho {
       String nuevaDireccion,
       PuntoGeografico nuevaUbicacion,
       List<String> nuevasEtiquetas,
-      Date nuevaFechaSuceso
+      LocalDateTime nuevaFechaSuceso
   ) {
-    if (!this.esEditablePor(idUsuarioEditor)) return false;
+    if (!this.esEditablePor(idUsuarioEditor)) {
+      return false;
+    }
 
-    if (nuevoTitulo != null && !nuevoTitulo.isBlank()) this.titulo = nuevoTitulo;
-    if (nuevaDescripcion != null && !nuevaDescripcion.isBlank()) this.descripcion = nuevaDescripcion;
-    if (nuevaCategoria != null && !nuevaCategoria.isBlank()) this.categoria = nuevaCategoria;
-    if (nuevaDireccion != null && !nuevaDireccion.isBlank()) this.direccion = nuevaDireccion;
-    if (nuevaUbicacion != null) this.ubicacion = nuevaUbicacion;
+    if (nuevoTitulo != null && !nuevoTitulo.isBlank()) {
+      this.titulo = nuevoTitulo;
+    }
+    if (nuevaDescripcion != null && !nuevaDescripcion.isBlank()) {
+      this.descripcion = nuevaDescripcion;
+    }
+    if (nuevaCategoria != null && !nuevaCategoria.isBlank()) {
+      this.categoria = nuevaCategoria;
+    }
+    if (nuevaDireccion != null && !nuevaDireccion.isBlank()) {
+      this.direccion = nuevaDireccion;
+    }
+    if (nuevaUbicacion != null) {
+      this.ubicacion = nuevaUbicacion;
+    }
     if (nuevasEtiquetas != null) {
       this.etiquetas.clear();
       this.etiquetas.addAll(nuevasEtiquetas);
     }
-    if (nuevaFechaSuceso != null) this.fechaSuceso = nuevaFechaSuceso;
+    if (nuevaFechaSuceso != null) {
+      this.fechaSuceso = nuevaFechaSuceso;
+    }
 
     return true;
   }

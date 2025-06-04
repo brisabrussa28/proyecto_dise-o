@@ -1,33 +1,41 @@
 package ar.edu.utn.frba.dds;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.detectorSpam.DetectorSpam;
-import ar.edu.utn.frba.dds.domain.filtro.*;
+import ar.edu.utn.frba.dds.domain.filtro.Filtro;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeCategoria;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeDireccion;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeEtiqueta;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeFecha;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeFechaDeCarga;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeLugar;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeOrigen;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroDeTitulo;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
-import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
+import ar.edu.utn.frba.dds.domain.rol.Rol;
+import ar.edu.utn.frba.dds.domain.servicioDeVisualizacion.ServicioDeVisualizacion;
 import ar.edu.utn.frba.dds.main.Usuario;
-import org.junit.jupiter.api.Test;
-
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Set;
+import org.junit.jupiter.api.Test;
 
 public class FiltroTest {
-  private DetectorSpam detectorSpam;
-  private GestorDeReportes gestor = new GestorDeReportes(detectorSpam);
-  Usuario contribuyenteA = new Usuario(null, null);
+  Usuario contribuyenteA = new Usuario("Jorge", "jorgesampa@outlook.com", Set.of(Rol.ADMINISTRADOR, Rol.CONTRIBUYENTE));
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
-  Date horaAux = Date.from(LocalDateTime.of(2025, 5, 6, 20, 9)
-      .atZone(ZoneId.systemDefault())
-      .toInstant());
+  LocalDateTime horaAux = LocalDateTime.of(2025, 5, 6, 20, 9);
   List<String> etiquetasAux = List.of(
       "#ancianita",
       "#robo_a_mano_armada",
@@ -35,11 +43,32 @@ public class FiltroTest {
       "#leyDeProtecciónALasAncianitas",
       "#NOalaVIOLENCIAcontraABUELITAS"
   );
+  private DetectorSpam detectorSpam;
+  private GestorDeReportes gestor = new GestorDeReportes(detectorSpam);
 
   public List<Hecho> crearColeccionHechoYDevolverlo() {
-    contribuyenteA.crearHecho("titulo", "Un día más siendo del conurbano", "Robos", "dire", pgAux, horaAux, etiquetasAux, fuenteAuxD);
-    Coleccion bonaerense = new Usuario("△", "libellumcipher@incognito.com").crearColeccion("Robos", "Un día más siendo del conurbano", "Robos", fuenteAuxD);
-    return new Usuario(null, null).visualizarHechos(bonaerense,gestor, new ServicioDeVisualizacion());
+    contribuyenteA.crearHecho(
+        "titulo",
+        "Un día más siendo del conurbano",
+        "Robos",
+        "dire",
+        pgAux,
+        horaAux,
+        etiquetasAux,
+        fuenteAuxD
+    );
+    Usuario illuminati = new Usuario(
+        "△",
+        "libellumcipher@incognito.com",
+        Set.of(Rol.CONTRIBUYENTE, Rol.ADMINISTRADOR, Rol.VISUALIZADOR)
+    );
+    Coleccion bonaerense = illuminati.crearColeccion(
+        "Robos",
+        "Un día más siendo del conurbano",
+        "Robos",
+        fuenteAuxD
+    );
+    return illuminati.visualizarHechos(bonaerense, gestor, new ServicioDeVisualizacion());
   }
 
   @Test
@@ -73,7 +102,7 @@ public class FiltroTest {
   @Test
   public void filtraPorFechaCargaCorrectamente() {
     List<Hecho> hechos = crearColeccionHechoYDevolverlo();
-    Date fecha = new Date();
+    LocalDateTime fecha = LocalDateTime.now();
     FiltroDeFechaDeCarga filtroFecha = new FiltroDeFechaDeCarga(fecha);
     assertFalse(filtroFecha.filtrar(hechos).isEmpty());
   }
@@ -88,8 +117,8 @@ public class FiltroTest {
   @Test
   public void filtraPorOrigenCorrectamente() {
     List<Hecho> hechos = crearColeccionHechoYDevolverlo();
-    FiltroDeOrigen filtroOrigen = new FiltroDeOrigen(Origen.CARGA_MANUAL);
-    assertTrue(filtroOrigen.filtrar(hechos).isEmpty());
+    FiltroDeOrigen filtroOrigen = new FiltroDeOrigen(Origen.DATASET);
+    assertEquals(0, filtroOrigen.filtrar(hechos).size());
   }
 
   @Test
