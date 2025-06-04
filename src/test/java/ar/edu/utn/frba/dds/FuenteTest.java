@@ -5,7 +5,7 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
-import ar.edu.utn.frba.dds.domain.fuentes.ServicioDeAgregacion;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -49,7 +49,7 @@ public class FuenteTest {
 
   @Test
   public void seAgregaLaFuenteCorrectamente() {
-    ServicioDeAgregacion servicio = new ServicioDeAgregacion("Juan");
+    FuenteDeAgregacion servicio = new FuenteDeAgregacion("Juan");
     FuenteDinamica nuevaFuente = new FuenteDinamica("Juan", null);
     servicio.agregarFuente(nuevaFuente);
     assertTrue(servicio.getFuentesCargadas().contains(nuevaFuente));
