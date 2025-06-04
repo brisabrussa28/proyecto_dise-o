@@ -1,11 +1,11 @@
 package ar.edu.utn.frba.dds.domain.coleccion;
 
-import ar.edu.utn.frba.dds.domain.filtro.*;
+import ar.edu.utn.frba.dds.domain.filtro.Filtro;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroIdentidad;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -124,6 +124,7 @@ public class Coleccion {
    */
 
   public boolean contieneA(Hecho unHecho, GestorDeReportes gestorDeReportes) {
-    return this.getHechos(gestorDeReportes).contains(unHecho);
+    return this.getHechos(gestorDeReportes)
+               .contains(unHecho);
   }
 }

@@ -55,9 +55,12 @@ public class ColeccionTest {
         fuenteAuxD
     );
 
-    boolean igual = bonaerense.getTitulo().equals("Robos") &&
-        bonaerense.getDescripcion().equals("Un día más siendo del conurbano") &&
-        bonaerense.getCategoria().equals("Robos");
+    boolean igual = bonaerense.getTitulo()
+                              .equals("Robos") &&
+        bonaerense.getDescripcion()
+                  .equals("Un día más siendo del conurbano") &&
+        bonaerense.getCategoria()
+                  .equals("Robos");
 
     assertTrue(igual);
   }
@@ -65,7 +68,8 @@ public class ColeccionTest {
   @Test
   public void coleccionContieneUnHecho() {
     Coleccion coleccion = iluminati.crearColeccion("Robos", "Descripcion", "Robos", fuenteAuxD);
-    Hecho hecho = new Hecho("titulo",
+    Hecho hecho = new Hecho(
+        "titulo",
         "desc",
         "Robos",
         "direccion",
@@ -95,7 +99,17 @@ public class ColeccionTest {
   @Test
   public void coleccionYaNoContieneHechoEliminadoPorGestor() {
     Coleccion coleccion = iluminati.crearColeccion("Robos", "Descripcion", "Robos", fuenteAuxD);
-    Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux, horaAux, horaAux, Origen.PROVISTO_CONTRIBUYENTE, etiquetasAux);
+    Hecho hecho = new Hecho(
+        "titulo",
+        "desc",
+        "Robos",
+        "direccion",
+        pgAux,
+        horaAux,
+        horaAux,
+        Origen.PROVISTO_CONTRIBUYENTE,
+        etiquetasAux
+    );
     fuenteAuxD.agregarHecho(hecho);
     when(detectorSpam.esSpam(anyString())).thenReturn(false);
     gestor.marcarComoEliminado(hecho);

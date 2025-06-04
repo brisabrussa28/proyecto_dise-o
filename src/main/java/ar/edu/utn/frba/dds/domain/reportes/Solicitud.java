@@ -20,9 +20,11 @@ public class Solicitud {
    * @param hechoSolicitado Hecho solicitado para eliminar
    * @param motivo          Razón de la eliminación
    */
-  public Solicitud(Usuario solicitante,
-                   Hecho hechoSolicitado,
-                   String motivo) {
+  public Solicitud(
+      Usuario solicitante,
+      Hecho hechoSolicitado,
+      String motivo
+  ) {
     this.validarMotivo(motivo);
     this.solicitante = solicitante;
     this.hechoSolicitado = hechoSolicitado;

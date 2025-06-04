@@ -33,7 +33,12 @@ public class LectorCsvTest {
         CampoHecho.DIRECCION, List.of("direccion")
     );
 
-    List<Hecho> csv = new LectorCSV().importar("src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemplo.csv", ',', "dd/MM/yyyy", mapeoColumnas);
+    List<Hecho> csv = new LectorCSV().importar(
+        "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemplo.csv",
+        ',',
+        "dd/MM/yyyy",
+        mapeoColumnas
+    );
     FiltroDeDireccion filtroDireccion = new FiltroDeDireccion("EL NESTORNAUTA");
     List<Hecho> hechosFiltrados = filtroDireccion.filtrar(csv);
     Hecho hecho = hechosFiltrados.get(0);
@@ -45,16 +50,28 @@ public class LectorCsvTest {
   @Test
   public void importarCSVformatoExtraño() {
     Map<CampoHecho, List<String>> mapeoColumnas = Map.of(
-        CampoHecho.TITULO, List.of("tipo_persona_id"),
-        CampoHecho.DESCRIPCION, List.of("tipo_persona", "modo_produccion_hecho_ampliada", "modo_produccion_hecho_otro"),
-        CampoHecho.LATITUD, List.of("latitud"),
-        CampoHecho.LONGITUD, List.of("longitud"),
-        CampoHecho.FECHA_SUCESO, List.of("fecha_hecho"),
-        CampoHecho.CATEGORIA, List.of("semaforo_estado"),
-        CampoHecho.DIRECCION, List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura")
+        CampoHecho.TITULO,
+        List.of("tipo_persona_id"),
+        CampoHecho.DESCRIPCION,
+        List.of("tipo_persona", "modo_produccion_hecho_ampliada", "modo_produccion_hecho_otro"),
+        CampoHecho.LATITUD,
+        List.of("latitud"),
+        CampoHecho.LONGITUD,
+        List.of("longitud"),
+        CampoHecho.FECHA_SUCESO,
+        List.of("fecha_hecho"),
+        CampoHecho.CATEGORIA,
+        List.of("semaforo_estado"),
+        CampoHecho.DIRECCION,
+        List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura")
     );
 
-    List<Hecho> csv = new LectorCSV().importar("src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/rarito.csv", ',', "dd-MM-yy", mapeoColumnas);
+    List<Hecho> csv = new LectorCSV().importar(
+        "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/rarito.csv",
+        ',',
+        "dd-MM-yy",
+        mapeoColumnas
+    );
     Hecho hecho = csv.get(0);
     System.out.println("Hecho importado:");
     System.out.println(hecho.getTitulo() + " - " + hecho.getDescripcion() + " - " + hecho.getCategoria() + " - " + hecho.getFechaSuceso() + " - " + hecho.getDireccion());
@@ -72,7 +89,12 @@ public class LectorCsvTest {
         CampoHecho.CATEGORIA, List.of("categoria"),
         CampoHecho.DIRECCION, List.of("direccion")
     );
-    List<Hecho> hechos = new LectorCSV().importar("src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemplo.csv", ',', "dd/MM/yyyy", mapeoEjemplo);
+    List<Hecho> hechos = new LectorCSV().importar(
+        "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemplo.csv",
+        ',',
+        "dd/MM/yyyy",
+        mapeoEjemplo
+    );
     assertEquals(5, hechos.size());
   }
 
@@ -87,28 +109,50 @@ public class LectorCsvTest {
         CampoHecho.CATEGORIA, List.of("categoria"),
         CampoHecho.DIRECCION, List.of("direccion")
     );
-    List<Hecho> hechos = new LectorCSV().importar("src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemploReordenado.csv", ',', "dd/MM/yyyy", mapeoEjemplo);
+    List<Hecho> hechos = new LectorCSV().importar(
+        "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemploReordenado.csv",
+        ',',
+        "dd/MM/yyyy",
+        mapeoEjemplo
+    );
     assertEquals(5, hechos.size());
-    assertTrue(hechos.stream().anyMatch(h -> "EL NESTORNAUTA".equals(h.getDireccion())));
+    assertTrue(hechos.stream()
+                     .anyMatch(h -> "EL NESTORNAUTA".equals(h.getDireccion())));
   }
 
   @Test
   public void testCsvConFilasVaciasYLecturaEspecial() {
     Map<CampoHecho, List<String>> mapeo = Map.of(
-        CampoHecho.TITULO, List.of("tipo_persona_id"),
-        CampoHecho.DESCRIPCION, List.of("tipo_persona"),
-        CampoHecho.LATITUD, List.of("latitud"),
-        CampoHecho.LONGITUD, List.of("longitud"),
-        CampoHecho.FECHA_SUCESO, List.of("fecha_hecho"),
-        CampoHecho.CATEGORIA, List.of("semaforo_estado"),
-        CampoHecho.DIRECCION, List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura")
+        CampoHecho.TITULO,
+        List.of("tipo_persona_id"),
+        CampoHecho.DESCRIPCION,
+        List.of("tipo_persona"),
+        CampoHecho.LATITUD,
+        List.of("latitud"),
+        CampoHecho.LONGITUD,
+        List.of("longitud"),
+        CampoHecho.FECHA_SUCESO,
+        List.of("fecha_hecho"),
+        CampoHecho.CATEGORIA,
+        List.of("semaforo_estado"),
+        CampoHecho.DIRECCION,
+        List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura")
     );
 
-    List<Hecho> hechos = new LectorCSV().importar("src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/luciano.csv", ',', "dd-MM-yy", mapeo);
+    List<Hecho> hechos = new LectorCSV().importar(
+        "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/luciano.csv",
+        ',',
+        "dd-MM-yy",
+        mapeo
+    );
 
     // Solo debe haber 1 hecho, los otros están vacíos
     assertEquals(1, hechos.size());
-    assertEquals("Imputado idRegistro 13483", hechos.get(0).getTitulo());
+    assertEquals(
+        "Imputado idRegistro 13483",
+        hechos.get(0)
+              .getTitulo()
+    );
   }
 
   @Test
@@ -118,9 +162,11 @@ public class LectorCsvTest {
       writer.write(""); // archivo vacío
     }
 
-    assertThrows(IllegalArgumentException.class, () -> {
-      new LectorCSV().importar(path, ',', "dd/MM/yyyy", Map.of());
-    });
+    assertThrows(
+        IllegalArgumentException.class, () -> {
+          new LectorCSV().importar(path, ',', "dd/MM/yyyy", Map.of());
+        }
+    );
   }
 
   @Test
@@ -154,7 +200,8 @@ public class LectorCsvTest {
 
     List<Hecho> hechos = new LectorCSV().importar(path, ',', "dd/MM/yyyy", mapeo);
     assertEquals(1, hechos.size()); // Se crea igual porque lat/lon son opcionales
-    assertNull(hechos.get(0).getUbicacion());
+    assertNull(hechos.get(0)
+                     .getUbicacion());
   }
 
   @Test

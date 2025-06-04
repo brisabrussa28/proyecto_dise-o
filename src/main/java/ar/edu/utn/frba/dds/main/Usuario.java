@@ -74,7 +74,9 @@ public class Usuario {
    * @return Colección creada
    */
   public Coleccion crearColeccion(String titulo, String descripcion, String categoria, Fuente fuente) {
-    if (!tieneRol(Rol.ADMINISTRADOR)) throw new RuntimeException("No tenés permisos para usar este método.");
+    if (!tieneRol(Rol.ADMINISTRADOR)) {
+      throw new RuntimeException("No tenés permisos para usar este método.");
+    }
     return new Coleccion(titulo, fuente, descripcion, categoria);
   }
 
@@ -88,8 +90,16 @@ public class Usuario {
    * @param mapeo        Mapeo de campos del hecho a columnas del CSV
    * @return FuenteEstatica creada a partir del CSV
    */
-  public FuenteEstatica importardesdeCsv(String rutaCsv, char separador, String nombreFuente, String formatoFecha, Map<CampoHecho, List<String>> mapeo) {
-    if (!tieneRol(Rol.ADMINISTRADOR)) throw new RuntimeException("No tenés permisos para usar este método.");
+  public FuenteEstatica importardesdeCsv(
+      String rutaCsv,
+      char separador,
+      String nombreFuente,
+      String formatoFecha,
+      Map<CampoHecho, List<String>> mapeo
+  ) {
+    if (!tieneRol(Rol.ADMINISTRADOR)) {
+      throw new RuntimeException("No tenés permisos para usar este método.");
+    }
     if (rutaCsv == null || nombreFuente == null) {
       throw new IllegalArgumentException("Ruta y nombre de fuente deben estar definidos");
     }
@@ -105,8 +115,15 @@ public class Usuario {
    * @param mapeo        Mapeo de campos del hecho a columnas del CSV
    * @return FuenteEstatica creada a partir del CSV
    */
-  public FuenteEstatica importardesdeCsv(String rutaCsv, String nombreFuente, String formatoFecha, Map<CampoHecho, List<String>> mapeo) {
-    if (!tieneRol(Rol.ADMINISTRADOR)) throw new RuntimeException("No tenés permisos para usar este método.");
+  public FuenteEstatica importardesdeCsv(
+      String rutaCsv,
+      String nombreFuente,
+      String formatoFecha,
+      Map<CampoHecho, List<String>> mapeo
+  ) {
+    if (!tieneRol(Rol.ADMINISTRADOR)) {
+      throw new RuntimeException("No tenés permisos para usar este método.");
+    }
     return importardesdeCsv(rutaCsv, ',', nombreFuente, formatoFecha, mapeo);
   }
 
@@ -117,8 +134,11 @@ public class Usuario {
    * @return Solicitud obtenida del gestor de reportes
    */
   public Solicitud obtenerSolicitud(GestorDeReportes gestorDeReportes) {
-    if (!tieneRol(Rol.ADMINISTRADOR)) throw new RuntimeException("No tenés permisos para usar este método.");
-    else return gestorDeReportes.obtenerSolicitud();
+    if (!tieneRol(Rol.ADMINISTRADOR)) {
+      throw new RuntimeException("No tenés permisos para usar este método.");
+    } else {
+      return gestorDeReportes.obtenerSolicitud();
+    }
   }
 
   /**
@@ -129,8 +149,11 @@ public class Usuario {
    * @return Solicitud en la posición especificada
    */
   public Solicitud obtenerSolicitudPorPosicion(int posicion, GestorDeReportes gestorDeReportes) {
-    if (!tieneRol(Rol.ADMINISTRADOR)) throw new RuntimeException("No tenés permisos para usar este método.");
-    else return gestorDeReportes.obtenerSolicitudPorPosicion(posicion);
+    if (!tieneRol(Rol.ADMINISTRADOR)) {
+      throw new RuntimeException("No tenés permisos para usar este método.");
+    } else {
+      return gestorDeReportes.obtenerSolicitudPorPosicion(posicion);
+    }
   }
 
   /**
@@ -141,7 +164,9 @@ public class Usuario {
    * @param gestorDeReportes Gestor de reportes para gestionar la solicitud
    */
   public void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud, GestorDeReportes gestorDeReportes) {
-    if (!tieneRol(Rol.ADMINISTRADOR)) throw new RuntimeException("No tenés permisos para usar este método.");
+    if (!tieneRol(Rol.ADMINISTRADOR)) {
+      throw new RuntimeException("No tenés permisos para usar este método.");
+    }
     gestorDeReportes.gestionarSolicitud(solicitud, aceptarSolicitud);
   }
 
@@ -155,7 +180,9 @@ public class Usuario {
    * @return Solicitud creada para la eliminación del hecho
    */
   public Solicitud solicitarEliminacion(Hecho hecho, String motivo, Fuente fuente, GestorDeReportes gestorDeReportes) {
-    if (!tieneRol(Rol.CONTRIBUYENTE)) throw new RuntimeException("No tenés permisos para usar este método.");
+    if (!tieneRol(Rol.CONTRIBUYENTE)) {
+      throw new RuntimeException("No tenés permisos para usar este método.");
+    }
     if (hecho == null || motivo == null || motivo.isBlank()) {
       throw new IllegalArgumentException("Hecho y motivo deben estar definidos");
     }

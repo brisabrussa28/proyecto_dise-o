@@ -50,9 +50,12 @@ public class LectorCSV {
     //Evita fechas imposibles como 31/23/2023
     dateFormat.setLenient(false);
 
-    try (CSVReader reader = new CSVReaderBuilder(new FileReader(path))
-        .withCSVParser(new CSVParserBuilder().withSeparator(separator).build())
-        .build()) {
+    try (
+        CSVReader reader = new CSVReaderBuilder(new FileReader(path))
+            .withCSVParser(new CSVParserBuilder().withSeparator(separator)
+                                                 .build())
+            .build()
+    ) {
 
       String[] headers = reader.readNext();
       if (headers == null || headers.length == 0) {
@@ -75,7 +78,8 @@ public class LectorCSV {
         }
       }
 
-    } catch (IOException | CsvException e) {
+    }
+    catch (IOException | CsvException e) {
       throw new RuntimeException("Error al leer el archivo CSV", e);
     }
 
@@ -124,8 +128,8 @@ public class LectorCSV {
     Double latitud = parseDouble(latStr);
     Double longitud = parseDouble(lonStr);
     PuntoGeografico ubicacion = (latitud != null && longitud != null)
-        ? new PuntoGeografico(latitud, longitud)
-        : null;
+                                ? new PuntoGeografico(latitud, longitud)
+                                : null;
 
     String fechaStr = extraerCampo(fila, mapeo.get(CampoHecho.FECHA_SUCESO), columnasPresentes, "/");
     LocalDateTime fechaSuceso = parseFecha(fechaStr, dateFormat);
@@ -155,19 +159,27 @@ public class LectorCSV {
    * @param separador         Separador a utilizar para concatenar los valores.
    * @return Valor concatenado de las columnas o null si no se encuentra ningún valor.
    */
-  private String extraerCampo(Map<String, String> fila, List<String> columnas, Set<String> columnasPresentes, String separador) {
-    if (columnas == null) return null;
+  private String extraerCampo(
+      Map<String, String> fila,
+      List<String> columnas,
+      Set<String> columnasPresentes,
+      String separador
+  ) {
+    if (columnas == null) {
+      return null;
+    }
 
     return columnas.stream()
-        .peek(col -> {
-          if (!columnasPresentes.contains(col)) {
-            logger.warning("Advertencia: columna " + col + " no encontrada en CSV");
-          }
-        })
-        .map(fila::get)
-        .filter(s -> s != null && !s.trim().isEmpty())
-        .reduce((a, b) -> a + separador + b)
-        .orElse(null);
+                   .peek(col -> {
+                     if (!columnasPresentes.contains(col)) {
+                       logger.warning("Advertencia: columna " + col + " no encontrada en CSV");
+                     }
+                   })
+                   .map(fila::get)
+                   .filter(s -> s != null && !s.trim()
+                                               .isEmpty())
+                   .reduce((a, b) -> a + separador + b)
+                   .orElse(null);
   }
 
   /**
@@ -179,7 +191,8 @@ public class LectorCSV {
   private Double parseDouble(String valor) {
     try {
       return valor != null ? Double.parseDouble(valor.trim()) : null;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       logger.warning("Error al parsear double: '" + valor + "'");
       return null;
     }
@@ -199,8 +212,9 @@ public class LectorCSV {
           .toInstant()
           .atZone(ZoneId.systemDefault())
           .toLocalDateTime()
-          : null;
-    } catch (ParseException e) {
+                           : null;
+    }
+    catch (ParseException e) {
       logger.warning("Error al parsear fecha: '" + valor + "'");
       return null;
     }

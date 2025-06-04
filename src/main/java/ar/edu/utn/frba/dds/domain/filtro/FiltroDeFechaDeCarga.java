@@ -11,15 +11,16 @@ public class FiltroDeFechaDeCarga extends Filtro {
    */
   public FiltroDeFechaDeCarga(LocalDateTime fechaCarga) {
     super(hechos -> {
-      LocalDateTime referencia = fechaCarga.atZone(ZoneId.systemDefault()).toLocalDateTime();
+      LocalDateTime referencia = fechaCarga.atZone(ZoneId.systemDefault())
+                                           .toLocalDateTime();
       return hechos.stream()
-          .filter(h -> {
-            // Convertir la fecha de carga del hecho a LocalDate para comparar dias (sin hora)
-            LocalDateTime fechaHecho = h.getFechaCarga();
-            return fechaHecho.getHour() == referencia.getHour()
-                && fechaHecho.getMinute() == referencia.getMinute();
-          })
-          .toList();
+                   .filter(h -> {
+                     // Convertir la fecha de carga del hecho a LocalDate para comparar dias (sin hora)
+                     LocalDateTime fechaHecho = h.getFechaCarga();
+                     return fechaHecho.getHour() == referencia.getHour()
+                         && fechaHecho.getMinute() == referencia.getMinute();
+                   })
+                   .toList();
     });
   }
 }

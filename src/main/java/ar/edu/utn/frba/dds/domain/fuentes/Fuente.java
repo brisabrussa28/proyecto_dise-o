@@ -1,10 +1,7 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-import ar.edu.utn.frba.dds.domain.filtro.FiltroDeId;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Clase fuente.

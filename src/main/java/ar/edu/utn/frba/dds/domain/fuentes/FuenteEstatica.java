@@ -3,11 +3,8 @@ package ar.edu.utn.frba.dds.domain.fuentes;
 import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Fuente de datos estática basada en archivo CSV.
@@ -28,7 +25,13 @@ public class FuenteEstatica extends Fuente {
    * @param formatoFecha Formato de fecha para los campos de fecha en el CSV.
    * @param mapeo        Mapeo de campos del hecho a columnas del CSV.
    */
-  public FuenteEstatica(String nombre, String rutaCsv, char separador, String formatoFecha, Map<CampoHecho, List<String>> mapeo) {
+  public FuenteEstatica(
+      String nombre,
+      String rutaCsv,
+      char separador,
+      String formatoFecha,
+      Map<CampoHecho, List<String>> mapeo
+  ) {
     super(nombre); // no carga los hechos en el constructor
     this.rutaCsv = rutaCsv;
     this.separador = separador;

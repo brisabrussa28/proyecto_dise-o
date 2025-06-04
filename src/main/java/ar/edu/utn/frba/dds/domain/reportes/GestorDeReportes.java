@@ -119,9 +119,9 @@ public class GestorDeReportes {
    */
   public Filtro filtroExcluyente() {
     return new Filtro(hechos ->
-        hechos.stream()
-            .filter(h -> !hechosEliminados.contains(h))
-            .toList()
+                          hechos.stream()
+                                .filter(h -> !hechosEliminados.contains(h))
+                                .toList()
     );
   }
 }

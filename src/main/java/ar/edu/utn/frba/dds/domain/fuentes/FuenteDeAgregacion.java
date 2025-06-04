@@ -3,7 +3,6 @@ package ar.edu.utn.frba.dds.domain.fuentes;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -41,8 +40,9 @@ public class FuenteDeAgregacion extends Fuente {
   @Override
   public List<Hecho> obtenerHechos() {
     return fuentesCargadas.stream()
-        .flatMap(fuente -> fuente.obtenerHechos().stream())
-        .collect(Collectors.toList());
+                          .flatMap(fuente -> fuente.obtenerHechos()
+                                                   .stream())
+                          .collect(Collectors.toList());
   }
 
   /**
