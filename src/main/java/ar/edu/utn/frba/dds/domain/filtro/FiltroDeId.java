@@ -8,19 +8,14 @@ import java.util.UUID;
  * Clase de filtro de id.
  */
 public class FiltroDeId extends Filtro {
-  UUID id;
-
   /**
-   * Constructor.
+   * Constructor de FiltroDeId.
+   *
+   * @param id Identificador del hecho a filtrar.
    */
-  public FiltroDeId(UUID id) {
-    this.id = id;
-  }
-
-  @Override
-  public List<Hecho> filtrar(List<Hecho> hechos) {
-    return hechos.stream()
-        .filter(hecho -> hecho.esElMismo(id))
-        .toList();
+  public FiltroDeId(String id) {
+    super(hechos -> hechos.stream()
+        .filter(h -> h.getId().toString().equals(id))
+        .toList());
   }
 }

@@ -8,17 +8,14 @@ import java.util.List;
  * Clase de filtro de titulo.
  */
 public class FiltroDeTitulo extends Filtro {
-  String titulo;
-
   /**
-   * Constructor.
+   * Constructor de FiltroDeTitulo.
+   *
+   * @param titulo Titulo a filtrar en los hechos.
    */
   public FiltroDeTitulo(String titulo) {
-    this.titulo = titulo;
-  }
-
-  @Override
-  public List<Hecho> filtrar(List<Hecho> hechos) {
-    return hechos.stream().filter(hecho -> hecho.esDeTitulo(titulo)).toList();
+    super(hechos -> hechos.stream()
+        .filter(h -> h.getTitulo().equalsIgnoreCase(titulo))
+        .toList());
   }
 }

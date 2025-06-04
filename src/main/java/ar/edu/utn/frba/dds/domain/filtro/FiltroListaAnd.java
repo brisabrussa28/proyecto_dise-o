@@ -8,21 +8,18 @@ import java.util.List;
  * Clase filtro de lista and.
  */
 public class FiltroListaAnd extends Filtro {
-  List<Filtro> filtros;
-
   /**
-   * Constructor.
+   * Constructor de FiltroListaAnd.
+   *
+   * @param filtros Lista de filtros a combinar con una operación AND
    */
   public FiltroListaAnd(List<Filtro> filtros) {
-    this.filtros = new ArrayList<>(filtros);
-  }
-
-  @Override
-  public List<Hecho> filtrar(List<Hecho> hechos) {
-    return filtros.stream()
-        .reduce(hechos,
-            (hechosFiltrados, filtro) -> filtro.filtrar(hechosFiltrados),
-            (hechos1, hechos2) -> hechos1); // este combiner no importa porque es secuencial
+    super(hechos -> {
+      List<Hecho> resultado = hechos;
+      for (Filtro filtro : filtros) {
+        resultado = filtro.filtrar(resultado);
+      }
+      return resultado;
+    });
   }
 }
-

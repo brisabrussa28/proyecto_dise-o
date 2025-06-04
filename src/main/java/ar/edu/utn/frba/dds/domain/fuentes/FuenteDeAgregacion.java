@@ -8,28 +8,35 @@ import java.util.stream.Collectors;
 
 
 /**
- * Servicio de Agregacion.
+ * Servicio de Agregación.
+ * Permite agregar múltiples fuentes y obtener los hechos combinados de todas ellas.
  */
-public class FuenteDeAgregacion extends Fuente {
+public class ServicioDeAgregacion extends Fuente {
   private final List<Fuente> fuentesCargadas;
 
   /**
-   * Constructor Servicio de Agregacion.
+   * Constructor del Servicio de Agregación.
+   *
+   * @param nombre Nombre del servicio de agregación
    */
-  public FuenteDeAgregacion(String nombre) {
-    super(nombre, null); // no usamos una lista fija local
+  public ServicioDeAgregacion(String nombre) {
+    super(nombre);
     this.fuentesCargadas = new ArrayList<>();
   }
 
   /**
-   * Agrega fuentes a la lista de fuentes cargadas.
+   * agrega una fuente al servicio de agregación.
+   *
+   * @param fuente Fuente a agregar
    */
   public void agregarFuente(Fuente fuente) {
     this.fuentesCargadas.add(fuente);
   }
 
   /**
-   * Obtiene los hechos de una fuente.
+   * obtiene los hechos de todas las fuentes cargadas.
+   *
+   * @return Lista de hechos combinados de todas las fuentes
    */
   @Override
   public List<Hecho> obtenerHechos() {
@@ -39,21 +46,10 @@ public class FuenteDeAgregacion extends Fuente {
   }
 
   /**
-   * Elimina un hecho de una fuente.
+   * obtiene las fuentes cargadas en el servicio de agregación.
+   *
+   * @return Lista de fuentes cargadas
    */
-  @Override
-  public void eliminarHecho(UUID hecho) {
-    for (Fuente fuente : fuentesCargadas) {
-      try {
-        fuente.eliminarHecho(hecho);
-        return; // eliminado con éxito, salimos
-      } catch (IllegalStateException e) {
-        // ignoramos y seguimos buscando en otras fuentes
-      }
-    }
-    throw new IllegalStateException("El hecho no se encontró: " + hecho);
-  }
-
   public List<Fuente> getFuentesCargadas() {
     return new ArrayList<>(fuentesCargadas);
   }

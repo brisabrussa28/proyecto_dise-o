@@ -1,86 +1,129 @@
 package ar.edu.utn.frba.dds.domain.coleccion;
 
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
+import ar.edu.utn.frba.dds.domain.filtro.*;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
+import java.util.ArrayList;
 import java.util.List;
 
-
 /**
- * Clase colección.
+ * Clase Coleccion.
+ * Representa una colección de hechos obtenidos de una fuente específica.
  */
+
 public class Coleccion {
+
   private final Fuente fuente;
   private final String titulo;
   private final String descripcion;
   private final String categoria;
   private Filtro filtro;
-  //private String criterio;
 
   /**
-   * Constructor.
+   * Constructor de la colección.
+   *
+   * @param titulo      Título de la colección.
+   * @param fuente      Fuente de la colección.
+   * @param descripcion Descripción de la colección.
+   * @param categoria   Categoría de la colección.
    */
+
   public Coleccion(String titulo, Fuente fuente, String descripcion, String categoria) {
     this.titulo = titulo;
     this.fuente = fuente;
     this.descripcion = descripcion;
     this.categoria = categoria;
-    this.filtro = new Filtro();
+    this.filtro = new FiltroIdentidad();
   }
 
   /**
-   * Eliminar hecho de la fuente.
+   * Establece el filtro de la colección.
+   *
+   * @param filtro
    */
-  public void eliminarHecho(Hecho hecho) {
-    fuente.eliminarHecho(hecho.getId());
+
+  public void setFiltro(Filtro filtro) {
+    this.filtro = filtro != null ? filtro : new FiltroIdentidad();
   }
 
   /**
-   * Modificación criterio de la colección.
+   * Obtiene la fuente de la colección.
+   *
+   * @return Fuente de la colección.
    */
-  public void agregarCriterio(Filtro nuevoFiltro) {
-    this.filtro = nuevoFiltro;
-  }
-
-  /**
-   * Filtrar hechos.
-   */
-  public List<Hecho> filtrar(Coleccion coleccion, Filtro filtro) {
-    return filtro.filtrar(coleccion.getHechos());
-  }
-
   public String getTitulo() {
     return titulo;
   }
 
+  /**
+   * Obtiene la fuente de la colección.
+   *
+   * @return Fuente de la colección.
+   */
   public String getDescripcion() {
     return descripcion;
   }
 
+  /**
+   * Obtiene la fuente de la colección.
+   *
+   * @return Fuente de la colección.
+   */
   public String getCategoria() {
     return categoria;
   }
 
+  /**
+   * Obtiene la fuente de la colección.
+   *
+   * @return Fuente de la colección.
+   */
   public Filtro getFiltro() {
     return filtro;
   }
 
-  public List<Hecho> getHechos() {
-    return filtro.filtrar(fuente.obtenerHechos());
+  /**
+   * Obtiene los hechos de la colección filtrados por el criterio propio y un filtro externo opcional.
+   *
+   * @param gestorDeReportes
+   * @return Lista de hechos filtrados.
+   */
+  public List<Hecho> getHechos(GestorDeReportes gestorDeReportes) {
+    return filtrarHechos(gestorDeReportes.filtroExcluyente()).filtrar(fuente.obtenerHechos());
   }
 
   /**
-   * Booleano, indica si la fuente de la colección es la indicadas.
+   * filtra los hechos de la colección aplicando el filtro propio y un filtro excluyente.
+   *
+   * @param filtroExcluyente
+   * @return un nuevo filtro que combina el filtro de la colección con el filtro excluyente.
+   */
+
+  private Filtro filtrarHechos(Filtro filtroExcluyente) {
+    return new FiltroListaAnd(List.of(filtro, filtroExcluyente));
+  }
+
+  /**
+   * Valida si la colección contiene una fuente específica.
+   *
+   * @param unaFuente
+   * @return true si la colección contiene la fuente, false en caso contrario.
    */
   public boolean contieneFuente(Fuente unaFuente) {
     return fuente == unaFuente;
   }
 
   /**
-   * Booleano, indica si el hecho solicitado existe en la colección.
+   * Verifica si un hecho está presente en la colección.
+   *
+   * @param unHecho          Hecho a verificar.
+   * @param gestorDeReportes Gestor de reportes para obtener los hechos.
+   * @return true si el hecho está en la colección, false en caso contrario.
    */
-  public boolean contieneA(Hecho unHecho) {
-    return this.getHechos().contains(unHecho);
+
+  public boolean contieneA(Hecho unHecho, GestorDeReportes gestorDeReportes) {
+    return this.getHechos(gestorDeReportes).contains(unHecho);
   }
 }
-

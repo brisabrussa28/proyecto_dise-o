@@ -1,26 +1,18 @@
 package ar.edu.utn.frba.dds.domain.filtro;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+
 import java.util.List;
 
-/**
- * Filtro de Categoria.
- */
 public class FiltroDeCategoria extends Filtro {
-
-  String categoria;
-
   /**
-   * Constructor.
+   * Constructor de FiltroDeCategoria.
+   *
+   * @param categoria Categoría a filtrar en los hechos.
    */
   public FiltroDeCategoria(String categoria) {
-    this.categoria = categoria;
-  }
-
-  @Override
-  public List<Hecho> filtrar(List<Hecho> hechos) {
-    return hechos.stream()
-        .filter(h -> h.esDeCategoria(categoria))
-        .toList();
+    super(hechos -> hechos.stream()
+        .filter(h -> h.getCategoria().equalsIgnoreCase(categoria))
+        .toList());
   }
 }

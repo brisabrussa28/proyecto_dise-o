@@ -9,17 +9,14 @@ import java.util.List;
  * Clase de filtro de lugar.
  */
 public class FiltroDeLugar extends Filtro {
-  PuntoGeografico ubicacion;
-
   /**
-   * Constructor.
+   * Constructor de FiltroDeLugar.
+   *
+   * @param lugar PuntoGeografico a filtrar en los hechos.
    */
-  public FiltroDeLugar(PuntoGeografico ubicacion) {
-    this.ubicacion = ubicacion;
-  }
-
-  @Override
-  public List<Hecho> filtrar(List<Hecho> hechos) {
-    return hechos.stream().filter(hecho -> hecho.esDeLugar(ubicacion)).toList();
+  public FiltroDeLugar(PuntoGeografico lugar) {
+    super(hechos -> hechos.stream()
+        .filter(h -> h.getUbicacion().equals(lugar))
+        .toList());
   }
 }

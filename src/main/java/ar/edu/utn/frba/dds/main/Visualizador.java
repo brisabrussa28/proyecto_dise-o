@@ -4,6 +4,7 @@ import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import java.util.List;
 
 /**
@@ -21,8 +22,8 @@ public class Visualizador extends Persona {
   /**
    * Visualizar hechos.
    */
-  public List<Hecho> visualizarHechos(Coleccion coleccion) {
-    return coleccion.getHechos();
+  public List<Hecho> visualizarHechos(Coleccion coleccion, GestorDeReportes gestor) {
+    return coleccion.getHechos(gestor);
   }
 
   /**
@@ -35,6 +36,8 @@ public class Visualizador extends Persona {
   /**
    * Filtrar los hechos.
    */
-
+  public List<Hecho> filtrar(Coleccion coleccion, Filtro filtro, GestorDeReportes gestor) {
+    return filtro.filtrar(coleccion.getHechos(gestor));
+  }
 
 }

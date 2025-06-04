@@ -8,20 +8,16 @@ import java.util.List;
  * Clase filtro lista or.
  */
 public class FiltroListaOr extends Filtro {
-  List<Filtro> filtros;
-
   /**
-   * Constructor.
+   * Constructor de FiltroListaOr.
+   *
+   * @param filtros Lista de filtros a combinar con una operación OR.
    */
-  public FiltroListaOr(List<Filtro> filtros) {
-    this.filtros = new ArrayList<>(filtros);
-  }
 
-  @Override
-  public List<Hecho> filtrar(List<Hecho> hechos) {
-    return filtros.stream()
-        .flatMap(filtro -> filtro.filtrar(hechos).stream())
-        .distinct()  // eliminar duplicados si corresponde
-        .toList();
+  public FiltroListaOr(List<Filtro> filtros) {
+    super(hechos -> filtros.stream()
+        .flatMap(f -> f.filtrar(hechos).stream())
+        .distinct()
+        .toList());
   }
 }

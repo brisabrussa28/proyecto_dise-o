@@ -1,24 +1,29 @@
 package ar.edu.utn.frba.dds.domain.filtro;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import java.time.LocalDateTime;
+
+import java.util.Date;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
-/**
- * Clase filtro de fecha de carga.
- */
 public class FiltroDeFechaDeCarga extends Filtro {
-  LocalDateTime fecha;
-
   /**
-   * Constructor.
+   * Constructor de FiltroDeFechaDeCarga.
+   *
+   * @param fechaCarga Fecha de carga a filtrar en los hechos.
    */
-  public FiltroDeFechaDeCarga(LocalDateTime fecha) {
-    this.fecha = fecha;
-  }
-
-  @Override
-  public List<Hecho> filtrar(List<Hecho> hechos) {
-    return hechos.stream().filter(hecho -> hecho.seCargoEl(fecha)).toList();
+  public FiltroDeFechaDeCarga(Date fechaCarga) {
+    super(hechos -> {
+      LocalDate referencia = fechaCarga.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+      return hechos.stream()
+          .filter(h -> {
+            // Convertir la fecha de carga del hecho a LocalDate para comparar dias (sin hora)
+            LocalDate fechaHecho = h.getFechaCarga().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            return fechaHecho.equals(referencia);
+          })
+          .toList();
+    });
   }
 }
+
