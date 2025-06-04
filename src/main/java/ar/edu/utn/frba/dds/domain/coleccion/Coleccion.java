@@ -3,8 +3,8 @@ package ar.edu.utn.frba.dds.domain.coleccion;
 import ar.edu.utn.frba.dds.domain.filtro.*;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +17,6 @@ public class Coleccion {
   private final String titulo;
   private final String descripcion;
   private final String categoria;
-
   private Filtro filtro;
 
   /**
@@ -28,16 +27,15 @@ public class Coleccion {
     this.fuente = fuente;
     this.descripcion = descripcion;
     this.categoria = categoria;
-    this.filtro = new Filtro(hechos -> hechos);
+    this.filtro = new FiltroIdentidad();
   }
 
   /**
-   * Modificación criterio de la colección.
+   * setter del filtro.
    */
-  public void agregarCriterio(Filtro nuevoFiltro) {
-    this.filtro = nuevoFiltro;
+  public void setFiltro(Filtro filtro) {
+    this.filtro = filtro != null ? filtro : new FiltroIdentidad();
   }
-
   /**
    * Título de la colección.
    */
@@ -67,20 +65,24 @@ public class Coleccion {
   }
 
   /**
-   * Obtiene los hechos filtrados aplicando criterios y exclusiones.
+   * Obtiene los hechos filtrados aplicando el criterio propio y un filtro externo opcional.
    */
-  public List<Hecho> getHechos(GestorDeReportes gestor) {
-    // Elimina los hechos que fueron eliminados por el gestor de reportes
-    List<Filtro> todosLosFiltros = new ArrayList<>(gestor.hechosEliminados());
+  public List<Hecho> getHechos(GestorDeReportes gestorDeReportes) {
+    return filtrarHechos(gestorDeReportes.hechosEliminados()).filtrar(fuente.obtenerHechos());
+  }
 
-    // Agrega el filtro de la colección
-    todosLosFiltros.add(filtro);
-
-    // Genera el filtro AND con todos los filtros
-    FiltroListaAnd filtroFinal = new FiltroListaAnd(todosLosFiltros);
-
-    // Filtra los hechos de la colección
-    return filtroFinal.filtrar(fuente.obtenerHechos());
+  private Filtro filtrarHechos(List<Hecho> hechosEliminados) {
+    Filtro filtroFinal = filtro;
+    Filtro filtroExclusion = new Filtro(hechos ->
+      hechos.stream()
+            .filter(h -> !hechosEliminados.contains(h))
+            .toList()
+    );
+  //Si la lista no está vacia
+  if (hechosEliminados != null && !hechosEliminados.isEmpty()) {
+      filtroFinal = new FiltroListaAnd(List.of(filtro, filtroExclusion));
+    }
+    return filtroFinal;
   }
 
   /**
@@ -93,7 +95,7 @@ public class Coleccion {
   /**
    * Booleano, indica si el hecho solicitado existe en la colección.
    */
-  public boolean contieneA(Hecho unHecho, GestorDeReportes gestor) {
-    return this.getHechos(gestor).contains(unHecho);
+  public boolean contieneA(Hecho unHecho, GestorDeReportes gestorDeReportes) {
+    return this.getHechos(gestorDeReportes).contains(unHecho);
   }
 }

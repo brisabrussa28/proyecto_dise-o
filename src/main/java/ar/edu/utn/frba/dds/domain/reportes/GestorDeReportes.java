@@ -17,7 +17,7 @@ public class GestorDeReportes {
 
   private final DetectorSpam detectorSpam;
   private final List<Solicitud> solicitudes = new ArrayList<>();
-  private final List<Filtro> hechosEliminados = new ArrayList<>();
+  private final List<Hecho> hechosEliminados = new ArrayList<>();
 
   public GestorDeReportes(DetectorSpam detectorSpam) {
     this.detectorSpam = detectorSpam;
@@ -75,14 +75,13 @@ public class GestorDeReportes {
    * Agrega un filtro para excluir un hecho.
    */
   public void eliminarHecho(Hecho hecho) {
-    Filtro filtroDeExclusion = new FiltroNot(new FiltroIgualHecho(hecho));
-    hechosEliminados.add(filtroDeExclusion);
+    hechosEliminados.add(hecho);
   }
 
   /**
    * Devuelve una copia de los filtros de hechos eliminados.
    */
-  public List<Filtro> hechosEliminados() {
+  public List<Hecho> hechosEliminados() {
     return new ArrayList<>(hechosEliminados);
   }
 }
