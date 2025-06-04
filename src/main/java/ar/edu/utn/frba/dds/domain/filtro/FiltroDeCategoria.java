@@ -2,7 +2,7 @@ package ar.edu.utn.frba.dds.domain.filtro;
 
 /**
  * Filtro por categoria.
- * */
+ */
 public class FiltroDeCategoria extends Filtro {
   /**
    * Constructor de FiltroDeCategoria.

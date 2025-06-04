@@ -123,9 +123,10 @@ public class FiltroTest {
   public void filtraPorOrigenCorrectamente() {
     List<Hecho> hechos = crearColeccionHechoYDevolverlo();
     FiltroDeOrigen filtroOrigen = new FiltroDeOrigen(Origen.DATASET);
-    assertEquals(0,
-                 filtroOrigen.filtrar(hechos)
-                             .size()
+    assertEquals(
+        0,
+        filtroOrigen.filtrar(hechos)
+                    .size()
     );
   }
 

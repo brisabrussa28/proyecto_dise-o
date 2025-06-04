@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * Filtro excluyente.
- * */
+ */
 public class FiltroNot extends Filtro {
   /**
    * Constructor de FiltroNot.
