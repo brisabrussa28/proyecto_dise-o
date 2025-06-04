@@ -291,4 +291,13 @@ public class Usuario {
   public String getEmail() {
     return email;
   }
+
+  /**
+   * Obtiene el ID del usuario.
+   *
+   * @return ID del usuario
+   */
+  public UUID getID() {
+    return id;
+  }
 }
