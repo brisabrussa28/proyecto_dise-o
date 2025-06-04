@@ -1,14 +1,15 @@
 package ar.edu.utn.frba.dds.domain.reportes;
 
 import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroIgualHecho;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroNot;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.detectorSpam.DetectorSpam;
+import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Gestor de Reportes.
@@ -17,14 +18,22 @@ public class GestorDeReportes {
 
   private final DetectorSpam detectorSpam;
   private final List<Solicitud> solicitudes = new ArrayList<>();
-  private final List<Filtro> hechosEliminados = new ArrayList<>();
+  private final Set<Hecho> hechosEliminados = new HashSet<>(); // Usamos Set para evitar duplicados
 
+  /**
+   * Constructor del gestor de reportes.
+   *
+   * @param detectorSpam Detector de spam para filtrar solicitudes
+   */
   public GestorDeReportes(DetectorSpam detectorSpam) {
     this.detectorSpam = detectorSpam;
   }
 
   /**
-   * Agrega una solicitud a la lista si no es spam.
+   * Agrega una solicitud al gestor de reportes.
+   * Si la razón de eliminación es spam, no se agrega.
+   *
+   * @param solicitud Solicitud a agregar
    */
   public void agregarSolicitud(Solicitud solicitud) {
     if (!detectorSpam.esSpam(solicitud.getRazonEliminacion())) {
@@ -33,7 +42,10 @@ public class GestorDeReportes {
   }
 
   /**
-   * Devuelve una solicitud por posición.
+   * Devuelve una lista de todas las solicitudes registradas.
+   *
+   * @param posicion Posición de la solicitud a obtener
+   * @return Lista de solicitudes
    */
   public Solicitud obtenerSolicitudPorPosicion(int posicion) {
     if (posicion < 0 || posicion >= solicitudes.size()) {
@@ -44,20 +56,31 @@ public class GestorDeReportes {
 
   /**
    * Devuelve la cantidad de solicitudes registradas.
+   *
+   * @return Cantidad de solicitudes
    */
+
   public int cantidadSolicitudes() {
     return solicitudes.size();
   }
 
   /**
-   * Devuelve la primera solicitud de la lista.
+   * Obtiene la primera solicitud registrada.
+   * Si no hay solicitudes, devuelve null.
+   *
+   * @return Primera solicitud o null si no hay solicitudes
    */
   public Solicitud obtenerSolicitud() {
-    return this.obtenerSolicitudPorPosicion(0);
+    return solicitudes.isEmpty() ? null : solicitudes.get(0);
   }
 
   /**
-   * Procesa una solicitud: si es aceptada, elimina el hecho.
+   * Gestiona una solicitud, aceptándola o rechazándola.
+   * Si se acepta, marca el hecho solicitado como eliminado.
+   *
+   * @param solicitud        Solicitud a gestionar
+   * @param aceptarSolicitud Indica si se acepta o rechaza la solicitud
+   * @throws SolicitudInexistenteException Si la solicitud no existe en el gestor
    */
   public void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud) {
     if (!solicitudes.contains(solicitud)) {
@@ -67,22 +90,40 @@ public class GestorDeReportes {
     solicitudes.remove(solicitud);
 
     if (aceptarSolicitud) {
-      eliminarHecho(solicitud.getHechoSolicitado());
+      marcarComoEliminado(solicitud.getHechoSolicitado());
     }
   }
 
   /**
-   * Agrega un filtro para excluir un hecho.
+   * Marca un hecho como eliminado.
+   * Si el hecho ya está eliminado, no se agrega nuevamente.
+   *
+   * @param hecho Hecho a marcar como eliminado
    */
-  public void eliminarHecho(Hecho hecho) {
-    Filtro filtroDeExclusion = new FiltroNot(new FiltroIgualHecho(hecho));
-    hechosEliminados.add(filtroDeExclusion);
+  public void marcarComoEliminado(Hecho hecho) {
+    hechosEliminados.add(hecho);
   }
 
   /**
-   * Devuelve una copia de los filtros de hechos eliminados.
+   * Devuelve una lista de todos los hechos eliminados.
+   *
+   * @return Lista de hechos eliminados
    */
-  public List<Filtro> hechosEliminados() {
+  public List<Hecho> hechosEliminados() {
     return new ArrayList<>(hechosEliminados);
+  }
+
+  /**
+   * Devuelve un filtro que excluye los hechos eliminados.
+   * Este filtro se puede usar para filtrar hechos en reportes.
+   *
+   * @return Filtro que excluye los hechos eliminados
+   */
+  public Filtro filtroExcluyente() {
+    return new Filtro(hechos ->
+        hechos.stream()
+            .filter(h -> !hechosEliminados.contains(h))
+            .toList()
+    );
   }
 }

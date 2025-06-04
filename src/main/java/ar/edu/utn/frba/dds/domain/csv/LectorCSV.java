@@ -14,15 +14,28 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Lector de archivos CSV a objetos Hecho.
  */
 public class LectorCSV {
 
+  private static final Logger logger = Logger.getLogger(LectorCSV.class.getName());
+
+  /**
+   * Este mét0do lee un archivo CSV y lo convierte en una lista de hechos.
+   *
+   * @param path          Ruta del archivo CSV a leer.
+   * @param separator     Carácter separador utilizado en el CSV.
+   * @param dateFormatStr Formato de fecha para los campos de fecha en el CSV.
+   * @param mapeoColumnas Mapeo de campos del hecho a columnas del CSV.
+   * @return Lista de objetos Hecho importados desde el CSV.
+   */
   public List<Hecho> importar(
       String path,
       char separator,
@@ -31,7 +44,8 @@ public class LectorCSV {
   ) {
     List<Hecho> hechos = new ArrayList<>();
     SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatStr);
-    dateFormat.setLenient(false); // Se asegura de que fechas erroneas 40/15/2939 no se acepten
+    //Evita fechas imposibles como 31/23/2023
+    dateFormat.setLenient(false);
 
     try (CSVReader reader = new CSVReaderBuilder(new FileReader(path))
         .withCSVParser(new CSVParserBuilder().withSeparator(separator).build())
@@ -42,33 +56,76 @@ public class LectorCSV {
         throw new IllegalArgumentException("El archivo CSV no contiene encabezados");
       }
 
-      Set<String> columnasPresentes = new HashSet<>(Arrays.asList(headers)); //set evita duplicados
+      Set<String> columnasPresentes = new HashSet<>(Arrays.asList(headers));
       String[] row;
       int linea = 1;
 
       while ((row = reader.readNext()) != null) {
         linea++;
+        Map<String, String> fila = mapearFila(row, headers);
+        Hecho hecho = construirHechoDesdeFila(fila, columnasPresentes, mapeoColumnas, dateFormat);
 
-        Map<String, String> fila = new HashMap<>();
-        for (int i = 0; i < headers.length && i < row.length; i++) {
-          fila.put(headers[i], row[i] != null ? row[i].trim() : null);
+        if (hecho != null) {
+          hechos.add(hecho);
+        } else {
+          logger.warning("[Línea " + linea + "] Fila descartada por datos insuficientes");
         }
+      }
 
-        String titulo = extraerCampo(fila, mapeoColumnas.get(CampoHecho.TITULO), columnasPresentes, " ");
-        String descripcion = extraerCampo(fila, mapeoColumnas.get(CampoHecho.DESCRIPCION), columnasPresentes, " ");
-        String categoria = extraerCampo(fila, mapeoColumnas.get(CampoHecho.CATEGORIA), columnasPresentes, " ");
-        String direccion = extraerCampo(fila, mapeoColumnas.get(CampoHecho.DIRECCION), columnasPresentes, ", ");
+    } catch (IOException | CsvException e) {
+      throw new RuntimeException("Error al leer el archivo CSV", e);
+    }
 
-        String latStr = extraerCampo(fila, mapeoColumnas.get(CampoHecho.LATITUD), columnasPresentes, "");
-        String lonStr = extraerCampo(fila, mapeoColumnas.get(CampoHecho.LONGITUD), columnasPresentes, "");
-        Double latitud = parseDouble(latStr);
-        Double longitud = parseDouble(lonStr);
-        PuntoGeografico ubicacion = (latitud != null && longitud != null)
-            ? new PuntoGeografico(latitud, longitud)
-            : null;
+    return hechos;
+  }
 
-        String fechaStr = extraerCampo(fila, mapeoColumnas.get(CampoHecho.FECHA_SUCESO), columnasPresentes);
-        LocalDateTime fechaSuceso = parseFecha(fechaStr, dateFormat);
+  /**
+   * Mapea una fila del CSV a un mapa de columnas.
+   *
+   * @param row     Fila del CSV como un array de Strings.
+   * @param headers Encabezados del CSV como un array de Strings.
+   * @return Mapa donde las claves son los encabezados y los valores son los datos de la fila.
+   */
+
+  private Map<String, String> mapearFila(String[] row, String[] headers) {
+    Map<String, String> fila = new HashMap<>();
+    for (int i = 0; i < headers.length && i < row.length; i++) {
+      fila.put(headers[i], row[i] != null ? row[i].trim() : null);
+    }
+    return fila;
+  }
+
+  /**
+   * Construye un objeto Hecho a partir de una fila del CSV.
+   *
+   * @param fila              Mapa que representa una fila del CSV.
+   * @param columnasPresentes Conjunto de columnas presentes en el CSV.
+   * @param mapeo             Mapeo de campos del hecho a columnas del CSV.
+   * @param dateFormat        Formato de fecha para los campos de fecha en el CSV.
+   * @return Objeto Hecho construido o null si faltan datos esenciales.
+   */
+
+  private Hecho construirHechoDesdeFila(
+      Map<String, String> fila,
+      Set<String> columnasPresentes,
+      Map<CampoHecho, List<String>> mapeo,
+      SimpleDateFormat dateFormat
+  ) {
+    String titulo = extraerCampo(fila, mapeo.get(CampoHecho.TITULO), columnasPresentes, " ");
+    String descripcion = extraerCampo(fila, mapeo.get(CampoHecho.DESCRIPCION), columnasPresentes, " ");
+    String categoria = extraerCampo(fila, mapeo.get(CampoHecho.CATEGORIA), columnasPresentes, " ");
+    String direccion = extraerCampo(fila, mapeo.get(CampoHecho.DIRECCION), columnasPresentes, ", ");
+
+    String latStr = extraerCampo(fila, mapeo.get(CampoHecho.LATITUD), columnasPresentes, "");
+    String lonStr = extraerCampo(fila, mapeo.get(CampoHecho.LONGITUD), columnasPresentes, "");
+    Double latitud = parseDouble(latStr);
+    Double longitud = parseDouble(lonStr);
+    PuntoGeografico ubicacion = (latitud != null && longitud != null)
+        ? new PuntoGeografico(latitud, longitud)
+        : null;
+
+    String fechaStr = extraerCampo(fila, mapeo.get(CampoHecho.FECHA_SUCESO), columnasPresentes, "/");
+    LocalDateTime fechaSuceso = parseFecha(fechaStr, dateFormat);
 
         boolean datosValidos = titulo != null && fechaSuceso != null;
 
@@ -93,17 +150,25 @@ public class LectorCSV {
     } catch (IOException | CsvException e) {
       throw new RuntimeException("Error al leer el archivo CSV", e);
     }
-
-    return hechos;
+    return null;
   }
 
+  /**
+   * Extrae un campo de la fila del CSV, concatenando valores si hay múltiples columnas.
+   *
+   * @param fila              Mapa que representa una fila del CSV.
+   * @param columnas          Lista de nombres de columnas a extraer.
+   * @param columnasPresentes Conjunto de columnas presentes en el CSV.
+   * @param separador         Separador a utilizar para concatenar los valores.
+   * @return Valor concatenado de las columnas o null si no se encuentra ningún valor.
+   */
   private String extraerCampo(Map<String, String> fila, List<String> columnas, Set<String> columnasPresentes, String separador) {
     if (columnas == null) return null;
 
     return columnas.stream()
         .peek(col -> {
           if (!columnasPresentes.contains(col)) {
-            System.err.println("Advertencia: columna " + col + " no encontrada en CSV");
+            logger.warning("Advertencia: columna " + col + " no encontrada en CSV");
           }
         })
         .map(fila::get)
@@ -112,20 +177,33 @@ public class LectorCSV {
         .orElse(null);
   }
 
+  /**
+   * Intenta parsear un String a Double, manejando excepciones.
+   *
+   * @param valor String a parsear.
+   * @return Double parseado o null si ocurre un error.
+   */
   private Double parseDouble(String valor) {
     try {
       return valor != null ? Double.parseDouble(valor.trim()) : null;
     } catch (Exception e) {
-      System.err.println("Error al parsear double: '" + valor + "'");
+      logger.warning("Error al parsear double: '" + valor + "'");
       return null;
     }
   }
 
+  /**
+   * Intenta parsear un String a Date, manejando excepciones.
+   *
+   * @param valor      String a parsear.
+   * @param dateFormat Formato de fecha a utilizar para el parseo.
+   * @return Date parseada o null si ocurre un error.
+   */
   private LocalDateTime parseFecha(String valor, SimpleDateFormat dateFormat) {
     try {
       return valor != null ? dateFormat.parse(valor.trim()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
     } catch (ParseException e) {
-      System.err.println("Error al parsear fecha: '" + valor + "'");
+      logger.warning("Error al parsear fecha: '" + valor + "'");
       return null;
     }
   }

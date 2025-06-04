@@ -7,6 +7,8 @@ import ar.edu.utn.frba.dds.domain.fuentes.ServicioDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
+import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -15,9 +17,6 @@ public class FuenteTest {
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
   LocalDateTime horaAux = LocalDateTime.of(2025, 5, 6, 20, 9);
-  //      Date.from(LocalDateTime.of(2025, 5, 6, 20, 9)
-//      .atZone(ZoneId.systemDefault())
-//      .toInstant());
   List<String> etiquetasAux = List.of(
       "#ancianita",
       "#robo_a_mano_armada",
@@ -54,7 +53,7 @@ public class FuenteTest {
 
   @Test
   public void seAgregaLaFuenteCorrectamente() {
-    ServicioDeAgregacion servicio = new ServicioDeAgregacion("Juan");
+    FuenteDeAgregacion servicio = new FuenteDeAgregacion("Juan");
     FuenteDinamica nuevaFuente = new FuenteDinamica("Juan", null);
     servicio.agregarFuente(nuevaFuente);
     assertTrue(servicio.getFuentesCargadas().contains(nuevaFuente));

@@ -5,6 +5,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 public class FiltroDeFechaDeCarga extends Filtro {
+  /**
+   * Constructor de FiltroDeFechaDeCarga.
+   *
+   * @param fechaCarga Fecha de carga a filtrar en los hechos.
+   */
   public FiltroDeFechaDeCarga(LocalDateTime fechaCarga) {
     super(hechos -> {
       LocalDateTime referencia = fechaCarga.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();

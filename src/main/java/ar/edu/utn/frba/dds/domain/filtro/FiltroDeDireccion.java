@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.List;
 
 public class FiltroDeDireccion extends Filtro {
+  /**
+   * Constructor de FiltroDeDireccion.
+   *
+   * @param direccion Dirección a filtrar en los hechos.
+   */
   public FiltroDeDireccion(String direccion) {
     super(hechos -> hechos.stream()
         .filter(h -> h.getDireccion().equalsIgnoreCase(direccion))

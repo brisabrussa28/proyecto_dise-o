@@ -5,14 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.detectorSpam.DetectorSpam;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
+import ar.edu.utn.frba.dds.domain.servicioDeVisualizacion.ServicioDeVisualizacion;
 import ar.edu.utn.frba.dds.main.Usuario;
-import ar.edu.utn.frba.dds.main.Usuario;
-import ar.edu.utn.frba.dds.main.Visualizador;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -24,7 +23,7 @@ public class TPATest {
   //Recursos utilizados
   Usuario contribuyenteA = new Usuario(null, null);
   Usuario contribuyenteB = new Usuario("Roberto", "roberto@gmail.com");
-  Visualizador visualizadorA = new Visualizador(null, null);
+  Usuario visualizadorA = new Usuario(null, null);
   List<String> etiquetasAux = List.of(
       "#ancianita",
       "#robo_a_mano_armada",
@@ -39,11 +38,10 @@ public class TPATest {
       .atZone(ZoneId.systemDefault())
       .toInstant());
   Hecho hechoAux = new Hecho("Jorge", "Choreo", "ROBO", "Av 9 de Julio", pgAux, Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), Origen.CARGA_MANUAL, etiquetasAux);
-  List <Hecho> listaHechoAux = List.of(hechoAux);
+  List<Hecho> listaHechoAux = List.of(hechoAux);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
   private DetectorSpam detectorSpam;
   private GestorDeReportes gestor = new GestorDeReportes(detectorSpam);
-
 
 
   //Se visualiza correctamente
@@ -52,17 +50,16 @@ public class TPATest {
 
     contribuyenteA.crearHecho("titulo", "Un día más siendo del conurbano", "Robos", "dire", pgAux, horaAux, etiquetasAux, fuenteAuxD);
     Coleccion bonaerense = iluminati.crearColeccion("Robos", "Un día más siendo del conurbano", "Robos", fuenteAuxD);
-    List<Hecho> hechos = visualizadorA.visualizarHechos(bonaerense,gestor);
+    List<Hecho> hechos = visualizadorA.visualizarHechos(bonaerense, gestor, new ServicioDeVisualizacion());
     assertFalse(hechos.isEmpty());
   }
-
 
 
   @Test
   public void visualizadorVeTodosLosHechosDeUnaColeccion() { // FANATICO DE CARLOS
     FuenteDinamica otraFuenteAux = new FuenteDinamica("Calos", listaHechoAux);
     Coleccion coleccionAux = new Coleccion("Pepito", otraFuenteAux, "Pedro", "ROBO");
-    List<Hecho> listaHechos = visualizadorA.visualizarHechos(coleccionAux,gestor);
+    List<Hecho> listaHechos = visualizadorA.visualizarHechos(coleccionAux, gestor, new ServicioDeVisualizacion());
     assertFalse(listaHechos.isEmpty());
   }
 

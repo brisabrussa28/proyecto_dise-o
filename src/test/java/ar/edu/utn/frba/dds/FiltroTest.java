@@ -9,7 +9,6 @@ import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.main.Usuario;
-import ar.edu.utn.frba.dds.main.Visualizador;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -40,7 +39,7 @@ public class FiltroTest {
   public List<Hecho> crearColeccionHechoYDevolverlo() {
     contribuyenteA.crearHecho("titulo", "Un día más siendo del conurbano", "Robos", "dire", pgAux, horaAux, etiquetasAux, fuenteAuxD);
     Coleccion bonaerense = new Usuario("△", "libellumcipher@incognito.com").crearColeccion("Robos", "Un día más siendo del conurbano", "Robos", fuenteAuxD);
-    return new Visualizador(null, null).visualizarHechos(bonaerense,gestor);
+    return new Usuario(null, null).visualizarHechos(bonaerense,gestor, new ServicioDeVisualizacion());
   }
 
   @Test

@@ -4,10 +4,17 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
+
 /**
  * Clase filtro de fecha.
  */
 public class FiltroDeFecha extends Filtro {
+  /**
+   * Constructor de FiltroDeFecha.
+   *
+   * @param fecha Fecha a filtrar en los hechos.
+   */
+
   public FiltroDeFecha(LocalDateTime fecha) {
     super(hechos -> {
       LocalDateTime referencia = fecha.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();

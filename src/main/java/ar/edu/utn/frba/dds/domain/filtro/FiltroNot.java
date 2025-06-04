@@ -5,6 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FiltroNot extends Filtro {
+  /**
+   * Constructor de FiltroNot.
+   *
+   * @param filtro Filtro a aplicar como negación.
+   */
+
+
   public FiltroNot(Filtro filtro) {
     super(hechos -> {
       List<Hecho> originales = new ArrayList<>(hechos);

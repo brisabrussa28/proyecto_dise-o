@@ -10,8 +10,12 @@ import java.util.List;
  */
 public class FuenteDinamica extends Fuente {
   List<Hecho> hechos;
+
   /**
-   * Constructor.
+   * Constructor de la clase FuenteDinamica.
+   *
+   * @param nombre Nombre de la fuente dinámica.
+   * @param hechos Lista de hechos iniciales para la fuente dinámica.
    */
   public FuenteDinamica(String nombre, List<Hecho> hechos) {
     super(nombre);
@@ -19,14 +23,18 @@ public class FuenteDinamica extends Fuente {
   }
 
   /**
-   * Agregar hecho a la fuente.
+   * Agrega un hecho a la fuente dinámica.
+   *
+   * @param hecho Hecho a agregar a la fuente dinámica.
    */
   public void agregarHecho(Hecho hecho) {
     this.hechos.add(hecho);
   }
 
   /**
-   * Obtiene los hechos de la fuente (vista inmutable).
+   * Obtiene los hechos de la fuente dinámica.
+   *
+   * @return Lista de hechos de la fuente dinámica.
    */
   @Override
   public List<Hecho> obtenerHechos() {
