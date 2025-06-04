@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.main;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
@@ -11,6 +12,7 @@ import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.rol.Rol;
+import ar.edu.utn.frba.dds.domain.servicioDeVisualizacion.ServicioDeVisualizacion;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -73,12 +75,7 @@ public class Usuario {
    * @param fuente      Fuente de la colección
    * @return Colección creada
    */
-  public Coleccion crearColeccion(
-      String titulo,
-      String descripcion,
-      String categoria,
-      Fuente fuente
-  ) {
+  public Coleccion crearColeccion(String titulo, String descripcion, String categoria, Fuente fuente) {
     if (!tieneRol(Rol.ADMINISTRADOR)) throw new RuntimeException("No tenés permisos para usar este método.");
     return new Coleccion(titulo, fuente, descripcion, categoria);
   }
@@ -122,7 +119,8 @@ public class Usuario {
    * @return Solicitud obtenida del gestor de reportes
    */
   public Solicitud obtenerSolicitud(GestorDeReportes gestorDeReportes) {
-    return gestorDeReportes.obtenerSolicitud();
+    if (!tieneRol(Rol.ADMINISTRADOR)) throw new RuntimeException("No tenés permisos para usar este método.");
+    else return gestorDeReportes.obtenerSolicitud();
   }
 
   /**
@@ -133,7 +131,8 @@ public class Usuario {
    * @return Solicitud en la posición especificada
    */
   public Solicitud obtenerSolicitudPorPosicion(int posicion, GestorDeReportes gestorDeReportes) {
-    return gestorDeReportes.obtenerSolicitudPorPosicion(posicion);
+    if (!tieneRol(Rol.ADMINISTRADOR)) throw new RuntimeException("No tenés permisos para usar este método.");
+    else return gestorDeReportes.obtenerSolicitudPorPosicion(posicion);
   }
 
   /**
@@ -179,39 +178,61 @@ public class Usuario {
    * @param titulo      String
    * @param ubicacion   PuntoGeografico
    */
-  public Hecho crearHecho(
-      String titulo,
-      String descripcion,
-      String categoria,
-      String direccion,
-      PuntoGeografico ubicacion,
-      Date fecha,
-      List<String> etiquetas,
-      FuenteDinamica fuente
-  ) {
+  public Hecho crearHecho(String titulo, String descripcion, String categoria, String direccion, PuntoGeografico ubicacion, Date fecha, List<String> etiquetas, FuenteDinamica fuente) {
     if (!tieneRol(Rol.CONTRIBUYENTE)) throw new RuntimeException("No tenés permisos para usar este método.");
-    Hecho hecho = new Hecho(
-        titulo,
-        descripcion,
-        categoria,
-        direccion,
-        ubicacion,
-        fecha,
-        Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()),
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetas
-    );
+    Hecho hecho = new Hecho(titulo, descripcion, categoria, direccion, ubicacion, fecha, Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), Origen.PROVISTO_CONTRIBUYENTE, etiquetas);
     fuente.agregarHecho(hecho);
     return hecho;
   }
+  // Sume los metodos como una fachada (Façade pattern) para facilitar el acceso desde el punto de vista del dominio o del código cliente.
 
   /**
-   * Geters.
+   * Visualizar hechos de una colección.
+   *
+   * @param coleccion Colección de hechos
+   * @param gestor    Gestor de reportes
+   * @param servicio  Servicio de visualización
+   * @return Lista de hechos visualizados
+   */
+
+  public List<Hecho> visualizarHechos(Coleccion coleccion, GestorDeReportes gestor, ServicioDeVisualizacion servicio) {
+    if (!tieneRol(Rol.VISUALIZADOR)) {
+      throw new RuntimeException("No tenés permisos para visualizar hechos.");
+    }
+    return servicio.obtenerHechosColeccion(coleccion, gestor);
+  }
+
+  /**
+   * Filtrar hechos de una colección.
+   *
+   * @param coleccion Colección de hechos
+   * @param filtro    Filtro a aplicar
+   * @param gestor    Gestor de reportes
+   * @param servicio  Servicio de visualización
+   * @return Lista de hechos filtrados
+   */
+  public List<Hecho> filtrarHechos(Coleccion coleccion, Filtro filtro, GestorDeReportes gestor, ServicioDeVisualizacion servicio) {
+    if (!tieneRol(Rol.VISUALIZADOR)) {
+      throw new RuntimeException("No tenés permisos para filtrar hechos.");
+    }
+    return servicio.filtrarHechosColeccion(coleccion, filtro, gestor);
+  }
+
+
+  /**
+   * Obtiene el ID del usuario.
+   *
+   * @return UUID del usuario
    */
   public String getNombre() {
     return nombre;
   }
 
+  /**
+   * Obtiene el email del usuario.
+   *
+   * @return Email del usuario
+   */
   public String getEmail() {
     return email;
   }
