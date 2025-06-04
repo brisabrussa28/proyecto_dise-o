@@ -5,6 +5,8 @@ import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroIgualHecho;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroNot;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.detectorSpam.DetectorSpam;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,67 +15,25 @@ import java.util.List;
  */
 public class GestorDeReportes {
 
-  private static GestorDeReportes INSTANCE = new GestorDeReportes(); // Singleton
-  private static List<Solicitud> solicitudes = new ArrayList<>();
-  private List<Filtro> HechosEliminados = new ArrayList<>();
+  private final DetectorSpam detectorSpam;
+  private final List<Solicitud> solicitudes = new ArrayList<>();
+  private final List<Filtro> hechosEliminados = new ArrayList<>();
 
-  private GestorDeReportes() {
+  public GestorDeReportes(DetectorSpam detectorSpam) {
+    this.detectorSpam = detectorSpam;
   }
 
   /**
-   * Devuelve la instancia única del gestor.
+   * Agrega una solicitud a la lista si no es spam.
    */
-  public static GestorDeReportes getInstancia() {
-//    if (instancia == null) {
-//      instancia = new GestorDeReportes();
-//    }
-    return INSTANCE;
-  }
-
-  /**
-   * Procesa una solicitud: si es aceptada, elimina el hecho.
-   *
-   * @param solicitud        la solicitud a gestionar
-   * @param aceptarSolicitud si se aprueba o no
-   */
-  public static void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud) {
-    if (!solicitudes.contains(solicitud)) {
-      throw new SolicitudInexistenteException("La solicitud no existe en el gestor.");
+  public void agregarSolicitud(Solicitud solicitud) {
+    if (!detectorSpam.esSpam(solicitud.getRazonEliminacion())) {
+      solicitudes.add(solicitud);
     }
-
-    solicitudes.remove(solicitud);
-
-    if (aceptarSolicitud) {
-      eliminarHecho(solicitud.getHechoSolicitado());
-    }
-  }
-
-  /**
-   * Agrega un filtro para excluir un hecho.
-   */
-  public static void eliminarHecho(Hecho hecho) {
-    Filtro filtroDeExclusion = new FiltroNot(new FiltroIgualHecho(hecho));
-    getInstancia().HechosEliminados.add(filtroDeExclusion);
-  }
-
-  /**
-   * Devuelve una copia de los filtros de hechos eliminados.
-   */
-  public static List<Filtro> hechosEliminados() {
-    return new ArrayList<>(getInstancia().HechosEliminados);
-  }
-
-  /**
-   * Agrega una solicitud a la lista.
-   */
-  public static void agregarSolicitud(Solicitud solicitud) {
-    solicitudes.add(solicitud);
   }
 
   /**
    * Devuelve una solicitud por posición.
-   *
-   * @param posicion índice de la lista
    */
   public Solicitud obtenerSolicitudPorPosicion(int posicion) {
     if (posicion < 0 || posicion >= solicitudes.size()) {
@@ -94,5 +54,35 @@ public class GestorDeReportes {
    */
   public Solicitud obtenerSolicitud() {
     return this.obtenerSolicitudPorPosicion(0);
+  }
+
+  /**
+   * Procesa una solicitud: si es aceptada, elimina el hecho.
+   */
+  public void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud) {
+    if (!solicitudes.contains(solicitud)) {
+      throw new SolicitudInexistenteException("La solicitud no existe en el gestor.");
+    }
+
+    solicitudes.remove(solicitud);
+
+    if (aceptarSolicitud) {
+      eliminarHecho(solicitud.getHechoSolicitado());
+    }
+  }
+
+  /**
+   * Agrega un filtro para excluir un hecho.
+   */
+  public void eliminarHecho(Hecho hecho) {
+    Filtro filtroDeExclusion = new FiltroNot(new FiltroIgualHecho(hecho));
+    hechosEliminados.add(filtroDeExclusion);
+  }
+
+  /**
+   * Devuelve una copia de los filtros de hechos eliminados.
+   */
+  public List<Filtro> hechosEliminados() {
+    return new ArrayList<>(hechosEliminados);
   }
 }

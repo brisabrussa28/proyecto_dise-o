@@ -8,14 +8,9 @@ import java.util.List;
  * Clase de filtro de titulo.
  */
 public class FiltroDeTitulo extends Filtro {
-  private final String titulo;
-
   public FiltroDeTitulo(String titulo) {
-    this.titulo = titulo;
-  }
-
-  @Override
-  public boolean cumple(Hecho hecho) {
-    return hecho.getTitulo() != null && hecho.getTitulo().equalsIgnoreCase(titulo);
+    super(hechos -> hechos.stream()
+                          .filter(h -> h.getTitulo().equalsIgnoreCase(titulo))
+                          .toList());
   }
 }

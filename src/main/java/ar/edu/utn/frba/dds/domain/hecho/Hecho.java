@@ -3,8 +3,12 @@ package ar.edu.utn.frba.dds.domain.hecho;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,16 +16,17 @@ import java.util.UUID;
  * Hecho.
  */
 public class Hecho {
-  String titulo;
-  String descripcion;
-  String categoria;
-  String direccion;
-  PuntoGeografico ubicacion;
-  LocalDateTime fechaSuceso;
-  LocalDateTime fechaCarga;
-  Origen fuenteOrigen;
-  List<String> etiquetas;
-  UUID id;
+  private String titulo;
+  private String descripcion;
+  private String categoria;
+  private String direccion;
+  private PuntoGeografico ubicacion;
+  private Date fechaSuceso;
+  private Date fechaCarga;
+  private Origen fuenteOrigen;
+  private List<String> etiquetas;
+  private UUID id;
+  private UUID idUsuarioCreador;
 
   /**
    * Constructor.
@@ -32,8 +37,8 @@ public class Hecho {
       String categoria,
       String direccion,
       PuntoGeografico ubicacion,
-      LocalDateTime fechaSuceso,
-      LocalDateTime fechaCarga,
+      Date fechaSuceso,
+      Date fechaCarga,
       Origen fuenteOrigen,
       List<String> etiquetas
   ) {
@@ -47,6 +52,31 @@ public class Hecho {
     this.fuenteOrigen = fuenteOrigen;
     this.etiquetas = new ArrayList<>(etiquetas);
     this.id = UUID.randomUUID();
+  }
+
+  public Hecho(
+      String titulo,
+      String descripcion,
+      String categoria,
+      String direccion,
+      PuntoGeografico ubicacion,
+      Date fechaSuceso,
+      Date fechaCarga,
+      Origen fuenteOrigen,
+      List<String> etiquetas,
+      UUID idUsuarioCreador
+  ) {
+    this.titulo = titulo;
+    this.descripcion = descripcion;
+    this.categoria = categoria;
+    this.ubicacion = ubicacion;
+    this.direccion = direccion;
+    this.fechaSuceso = fechaSuceso;
+    this.fechaCarga = fechaCarga;
+    this.fuenteOrigen = fuenteOrigen;
+    this.etiquetas = new ArrayList<>(etiquetas);
+    this.id = UUID.randomUUID();
+    this.idUsuarioCreador = idUsuarioCreador;
   }
 
   public UUID getId() {
@@ -73,11 +103,11 @@ public class Hecho {
     return ubicacion;
   }
 
-  public LocalDateTime getFechaSuceso() {
+  public Date getFechaSuceso() {
     return fechaSuceso;
   }
 
-  public LocalDateTime getFechaCarga() {
+  public Date getFechaCarga() {
     return fechaCarga;
   }
 
@@ -123,16 +153,14 @@ public class Hecho {
   /**
    * Si la fecha del suceso es la buscada.
    */
-  public boolean esDeFecha(LocalDateTime unaFecha) {
+  public boolean esDeFecha(Date unaFecha) {
     return this.fechaSuceso.equals(unaFecha);
   }
 
   /**
    * Si la fecha de carga es la buscada.
    */
-  public boolean seCargoEl(LocalDateTime unaFecha) {
-    return this.fechaCarga.equals(unaFecha);
-  }
+  public boolean seCargoEl(Date unaFecha) {return this.fechaCarga.equals(unaFecha);}
 
   /**
    * Si no tiene datos.
@@ -146,12 +174,11 @@ public class Hecho {
         fechaSuceso == null &&
         (etiquetas == null || etiquetas.isEmpty());
   }
-
   /**
    * Si el hecho se cargó antes de la fecha buscada.
    */
-  public boolean seCargoAntesDe(LocalDateTime unaFecha) {
-    return this.fechaCarga.isBefore(unaFecha);
+  public boolean seCargoAntesDe(Date unaFecha) {
+    return this.fechaCarga.before(unaFecha);
   }
 
   /**
@@ -172,7 +199,76 @@ public class Hecho {
     return new ArrayList<>(this.etiquetas);
   }
 
-  boolean perteneceA(Coleccion unaColeccion) {
-    return unaColeccion.contieneA(this);
+  boolean perteneceA(Coleccion unaColeccion, GestorDeReportes gestor) {
+    return unaColeccion.contieneA(this,gestor);
+  }
+
+  public boolean esEditablePor(UUID idUsuarioEditor) {
+    if (this.idUsuarioCreador == null || !this.idUsuarioCreador.equals(idUsuarioEditor)) {
+      return false;
+    }
+
+    LocalDate hoy = LocalDate.now();
+    LocalDate fechaDeCarga = this.fechaCarga.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+    return hoy.isAfter(fechaDeCarga.plusWeeks(1));
+  }
+
+  public boolean editarHecho(
+      UUID idUsuarioEditor,
+      String nuevoTitulo,
+      String nuevaDescripcion,
+      String nuevaCategoria,
+      String nuevaDireccion,
+      PuntoGeografico nuevaUbicacion,
+      List<String> nuevasEtiquetas,
+      Date nuevaFechaSuceso
+  ) {
+    if (this.esEditablePor(idUsuarioEditor)) {
+      this.actualizarInformacion(
+          nuevoTitulo,
+          nuevaDescripcion,
+          nuevaCategoria,
+          nuevaDireccion,
+          nuevaUbicacion,
+          nuevasEtiquetas,
+          nuevaFechaSuceso
+      );
+      return true;
+    }
+    return false;
+  }
+
+  private void actualizarInformacion(
+      String nuevoTitulo,
+      String nuevaDescripcion,
+      String nuevaCategoria,
+      String nuevaDireccion,
+      PuntoGeografico nuevaUbicacion,
+      List<String> nuevasEtiquetas,
+      Date nuevaFechaSuceso
+  ) {
+    if (nuevoTitulo != null && !nuevoTitulo.isBlank()) {
+      this.titulo = nuevoTitulo;
+    }
+    if (nuevaDescripcion != null && !nuevaDescripcion.isBlank()) {
+      this.descripcion = nuevaDescripcion;
+    }
+    if (nuevaCategoria != null && !nuevaCategoria.isBlank()) {
+      this.categoria = nuevaCategoria;
+    }
+    if (nuevaDireccion != null && !nuevaDireccion.isBlank()) {
+      this.direccion = nuevaDireccion;
+    }
+    if (nuevaUbicacion != null) {
+      this.ubicacion = nuevaUbicacion;
+    }
+    if (nuevasEtiquetas != null) {
+      this.etiquetas.clear();
+      this.etiquetas.addAll(nuevasEtiquetas);
+    }
+    if (nuevaFechaSuceso != null) {
+      this.fechaSuceso = nuevaFechaSuceso;
+    }
   }
 }

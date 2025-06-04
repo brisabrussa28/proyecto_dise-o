@@ -6,33 +6,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Clase base para filtros de hechos.
  */
 public class Filtro {
+  private final Operacion operacion;
 
-  /**
-   * Aplica el filtro a una lista de hechos.
-   */
+  public Filtro(Operacion operacion) {
+    this.operacion = operacion;
+  }
+
   public List<Hecho> filtrar(List<Hecho> hechos) {
-    if (hechos == null || hechos.isEmpty()) {
-      return Collections.emptyList();
-    }
-    return hechos.stream().filter(this::cumple).collect(Collectors.toList());
+    return operacion.ejecutar(hechos);
   }
 
-  /**
-   * Condición específica del filtro.
-   */
-  public boolean cumple(Hecho hecho){
-    return true;
-  }
-
-  /**
-   * Devuelve el predicado del filtro.
-   */
-  public Predicate<Hecho> comoPredicado() {
-    return this::cumple;
-  }
 }

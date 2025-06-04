@@ -28,7 +28,7 @@ public class Coleccion {
     this.fuente = fuente;
     this.descripcion = descripcion;
     this.categoria = categoria;
-    this.filtro = new Filtro();
+    this.filtro = new Filtro(hechos -> hechos);
   }
 
   /**
@@ -69,9 +69,9 @@ public class Coleccion {
   /**
    * Obtiene los hechos filtrados aplicando criterios y exclusiones.
    */
-  public List<Hecho> getHechos() {
+  public List<Hecho> getHechos(GestorDeReportes gestor) {
     // Elimina los hechos que fueron eliminados por el gestor de reportes
-    List<Filtro> todosLosFiltros = new ArrayList<>(GestorDeReportes.hechosEliminados());
+    List<Filtro> todosLosFiltros = new ArrayList<>(gestor.hechosEliminados());
 
     // Agrega el filtro de la colección
     todosLosFiltros.add(filtro);
@@ -93,7 +93,7 @@ public class Coleccion {
   /**
    * Booleano, indica si el hecho solicitado existe en la colección.
    */
-  public boolean contieneA(Hecho unHecho) {
-    return this.getHechos().contains(unHecho);
+  public boolean contieneA(Hecho unHecho, GestorDeReportes gestor) {
+    return this.getHechos(gestor).contains(unHecho);
   }
 }

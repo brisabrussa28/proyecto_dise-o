@@ -9,14 +9,9 @@ import java.util.List;
  * Clase de filtro de origen.
  */
 public class FiltroDeOrigen extends Filtro {
-  private final Origen origen;
-
   public FiltroDeOrigen(Origen origen) {
-    this.origen = origen;
-  }
-
-  @Override
-  public boolean cumple(Hecho hecho) {
-    return hecho.getOrigen() != null && hecho.getOrigen().equals(origen);
+    super(hechos -> hechos.stream()
+                          .filter(h -> h.getOrigen().equals(origen))
+                          .toList());
   }
 }

@@ -31,7 +31,7 @@ public class LectorCSV {
   ) {
     List<Hecho> hechos = new ArrayList<>();
     SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatStr);
-    dateFormat.setLenient(false);
+    dateFormat.setLenient(false); // Se asegura de que fechas erroneas 40/15/2939 no se acepten
 
     try (CSVReader reader = new CSVReaderBuilder(new FileReader(path))
         .withCSVParser(new CSVParserBuilder().withSeparator(separator).build())
@@ -54,13 +54,13 @@ public class LectorCSV {
           fila.put(headers[i], row[i] != null ? row[i].trim() : null);
         }
 
-        String titulo = extraerCampo(fila, mapeoColumnas.get(CampoHecho.TITULO), columnasPresentes);
-        String descripcion = extraerCampo(fila, mapeoColumnas.get(CampoHecho.DESCRIPCION), columnasPresentes);
-        String categoria = extraerCampo(fila, mapeoColumnas.get(CampoHecho.CATEGORIA), columnasPresentes);
-        String direccion = extraerCampo(fila, mapeoColumnas.get(CampoHecho.DIRECCION), columnasPresentes);
+        String titulo = extraerCampo(fila, mapeoColumnas.get(CampoHecho.TITULO), columnasPresentes, " ");
+        String descripcion = extraerCampo(fila, mapeoColumnas.get(CampoHecho.DESCRIPCION), columnasPresentes, " ");
+        String categoria = extraerCampo(fila, mapeoColumnas.get(CampoHecho.CATEGORIA), columnasPresentes, " ");
+        String direccion = extraerCampo(fila, mapeoColumnas.get(CampoHecho.DIRECCION), columnasPresentes, ", ");
 
-        String latStr = extraerCampo(fila, mapeoColumnas.get(CampoHecho.LATITUD), columnasPresentes);
-        String lonStr = extraerCampo(fila, mapeoColumnas.get(CampoHecho.LONGITUD), columnasPresentes);
+        String latStr = extraerCampo(fila, mapeoColumnas.get(CampoHecho.LATITUD), columnasPresentes, "");
+        String lonStr = extraerCampo(fila, mapeoColumnas.get(CampoHecho.LONGITUD), columnasPresentes, "");
         Double latitud = parseDouble(latStr);
         Double longitud = parseDouble(lonStr);
         PuntoGeografico ubicacion = (latitud != null && longitud != null)
@@ -97,7 +97,7 @@ public class LectorCSV {
     return hechos;
   }
 
-  private String extraerCampo(Map<String, String> fila, List<String> columnas, Set<String> columnasPresentes) {
+  private String extraerCampo(Map<String, String> fila, List<String> columnas, Set<String> columnasPresentes, String separador) {
     if (columnas == null) return null;
 
     return columnas.stream()
@@ -108,7 +108,7 @@ public class LectorCSV {
         })
         .map(fila::get)
         .filter(s -> s != null && !s.trim().isEmpty())
-        .reduce((a, b) -> a + " " + b)
+        .reduce((a, b) -> a + separador + b)
         .orElse(null);
   }
 

@@ -1,23 +1,22 @@
 package ar.edu.utn.frba.dds;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.main.Contribuyente;
+import ar.edu.utn.frba.dds.main.Usuario;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import org.junit.jupiter.api.Test;
 
 public class HechoTest {
 
-  Contribuyente contribuyenteA = new Contribuyente(null, null);
+  Usuario contribuyenteA = new Usuario(null, null);
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
   List<String> etiquetasAux = List.of(
@@ -30,30 +29,33 @@ public class HechoTest {
 
   @Test
   public void hechoCreadoCorrectamente() {
+    String titulo = "Robo";
+    String descripcion = "Hombre blanco asalta ancianita indefensa";
+    String categoria = "ROBO";
+    String direccion = "Avenida Siempreviva 742";
+    LocalDateTime fechaSuceso = LocalDateTime.from(LocalDateTime.now().minusDays(5).atZone(ZoneId.systemDefault()).toInstant());
+    LocalDateTime fechaCarga = LocalDateTime.now();
+
     Hecho hechoTest = contribuyenteA.crearHecho(
-        "Robo",
-        "Hombre blanco asalta ancianita indefensa",
-        "ROBO",
-        "Avenida Siempreviva 742",
+        titulo,
+        descripcion,
+        categoria,
+        direccion,
         pgAux, // Ubicación
-        //Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), // Fecha
-        LocalDateTime.now(),
+        fechaSuceso, // Fecha
         etiquetasAux,  // Etiquetas
         fuenteAuxD // Fuente
     );
 
-    boolean igual = (
-        Objects.equals(hechoTest.getTitulo(), "Robo") &&
-            Objects.equals(hechoTest.getDescripcion(), "Hombre blanco asalta ancianita indefensa") &&
-            Objects.equals(hechoTest.getCategoria(), "ROBO") &&
-            Objects.equals(hechoTest.getDireccion(), "Avenida Siempreviva 742") &&
-            hechoTest.getUbicacion() == pgAux &&
-            Objects.equals(hechoTest.getFechaSuceso(), Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())) &&
-            Objects.equals(hechoTest.getFechaCarga(), Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())) &&
-            hechoTest.getEtiquetas().size() == etiquetasAux.size() &&
-            hechoTest.getOrigen() == Origen.PROVISTO_CONTRIBUYENTE
-    );
-    assertTrue(igual); // Si "igual" es true es que están correctos los datos
+    assertEquals("Robo", hechoTest.getTitulo());
+    assertEquals("Hombre blanco asalta ancianita indefensa", hechoTest.getDescripcion());
+    assertEquals("ROBO", hechoTest.getCategoria());
+    assertEquals("Avenida Siempreviva 742", hechoTest.getDireccion());
+    assertEquals(hechoTest.getUbicacion(), pgAux);
+    assertEquals(hechoTest.getFechaSuceso(), fechaSuceso);
+    assertEquals(hechoTest.getFechaCarga().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(), fechaCarga);
+    assertEquals(hechoTest.getEtiquetas().size(), etiquetasAux.size());
+    assertEquals(hechoTest.getOrigen(), Origen.PROVISTO_CONTRIBUYENTE);
   }
 
   @Test

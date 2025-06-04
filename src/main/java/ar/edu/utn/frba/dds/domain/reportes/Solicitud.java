@@ -2,25 +2,25 @@ package ar.edu.utn.frba.dds.domain.reportes;
 
 import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.main.Contribuyente;
+import ar.edu.utn.frba.dds.main.Usuario;
 
 /**
  * Solicitud.
  */
 public class Solicitud {
 
-  Contribuyente solicitante;
+  Usuario solicitante;
   Hecho hechoSolicitado;
   String razonEliminacion;
 
   /**
    * Constructor de solicitud.
    *
-   * @param solicitante     Contribuyente que solicita la eliminación
+   * @param solicitante     Usuario que solicita la eliminación
    * @param hechoSolicitado Hecho solicitado para eliminar
    * @param motivo          Razón de la eliminación
    */
-  public Solicitud(Contribuyente solicitante,
+  public Solicitud(Usuario solicitante,
                    Hecho hechoSolicitado,
                    String motivo) {
     this.validarMotivo(motivo);
@@ -29,7 +29,7 @@ public class Solicitud {
     this.razonEliminacion = motivo;
   }
 
-  public Contribuyente getSolicitante() {
+  public Usuario getSolicitante() {
     return solicitante;
   }
 

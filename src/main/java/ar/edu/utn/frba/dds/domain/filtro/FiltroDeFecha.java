@@ -1,20 +1,23 @@
 package ar.edu.utn.frba.dds.domain.filtro;
 
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.time.LocalDateTime;
-
+import java.util.Date;
+import java.time.LocalDate;
+import java.time.ZoneId;
 /**
  * Clase filtro de fecha.
  */
 public class FiltroDeFecha extends Filtro {
-  private final LocalDateTime fecha;
-
   public FiltroDeFecha(LocalDateTime fecha) {
-    this.fecha = fecha;
-  }
-
-  @Override
-  public boolean cumple(Hecho hecho) {
-    return hecho.getFechaSuceso() != null && hecho.getFechaSuceso().equals(fecha);
+    super(hechos -> {
+      LocalDateTime referencia = fecha.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+      return hechos.stream()
+                   .filter(h -> {
+                      // Convertir la fecha de carga del hecho a LocalDate para comparar dias (sin hora)
+                     LocalDateTime fechaHecho = h.getFechaSuceso().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                     return fechaHecho.equals(referencia);
+                   })
+                   .toList();
+    });
   }
 }

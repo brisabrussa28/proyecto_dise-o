@@ -9,16 +9,10 @@ import java.util.List;
 import java.util.List;
 
 public class FiltroDeDireccion extends Filtro {
-
-  private final String direccion;
-
   public FiltroDeDireccion(String direccion) {
-    this.direccion = direccion;
-  }
-
-  @Override
-  public boolean cumple(Hecho hecho) {
-    return hecho.getDireccion() != null && hecho.getDireccion().equalsIgnoreCase(direccion);
+    super(hechos -> hechos.stream()
+        .filter(h -> h.getDireccion().equalsIgnoreCase(direccion))
+        .toList());
   }
 }
 
