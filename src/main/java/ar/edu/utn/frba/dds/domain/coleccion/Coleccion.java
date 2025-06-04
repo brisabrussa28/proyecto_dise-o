@@ -39,16 +39,6 @@ public class Coleccion {
   }
 
   /**
-   * Establece el filtro de la colección.
-   *
-   * @param filtro
-   */
-
-  public void setFiltro(Filtro filtro) {
-    this.filtro = filtro != null ? filtro : new FiltroIdentidad();
-  }
-
-  /**
    * Obtiene la fuente de la colección.
    *
    * @return Fuente de la colección.
@@ -85,9 +75,19 @@ public class Coleccion {
   }
 
   /**
-   * Obtiene los hechos de la colección filtrados por el criterio propio y un filtro externo opcional.
+   * Establece el filtro de la colección.
    *
-   * @param gestorDeReportes
+   * @param filtro Filtro
+   */
+
+  public void setFiltro(Filtro filtro) {
+    this.filtro = filtro != null ? filtro : new FiltroIdentidad();
+  }
+
+  /**
+   * Obtiene los hechos de la colección filtrados por un criterio y un filtro externo opcional.
+   *
+   * @param gestorDeReportes GestorDeReportes
    * @return Lista de hechos filtrados.
    */
   public List<Hecho> getHechos(GestorDeReportes gestorDeReportes) {
@@ -97,7 +97,7 @@ public class Coleccion {
   /**
    * filtra los hechos de la colección aplicando el filtro propio y un filtro excluyente.
    *
-   * @param filtroExcluyente
+   * @param filtroExcluyente Filtro
    * @return un nuevo filtro que combina el filtro de la colección con el filtro excluyente.
    */
 
@@ -108,7 +108,7 @@ public class Coleccion {
   /**
    * Valida si la colección contiene una fuente específica.
    *
-   * @param unaFuente
+   * @param unaFuente Fuente
    * @return true si la colección contiene la fuente, false en caso contrario.
    */
   public boolean contieneFuente(Fuente unaFuente) {

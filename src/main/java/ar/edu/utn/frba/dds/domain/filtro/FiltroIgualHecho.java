@@ -2,12 +2,16 @@ package ar.edu.utn.frba.dds.domain.filtro;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 
+/**
+ * Filtra segun un Hecho concreto.
+ */
 public class FiltroIgualHecho extends Filtro {
   /**
    * Constructor de FiltroIgualHecho.
    *
    * @param hecho Hecho con el que se compararán los demás hechos.
    */
+
   public FiltroIgualHecho(Hecho hecho) {
     super(hechos -> hechos.stream()
                           .filter(h -> {

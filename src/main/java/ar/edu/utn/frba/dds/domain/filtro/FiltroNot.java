@@ -4,6 +4,9 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Filtro excluyente.
+ * */
 public class FiltroNot extends Filtro {
   /**
    * Constructor de FiltroNot.

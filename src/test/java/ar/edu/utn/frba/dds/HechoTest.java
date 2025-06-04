@@ -10,13 +10,9 @@ import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.rol.Rol;
 import ar.edu.utn.frba.dds.main.Usuario;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.chrono.ChronoLocalDateTime;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -25,8 +21,10 @@ public class HechoTest {
 
   Usuario contribuyenteA = new Usuario(null, null, Set.of(Rol.CONTRIBUYENTE));
   Usuario UsuarioRegistrado = new Usuario("Juan", "juan@mail.com");
-  LocalDateTime hace3Dias = LocalDateTime.now().minusDays(3);
-  LocalDateTime hace10Dias = LocalDateTime.now().minusDays(10);
+  LocalDateTime hace3Dias = LocalDateTime.now()
+                                         .minusDays(3);
+  LocalDateTime hace10Dias = LocalDateTime.now()
+                                          .minusDays(10);
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
   List<String> etiquetasAux = List.of(
@@ -43,7 +41,9 @@ public class HechoTest {
     String descripcion = "Hombre blanco asalta ancianita indefensa";
     String categoria = "ROBO";
     String direccion = "Avenida Siempreviva 742";
-    LocalDateTime fechaSuceso = LocalDateTime.from(LocalDateTime.now().minusDays(5).atZone(ZoneId.systemDefault()));
+    LocalDateTime fechaSuceso = LocalDateTime.from(LocalDateTime.now()
+                                                                .minusDays(5)
+                                                                .atZone(ZoneId.systemDefault()));
     LocalDateTime fechaCarga = LocalDateTime.now();
 
     Hecho hechoTest = contribuyenteA.crearHecho(
@@ -63,9 +63,18 @@ public class HechoTest {
     assertEquals("Avenida Siempreviva 742", hechoTest.getDireccion());
     assertEquals(hechoTest.getUbicacion(), pgAux);
     assertEquals(hechoTest.getFechaSuceso(), fechaSuceso);
-    assertEquals(hechoTest.getFechaCarga().getHour(), fechaCarga.getHour());
-    assertEquals(hechoTest.getFechaCarga().getMinute(), fechaCarga.getMinute());
-    assertEquals(hechoTest.getEtiquetas().size(), etiquetasAux.size());
+    assertEquals(
+        hechoTest.getFechaCarga()
+                 .getHour(), fechaCarga.getHour()
+    );
+    assertEquals(
+        hechoTest.getFechaCarga()
+                 .getMinute(), fechaCarga.getMinute()
+    );
+    assertEquals(
+        hechoTest.getEtiquetas()
+                 .size(), etiquetasAux.size()
+    );
     assertEquals(Origen.PROVISTO_CONTRIBUYENTE, hechoTest.getOrigen());
   }
 
@@ -80,7 +89,8 @@ public class HechoTest {
         LocalDateTime.now(),/*Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())*/
         LocalDateTime.now(),
         null,
-        etiquetasAux);
+        etiquetasAux
+    );
     assertFalse(hecho.sucedioEn("Mozart 2300"));
   }
 

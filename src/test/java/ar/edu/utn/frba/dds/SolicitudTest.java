@@ -6,7 +6,7 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.detectorSpam.DetectorSpam;
+import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
@@ -44,7 +44,17 @@ public class SolicitudTest {
   public void solicitarEliminacionDeHechoCorrectamente() {
     when(detectorSpam.esSpam(anyString())).thenReturn(false);
     String motivo = "a".repeat(600);
-    Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux, horaAux, horaAux, Origen.PROVISTO_CONTRIBUYENTE, etiquetasAux);
+    Hecho hecho = new Hecho(
+        "titulo",
+        "desc",
+        "Robos",
+        "direccion",
+        pgAux,
+        horaAux,
+        horaAux,
+        Origen.PROVISTO_CONTRIBUYENTE,
+        etiquetasAux
+    );
     FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
     fuente.agregarHecho(hecho);
 
@@ -58,13 +68,23 @@ public class SolicitudTest {
   public void gestorDeReportesNoObtieneSolicitudes() {
     when(detectorSpam.esSpam(anyString())).thenReturn(false);
     String motivo = "a".repeat(5); // motivo inválido
-    Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux, horaAux, horaAux, Origen.PROVISTO_CONTRIBUYENTE, etiquetasAux);
+    Hecho hecho = new Hecho(
+        "titulo",
+        "desc",
+        "Robos",
+        "direccion",
+        pgAux,
+        horaAux,
+        horaAux,
+        Origen.PROVISTO_CONTRIBUYENTE,
+        etiquetasAux
+    );
     FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
     fuente.agregarHecho(hecho);
 
-    assertThrows(RazonInvalidaException.class, () -> {
-      new Solicitud(null, hecho, motivo);
-    });
+    assertThrows(
+        RazonInvalidaException.class, () -> new Solicitud(null, hecho, motivo)
+    );
   }
 
   @Test
@@ -73,9 +93,9 @@ public class SolicitudTest {
     String motivo = "perú es clave".repeat(50);
     Solicitud solicitud = new Solicitud(null, null, motivo);
 
-    assertThrows(SolicitudInexistenteException.class, () -> {
-      gestor.gestionarSolicitud(solicitud, true);
-    });
+    assertThrows(
+        SolicitudInexistenteException.class, () -> gestor.gestionarSolicitud(solicitud, true)
+    );
   }
 
   @Test
@@ -94,8 +114,8 @@ public class SolicitudTest {
         etiquetasAux
     );
 
-    assertThrows(RazonInvalidaException.class, () -> {
-      new Solicitud(null, hecho, motivo);
-    });
+    assertThrows(
+        RazonInvalidaException.class, () -> new Solicitud(null, hecho, motivo)
+    );
   }
 }

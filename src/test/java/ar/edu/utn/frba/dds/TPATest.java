@@ -4,14 +4,14 @@ package ar.edu.utn.frba.dds;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.detectorSpam.DetectorSpam;
+import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.domain.rol.Rol;
-import ar.edu.utn.frba.dds.domain.servicioDeVisualizacion.ServicioDeVisualizacion;
+import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacion;
 import ar.edu.utn.frba.dds.main.Usuario;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,7 +31,11 @@ public class TPATest {
       "#NOalaVIOLENCIAcontraABUELITAS"
   );
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
-  Usuario admin = new Usuario("pipocapo", "makenipipo@gmail.com", Set.of(Rol.CONTRIBUYENTE, Rol.VISUALIZADOR, Rol.ADMINISTRADOR));
+  Usuario admin = new Usuario(
+      "pipocapo",
+      "makenipipo@gmail.com",
+      Set.of(Rol.CONTRIBUYENTE, Rol.VISUALIZADOR, Rol.ADMINISTRADOR)
+  );
   LocalDateTime horaAux = LocalDateTime.of(2025, 5, 6, 20, 9);
 
   Hecho hechoAux = new Hecho(

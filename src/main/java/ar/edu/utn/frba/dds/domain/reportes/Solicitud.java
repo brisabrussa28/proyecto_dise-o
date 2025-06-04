@@ -31,10 +31,6 @@ public class Solicitud {
     this.razonEliminacion = motivo;
   }
 
-  public Usuario getSolicitante() {
-    return solicitante;
-  }
-
   public Hecho getHechoSolicitado() {
     return hechoSolicitado;
   }

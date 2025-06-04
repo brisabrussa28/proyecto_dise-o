@@ -78,8 +78,7 @@ public class LectorCSV {
         }
       }
 
-    }
-    catch (IOException | CsvException e) {
+    } catch (IOException | CsvException e) {
       throw new RuntimeException("Error al leer el archivo CSV", e);
     }
 
@@ -191,8 +190,7 @@ public class LectorCSV {
   private Double parseDouble(String valor) {
     try {
       return valor != null ? Double.parseDouble(valor.trim()) : null;
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       logger.warning("Error al parsear double: '" + valor + "'");
       return null;
     }
@@ -213,8 +211,7 @@ public class LectorCSV {
           .atZone(ZoneId.systemDefault())
           .toLocalDateTime()
                            : null;
-    }
-    catch (ParseException e) {
+    } catch (ParseException e) {
       logger.warning("Error al parsear fecha: '" + valor + "'");
       return null;
     }

@@ -1,5 +1,8 @@
 package ar.edu.utn.frba.dds.domain.filtro;
 
+/**
+ * Filtro por direccion de un hecho.
+ * */
 public class FiltroDeDireccion extends Filtro {
   /**
    * Constructor de FiltroDeDireccion.

@@ -2,11 +2,11 @@ package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,8 @@ public class FuenteTest {
   @Test
   public void fuenteDinamicaAgregaYObtieneHechos() {
     FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
-    Hecho hecho = new Hecho("titulo",
+    Hecho hecho = new Hecho(
+        "titulo",
         "desc",
         "Robos",
         "direccion",
@@ -38,13 +39,24 @@ public class FuenteTest {
         etiquetasAux
     );
     fuente.agregarHecho(hecho);
-    assertTrue(fuente.obtenerHechos().contains(hecho));
+    assertTrue(fuente.obtenerHechos()
+                     .contains(hecho));
   }
 
   @Test
   public void seAgregaHechoAFuente() {
     FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
-    Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux, horaAux, horaAux, Origen.PROVISTO_CONTRIBUYENTE, etiquetasAux);
+    Hecho hecho = new Hecho(
+        "titulo",
+        "desc",
+        "Robos",
+        "direccion",
+        pgAux,
+        horaAux,
+        horaAux,
+        Origen.PROVISTO_CONTRIBUYENTE,
+        etiquetasAux
+    );
     fuente.agregarHecho(hecho);
     assertTrue(fuente.contiene(hecho));
   }
@@ -54,6 +66,7 @@ public class FuenteTest {
     FuenteDeAgregacion servicio = new FuenteDeAgregacion("Juan");
     FuenteDinamica nuevaFuente = new FuenteDinamica("Juan", null);
     servicio.agregarFuente(nuevaFuente);
-    assertTrue(servicio.getFuentesCargadas().contains(nuevaFuente));
+    assertTrue(servicio.getFuentesCargadas()
+                       .contains(nuevaFuente));
   }
 }

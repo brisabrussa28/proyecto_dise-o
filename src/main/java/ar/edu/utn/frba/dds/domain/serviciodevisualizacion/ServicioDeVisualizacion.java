@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.servicioDeVisualizacion;
+package ar.edu.utn.frba.dds.domain.serviciodevisualizacion;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
@@ -6,6 +6,9 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import java.util.List;
 
+/**
+ * Permite visualizar los hechos de una coleccion.
+ */
 public class ServicioDeVisualizacion {
 
   //Obtener los hechos de una colección en especifico

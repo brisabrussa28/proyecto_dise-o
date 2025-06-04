@@ -12,7 +12,7 @@ import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.rol.Rol;
-import ar.edu.utn.frba.dds.domain.servicioDeVisualizacion.ServicioDeVisualizacion;
+import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacion;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;

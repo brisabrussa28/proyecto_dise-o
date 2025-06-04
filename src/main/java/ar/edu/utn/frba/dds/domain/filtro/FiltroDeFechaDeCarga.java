@@ -1,8 +1,10 @@
 package ar.edu.utn.frba.dds.domain.filtro;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 
+/**
+ * Filtro por fecha de carga.
+ */
 public class FiltroDeFechaDeCarga extends Filtro {
   /**
    * Constructor de FiltroDeFechaDeCarga.
@@ -11,14 +13,14 @@ public class FiltroDeFechaDeCarga extends Filtro {
    */
   public FiltroDeFechaDeCarga(LocalDateTime fechaCarga) {
     super(hechos -> {
-      LocalDateTime referencia = fechaCarga.atZone(ZoneId.systemDefault())
-                                           .toLocalDateTime();
+      LocalDateTime referencia = fechaCarga.toLocalDate()
+                                           .atStartOfDay();
       return hechos.stream()
                    .filter(h -> {
-                     // Convertir la fecha de carga del hecho a LocalDate para comparar dias (sin hora)
-                     LocalDateTime fechaHecho = h.getFechaCarga();
-                     return fechaHecho.getHour() == referencia.getHour()
-                         && fechaHecho.getMinute() == referencia.getMinute();
+                     LocalDateTime fechaHecho = h.getFechaCarga()
+                                                 .toLocalDate()
+                                                 .atStartOfDay();
+                     return fechaHecho.equals(referencia);
                    })
                    .toList();
     });

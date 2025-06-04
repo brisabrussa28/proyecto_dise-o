@@ -4,7 +4,6 @@ import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,14 +14,14 @@ public class Hecho {
   private final List<String> etiquetas;
   private final UUID id;
   private final UUID idUsuarioCreador;
+  private final LocalDateTime fechaCarga;
+  private final Origen fuenteOrigen;
   private String titulo;
   private String descripcion;
   private String categoria;
   private String direccion;
   private PuntoGeografico ubicacion;
   private LocalDateTime fechaSuceso;
-  private LocalDateTime fechaCarga;
-  private Origen fuenteOrigen;
 
   /**
    * Constructor básico.
@@ -35,7 +34,7 @@ public class Hecho {
    * @param fechaSuceso  LocalDateTime
    * @param fechaCarga   LocalDateTime
    * @param fuenteOrigen Origen
-   * @param etiquetas    List<String>
+   * @param etiquetas    List
    */
   public Hecho(
       String titulo,
@@ -48,7 +47,18 @@ public class Hecho {
       Origen fuenteOrigen,
       List<String> etiquetas
   ) {
-    this(titulo, descripcion, categoria, direccion, ubicacion, fechaSuceso, fechaCarga, fuenteOrigen, etiquetas, null);
+    this(
+        titulo,
+        descripcion,
+        categoria,
+        direccion,
+        ubicacion,
+        fechaSuceso,
+        fechaCarga,
+        fuenteOrigen,
+        etiquetas,
+        null
+    );
   }
 
   /**
@@ -62,7 +72,7 @@ public class Hecho {
    * @param fechaSuceso      LocalDateTime
    * @param fechaCarga       LocalDateTime
    * @param fuenteOrigen     Origen
-   * @param etiquetas        List<String>
+   * @param etiquetas        List
    * @param idUsuarioCreador UUID
    */
   public Hecho(
@@ -226,8 +236,8 @@ public class Hecho {
    * @param fecha fecha a verificar
    * @return true si es de la fecha, false en caso contrario
    */
-  public boolean esDeFecha(Date fecha) {
-    return this.fechaSuceso.equals(fecha);
+  public boolean esDeFecha(LocalDateTime fecha) {
+    return this.fechaSuceso.isEqual(fecha);
   }
 
   /**
@@ -236,8 +246,8 @@ public class Hecho {
    * @param fecha fecha a verificar
    * @return true si ocurrió antes de la fecha, false en caso contrario
    */
-  public boolean seCargoEl(Date fecha) {
-    return this.fechaCarga.equals(fecha);
+  public boolean seCargoEl(LocalDateTime fecha) {
+    return this.fechaCarga.isEqual(fecha);
   }
 
   /**
@@ -278,13 +288,13 @@ public class Hecho {
    * @return true si el hecho está vacío, false en caso contrario
    */
   public boolean estaVacio() {
-    return (titulo == null || titulo.isBlank()) &&
-        (descripcion == null || descripcion.isBlank()) &&
-        (categoria == null || categoria.isBlank()) &&
-        (direccion == null || direccion.isBlank()) &&
-        ubicacion == null &&
-        fechaSuceso == null &&
-        (etiquetas == null || etiquetas.isEmpty());
+    return (titulo == null || titulo.isBlank())
+        && (descripcion == null || descripcion.isBlank())
+        && (categoria == null || categoria.isBlank())
+        && (direccion == null || direccion.isBlank())
+        && ubicacion == null
+        && fechaSuceso == null
+        && (etiquetas == null || etiquetas.isEmpty());
   }
 
   /**
@@ -299,8 +309,7 @@ public class Hecho {
       return false;
     }
     LocalDateTime hoy = LocalDateTime.now();
-    LocalDateTime fechaDeCarga = this.fechaCarga;
-    return hoy.isBefore(fechaDeCarga.plusWeeks(1));
+    return hoy.isBefore(fechaCarga.plusWeeks(1));
   }
 
   /**

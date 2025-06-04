@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.reportes;
 
-import ar.edu.utn.frba.dds.domain.detectorSpam.DetectorSpam;
+import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;

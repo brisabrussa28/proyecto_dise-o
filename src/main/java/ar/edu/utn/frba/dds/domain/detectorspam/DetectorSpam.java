@@ -1,5 +1,8 @@
-package ar.edu.utn.frba.dds.domain.detectorSpam;
+package ar.edu.utn.frba.dds.domain.detectorspam;
 
+/**
+ * Interfaz de nuestro componente para detectar si una solicitud es spam.
+ * */
 public interface DetectorSpam {
 
   /**
