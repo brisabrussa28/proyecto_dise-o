@@ -226,9 +226,8 @@ public class Hecho {
    * @param nuevaUbicacion   Nueva ubicación del hecho
    * @param nuevasEtiquetas  Nuevas etiquetas del hecho
    * @param nuevaFechaSuceso Nueva fecha de suceso del hecho
-   * @return true si la edición fue exitosa, false si el usuario no tiene permisos para editarlo
    */
-  public boolean editarHecho(
+  public void editarHecho(
       UUID idUsuarioEditor,
       String nuevoTitulo,
       String nuevaDescripcion,
@@ -239,7 +238,7 @@ public class Hecho {
       LocalDateTime nuevaFechaSuceso
   ) {
     if (!this.esEditablePor(idUsuarioEditor)) {
-      return false;
+      throw new RuntimeException("Solo el usuario creador puede editar el hecho");
     }
 
     if (nuevoTitulo != null && !nuevoTitulo.isBlank()) {
@@ -269,7 +268,5 @@ public class Hecho {
       }
       this.fechaSuceso = nuevaFechaSuceso;
     }
-
-    return true;
   }
 }

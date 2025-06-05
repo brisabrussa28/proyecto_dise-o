@@ -296,6 +296,47 @@ public class HechoTest {
         )
     );
   }
+
+
+  @Test
+  public void editarHechoConUsuarioDistintoLanzaExcepcion() {
+    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
+    List<String> etiquetas = List.of("#test");
+    LocalDateTime fechaSuceso = LocalDateTime.now()
+                                             .minusDays(2);
+    LocalDateTime fechaCarga = LocalDateTime.now()
+                                            .minusDays(1);
+    java.util.UUID idUsuarioCreador = java.util.UUID.randomUUID();
+    java.util.UUID idUsuarioOtro = java.util.UUID.randomUUID();
+    Hecho hecho = new Hecho(
+        "titulo",
+        "desc",
+        "cat",
+        "dir",
+        ubicacion,
+        fechaSuceso,
+        fechaCarga,
+        Origen.PROVISTO_CONTRIBUYENTE,
+        etiquetas,
+        idUsuarioCreador
+    );
+
+    Exception exception = assertThrows(
+        RuntimeException.class,
+        () -> hecho.editarHecho(
+            idUsuarioOtro,
+            "nuevo titulo",
+            "nueva desc",
+            "nueva cat",
+            "nueva dir",
+            new PuntoGeografico(2.0, 2.0),
+            List.of("#nueva"),
+            fechaSuceso
+        )
+    );
+    assertEquals("Solo el usuario creador puede editar el hecho", exception.getMessage());
+  }
+
 }
 
 
