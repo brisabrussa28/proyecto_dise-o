@@ -83,8 +83,8 @@ public class UsuarioTest {
   @Test
   void visualizadorFiltraHechos() {
     Hecho hecho = mock(Hecho.class);
-    when(servicio.obtenerHechosColeccion(coleccion, gestor)).thenReturn(List.of(hecho));
     FiltroIdentidad filtroIdentidad = new FiltroIdentidad();
+    when(servicio.filtrarHechosColeccion(coleccion, filtroIdentidad, gestor)).thenReturn(List.of(hecho));
 
     List<Hecho> filtrados = visualizador.filtrarHechos(coleccion, filtroIdentidad, gestor, servicio);
 

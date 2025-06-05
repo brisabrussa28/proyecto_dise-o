@@ -1,0 +1,105 @@
+package ar.edu.utn.frba.dds;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
+import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
+import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.origen.Origen;
+import ar.edu.utn.frba.dds.main.Usuario;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+public class GestorDeReportesTest {
+
+  private GestorDeReportes gestor;
+  private Usuario solicitante;
+
+  PuntoGeografico pg = new PuntoGeografico(33.0, 44.0);
+  LocalDateTime hora = LocalDateTime.now();
+  List<String> etiquetas = List.of("#robo");
+
+  Hecho hecho = new Hecho(
+      "titulo",
+      "desc",
+      "Robos",
+      "direccion",
+      pg,
+      hora,
+      hora,
+      Origen.PROVISTO_CONTRIBUYENTE,
+      etiquetas
+  );
+
+  @BeforeEach
+  public void setUp() {
+    DetectorSpam detector = mock(DetectorSpam.class);
+    when(detector.esSpam(anyString())).thenReturn(false);
+    gestor = new GestorDeReportes(detector);
+    solicitante = mock(Usuario.class);
+  }
+
+  @Test
+  public void agregarYContarSolicitudes() {
+    Solicitud solicitud = new Solicitud(solicitante, hecho, "motivo".repeat(100));
+    gestor.agregarSolicitud(solicitud);
+    assertEquals(1, gestor.cantidadSolicitudes());
+  }
+
+  @Test
+  public void agregarDosSolicitudesDistintas() {
+    gestor.agregarSolicitud(new Solicitud(solicitante, hecho, "motivo1".repeat(100)));
+    gestor.agregarSolicitud(new Solicitud(solicitante, hecho, "motivo2".repeat(100)));
+    assertEquals(2, gestor.cantidadSolicitudes());
+  }
+
+  @Test
+  public void agregarDosSolicitudesIgualesSoloAgregaUna() {
+    Solicitud solicitud = new Solicitud(solicitante, hecho, "motivo".repeat(100));
+    gestor.agregarSolicitud(solicitud);
+    gestor.agregarSolicitud(solicitud);
+    assertEquals(1, gestor.cantidadSolicitudes());
+  }
+
+  @Test
+  public void noAgregaSolicitudSiEsSpam() {
+    DetectorSpam detectorSpamTrue = mock(DetectorSpam.class);
+    when(detectorSpamTrue.esSpam(anyString())).thenReturn(true);
+    GestorDeReportes gestorSpam = new GestorDeReportes(detectorSpamTrue);
+
+    Solicitud solicitudSpam = new Solicitud(solicitante, hecho, "motivo".repeat(100));
+    gestorSpam.agregarSolicitud(solicitudSpam);
+
+    assertEquals(0, gestorSpam.cantidadSolicitudes());
+  }
+
+  @Test
+  public void agregarSolicitudNullLanzaExcepcion() {
+    assertThrows(
+        NullPointerException.class, () -> gestor.agregarSolicitud(null)
+    );
+  }
+
+  @Test
+  public void gestionarSolicitudInexistenteLanzaExcepcion() {
+    Solicitud solicitudFalsa = mock(Solicitud.class);
+    assertThrows(
+        SolicitudInexistenteException.class, () -> gestor.gestionarSolicitud(solicitudFalsa, true)
+    );
+  }
+
+  @Test
+  public void marcarComoEliminadoNullLanzaExcepcion() {
+    assertThrows(
+        NullPointerException.class, () -> gestor.marcarComoEliminado(null)
+    );
+  }
+}

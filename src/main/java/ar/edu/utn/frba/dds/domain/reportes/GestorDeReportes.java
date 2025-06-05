@@ -15,7 +15,7 @@ import java.util.Set;
 public class GestorDeReportes {
 
   private final DetectorSpam detectorSpam;
-  private final List<Solicitud> solicitudes = new ArrayList<>();
+  private final Set<Solicitud> solicitudes = new HashSet<>();
   private final Set<Hecho> hechosEliminados = new HashSet<>(); // Usamos Set para evitar duplicados
 
   /**
@@ -24,6 +24,9 @@ public class GestorDeReportes {
    * @param detectorSpam Detector de spam para filtrar solicitudes
    */
   public GestorDeReportes(DetectorSpam detectorSpam) {
+    if (detectorSpam == null) {
+      throw new NullPointerException("DetectorSpam no puede ser null");
+    }
     this.detectorSpam = detectorSpam;
   }
 
@@ -34,10 +37,14 @@ public class GestorDeReportes {
    * @param solicitud Solicitud a agregar
    */
   public void agregarSolicitud(Solicitud solicitud) {
+    if (solicitud == null) {
+      throw new NullPointerException("Solicitud no puede ser null");
+    }
     if (!detectorSpam.esSpam(solicitud.getRazonEliminacion())) {
       solicitudes.add(solicitud);
     }
   }
+
 
   /**
    * Devuelve una lista de todas las solicitudes registradas.
@@ -49,7 +56,7 @@ public class GestorDeReportes {
     if (posicion < 0 || posicion >= solicitudes.size()) {
       throw new SolicitudInexistenteException("La posición es inválida o no existe en el gestor.");
     }
-    return solicitudes.get(posicion);
+    return new ArrayList<>(solicitudes).get(posicion);
   }
 
   /**
@@ -69,7 +76,7 @@ public class GestorDeReportes {
    * @return Primera solicitud o null si no hay solicitudes
    */
   public Solicitud obtenerSolicitud() {
-    return solicitudes.isEmpty() ? null : solicitudes.get(0);
+    return solicitudes.isEmpty() ? null : new ArrayList<>(solicitudes).get(0);
   }
 
   /**
@@ -99,6 +106,9 @@ public class GestorDeReportes {
    * @param hecho Hecho a marcar como eliminado
    */
   public void marcarComoEliminado(Hecho hecho) {
+    if (hecho == null) {
+      throw new NullPointerException("Hecho no puede ser null");
+    }
     hechosEliminados.add(hecho);
   }
 
