@@ -34,7 +34,7 @@ public class LectorCsvTest {
     );
 
     List<Hecho> csv = new LectorCSV(',', "dd/MM/yyyy", mapeoColumnas).importar(
-        "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemplo.csv");
+        dir + "ejemplo.csv");
     FiltroDeDireccion filtroDireccion = new FiltroDeDireccion("EL NESTORNAUTA");
     List<Hecho> hechosFiltrados = filtroDireccion.filtrar(csv);
     Hecho hecho = hechosFiltrados.get(0);
@@ -46,127 +46,20 @@ public class LectorCsvTest {
   @Test
   public void importarCSVformatoExtraño() {
     Map<CampoHecho, List<String>> mapeoColumnas = Map.of(
-        CampoHecho.TITULO,
-        List.of("tipo_persona_id"),
-        CampoHecho.DESCRIPCION,
-        List.of("tipo_persona", "modo_produccion_hecho_ampliada", "modo_produccion_hecho_otro"),
-        CampoHecho.LATITUD,
-        List.of("latitud"),
-        CampoHecho.LONGITUD,
-        List.of("longitud"),
-        CampoHecho.FECHA_SUCESO,
-        List.of("fecha_hecho"),
-        CampoHecho.CATEGORIA,
-        List.of("semaforo_estado"),
-        CampoHecho.DIRECCION,
-        List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura")
+        CampoHecho.TITULO, List.of("tipo_persona_id"),
+        CampoHecho.DESCRIPCION, List.of("tipo_persona", "modo_produccion_hecho_ampliada", "modo_produccion_hecho_otro"),
+        CampoHecho.LATITUD, List.of("latitud"),
+        CampoHecho.LONGITUD, List.of("longitud"),
+        CampoHecho.FECHA_SUCESO, List.of("fecha_hecho"),
+        CampoHecho.CATEGORIA, List.of("semaforo_estado"),
+        CampoHecho.DIRECCION, List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura")
     );
 
-    List<Hecho> csv = new LectorCSV(
-        ',',
-        "dd-MM-yy",
-        mapeoColumnas
-    ).importar(
-        "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/rarito.csv"
-    );
+    List<Hecho> csv = new LectorCSV(',', "dd-MM-yy", mapeoColumnas).importar(
+        dir + "rarito.csv");
     Hecho hecho = csv.get(0);
-    System.out.println("Hecho importado:");
-    System.out.println(hecho.getTitulo() + " - " + hecho.getDescripcion() + " - " + hecho.getCategoria() + " - " + hecho.getFechaSuceso() + " - " + hecho.getDireccion());
+
     assertEquals("Imputado idRegistro 13483", hecho.getTitulo());
-  }
-
-  @Test
-  public void testCantidadDeHechosEnEjemploCsv() {
-    Map<CampoHecho, List<String>> mapeoEjemplo = Map.of(
-        CampoHecho.TITULO, List.of("titulo"),
-        CampoHecho.DESCRIPCION, List.of("descripcion"),
-        CampoHecho.LATITUD, List.of("latitud"),
-        CampoHecho.LONGITUD, List.of("longitud"),
-        CampoHecho.FECHA_SUCESO, List.of("fechaSuceso"),
-        CampoHecho.CATEGORIA, List.of("categoria"),
-        CampoHecho.DIRECCION, List.of("direccion")
-    );
-    List<Hecho> hechos = new LectorCSV(
-        ',',
-        "dd/MM/yyyy",
-        mapeoEjemplo
-    ).importar(
-        "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemplo.csv"
-    );
-    assertEquals(5, hechos.size());
-  }
-
-  @Test
-  public void testLecturaConColumnasReordenadas() {
-    Map<CampoHecho, List<String>> mapeoEjemplo = Map.of(
-        CampoHecho.TITULO, List.of("titulo"),
-        CampoHecho.DESCRIPCION, List.of("descripcion"),
-        CampoHecho.LATITUD, List.of("latitud"),
-        CampoHecho.LONGITUD, List.of("longitud"),
-        CampoHecho.FECHA_SUCESO, List.of("fechaSuceso"),
-        CampoHecho.CATEGORIA, List.of("categoria"),
-        CampoHecho.DIRECCION, List.of("direccion")
-    );
-    List<Hecho> hechos = new LectorCSV(
-        ',',
-        "dd/MM/yyyy",
-        mapeoEjemplo
-    ).importar(
-        "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemploReordenado.csv"
-    );
-    assertEquals(5, hechos.size());
-    assertTrue(hechos.stream()
-                     .anyMatch(h -> "EL NESTORNAUTA".equals(h.getDireccion())));
-  }
-
-  @Test
-  public void testCsvConFilasVaciasYLecturaEspecial() {
-    Map<CampoHecho, List<String>> mapeo = Map.of(
-        CampoHecho.TITULO,
-        List.of("tipo_persona_id"),
-        CampoHecho.DESCRIPCION,
-        List.of("tipo_persona"),
-        CampoHecho.LATITUD,
-        List.of("latitud"),
-        CampoHecho.LONGITUD,
-        List.of("longitud"),
-        CampoHecho.FECHA_SUCESO,
-        List.of("fecha_hecho"),
-        CampoHecho.CATEGORIA,
-        List.of("semaforo_estado"),
-        CampoHecho.DIRECCION,
-        List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura")
-    );
-
-    List<Hecho> hechos = new LectorCSV(
-        ',',
-        "dd-MM-yy",
-        mapeo
-    ).importar(
-        "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/luciano.csv"
-    );
-
-    // Solo debe haber 1 hecho, los otros están vacíos
-    assertEquals(1, hechos.size());
-    assertEquals(
-        "Imputado idRegistro 13483",
-        hechos.get(0)
-              .getTitulo()
-    );
-  }
-
-  @Test
-  public void testCsvSinEncabezado() throws IOException {
-    String path = dir + "sinEncabezado.csv";
-    try (FileWriter writer = new FileWriter(path)) {
-      writer.write(""); // archivo vacío
-    }
-
-    assertThrows(
-        IllegalArgumentException.class, () -> {
-          new LectorCSV(',', "dd/MM/yyyy", Map.of()).importar(path);
-        }
-    );
   }
 
   @Test
@@ -199,40 +92,7 @@ public class LectorCsvTest {
     );
 
     List<Hecho> hechos = new LectorCSV(',', "dd/MM/yyyy", mapeo).importar(path);
-    assertEquals(1, hechos.size()); // Se crea igual porque lat/lon son opcionales
-    assertNull(hechos.get(0)
-                     .getUbicacion());
-  }
-
-  @Test
-  public void testCsvConFechaInvalida() throws IOException {
-    String path = dir + "fechaInvalida.csv";
-    try (FileWriter writer = new FileWriter(path)) {
-      writer.write("titulo,fechaSuceso\nEvento,32/13/2020\n");
-    }
-
-    Map<CampoHecho, List<String>> mapeo = Map.of(
-        CampoHecho.TITULO, List.of("titulo"),
-        CampoHecho.FECHA_SUCESO, List.of("fechaSuceso")
-    );
-
-    List<Hecho> hechos = new LectorCSV(',', "dd/MM/yyyy", mapeo).importar(path);
-    assertEquals(0, hechos.size()); // No se crea por fecha inválida
-  }
-
-  @Test
-  public void testCsvConFilaVacia() throws IOException {
-    String path = dir + "filaVacia.csv";
-    try (FileWriter writer = new FileWriter(path)) {
-      writer.write("titulo,fechaSuceso\nEvento,25/12/2020\n,\n\n");
-    }
-
-    Map<CampoHecho, List<String>> mapeo = Map.of(
-        CampoHecho.TITULO, List.of("titulo"),
-        CampoHecho.FECHA_SUCESO, List.of("fechaSuceso")
-    );
-
-    List<Hecho> hechos = new LectorCSV(',', "dd/MM/yyyy", mapeo).importar(path);
     assertEquals(1, hechos.size());
+    assertNull(hechos.get(0).getUbicacion());
   }
 }

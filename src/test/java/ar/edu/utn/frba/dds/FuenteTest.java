@@ -80,35 +80,38 @@ public class FuenteTest {
 
   // Tests FuenteEstatica
 
-  @Test
-  public void fuenteEstaticaUsaLectorCSVCorrectamente() {
+@Test
+public void fuenteEstaticaUsaLectorCSVCorrectamente() {
     Hecho hechoMock = mock(Hecho.class);
     LectorCSV lectorMock = mock(LectorCSV.class);
 
-    when(lectorMock.importar("ruta.csv", ',', "yyyy-MM-dd", Map.of())).thenReturn(List.of(hechoMock));
+    // Ajusta los argumentos según los cambios en el método importar
+    when(lectorMock.importar("ruta.csv")).thenReturn(List.of(hechoMock));
 
-    FuenteEstatica fuente = new FuenteEstatica("MiFuente", "ruta.csv", ',', "yyyy-MM-dd", Map.of());
+    // Ajusta el constructor de FuenteEstatica si cambió
+    FuenteEstatica fuente = new FuenteEstatica("MiFuente", "ruta.csv", lectorMock);
 
     List<Hecho> hechos = fuente.obtenerHechos();
 
     assertEquals(1, hechos.size());
     assertEquals(hechoMock, hechos.get(0));
-    verify(lectorMock).importar("ruta.csv", ',', "yyyy-MM-dd", Map.of());
-  }
+    verify(lectorMock).importar("ruta.csv");
+}
 
-  @Test
-  public void fuenteEstaticaDevuelveListaVaciaSiCSVEstaVacio() {
+@Test
+public void fuenteEstaticaDevuelveListaVaciaSiCSVEstaVacio() {
     LectorCSV lectorMock = mock(LectorCSV.class);
-    when(lectorMock.importar(anyString(), anyChar(), anyString(), anyMap())).thenReturn(List.of());
-    FuenteEstatica fuente = new FuenteEstatica("Vacia", "vac.csv", ',', "dd/MM/yyyy", Map.of());
+
+    // Ajusta los argumentos según los cambios en el método importar
+    when(lectorMock.importar(anyString())).thenReturn(List.of());
+
+    // Ajusta el constructor de FuenteEstatica si cambió
+    FuenteEstatica fuente = new FuenteEstatica("Vacia", "vac.csv", lectorMock);
 
     List<Hecho> hechos = fuente.obtenerHechos();
 
     assertTrue(hechos.isEmpty());
-  }
-
-  // Tests FuenteDeAgregacion
-
+}
   @Test
 
   public void fuenteDeAgregacionCombinaHechosDeTodasLasFuentes() {
