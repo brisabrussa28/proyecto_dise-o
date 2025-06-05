@@ -38,8 +38,7 @@ public class Conexion {
           json, new TypeReference<>() {
           }
       );
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       throw new RuntimeException("Fallo la conexión: " + e.getMessage(), e);
     }
   }

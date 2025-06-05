@@ -28,7 +28,8 @@ public class PuntoGeografico {
     return longitud;
   }
 
-  // getters...
+  // Necesario para que el punto geográfico pueda ser comparado en filtros y otras operaciones
+
 
   @Override
   public boolean equals(Object o) {
@@ -38,8 +39,8 @@ public class PuntoGeografico {
     if (!(o instanceof PuntoGeografico that)) {
       return false;
     }
-    return Double.compare(that.latitud, latitud) == 0 &&
-        Double.compare(that.longitud, longitud) == 0;
+    return Double.compare(that.latitud, latitud) == 0
+        && Double.compare(that.longitud, longitud) == 0;
   }
 
   @Override

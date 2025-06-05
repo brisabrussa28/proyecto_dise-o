@@ -33,8 +33,6 @@ public class LectorCSV {
   String dateFormatStr;
   Map<CampoHecho, List<String>> mapeoColumnas;
 
-
-
   public LectorCSV(
       char separator,
       String dateFormatStr,
@@ -43,13 +41,12 @@ public class LectorCSV {
     this.separator = separator;
     this.dateFormatStr = dateFormatStr;
     this.mapeoColumnas = mapeoColumnas;
-
   }
 
   /**
-   * Este mét0do lee un archivo CSV y lo convierte en una lista de hechos.
+   * Este método lee un archivo CSV y lo convierte en una lista de hechos.
    *
-   * @param path          Ruta del archivo CSV a leer.
+   * @param path Ruta del archivo CSV a leer.
    * @return Lista de objetos Hecho importados desde el CSV.
    */
   public List<Hecho> importar(
@@ -57,7 +54,7 @@ public class LectorCSV {
   ) {
     List<Hecho> hechos = new ArrayList<>();
     SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatStr);
-    //Evita fechas imposibles como 31/23/2023
+    // Evita fechas imposibles como 31/23/2023
     dateFormat.setLenient(false);
 
     try (
@@ -66,7 +63,6 @@ public class LectorCSV {
                                                  .build())
             .build()
     ) {
-
       String[] headers = reader.readNext();
       if (headers == null || headers.length == 0) {
         throw new IllegalArgumentException("El archivo CSV no contiene encabezados");
@@ -87,7 +83,6 @@ public class LectorCSV {
           logger.warning("[Línea " + linea + "] Fila descartada por datos insuficientes");
         }
       }
-
     } catch (IOException | CsvException e) {
       throw new RuntimeException("Error al leer el archivo CSV", e);
     }
@@ -102,20 +97,20 @@ public class LectorCSV {
    * @param headers Encabezados del CSV como un array de Strings.
    * @return Mapa donde las claves son los encabezados y los valores son los datos de la fila.
    */
-
-private Map<String, String> mapearFila(String[] row, String[] headers) {
+  private Map<String, String> mapearFila(String[] row, String[] headers) {
     Map<String, String> fila = new HashMap<>();
     Set<String> seenHeaders = new HashSet<>();
 
     for (int i = 0; i < headers.length && i < row.length; i++) {
-        if (seenHeaders.contains(headers[i])) {
-            throw new IllegalArgumentException("Header duplicado detectado: " + headers[i]);
-        }
-        seenHeaders.add(headers[i]);
-        fila.put(headers[i], row[i] != null ? row[i].trim() : null);
+      if (seenHeaders.contains(headers[i])) {
+        throw new IllegalArgumentException("Header duplicado detectado: " + headers[i]);
+      }
+      seenHeaders.add(headers[i]);
+      fila.put(headers[i], row[i] != null ? row[i].trim() : null);
     }
     return fila;
-}
+  }
+
   /**
    * Construye un objeto Hecho a partir de una fila del CSV.
    *
@@ -125,7 +120,6 @@ private Map<String, String> mapearFila(String[] row, String[] headers) {
    * @param dateFormat        Formato de fecha para los campos de fecha en el CSV.
    * @return Objeto Hecho construido o null si faltan datos esenciales.
    */
-
   private Hecho construirHechoDesdeFila(
       Map<String, String> fila,
       Set<String> columnasPresentes,

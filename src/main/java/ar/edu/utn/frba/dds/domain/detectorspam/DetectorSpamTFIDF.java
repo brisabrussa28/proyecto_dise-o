@@ -1,6 +1,13 @@
 package ar.edu.utn.frba.dds.domain.detectorspam;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 
 public class DetectorSpamTFIDF {
 
@@ -78,10 +85,14 @@ public class DetectorSpamTFIDF {
   private int contarDocumentosQueContienen(String palabra) {
     int count = 0;
     for (String mensaje : mensajesSpam) {
-      if (obtenerPalabrasUnicas(mensaje).contains(palabra)) count++;
+      if (obtenerPalabrasUnicas(mensaje).contains(palabra)) {
+        count++;
+      }
     }
     for (String mensaje : mensajesNoSpam) {
-      if (obtenerPalabrasUnicas(mensaje).contains(palabra)) count++;
+      if (obtenerPalabrasUnicas(mensaje).contains(palabra)) {
+        count++;
+      }
     }
     return count;
   }

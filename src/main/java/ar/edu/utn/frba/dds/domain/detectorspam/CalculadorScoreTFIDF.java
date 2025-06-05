@@ -1,12 +1,15 @@
 package ar.edu.utn.frba.dds.domain.detectorspam;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 public class CalculadorScoreTFIDF {
 
   // Calcula el score promedio de similitud entre un mensaje nuevo y una lista de mensajes previos
   public double calcularPromedioSimilitud(List<Map<String, Double>> vectores, Map<String, Double> tfidfNuevo) {
-    if (vectores == null || vectores.isEmpty()) return 0;
+    if (vectores == null || vectores.isEmpty()) {
+      return 0;
+    }
 
     double acumulado = 0;
     for (Map<String, Double> tfidfExistente : vectores) {
@@ -42,7 +45,9 @@ public class CalculadorScoreTFIDF {
     }
     normB = Math.sqrt(normB);
 
-    if (normA == 0 || normB == 0) return 0;
+    if (normA == 0 || normB == 0) {
+      return 0;
+    }
 
     // Devuelve la similitud coseno, que es el coseno del ángulo entre los dos vectores
     // Esto lo calculabamos en aga para encontrar la proyeccion de a sobre b
