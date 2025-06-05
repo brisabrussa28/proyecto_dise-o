@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -55,14 +56,9 @@ public class ColeccionTest {
         fuenteAuxD
     );
 
-    boolean igual = bonaerense.getTitulo()
-                              .equals("Robos") &&
-        bonaerense.getDescripcion()
-                  .equals("Un día más siendo del conurbano") &&
-        bonaerense.getCategoria()
-                  .equals("Robos");
-
-    assertTrue(igual);
+    assertEquals("Robos", bonaerense.getTitulo());
+    assertEquals("Un día más siendo del conurbano", bonaerense.getDescripcion());
+    assertEquals("Robos", bonaerense.getCategoria());
   }
 
   @Test
@@ -88,6 +84,21 @@ public class ColeccionTest {
     Coleccion coleccion = iluminati.crearColeccion("Robos", "Descripcion", "Robos", fuenteAuxD);
     assertEquals("Robos", coleccion.getCategoria());
     assertNotEquals("Violencia", coleccion.getCategoria());
+  }
+
+  @Test
+  public void siCreoUnaColeccionSinTituloLanzaExcepcion() {
+    assertThrows(RuntimeException.class, () -> iluminati.crearColeccion("", "hola", "Robos", fuenteAuxD));
+  }
+
+  @Test
+  public void siCreoUnaColeccionSinDescripcionLanzaExcepcion() {
+    assertThrows(RuntimeException.class, () -> iluminati.crearColeccion("Robos", "", "Robos", fuenteAuxD));
+  }
+
+  @Test
+  public void siCreoUnaColeccionSinCategoriaLanzaExcepcion() {
+    assertThrows(RuntimeException.class, () -> iluminati.crearColeccion("Robos", "hola", "", fuenteAuxD));
   }
 
   @Test

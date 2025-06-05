@@ -9,6 +9,7 @@ import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
+import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.rol.Rol;
@@ -29,6 +30,7 @@ public class Usuario {
   protected String email;
   protected UUID id;
   protected java.util.Set<Rol> roles;
+
 
   /**
    * Constructor.
@@ -77,60 +79,60 @@ public class Usuario {
     if (!tieneRol(Rol.ADMINISTRADOR)) {
       throw new RuntimeException("No tenés permisos para usar este método.");
     }
+    this.validarTitulo(titulo);
+    this.validarDescripcion(descripcion);
+    this.validarCategoria(categoria);
+
     return new Coleccion(titulo, fuente, descripcion, categoria);
   }
+
+  private void validarTitulo(String titulo) {
+    if (titulo == null || titulo.isBlank()) {
+      throw new RuntimeException("El titulo es campo obligatorio.");
+    }
+  }
+
+  private void validarDescripcion(String descripcion) {
+    if (descripcion == null || descripcion.isBlank()) {
+      throw new RuntimeException("La descripcion es campo obligatorio.");
+    }
+  }
+
+  private void validarCategoria(String categoria) {
+    if (categoria == null || categoria.isBlank()) {
+      throw new RuntimeException("La categoria es campo obligatorio.");
+    }
+  }
+
 
   /**
    * Importar datos desde un archivo CSV.
    *
    * @param rutaCsv      Ruta del archivo CSV
-   * @param separador    Carácter separador de campos
+   * @param lector    Carácter separador de campos
    * @param nombreFuente Nombre de la fuente
-   * @param formatoFecha Formato de fecha para los campos de fecha
-   * @param mapeo        Mapeo de campos del hecho a columnas del CSV
    * @return FuenteEstatica creada a partir del CSV
    */
   public FuenteEstatica importardesdeCsv(
       String rutaCsv,
-      char separador,
       String nombreFuente,
-      String formatoFecha,
-      Map<CampoHecho, List<String>> mapeo
+      LectorCSV lector
   ) {
     if (!tieneRol(Rol.ADMINISTRADOR)) {
       throw new RuntimeException("No tenés permisos para usar este método.");
     }
-    if (rutaCsv == null || nombreFuente == null) {
-      throw new IllegalArgumentException("Ruta y nombre de fuente deben estar definidos");
+    if (rutaCsv == null || nombreFuente == null || lector == null) {
+      throw new IllegalArgumentException("Ruta, nombre de fuente y lector deben estar definidos");
     }
-    return new FuenteEstatica(nombreFuente, rutaCsv, separador, formatoFecha, mapeo);
+    return new FuenteEstatica(nombreFuente, rutaCsv, lector);
   }
 
-  /**
-   * Importar datos desde un archivo CSV con separador por defecto (',').
-   *
-   * @param rutaCsv      Ruta del archivo CSV
-   * @param nombreFuente Nombre de la fuente
-   * @param formatoFecha Formato de fecha para los campos de fecha
-   * @param mapeo        Mapeo de campos del hecho a columnas del CSV
-   * @return FuenteEstatica creada a partir del CSV
-   */
-  public FuenteEstatica importardesdeCsv(
-      String rutaCsv,
-      String nombreFuente,
-      String formatoFecha,
-      Map<CampoHecho, List<String>> mapeo
-  ) {
-    if (!tieneRol(Rol.ADMINISTRADOR)) {
-      throw new RuntimeException("No tenés permisos para usar este método.");
-    }
-    return importardesdeCsv(rutaCsv, ',', nombreFuente, formatoFecha, mapeo);
-  }
+
 
   /**
    * Obtener una solicitud del gestor de reportes.
    *
-   * @param gestorDeReportes
+   * @param gestorDeReportes GestorDeReportes
    * @return Solicitud obtenida del gestor de reportes
    */
   public Solicitud obtenerSolicitud(GestorDeReportes gestorDeReportes) {

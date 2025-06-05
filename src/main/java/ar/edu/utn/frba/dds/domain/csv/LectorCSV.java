@@ -29,21 +29,31 @@ import java.util.logging.Logger;
 public class LectorCSV {
 
   private static final Logger logger = Logger.getLogger(LectorCSV.class.getName());
+  char separator;
+  String dateFormatStr;
+  Map<CampoHecho, List<String>> mapeoColumnas;
+
+
+
+  public LectorCSV(
+      char separator,
+      String dateFormatStr,
+      Map<CampoHecho, List<String>> mapeoColumnas
+  ) {
+    this.separator = separator;
+    this.dateFormatStr = dateFormatStr;
+    this.mapeoColumnas = mapeoColumnas;
+
+  }
 
   /**
    * Este mét0do lee un archivo CSV y lo convierte en una lista de hechos.
    *
    * @param path          Ruta del archivo CSV a leer.
-   * @param separator     Carácter separador utilizado en el CSV.
-   * @param dateFormatStr Formato de fecha para los campos de fecha en el CSV.
-   * @param mapeoColumnas Mapeo de campos del hecho a columnas del CSV.
    * @return Lista de objetos Hecho importados desde el CSV.
    */
   public List<Hecho> importar(
-      String path,
-      char separator,
-      String dateFormatStr,
-      Map<CampoHecho, List<String>> mapeoColumnas
+      String path
   ) {
     List<Hecho> hechos = new ArrayList<>();
     SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatStr);
