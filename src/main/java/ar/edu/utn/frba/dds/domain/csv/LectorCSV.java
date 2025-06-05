@@ -103,14 +103,19 @@ public class LectorCSV {
    * @return Mapa donde las claves son los encabezados y los valores son los datos de la fila.
    */
 
-  private Map<String, String> mapearFila(String[] row, String[] headers) {
+private Map<String, String> mapearFila(String[] row, String[] headers) {
     Map<String, String> fila = new HashMap<>();
+    Set<String> seenHeaders = new HashSet<>();
+
     for (int i = 0; i < headers.length && i < row.length; i++) {
-      fila.put(headers[i], row[i] != null ? row[i].trim() : null);
+        if (seenHeaders.contains(headers[i])) {
+            throw new IllegalArgumentException("Header duplicado detectado: " + headers[i]);
+        }
+        seenHeaders.add(headers[i]);
+        fila.put(headers[i], row[i] != null ? row[i].trim() : null);
     }
     return fila;
-  }
-
+}
   /**
    * Construye un objeto Hecho a partir de una fila del CSV.
    *
