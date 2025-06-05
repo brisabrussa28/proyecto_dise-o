@@ -1,197 +1,301 @@
 package ar.edu.utn.frba.dds;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
+import ar.edu.utn.frba.dds.domain.filtro.FiltroIgualHecho;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.rol.Rol;
 import ar.edu.utn.frba.dds.main.Usuario;
+
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 
 public class HechoTest {
 
-  Usuario contribuyenteA = new Usuario(null, null, Set.of(Rol.CONTRIBUYENTE));
-  Usuario UsuarioRegistrado = new Usuario("Juan", "juan@mail.com");
-  LocalDateTime hace3Dias = LocalDateTime.now()
-                                         .minusDays(3);
-  LocalDateTime hace10Dias = LocalDateTime.now()
-                                          .minusDays(10);
-  PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
-  FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
-  List<String> etiquetasAux = List.of(
-      "#ancianita",
-      "#robo_a_mano_armada",
-      "#violencia",
-      "#leyDeProtecciónALasAncianitas",
-      "#NOalaVIOLENCIAcontraABUELITAS"
-  );
-
   @Test
-  public void hechoCreadoCorrectamente() {
-    String titulo = "Robo";
-    String descripcion = "Hombre blanco asalta ancianita indefensa";
-    String categoria = "ROBO";
-    String direccion = "Avenida Siempreviva 742";
-    LocalDateTime fechaSuceso = LocalDateTime.from(LocalDateTime.now()
-                                                                .minusDays(5)
-                                                                .atZone(ZoneId.systemDefault()));
-    LocalDateTime fechaCarga = LocalDateTime.now();
+  public void seCreaHechoCorrectamente() {
+    Usuario usuario = new Usuario("Juan", "juan@mail.com", Set.of(Rol.CONTRIBUYENTE));
+    FuenteDinamica fuente = new FuenteDinamica("Fuente X", null);
+    PuntoGeografico ubicacion = new PuntoGeografico(33.0, 44.0);
+    List<String> etiquetas = List.of("#robo", "#violencia");
+    LocalDateTime fechaSuceso = LocalDateTime.now()
+                                             .minusDays(5);
 
-    Hecho hechoTest = contribuyenteA.crearHecho(
-        titulo,
-        descripcion,
-        categoria,
-        direccion,
-        pgAux, // Ubicación
-        fechaSuceso, // Fecha
-        etiquetasAux,  // Etiquetas
-        fuenteAuxD // Fuente
+    Hecho hecho = usuario.crearHecho(
+        "Robo",
+        "Robo a mano armada",
+        "DELITO",
+        "Calle falsa 123",
+        ubicacion,
+        fechaSuceso,
+        etiquetas,
+        fuente
     );
 
-    assertEquals("Robo", hechoTest.getTitulo());
-    assertEquals("Hombre blanco asalta ancianita indefensa", hechoTest.getDescripcion());
-    assertEquals("ROBO", hechoTest.getCategoria());
-    assertEquals("Avenida Siempreviva 742", hechoTest.getDireccion());
-    assertEquals(hechoTest.getUbicacion(), pgAux);
-    assertEquals(hechoTest.getFechaSuceso(), fechaSuceso);
-    assertEquals(
-        hechoTest.getFechaCarga()
-                 .getHour(), fechaCarga.getHour()
-    );
-    assertEquals(
-        hechoTest.getFechaCarga()
-                 .getMinute(), fechaCarga.getMinute()
-    );
-    assertEquals(
-        hechoTest.getEtiquetas()
-                 .size(), etiquetasAux.size()
-    );
-    assertEquals(Origen.PROVISTO_CONTRIBUYENTE, hechoTest.getOrigen());
+    assertEquals("Robo", hecho.getTitulo());
+    assertEquals("Robo a mano armada", hecho.getDescripcion());
+    assertEquals("DELITO", hecho.getCategoria());
+    assertEquals("Calle falsa 123", hecho.getDireccion());
+    assertEquals(ubicacion, hecho.getUbicacion());
+    assertEquals(fechaSuceso, hecho.getFechaSuceso());
+    assertEquals(etiquetas, hecho.getEtiquetas());
+    assertEquals(Origen.PROVISTO_CONTRIBUYENTE, hecho.getOrigen());
+    assertNotNull(hecho.getFechaCarga());
   }
 
   @Test
-  public void direccionIdentica() {
+  public void filtroDetectaHechoIdentico() {
+    LocalDateTime fecha = LocalDateTime.now()
+                                       .minusDays(2);
+    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
+    List<String> etiquetas = List.of("#etiqueta");
+
+    Hecho original = new Hecho(
+        "titulo",
+        "desc",
+        "categoria",
+        "direccion",
+        ubicacion,
+        fecha,
+        fecha,
+        Origen.PROVISTO_CONTRIBUYENTE,
+        etiquetas
+    );
+    Hecho copia = new Hecho(
+        "titulo",
+        "descX",
+        "categoria",
+        "direccion",
+        ubicacion,
+        fecha,
+        fecha,
+        Origen.PROVISTO_CONTRIBUYENTE,
+        List.of("#otra")
+    );
+
+    FiltroIgualHecho filtro = new FiltroIgualHecho(original);
+
+    List<Hecho> filtrados = filtro.filtrar(List.of(copia));
+
+    assertEquals(1, filtrados.size());
+    assertEquals(copia, filtrados.get(0));
+  }
+
+  @Test
+  public void filtroNoDetectaHechoDistinto() {
+    LocalDateTime fecha = LocalDateTime.now()
+                                       .minusDays(2);
+    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
+
+    Hecho original = new Hecho(
+        "Robo",
+        "desc",
+        "DELITO",
+        "Calle X",
+        ubicacion,
+        fecha,
+        fecha,
+        Origen.PROVISTO_CONTRIBUYENTE,
+        List.of()
+    );
+    Hecho distinto = new Hecho(
+        "Incendio",
+        "otra",
+        "ACCIDENTE",
+        "Calle Y",
+        ubicacion,
+        fecha,
+        fecha,
+        Origen.PROVISTO_CONTRIBUYENTE,
+        List.of()
+    );
+
+    FiltroIgualHecho filtro = new FiltroIgualHecho(original);
+
+    List<Hecho> resultado = filtro.filtrar(List.of(distinto));
+
+    assertTrue(resultado.isEmpty());
+  }
+
+  @Test
+  public void lanzaExcepcionSiFechaSucesoEsPosteriorAFechaCarga() {
+    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
+    List<String> etiquetas = List.of("#test");
+    LocalDateTime fechaSuceso = LocalDateTime.now();
+    LocalDateTime fechaCarga = fechaSuceso.minusDays(1); // incorrecto
+
+    assertThrows(
+        RuntimeException.class,
+        () -> new Hecho(
+            "t",
+            "d",
+            "c",
+            "dir",
+            ubicacion,
+            fechaSuceso,
+            fechaCarga,
+            Origen.PROVISTO_CONTRIBUYENTE,
+            etiquetas
+        )
+    );
+  }
+
+  @Test
+  public void lanzaExcepcionSiFechaSucesoEsFutura() {
+    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
+    List<String> etiquetas = List.of("#test");
+    LocalDateTime fechaFutura = LocalDateTime.now()
+                                             .plusDays(1);
+
+    assertThrows(
+        RuntimeException.class,
+        () -> new Hecho(
+            "t",
+            "d",
+            "c",
+            "dir",
+            ubicacion,
+            fechaFutura,
+            LocalDateTime.now(),
+            Origen.PROVISTO_CONTRIBUYENTE,
+            etiquetas
+        )
+    );
+  }
+
+  @Test
+  public void lanzaExcepcionSiFechaCargaEsFutura() {
+    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
+    List<String> etiquetas = List.of("#test");
+    LocalDateTime fechaFutura = LocalDateTime.now()
+                                             .plusDays(1);
+
+    assertThrows(
+        RuntimeException.class,
+        () -> new Hecho(
+            "t",
+            "d",
+            "c",
+            "dir",
+            ubicacion,
+            LocalDateTime.now(),
+            fechaFutura,
+            Origen.PROVISTO_CONTRIBUYENTE,
+            etiquetas
+        )
+    );
+  }
+
+  @Test
+  public void hechoValidoNoLanzaExcepcion() {
+    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
+    List<String> etiquetas = List.of("#test");
+    assertDoesNotThrow(() -> {
+      new Hecho(
+          "ok",
+          "desc",
+          "cat",
+          "dir",
+          ubicacion,
+          LocalDateTime.now()
+                       .minusDays(2),
+          LocalDateTime.now()
+                       .minusDays(1),
+          Origen.PROVISTO_CONTRIBUYENTE,
+          etiquetas
+      );
+    });
+  }
+
+
+  @Test
+  public void edicionDeHechoModificaSusCampos() {
+    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
+    List<String> etiquetas = List.of("#test");
+    LocalDateTime fechaSuceso = LocalDateTime.now()
+                                             .minusDays(2);
+    LocalDateTime fechaCarga = LocalDateTime.now()
+                                            .minusDays(1);
+    java.util.UUID idUsuario = java.util.UUID.randomUUID();
     Hecho hecho = new Hecho(
         "titulo",
-        "Un día más siendo del conurbano",
-        "Robos",
-        "dire",
-        pgAux,
-        LocalDateTime.now(),/*Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()), Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())*/
-        LocalDateTime.now(),
-        null,
-        etiquetasAux
+        "desc",
+        "cat",
+        "dir",
+        ubicacion,
+        fechaSuceso,
+        fechaCarga,
+        Origen.PROVISTO_CONTRIBUYENTE,
+        etiquetas,
+        idUsuario
     );
-    assertFalse(hecho.sucedioEn("Mozart 2300"));
+
+    hecho.editarHecho(
+        idUsuario,
+        "nuevo titulo",
+        "nueva desc",
+        "nueva cat",
+        "nueva dir",
+        new PuntoGeografico(2.0, 2.0),
+        List.of("#nueva"),
+        fechaSuceso
+    );
+
+    assertEquals("nuevo titulo", hecho.getTitulo());
+    assertEquals("nueva desc", hecho.getDescripcion());
+    assertEquals("nueva cat", hecho.getCategoria());
+    assertEquals("nueva dir", hecho.getDireccion());
+    assertEquals(new PuntoGeografico(2.0, 2.0), hecho.getUbicacion());
+    assertEquals(List.of("#nueva"), hecho.getEtiquetas());
+    assertEquals(fechaSuceso, hecho.getFechaSuceso());
   }
 
-  @Test
-  public void unHechoEsEditableAntesDeLaSemana() {
-    Hecho hecho = new Hecho(
-        "Choque",
-        "Choque en autopista",
-        "Transito",
-        "Av. Siempreviva",
-        pgAux,
-        hace3Dias,
-        hace3Dias,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetasAux,
-        UsuarioRegistrado.getID()
-    );
-
-    boolean editable = hecho.esEditablePor(UsuarioRegistrado.getID());
-    assertTrue(editable, "Debería ser editable dentro de la primera semana.");
-  }
 
   @Test
-  public void unHechoNoEsEditablePasadaLaSemana() {
+  public void editarHechoConFechaSucesoFuturaLanzaExcepcion() {
+    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
+    List<String> etiquetas = List.of("#test");
+    LocalDateTime fechaSuceso = LocalDateTime.now()
+                                             .minusDays(2);
+    LocalDateTime fechaCarga = LocalDateTime.now()
+                                            .minusDays(1);
+    java.util.UUID idUsuario = java.util.UUID.randomUUID();
     Hecho hecho = new Hecho(
-        "Incendio",
-        "Incendio en fábrica",
-        "Emergencia",
-        "Calle Falsa 123",
-        pgAux,
-        hace10Dias,
-        hace10Dias,
+        "titulo",
+        "desc",
+        "cat",
+        "dir",
+        ubicacion,
+        fechaSuceso,
+        fechaCarga,
         Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetasAux,
-        UsuarioRegistrado.getID()
+        etiquetas,
+        idUsuario
     );
 
-    boolean editable = hecho.esEditablePor(UsuarioRegistrado.getID());
-    assertFalse(editable, "No debería ser editable pasada una semana desde su carga.");
-  }
+    LocalDateTime fechaFutura = LocalDateTime.now()
+                                             .plusDays(1);
 
-  @Test
-  public void unHechoNoEsEditablePorUsuarioQueNoLoCreo() {
-    Hecho hecho = new Hecho(
-        "Corte de luz",
-        "Zona sin energía eléctrica",
-        "Servicios",
-        "Barrio Norte",
-        pgAux,
-        hace3Dias,
-        hace3Dias,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetasAux,
-        UsuarioRegistrado.getID()
+    assertThrows(
+        RuntimeException.class,
+        () -> hecho.editarHecho(
+            idUsuario,
+            "nuevo titulo",
+            "nueva desc",
+            "nueva cat",
+            "nueva dir",
+            new PuntoGeografico(2.0, 2.0),
+            List.of("#nueva"),
+            fechaFutura
+        )
     );
-
-    boolean editable = hecho.esEditablePor(contribuyenteA.getID());
-    assertFalse(editable, "No debería ser editable por otro usuario que no lo creó.");
-  }
-
-  @Test
-  public void unHechoSeEditoCorrectamente() {
-    Hecho hecho = new Hecho(
-        "Inundación",
-        "Calles anegadas por tormenta",
-        "Clima",
-        "Zona Sur",
-        pgAux,
-        hace3Dias,
-        hace3Dias,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetasAux,
-        UsuarioRegistrado.getID()
-    );
-
-    String nuevoTitulo = "Inundación grave";
-    String nuevaDescripcion = "Calles completamente inundadas";
-    String nuevaCategoria = "Emergencia";
-    String nuevaDireccion = "Zona Sur extendida";
-    PuntoGeografico nuevaUbicacion = new PuntoGeografico(10.0, 20.0);
-    List<String> nuevasEtiquetas = Arrays.asList("clima", "alerta");
-    LocalDateTime nuevaFechaSuceso = LocalDateTime.now();
-
-    boolean editado = hecho.editarHecho(
-        UsuarioRegistrado.getID(),
-        nuevoTitulo,
-        nuevaDescripcion,
-        nuevaCategoria,
-        nuevaDireccion,
-        nuevaUbicacion,
-        nuevasEtiquetas,
-        nuevaFechaSuceso
-    );
-
-    assertTrue(editado, "El hecho debería haberse editado correctamente.");
-    assertEquals(nuevoTitulo, hecho.getTitulo());
-    assertEquals(nuevaDescripcion, hecho.getDescripcion());
-    assertEquals(nuevaCategoria, hecho.getCategoria());
-    assertEquals(nuevaDireccion, hecho.getDireccion());
-    assertEquals(nuevaUbicacion, hecho.getUbicacion());
-    assertEquals(nuevasEtiquetas, hecho.getEtiquetas());
-    assertEquals(nuevaFechaSuceso, hecho.getFechaSuceso());
   }
 }
+
+

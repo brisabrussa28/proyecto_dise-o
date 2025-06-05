@@ -275,9 +275,9 @@ public class Usuario {
 
 
   /**
-   * Obtiene el ID del usuario.
+   * Obtiene el nombre del usuario.
    *
-   * @return UUID del usuario
+   * @return nombre del usuario
    */
   public String getNombre() {
     return nombre;

@@ -87,6 +87,14 @@ public class Hecho {
       List<String> etiquetas,
       UUID idUsuarioCreador
   ) {
+    if (fechaSuceso != null && fechaCarga != null) {
+      if (fechaSuceso.isAfter(fechaCarga)) {
+        throw new RuntimeException("fechaSuceso no puede ser posterior a fechaCarga");
+      }
+      if (fechaSuceso.isAfter(LocalDateTime.now()) || fechaCarga.isAfter(LocalDateTime.now())) {
+        throw new RuntimeException("Las fechs no pueden ser futuras");
+      }
+    }
     this.titulo = titulo;
     this.descripcion = descripcion;
     this.categoria = categoria;
@@ -191,113 +199,6 @@ public class Hecho {
   }
 
   /**
-   * verifica si el hecho es de una categoría específica.
-   *
-   * @param categoria categoría a verificar
-   * @return true si es de la categoría, false en caso contrario
-   */
-  public boolean esDeCategoria(String categoria) {
-    return this.categoria.equals(categoria);
-  }
-
-  /**
-   * Verifica si el hecho tiene una etiqueta específica.
-   *
-   * @param etiqueta etiqueta a verificar
-   * @return true si tiene la etiqueta, false en caso contrario
-   */
-  public boolean tieneEtiqueta(String etiqueta) {
-    return this.etiquetas.contains(etiqueta);
-  }
-
-  /**
-   * Verifica si el hecho es de un título específico.
-   *
-   * @param titulo título a verificar
-   * @return true si es del título, false en caso contrario
-   */
-  public boolean esDeTitulo(String titulo) {
-    return this.titulo.equals(titulo);
-  }
-
-  /**
-   * Verifica si el hecho es de una descripción específica.
-   *
-   * @param direccion descripción a verificar
-   * @return true si es de la descripción, false en caso contrario
-   */
-  public boolean sucedioEn(String direccion) {
-    return this.direccion.equals(direccion);
-  }
-
-  /**
-   * Verifica si el hecho es de una fecha específica.
-   *
-   * @param fecha fecha a verificar
-   * @return true si es de la fecha, false en caso contrario
-   */
-  public boolean esDeFecha(LocalDateTime fecha) {
-    return this.fechaSuceso.isEqual(fecha);
-  }
-
-  /**
-   * Verifica si el hecho ocurrió antes de una fecha específica.
-   *
-   * @param fecha fecha a verificar
-   * @return true si ocurrió antes de la fecha, false en caso contrario
-   */
-  public boolean seCargoEl(LocalDateTime fecha) {
-    return this.fechaCarga.isEqual(fecha);
-  }
-
-  /**
-   * Verifica si el hecho ocurrió antes de una fecha específica.
-   *
-   * @param fecha fecha a verificar
-   * @return true si ocurrió antes de la fecha, false en caso contrario
-   */
-  public boolean seCargoAntesDe(LocalDateTime fecha) {
-    return this.fechaCarga.isBefore(fecha);
-  }
-
-  /**
-   * Verifica si el hecho es de un origen específico.
-   *
-   * @param origen origen a verificar
-   * @return true si es del origen, false en caso contrario
-   */
-  public boolean esDeOrigen(Origen origen) {
-    return this.fuenteOrigen.equals(origen);
-  }
-
-  /**
-   * Verifica si el hecho es de un lugar específico.
-   *
-   * @param lugar PuntoGeografico a verificar
-   * @return true si es del lugar, false en caso contrario
-   */
-  public boolean esDeLugar(PuntoGeografico lugar) {
-    return this.ubicacion.equals(lugar);
-  }
-
-  /**
-   * Verifica si el hecho está vacío.
-   * Un hecho se considera vacío si no tiene título, descripción, categoría, dirección,
-   * ubicación, fecha de suceso o etiquetas.
-   *
-   * @return true si el hecho está vacío, false en caso contrario
-   */
-  public boolean estaVacio() {
-    return (titulo == null || titulo.isBlank())
-        && (descripcion == null || descripcion.isBlank())
-        && (categoria == null || categoria.isBlank())
-        && (direccion == null || direccion.isBlank())
-        && ubicacion == null
-        && fechaSuceso == null
-        && (etiquetas == null || etiquetas.isEmpty());
-  }
-
-  /**
    * Verifica si el hecho es editable por un usuario específico.
    * Un hecho es editable por su creador durante una semana desde su fecha de carga.
    *
@@ -361,6 +262,11 @@ public class Hecho {
       this.etiquetas.addAll(nuevasEtiquetas);
     }
     if (nuevaFechaSuceso != null) {
+      if (this.fechaCarga != null) {
+        if (nuevaFechaSuceso.isAfter(LocalDateTime.now())) {
+          throw new RuntimeException("Fecha de suceso no puede ser posterior al momento actual");
+        }
+      }
       this.fechaSuceso = nuevaFechaSuceso;
     }
 

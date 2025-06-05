@@ -1,5 +1,7 @@
 package ar.edu.utn.frba.dds.domain.info;
 
+import java.util.Objects;
+
 /**
  * Punto Geografico.
  */
@@ -24,5 +26,24 @@ public class PuntoGeografico {
 
   public double getLongitud() {
     return longitud;
+  }
+
+  // getters...
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof PuntoGeografico that)) {
+      return false;
+    }
+    return Double.compare(that.latitud, latitud) == 0 &&
+        Double.compare(that.longitud, longitud) == 0;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(latitud, longitud);
   }
 }
