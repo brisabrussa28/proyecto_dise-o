@@ -1,18 +1,21 @@
 package ar.edu.utn.frba.dds;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-
 import java.util.List;
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
 
 public class FuenteTest {
@@ -80,8 +83,8 @@ public class FuenteTest {
 
   // Tests FuenteEstatica
 
-@Test
-public void fuenteEstaticaUsaLectorCSVCorrectamente() {
+  @Test
+  public void fuenteEstaticaUsaLectorCSVCorrectamente() {
     Hecho hechoMock = mock(Hecho.class);
     LectorCSV lectorMock = mock(LectorCSV.class);
 
@@ -96,10 +99,10 @@ public void fuenteEstaticaUsaLectorCSVCorrectamente() {
     assertEquals(1, hechos.size());
     assertEquals(hechoMock, hechos.get(0));
     verify(lectorMock).importar("ruta.csv");
-}
+  }
 
-@Test
-public void fuenteEstaticaDevuelveListaVaciaSiCSVEstaVacio() {
+  @Test
+  public void fuenteEstaticaDevuelveListaVaciaSiCSVEstaVacio() {
     LectorCSV lectorMock = mock(LectorCSV.class);
 
     // Ajusta los argumentos según los cambios en el método importar
@@ -111,7 +114,8 @@ public void fuenteEstaticaDevuelveListaVaciaSiCSVEstaVacio() {
     List<Hecho> hechos = fuente.obtenerHechos();
 
     assertTrue(hechos.isEmpty());
-}
+  }
+
   @Test
 
   public void fuenteDeAgregacionCombinaHechosDeTodasLasFuentes() {

@@ -13,8 +13,8 @@ import static org.mockito.Mockito.when;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
@@ -164,22 +164,24 @@ public class ColeccionTest {
     Fuente fuente = mock(Fuente.class);
     Hecho hecho1 = mock(Hecho.class);
     Hecho hecho2 = mock(Hecho.class);
+    GestorDeReportes gestor = new GestorDeReportes();
 
-    // Initial state of the fuente
     when(fuente.obtenerHechos()).thenReturn(List.of(hecho1));
 
     Coleccion coleccion = new Coleccion("Test", fuente, "Descripcion", "Categoria");
 
-    // Verify initial state
-    List<Hecho> hechosIniciales = coleccion.getHechos(mock(GestorDeReportes.class));
-    assertEquals(1, hechosIniciales.size());
-    assertTrue(hechosIniciales.contains(hecho1));
+    when(coleccion.getHechos(gestor)).thenReturn(List.of(hecho1));
+    assertEquals(
+        1,
+        coleccion.getHechos(gestor)
+                 .size()
+    );
+    assertTrue(coleccion.getHechos(gestor)
+                        .contains(hecho1));
 
-    // Change the state of the fuente
     when(fuente.obtenerHechos()).thenReturn(List.of(hecho1, hecho2));
 
-    // Verify updated state
-    List<Hecho> hechosActualizados = coleccion.getHechos(mock(GestorDeReportes.class));
+    List<Hecho> hechosActualizados = coleccion.getHechos(gestor);
     assertEquals(2, hechosActualizados.size());
     assertTrue(hechosActualizados.contains(hecho1));
     assertTrue(hechosActualizados.contains(hecho2));

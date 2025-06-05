@@ -1,11 +1,7 @@
 package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
@@ -31,7 +27,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class FiltroTest {
@@ -46,8 +41,8 @@ public class FiltroTest {
       "#leyDeProtecciónALasAncianitas",
       "#NOalaVIOLENCIAcontraABUELITAS"
   );
-  private DetectorSpam detectorSpam ;
-  private GestorDeReportes gestor = new GestorDeReportes(detectorSpam);
+  private DetectorSpam detectorSpam;
+  private final GestorDeReportes gestor = new GestorDeReportes(detectorSpam);
 
   public List<Hecho> crearColeccionHechoYDevolverlo() {
     contribuyenteA.crearHecho(
@@ -78,32 +73,44 @@ public class FiltroTest {
   public void filtraPorCategoriaCorrectamente() {
     List<Hecho> hechos = crearColeccionHechoYDevolverlo();
     FiltroDeCategoria filtroCategoria = new FiltroDeCategoria("Robos");
-    assertFalse(filtroCategoria.filtrar(hechos)
-                               .isEmpty());
+    assertNotEquals(
+        0,
+        filtroCategoria.filtrar(hechos)
+                       .size()
+    );
   }
 
   @Test
   public void filtraPorDireccionCorrectamente() {
     List<Hecho> hechos = crearColeccionHechoYDevolverlo();
     FiltroDeDireccion filtroDireccion = new FiltroDeDireccion("Mozart 2300");
-    assertTrue(filtroDireccion.filtrar(hechos)
-                              .isEmpty());
+    assertEquals(
+        0,
+        filtroDireccion.filtrar(hechos)
+                       .size()
+    );
   }
 
   @Test
   public void filtraPorEtiquetaCorrectamente() {
     List<Hecho> hechos = crearColeccionHechoYDevolverlo();
     FiltroDeEtiqueta filtroEtiqueta = new FiltroDeEtiqueta(etiquetasAux.get(0));
-    assertFalse(filtroEtiqueta.filtrar(hechos)
-                              .isEmpty());
+    assertNotEquals(
+        0,
+        filtroEtiqueta.filtrar(hechos)
+                      .size()
+    );
   }
 
   @Test
   public void filtraPorFechaCorrectamente() {
     List<Hecho> hechos = crearColeccionHechoYDevolverlo();
     FiltroDeFecha filtroFecha = new FiltroDeFecha(horaAux);
-    assertFalse(filtroFecha.filtrar(hechos)
-                           .isEmpty());
+    assertNotEquals(
+        0,
+        filtroFecha.filtrar(hechos)
+                   .size()
+    );
   }
 
   @Test
@@ -111,16 +118,22 @@ public class FiltroTest {
     List<Hecho> hechos = crearColeccionHechoYDevolverlo();
     LocalDateTime fecha = LocalDateTime.now();
     FiltroDeFechaDeCarga filtroFecha = new FiltroDeFechaDeCarga(fecha);
-    assertFalse(filtroFecha.filtrar(hechos)
-                           .isEmpty());
+    assertNotEquals(
+        0,
+        filtroFecha.filtrar(hechos)
+                   .size()
+    );
   }
 
   @Test
   public void filtraPorLugarCorrectamente() {
     List<Hecho> hechos = crearColeccionHechoYDevolverlo();
     FiltroDeLugar filtroLugar = new FiltroDeLugar(pgAux);
-    assertFalse(filtroLugar.filtrar(hechos)
-                           .isEmpty());
+    assertNotEquals(
+        0,
+        filtroLugar.filtrar(hechos)
+                   .size()
+    );
   }
 
   @Test
@@ -138,8 +151,11 @@ public class FiltroTest {
   public void filtraPorTituloCorrectamente() {
     List<Hecho> hechos = crearColeccionHechoYDevolverlo();
     FiltroDeTitulo filtroTitulo = new FiltroDeTitulo("titulo");
-    assertFalse(filtroTitulo.filtrar(hechos)
-                            .isEmpty());
+    assertNotEquals(
+        0,
+        filtroTitulo.filtrar(hechos)
+                    .size()
+    );
   }
 
   @Test
@@ -153,7 +169,10 @@ public class FiltroTest {
     filtros.add(filtroDireccion);
     filtros.add(filtroEtiqueta);
     FiltroListaAnd filtroListaAnd = new FiltroListaAnd(filtros);
-    assertFalse(filtroListaAnd.filtrar(hechos)
-                              .isEmpty());
+    assertNotEquals(
+        0,
+        filtroListaAnd.filtrar(hechos)
+                      .size()
+    );
   }
 }
