@@ -1,22 +1,20 @@
 package ar.edu.utn.frba.dds.main;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
-import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.rol.Rol;
 import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacion;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -109,7 +107,7 @@ public class Usuario {
    * Importar datos desde un archivo CSV.
    *
    * @param rutaCsv      Ruta del archivo CSV
-   * @param lector    Carácter separador de campos
+   * @param lector       Carácter separador de campos
    * @param nombreFuente Nombre de la fuente
    * @return FuenteEstatica creada a partir del CSV
    */
@@ -126,7 +124,6 @@ public class Usuario {
     }
     return new FuenteEstatica(nombreFuente, rutaCsv, lector);
   }
-
 
 
   /**
@@ -273,33 +270,5 @@ public class Usuario {
       throw new RuntimeException("No tenés permisos para filtrar hechos.");
     }
     return servicio.filtrarHechosColeccion(coleccion, filtro, gestor);
-  }
-
-
-  /**
-   * Obtiene el nombre del usuario.
-   *
-   * @return nombre del usuario
-   */
-  public String getNombre() {
-    return nombre;
-  }
-
-  /**
-   * Obtiene el email del usuario.
-   *
-   * @return Email del usuario
-   */
-  public String getEmail() {
-    return email;
-  }
-
-  /**
-   * Obtiene el ID del usuario.
-   *
-   * @return ID del usuario
-   */
-  public UUID getID() {
-    return id;
   }
 }

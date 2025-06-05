@@ -164,7 +164,7 @@ public class ColeccionTest {
     Fuente fuente = mock(Fuente.class);
     Hecho hecho1 = mock(Hecho.class);
     Hecho hecho2 = mock(Hecho.class);
-    GestorDeReportes gestor = new GestorDeReportes();
+    GestorDeReportes gestor = new GestorDeReportes(detectorSpam);
 
     when(fuente.obtenerHechos()).thenReturn(List.of(hecho1));
 

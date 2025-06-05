@@ -16,7 +16,7 @@ public class GestorDeReportes {
 
   private final Set<Solicitud> solicitudes = new HashSet<>();
   private final Set<Hecho> hechosEliminados = new HashSet<>(); // Usamos Set para evitar duplicados
-  private DetectorSpam detectorSpam;
+  private final DetectorSpam detectorSpam;
 
   /**
    * Constructor del gestor de reportes.
@@ -25,9 +25,6 @@ public class GestorDeReportes {
    */
   public GestorDeReportes(DetectorSpam detectorSpam) {
     this.detectorSpam = detectorSpam;
-  }
-
-  public GestorDeReportes() {
   }
 
   /**
