@@ -102,4 +102,29 @@ public class GestorDeReportesTest {
         NullPointerException.class, () -> gestor.marcarComoEliminado(null)
     );
   }
+
+  @Test
+  public void hechoMarcadoComoEliminadoApareceEnListaDeEliminados() {
+    gestor.marcarComoEliminado(hecho);
+    List<Hecho> eliminados = gestor.hechosEliminados();
+    assertEquals(1, eliminados.size());
+    assertTrue(eliminados.contains(hecho));
+  }
+
+  @Test
+  public void filtroExcluyenteNoIncluyeHechosEliminados() {
+    Hecho hecho1 = new Hecho("t1", "d1", "c1", "dir1", pg, hora, hora, Origen.PROVISTO_CONTRIBUYENTE, etiquetas);
+    Hecho hecho2 = new Hecho("t2", "d2", "c2", "dir2", pg, hora, hora, Origen.PROVISTO_CONTRIBUYENTE, etiquetas);
+
+    gestor.marcarComoEliminado(hecho1);
+
+    List<Hecho> hechos = List.of(hecho1, hecho2);
+    List<Hecho> filtrados = gestor.filtroExcluyente()
+                                  .filtrar(hechos);
+
+    assertFalse(filtrados.contains(hecho1));
+    assertTrue(filtrados.contains(hecho2));
+    assertEquals(1, filtrados.size());
+  }
+
 }
