@@ -91,7 +91,17 @@ public class Coleccion {
    * @return Lista de hechos filtrados.
    */
   public List<Hecho> getHechos(GestorDeReportes gestorDeReportes) {
-    return filtrarHechos(gestorDeReportes.filtroExcluyente()).filtrar(fuente.obtenerHechos());
+    if (fuente == null) {
+      throw new IllegalStateException("Fuente cannot be null");
+    }
+    if (gestorDeReportes == null) {
+      throw new IllegalArgumentException("GestorDeReportes cannot be null");
+    }
+    List<Hecho> hechos = fuente.obtenerHechos();
+    if (hechos == null) {
+      throw new IllegalStateException("La fuente devolvió una lista de hechos nula");
+    }
+    return filtrarHechos(gestorDeReportes.filtroExcluyente()).filtrar(hechos);
   }
 
   /**
