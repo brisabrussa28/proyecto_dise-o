@@ -5,5 +5,6 @@ package ar.edu.utn.frba.dds.domain.origen;
  */
 public enum Origen {
   DATASET,
-  PROVISTO_CONTRIBUYENTE
+  PROVISTO_CONTRIBUYENTE,
+  FUENTE_DEMO
 }
