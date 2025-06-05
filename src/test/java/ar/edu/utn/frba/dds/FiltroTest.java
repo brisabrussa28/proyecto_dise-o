@@ -46,7 +46,7 @@ public class FiltroTest {
       "#leyDeProtecciónALasAncianitas",
       "#NOalaVIOLENCIAcontraABUELITAS"
   );
-  private DetectorSpam detectorSpam;
+  private DetectorSpam detectorSpam ;
   private GestorDeReportes gestor = new GestorDeReportes(detectorSpam);
 
   public List<Hecho> crearColeccionHechoYDevolverlo() {

@@ -1,72 +1,155 @@
 package ar.edu.utn.frba.dds;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
+import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
+import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
-import java.time.LocalDateTime;
+
 import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 public class FuenteTest {
-  PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
-  FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
-  LocalDateTime horaAux = LocalDateTime.of(2025, 5, 6, 20, 9);
-  List<String> etiquetasAux = List.of(
-      "#ancianita",
-      "#robo_a_mano_armada",
-      "#violencia",
-      "#leyDeProtecciónALasAncianitas",
-      "#NOalaVIOLENCIAcontraABUELITAS"
-  );
 
+  // Tests FuenteDinamica
 
   @Test
-  public void fuenteDinamicaAgregaYObtieneHechos() {
+  public void fuenteDinamicaIniciaConListaVaciaSiNoSeProporciona() {
     FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
-    Hecho hecho = new Hecho(
-        "titulo",
-        "desc",
-        "Robos",
-        "direccion",
-        pgAux,
-        horaAux,
-        horaAux,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetasAux
+    assertTrue(fuente.obtenerHechos()
+                     .isEmpty());
+  }
+
+  @Test
+  public void fuenteDinamicaAgregaHechoCorrectamente() {
+    FuenteDinamica fuente = new FuenteDinamica("Fuente1", null);
+    Hecho hechoMock = mock(Hecho.class);
+    fuente.agregarHecho(hechoMock);
+    assertEquals(
+        1,
+        fuente.obtenerHechos()
+              .size()
     );
+    assertEquals(
+        hechoMock,
+        fuente.obtenerHechos()
+              .get(0)
+    );
+  }
+
+  @Test
+  public void obtenerHechosDevuelveListaInmutableDinamica() {
+    FuenteDinamica fuente = new FuenteDinamica("FuenteInmutable", null);
+    Hecho hecho = mock(Hecho.class);
     fuente.agregarHecho(hecho);
+    List<Hecho> hechos = fuente.obtenerHechos();
+    assertThrows(UnsupportedOperationException.class, () -> hechos.add(mock(Hecho.class)));
+  }
+
+  @Test
+  public void fuenteDinamicaPuedeIniciarseConHechos() {
+    Hecho hecho = mock(Hecho.class);
+    FuenteDinamica fuente = new FuenteDinamica("FuenteConHechos", List.of(hecho));
+    assertEquals(
+        1,
+        fuente.obtenerHechos()
+              .size()
+    );
     assertTrue(fuente.obtenerHechos()
                      .contains(hecho));
   }
 
   @Test
-  public void seAgregaHechoAFuente() {
-    FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
-    Hecho hecho = new Hecho(
-        "titulo",
-        "desc",
-        "Robos",
-        "direccion",
-        pgAux,
-        horaAux,
-        horaAux,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetasAux
+  public void agregarHechoNoAgregaNulo() {
+    FuenteDinamica fuente = new FuenteDinamica("Fuente", null);
+    fuente.agregarHecho(null);
+    assertEquals(
+        1,
+        fuente.obtenerHechos()
+              .size()
     );
-    fuente.agregarHecho(hecho);
-    assertTrue(fuente.contiene(hecho));
+    assertNull(fuente.obtenerHechos()
+                     .get(0));
+  }
+
+  // Tests FuenteEstatica
+
+  @Test
+  public void fuenteEstaticaUsaLectorCSVCorrectamente() {
+    Hecho hechoMock = mock(Hecho.class);
+    LectorCSV lectorMock = mock(LectorCSV.class);
+
+    when(lectorMock.importar("ruta.csv", ',', "yyyy-MM-dd", Map.of())).thenReturn(List.of(hechoMock));
+
+    FuenteEstatica fuente = new FuenteEstatica("MiFuente", "ruta.csv", ',', "yyyy-MM-dd", Map.of());
+
+    List<Hecho> hechos = fuente.obtenerHechos();
+
+    assertEquals(1, hechos.size());
+    assertEquals(hechoMock, hechos.get(0));
+    verify(lectorMock).importar("ruta.csv", ',', "yyyy-MM-dd", Map.of());
   }
 
   @Test
-  public void seAgregaLaFuenteCorrectamente() {
-    FuenteDeAgregacion servicio = new FuenteDeAgregacion("Juan");
-    FuenteDinamica nuevaFuente = new FuenteDinamica("Juan", null);
-    servicio.agregarFuente(nuevaFuente);
-    assertTrue(servicio.getFuentesCargadas()
-                       .contains(nuevaFuente));
+  public void fuenteEstaticaDevuelveListaVaciaSiCSVEstaVacio() {
+    LectorCSV lectorMock = mock(LectorCSV.class);
+    when(lectorMock.importar(anyString(), anyChar(), anyString(), anyMap())).thenReturn(List.of());
+    FuenteEstatica fuente = new FuenteEstatica("Vacia", "vac.csv", ',', "dd/MM/yyyy", Map.of());
+
+    List<Hecho> hechos = fuente.obtenerHechos();
+
+    assertTrue(hechos.isEmpty());
+  }
+
+  // Tests FuenteDeAgregacion
+
+  @Test
+
+  public void fuenteDeAgregacionCombinaHechosDeTodasLasFuentes() {
+    Hecho hecho1 = mock(Hecho.class);
+    Hecho hecho2 = mock(Hecho.class);
+    Fuente fuente1 = mock(Fuente.class);
+    Fuente fuente2 = mock(Fuente.class);
+    when(fuente1.obtenerHechos()).thenReturn(List.of(hecho1));
+    when(fuente2.obtenerHechos()).thenReturn(List.of(hecho2));
+    FuenteDeAgregacion agregadora = new FuenteDeAgregacion("Agregada");
+    agregadora.agregarFuente(fuente1);
+    agregadora.agregarFuente(fuente2);
+    List<Hecho> todos = agregadora.obtenerHechos();
+    assertEquals(2, todos.size());
+    assertTrue(todos.contains(hecho1));
+    assertTrue(todos.contains(hecho2));
+  }
+
+  @Test
+  public void fuenteDeAgregacionConFuentesVacias() {
+    Fuente vacia1 = mock(Fuente.class);
+    Fuente vacia2 = mock(Fuente.class);
+    when(vacia1.obtenerHechos()).thenReturn(List.of());
+    when(vacia2.obtenerHechos()).thenReturn(List.of());
+    FuenteDeAgregacion agregadora = new FuenteDeAgregacion("AgregadoraVacia");
+    agregadora.agregarFuente(vacia1);
+    agregadora.agregarFuente(vacia2);
+    assertTrue(agregadora.obtenerHechos()
+                         .isEmpty());
+  }
+
+  @Test
+  public void fuenteDeAgregacionAdmiteFuentesDinamicamente() {
+    Fuente fuente = mock(Fuente.class);
+    when(fuente.obtenerHechos()).thenReturn(List.of(mock(Hecho.class)));
+    FuenteDeAgregacion agregadora = new FuenteDeAgregacion("Dinámica");
+    agregadora.agregarFuente(fuente);
+    assertEquals(
+        1,
+        agregadora.obtenerHechos()
+                  .size()
+    );
   }
 }
