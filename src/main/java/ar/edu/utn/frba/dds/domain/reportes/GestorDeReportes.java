@@ -24,9 +24,6 @@ public class GestorDeReportes {
    * @param detectorSpam Detector de spam para filtrar solicitudes
    */
   public GestorDeReportes(DetectorSpam detectorSpam) {
-    if (detectorSpam == null) {
-      throw new NullPointerException("DetectorSpam no puede ser null");
-    }
     this.detectorSpam = detectorSpam;
   }
 

@@ -39,11 +39,11 @@ public class ColeccionTest {
   private GestorDeReportes gestor;
   private DetectorSpam detectorSpam;
 
-  @BeforeEach
-  void initFileSystem() {
-    detectorSpam = mock(DetectorSpam.class);
-    gestor = new GestorDeReportes(detectorSpam);
-  }
+//  @BeforeEach
+//  void initFileSystem() {
+//    detectorSpam = mock(DetectorSpam.class);
+//    gestor = new GestorDeReportes(detectorSpam);
+//  }
 
 
   @Test
