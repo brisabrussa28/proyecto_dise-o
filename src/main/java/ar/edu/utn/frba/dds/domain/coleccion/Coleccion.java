@@ -112,6 +112,9 @@ public class Coleccion {
    */
 
   private Filtro filtrarHechos(Filtro filtroExcluyente) {
+    if (filtroExcluyente == null) {
+      return filtro;
+    }
     return new FiltroListaAnd(List.of(filtro, filtroExcluyente));
   }
 
