@@ -54,17 +54,29 @@ public class FuenteDemo extends FuenteProxy {
     }
   }
 
-//  public List<Hecho> construirHechosDesdeMap(Map<String, Object> datos, UUID idUsuario) {
-//    List<Hecho> hechosConstruidos = new ArrayList<>();
-//    List<Map<String, Object>> hechos = (List<Map<String, Object>>) datos.get("hechos");
-//
-//    for (Map<String, Object> hechoMap : hechos) {
-//      Hecho hecho = construirHechoIndividual(hechoMap, idUsuario);
-//      hechosConstruidos.add(hecho);
-//    }
-//
-//    return hechosConstruidos;
-//  }
+  public void actualizarHechos() {
+    try {
+      LocalDateTime ahora = LocalDateTime.now();
+
+      if (ultimaActualizacion == null || ahora.isAfter(ultimaActualizacion.plusHours(1))) {
+        List<Hecho> nuevosHechos = new ArrayList<>();
+        Map<String, Object> datos;
+
+        while ((datos = conexion.siguienteHecho(url, ultimaActualizacion)) != null) {
+          Hecho hecho = construirHechoIndividual(datos);
+          nuevosHechos.add(hecho);
+        }
+
+        cacheUltimosHechos = nuevosHechos;
+        ultimaActualizacion = ahora;
+
+        System.out.println("FuenteDemo actualizó hechos (" + nuevosHechos.size() + ").");
+      }
+    } catch (Exception e) {
+      System.err.println("Error al consultar FuenteDemo: " + e.getMessage());
+      throw new ConexionFuenteDemoException("Error al consultar FuenteDemo", e);
+    }
+  }
 
   private Hecho construirHechoIndividual(Map<String, Object> datos) {
     String titulo = (String) datos.get("titulo");
@@ -97,30 +109,4 @@ public class FuenteDemo extends FuenteProxy {
         etiquetas
     );
   }
-
-  public void actualizarHechos() {
-    try {
-      LocalDateTime ahora = LocalDateTime.now();
-
-      if (ultimaActualizacion == null || ahora.isAfter(ultimaActualizacion.plusHours(1))) {
-        List<Hecho> nuevosHechos = new ArrayList<>();
-        Map<String, Object> datos;
-
-        while ((datos = conexion.siguienteHecho(url, ultimaActualizacion)) != null) {
-          Hecho hecho = construirHechoIndividual(datos);
-          nuevosHechos.add(hecho);
-        }
-
-        cacheUltimosHechos = nuevosHechos;
-        ultimaActualizacion = ahora;
-
-        System.out.println("FuenteDemo actualizó hechos (" + nuevosHechos.size() + ").");
-      }
-    } catch (Exception e) {
-      System.err.println("Error al consultar FuenteDemo: " + e.getMessage());
-      throw new ConexionFuenteDemoException("Error al consultar FuenteDemo", e);
-    }
-  }
-
-
 }
