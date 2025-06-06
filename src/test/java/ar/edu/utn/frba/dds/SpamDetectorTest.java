@@ -17,9 +17,9 @@ public class SpamDetectorTest {
 
     when(detectorMock.esSpam("Este es un mensaje spam")).thenReturn(true);
 
-    assertTrue(detectorMock.esSpam("Este es un mensaje spam"));
-
     verify(detectorMock).esSpam("Este es un mensaje spam");
+
+    assertTrue(detectorMock.esSpam("Este es un mensaje spam"));
   }
 
   @Test
@@ -28,8 +28,8 @@ public class SpamDetectorTest {
 
     when(detectorMock.esSpam("Mensaje normal")).thenReturn(false);
 
-    assertFalse(detectorMock.esSpam("Mensaje normal"));
-
     verify(detectorMock).esSpam("Mensaje normal");
+
+    assertFalse(detectorMock.esSpam("Mensaje normal"));
   }
 }

@@ -34,12 +34,7 @@ public class GestorDeReportes {
    * @param solicitud Solicitud a agregar
    */
   public void agregarSolicitud(Solicitud solicitud) {
-    if (solicitud == null) {
-      throw new NullPointerException("Solicitud no puede ser null");
-    }
-    if (!detectorSpam.esSpam(solicitud.getRazonEliminacion())) {
-      solicitudes.add(solicitud);
-    }
+    solicitudes.add(solicitud);
   }
 
 

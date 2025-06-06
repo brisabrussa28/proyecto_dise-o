@@ -19,7 +19,7 @@ public class FuenteDinamica extends Fuente {
    */
   public FuenteDinamica(String nombre, List<Hecho> hechos) {
     super(nombre);
-    this.hechos = hechos != null ? new ArrayList<>(hechos) : new ArrayList<>();
+    this.hechos = hechos;
   }
 
   /**

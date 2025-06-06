@@ -1,4 +1,4 @@
-## [OBSERVACIONES]
+## OBSERVACIONES
     - El checkstyle para el tp anual es sugestivo.
     - Cuidado con clases Sistemas
     - Cuidado con las clases Rol
@@ -13,3 +13,14 @@
     - Buscar una lib para leer CSVs
     - FuenteEstatica debe leer el CSV para buscar hechos
     - Terminología como visualizar y/o mostrar no se usa, es de presentación.
+
+## OBSERVACIONES PT2
+    - Es innecesario validar el rol, todo lo relacionado con permisos se valida en una capa superior.
+    - No es Gestor, es Repositorio
+    - Evitar misplaced methods
+    - No usar el singleton para servicioMetamapa, usar inyección de dependencias en cada clase que lo vaya a usar.
+    - NO usar systemprintln
+    - Reemplazar scheduler con CRON.
+    - Liquidar clase FuenteProxy.
+    - Separar hechos para que queden en revisión y pueda ser editado.
+    - No hace falta analizar la nulidad de las colecciones.
