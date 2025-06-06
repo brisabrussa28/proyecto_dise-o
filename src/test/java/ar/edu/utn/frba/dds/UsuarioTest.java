@@ -61,7 +61,6 @@ public class UsuarioTest {
     Usuario usuario = new Usuario("SinRol", "sinrol@mail.com", Set.of());
     assertFalse(usuario.tieneRol(Rol.ADMINISTRADOR));
     assertFalse(usuario.tieneRol(Rol.VISUALIZADOR));
-    // Should not be able to visualize hechos
     assertThrows(RuntimeException.class, () -> usuario.visualizarHechos(coleccion, gestor, servicio));
   }
 

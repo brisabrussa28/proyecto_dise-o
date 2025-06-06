@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
@@ -39,11 +40,11 @@ public class GestorDeReportesTest {
   );
   private GestorDeReportes gestor;
   private Usuario solicitante;
+  DetectorSpam detector;
 
   @BeforeEach
   public void setUp() {
-    DetectorSpam detector = mock(DetectorSpam.class);
-    when(detector.esSpam(anyString())).thenReturn(false);
+    detector = mock(DetectorSpam.class);
     gestor = new GestorDeReportes(detector);
     solicitante = mock(Usuario.class);
   }
@@ -72,14 +73,12 @@ public class GestorDeReportesTest {
 
   @Test
   public void noAgregaSolicitudSiEsSpam() {
-    DetectorSpam detectorSpamTrue = mock(DetectorSpam.class);
-    when(detectorSpamTrue.esSpam(anyString())).thenReturn(true);
-    GestorDeReportes gestorSpam = new GestorDeReportes(detectorSpamTrue);
-
+    when(detector.esSpam(anyString())).thenReturn(true);
     Solicitud solicitudSpam = new Solicitud(solicitante, hecho, "motivo".repeat(100));
-    gestorSpam.agregarSolicitud(solicitudSpam);
+    gestor.agregarSolicitud(solicitudSpam);
+    verify(detector).esSpam(anyString());
 
-    assertEquals(0, gestorSpam.cantidadSolicitudes());
+    assertEquals(0, gestor.cantidadSolicitudes());
   }
 
   @Test
