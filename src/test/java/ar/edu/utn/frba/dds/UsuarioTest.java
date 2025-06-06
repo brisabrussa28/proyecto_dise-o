@@ -42,8 +42,8 @@ public class UsuarioTest {
   Coleccion coleccion;
   GestorDeReportes gestor;
   ServicioDeVisualizacion servicio;
+  ServicioDeVisualizacion servicioVisualizacion;
   Filtro filtro;
-  DetectorSpam spam;
 
   Map<CampoHecho, List<String>> mapeoCsvEjemplo = Map.of(
       CampoHecho.TITULO, List.of("titulo"),
@@ -62,7 +62,8 @@ public class UsuarioTest {
     admin = new Usuario("Admin", "admin@mail.com", Set.of(Rol.ADMINISTRADOR, Rol.VISUALIZADOR));
     coleccion = mock(Coleccion.class);
     gestor = mock(GestorDeReportes.class);
-    servicio = new ServicioDeVisualizacion();
+    servicioVisualizacion = new ServicioDeVisualizacion();
+    servicio = mock(ServicioDeVisualizacion.class);
     filtro = mock(Filtro.class);
   }
 
@@ -116,7 +117,7 @@ public class UsuarioTest {
         fuente
     );
 
-    List<Hecho> hechosTest = admin.visualizarHechos(coleccionTest,gestor, servicio);
+    List<Hecho> hechosTest = admin.visualizarHechos(coleccionTest,gestor, servicioVisualizacion);
     assertEquals(
         "EL NESTORNAUTA",
         hechosTest.get(4)
