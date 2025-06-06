@@ -27,14 +27,14 @@ public class CalculadorScoreTFIDF {
     double normA = 0.0; // Norma del vector A
     double normB = 0.0; // Norma del vector B
 
-    //producto escalar pero en lugar de posiciones (x, y, z), tenemos palabras como claves: "dinero", "gratis", "hola".
-    for (String key : a.keySet()) {
-      if (b.containsKey(key)) {
-        productoEscalar += a.get(key) * b.get(key);
+    // Itera usando entrySet para mayor eficiencia
+    for (Map.Entry<String, Double> entry : a.entrySet()) {
+      if (b.containsKey(entry.getKey())) {
+        productoEscalar += entry.getValue() * b.get(entry.getKey());
       }
     }
 
-    // Calcula la norma de cada vector (como lo hicimos en álgebra)
+    // Calcula la norma de cada vector
     for (double valorA : a.values()) {
       normA += valorA * valorA;
     }
@@ -49,8 +49,7 @@ public class CalculadorScoreTFIDF {
       return 0;
     }
 
-    // Devuelve la similitud coseno, que es el coseno del ángulo entre los dos vectores
-    // Esto lo calculabamos en aga para encontrar la proyeccion de a sobre b
+    // Devuelve la similitud coseno
     return productoEscalar / (normA * normB);
   }
 }

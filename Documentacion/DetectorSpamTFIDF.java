@@ -73,10 +73,12 @@ public class DetectorSpamTFIDF {
     tf.replaceAll((p, v) -> tf.get(p) / palabras.size());
 
     Map<String, Double> tfidf = new HashMap<>();
-    for (String palabra : tf.keySet()) {
+    for (Map.Entry<String, Double> entry : tf.entrySet()) {
+      String palabra = entry.getKey();
+      double tfValue = entry.getValue();
       int df = contarDocumentosQueContienen(palabra);
       double idf = df == 0 ? 0 : Math.log((double) totalMensajes / df); // calculo idf, evitando división por cero
-      tfidf.put(palabra, tf.get(palabra) * idf); // TF-IDF = TF * IDF
+      tfidf.put(palabra, tfValue * idf); // TF-IDF = TF * IDF
     }
 
     return tfidf;

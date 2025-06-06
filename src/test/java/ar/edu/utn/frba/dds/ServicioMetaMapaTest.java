@@ -1,0 +1,105 @@
+package ar.edu.utn.frba.dds;
+
+import ar.edu.utn.frba.dds.domain.hecho.HechoQuerys;
+import ar.edu.utn.frba.dds.domain.hecho.ListadoDeHechos;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.origen.Origen;
+import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
+import ar.edu.utn.frba.dds.domain.serviciometamapa.ServicioMetaMapa;
+import ar.edu.utn.frba.dds.main.Usuario;
+
+import com.github.tomakehurst.wiremock.WireMockServer;
+import org.junit.jupiter.api.*;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class ServicioMetaMapaTest {
+
+  private WireMockServer wireMockServer;
+  private ServicioMetaMapa servicioMetaMapa;
+  private final HechoQuerys filtros = new HechoQuerys("desastres", null, null, null, null, null);
+
+  @BeforeEach
+  public void setUp() {
+    wireMockServer = new WireMockServer(8080);
+    wireMockServer.start();
+    configureFor("localhost", 8080);
+
+    ServicioMetaMapa.reiniciarInstancia("http://localhost:8080");
+    this.servicioMetaMapa = ServicioMetaMapa.instancia("http://localhost:8080");
+  }
+
+  @AfterEach
+  public void tearDown() {
+    wireMockServer.stop();
+  }
+
+  @Test
+  public void obtenerHechos() throws IOException {
+    String body = "{ \"hechos\": [ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\", \"descripcion\": \"Simulado\" } ] }";
+
+    stubFor(get(urlPathEqualTo("/hechos"))
+                .withQueryParam("categoria", equalTo("desastres"))
+                .willReturn(aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(body)));
+
+    ListadoDeHechos listadoDeHechos = servicioMetaMapa.listadoDeHechos(filtros);
+    assertNotNull(listadoDeHechos);
+    assertEquals(1, listadoDeHechos.getHechos().size());
+  }
+
+  @Test
+  public void obtenerHechosDeColeccionUno() throws IOException {
+    String body = "{ \"hechos\": [ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\", \"descripcion\": \"Colección simulada\" } ] }";
+
+    stubFor(get(urlPathEqualTo("/colecciones/1/hechos"))
+                .withQueryParam("categoria", equalTo("desastres"))
+                .willReturn(aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(body)));
+
+    ListadoDeHechos listado = servicioMetaMapa.listadoDeHechosPorColeccion(1, filtros);
+    assertNotNull(listado);
+    assertEquals(1, listado.getHechos().size());
+  }
+
+  @Test
+  public void seCreaSolicitud() throws IOException {
+    stubFor(post(urlEqualTo("/solicitudes"))
+                .willReturn(aResponse()
+                                .withStatus(201)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{ \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\" }")));
+
+    PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
+    String motivo = "a".repeat(600);
+    List<String> etiquetasAux = List.of(
+        "#ancianita",
+        "#robo_a_mano_armada",
+        "#violencia",
+        "#leyDeProtecciónALasAncianitas",
+        "#NOalaVIOLENCIAcontraABUELITAS"
+    );
+
+    Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux,
+                            LocalDateTime.now(), LocalDateTime.now(),
+                            Origen.PROVISTO_CONTRIBUYENTE, etiquetasAux);
+
+    FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
+    fuente.agregarHecho(hecho);
+
+    Solicitud solicitud = new Solicitud(new Usuario("Niko Bellic", ""), hecho, motivo);
+    int codigo = servicioMetaMapa.enviarSolicitud(solicitud);
+    assertEquals(201, codigo);
+  }
+}
