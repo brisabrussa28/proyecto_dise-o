@@ -20,11 +20,7 @@ public class Solicitud {
    * @param hechoSolicitado Hecho solicitado para eliminar
    * @param motivo          Razón de la eliminación
    */
-  public Solicitud(
-      Usuario solicitante,
-      Hecho hechoSolicitado,
-      String motivo
-  ) {
+  public Solicitud(Usuario solicitante, Hecho hechoSolicitado, String motivo) {
     if (solicitante == null) {
       throw new NullPointerException("El solicitante no puede ser null");
     }
@@ -46,6 +42,10 @@ public class Solicitud {
 
   public String getRazonEliminacion() {
     return razonEliminacion;
+  }
+
+  public Usuario getSolicitante() {
+    return solicitante;
   }
 
   /**
