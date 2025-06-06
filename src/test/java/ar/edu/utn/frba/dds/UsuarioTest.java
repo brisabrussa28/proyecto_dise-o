@@ -7,6 +7,7 @@ import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
+import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.rol.Rol;
 import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacion;
 import ar.edu.utn.frba.dds.main.Usuario;
@@ -192,5 +193,76 @@ public class UsuarioTest {
             usuario.crearColeccion("Titulo", "Descripcion", "Categoria", fuente)
     );
   }
+
+  @Test
+  void administradorPuedeGestionarSolicitudesCorrectamente() {
+    Usuario usuario = new Usuario("Admin", "admin@mail.com", Set.of(Rol.ADMINISTRADOR));
+    GestorDeReportes gestorMock = mock(GestorDeReportes.class);
+    Solicitud solicitudMock = mock(Solicitud.class);
+
+    // Mock behavior
+    when(gestorMock.obtenerSolicitud()).thenReturn(solicitudMock);
+
+    // Obtener solicitud
+    Solicitud solicitud = usuario.obtenerSolicitud(gestorMock);
+    assertNotNull(solicitud);
+    verify(gestorMock).obtenerSolicitud();
+
+    // Gestionar solicitud
+    usuario.gestionarSolicitud(solicitud, true, gestorMock);
+    verify(gestorMock).gestionarSolicitud(solicitud, true);
+  }
+
+  @Test
+  void contribuyenteNoPuedeGestionarSolicitudes() {
+    Usuario usuario = new Usuario("Contribuyente", "contribuyente@mail.com", Set.of(Rol.CONTRIBUYENTE));
+    GestorDeReportes gestorMock = mock(GestorDeReportes.class);
+    Solicitud solicitudMock = mock(Solicitud.class);
+
+    // Intentar gestionar solicitud
+    assertThrows(
+        RuntimeException.class, () -> usuario.gestionarSolicitud(solicitudMock, true, gestorMock)
+    );
+  }
+
+  @Test
+  void visualizadorNoPuedeCrearNiGestionarPeroPuedeFiltrar() {
+    Usuario usuario = new Usuario("Visualizador", "visualizador@mail.com", Set.of(Rol.VISUALIZADOR));
+    Filtro filtroMock = mock(Filtro.class);
+    Hecho hechoMock = mock(Hecho.class);
+
+    // Mock behavior
+    when(servicio.filtrarHechosColeccion(coleccion, filtroMock, gestor)).thenReturn(List.of(hechoMock));
+
+    // Filtrar hechos
+    List<Hecho> hechosFiltrados = usuario.filtrarHechos(coleccion, filtroMock, gestor, servicio);
+    assertEquals(1, hechosFiltrados.size());
+    assertEquals(hechoMock, hechosFiltrados.get(0));
+
+    // No puede crear colección
+    assertThrows(
+        RuntimeException.class, () -> usuario.crearColeccion("Titulo", "Descripcion", "Categoria", mock(Fuente.class))
+    );
+
+    // No puede gestionar solicitudes
+    assertThrows(
+        RuntimeException.class, () -> usuario.gestionarSolicitud(mock(Solicitud.class), true, gestor)
+    );
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
