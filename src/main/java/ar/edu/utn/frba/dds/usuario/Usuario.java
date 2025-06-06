@@ -56,20 +56,8 @@ public class Usuario {
     this.roles = roles != null ? new HashSet<>(roles) : new HashSet<>();
   }
 
-  public String getNombre() {
-    return nombre;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
   public UUID getId() {
     return id;
-  }
-
-  public Set<Rol> getRoles() {
-    return new HashSet<>(roles);
   }
 
   /**

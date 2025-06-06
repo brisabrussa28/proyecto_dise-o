@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -12,10 +13,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
+import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroIdentidad;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
+import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
@@ -24,6 +29,7 @@ import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacio
 import ar.edu.utn.frba.dds.usuario.Usuario;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,15 +43,26 @@ public class UsuarioTest {
   GestorDeReportes gestor;
   ServicioDeVisualizacion servicio;
   Filtro filtro;
+  DetectorSpam spam;
+
+  Map<CampoHecho, List<String>> mapeoCsvEjemplo = Map.of(
+      CampoHecho.TITULO, List.of("titulo"),
+      CampoHecho.DESCRIPCION, List.of("descripcion"),
+      CampoHecho.LATITUD, List.of("latitud"),
+      CampoHecho.LONGITUD, List.of("longitud"),
+      CampoHecho.FECHA_SUCESO, List.of("fechaSuceso"),
+      CampoHecho.CATEGORIA, List.of("categoria"),
+      CampoHecho.DIRECCION, List.of("direccion")
+  );
 
   @BeforeEach
   void setUp() {
     visualizador = new Usuario("Visualizador", "visualizador@mail.com", Set.of(Rol.VISUALIZADOR));
     contribuyente = new Usuario("Contribuyente", "contribuyente@mail.com", Set.of(Rol.CONTRIBUYENTE));
-    admin = new Usuario("Admin", "admin@mail.com", Set.of(Rol.ADMINISTRADOR));
+    admin = new Usuario("Admin", "admin@mail.com", Set.of(Rol.ADMINISTRADOR, Rol.VISUALIZADOR));
     coleccion = mock(Coleccion.class);
     gestor = mock(GestorDeReportes.class);
-    servicio = mock(ServicioDeVisualizacion.class);
+    servicio = new ServicioDeVisualizacion();
     filtro = mock(Filtro.class);
   }
 
@@ -54,6 +71,57 @@ public class UsuarioTest {
     Usuario usuario = new Usuario("Multi", "multi@mail.com", Set.of(Rol.ADMINISTRADOR, Rol.VISUALIZADOR));
     assertTrue(usuario.tieneRol(Rol.ADMINISTRADOR));
     assertTrue(usuario.tieneRol(Rol.VISUALIZADOR));
+  }
+
+  @Test
+  public void usuarioVisualizadorConsultaUnCsv() {
+    assertThrows(
+        RuntimeException.class, () -> visualizador.importardesdeCsv(
+            "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemplo.csv",
+            "ejemplo.csv",
+            new LectorCSV(',', "dd/mm/yyyy", mapeoCsvEjemplo)
+        )
+    );
+  }
+
+  @Test
+  public void usuarioAdminPuedeConsultarCsv() {
+    LectorCSV lector = new LectorCSV(',', "dd/mm/yyyy", mapeoCsvEjemplo);
+    assertDoesNotThrow(
+        () -> admin.importardesdeCsv(
+            "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemplo.csv",
+            "ejemplo.csv",
+            lector
+        )
+    );
+    FuenteEstatica fuente = new FuenteEstatica(
+        "Fuente",
+        "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/ejemplo.csv",
+        lector
+    );
+
+    Coleccion coleccion = admin.crearColeccion(
+        "Coleccion de Fuente Estática",
+        "Es una colección de prueba",
+        "PRUEBA",
+        fuente
+    );
+
+    //when(coleccion.getHechos(gestor)).thenReturn(fuente.obtenerHechos());
+//    List<Hecho> hechosTest = fuente.obtenerHechos();
+    Coleccion coleccionTest = admin.crearColeccion(
+        "PRUEBA",
+        "ESTO ES UNA PRUEBA",
+        "TEST",
+        fuente
+    );
+
+    List<Hecho> hechosTest = admin.visualizarHechos(coleccionTest,gestor, servicio);
+    assertEquals(
+        "EL NESTORNAUTA",
+        hechosTest.get(4)
+                  .getDireccion()
+    );
   }
 
   @Test
