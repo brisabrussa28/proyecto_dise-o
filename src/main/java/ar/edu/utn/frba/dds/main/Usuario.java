@@ -14,6 +14,7 @@ import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.rol.Rol;
 import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacion;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -24,11 +25,11 @@ import java.util.UUID;
  * importar datos desde CSV, gestionar solicitudes y crear hechos.
  */
 public class Usuario {
-  protected String nombre;
-  protected String email;
-  protected UUID id;
-  protected java.util.Set<Rol> roles;
 
+  private String nombre;
+  private String email;
+  private UUID id;
+  private Set<Rol> roles;
 
   /**
    * Constructor.
@@ -40,6 +41,7 @@ public class Usuario {
     this.nombre = nombre;
     this.email = email;
     this.id = UUID.randomUUID();
+    this.roles = new HashSet<>();
   }
 
   /**
@@ -51,7 +53,23 @@ public class Usuario {
    */
   public Usuario(String nombre, String email, Set<Rol> roles) {
     this(nombre, email);
-    this.roles = roles;
+    this.roles = roles != null ? new HashSet<>(roles) : new HashSet<>();
+  }
+
+  public String getNombre() {
+    return nombre;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public UUID getId() {
+    return id;
+  }
+
+  public Set<Rol> getRoles() {
+    return new HashSet<>(roles);
   }
 
   /**
@@ -102,7 +120,6 @@ public class Usuario {
     }
   }
 
-
   /**
    * Importar datos desde un archivo CSV.
    *
@@ -124,7 +141,6 @@ public class Usuario {
     }
     return new FuenteEstatica(nombreFuente, rutaCsv, lector);
   }
-
 
   /**
    * Obtener una solicitud del gestor de reportes.
@@ -229,7 +245,6 @@ public class Usuario {
     fuente.agregarHecho(hecho);
     return hecho;
   }
-  // Sume los metodos como una fachada (Façade pattern) para facilitar el acceso desde el punto de vista del dominio o del código cliente.
 
   /**
    * Visualizar hechos de una colección.
@@ -239,7 +254,6 @@ public class Usuario {
    * @param servicio  Servicio de visualización
    * @return Lista de hechos visualizados
    */
-
   public List<Hecho> visualizarHechos(
       Coleccion coleccion,
       GestorDeReportes gestor,

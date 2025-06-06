@@ -8,8 +8,9 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -40,7 +41,8 @@ public class LectorCSV {
   ) {
     this.separator = separator;
     this.dateFormatStr = dateFormatStr;
-    this.mapeoColumnas = mapeoColumnas;
+    // Defensive copy to avoid exposing internal representation
+    this.mapeoColumnas = new HashMap<>(mapeoColumnas);
   }
 
   /**
@@ -49,16 +51,17 @@ public class LectorCSV {
    * @param path Ruta del archivo CSV a leer.
    * @return Lista de objetos Hecho importados desde el CSV.
    */
-  public List<Hecho> importar(
-      String path
-  ) {
+  public List<Hecho> importar(String path) {
     List<Hecho> hechos = new ArrayList<>();
     SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatStr);
-    // Evita fechas imposibles como 31/23/2023
     dateFormat.setLenient(false);
 
     try (
-        CSVReader reader = new CSVReaderBuilder(new FileReader(path))
+        CSVReader reader = new CSVReaderBuilder(
+            new InputStreamReader(
+                new java.io.FileInputStream(path), StandardCharsets.UTF_8
+            )
+        )
             .withCSVParser(new CSVParserBuilder().withSeparator(separator)
                                                  .build())
             .build()
