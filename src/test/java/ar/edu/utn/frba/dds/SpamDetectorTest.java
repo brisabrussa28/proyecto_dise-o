@@ -1,9 +1,13 @@
 package ar.edu.utn.frba.dds;
 
-import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
+import org.junit.jupiter.api.Test;
 
 public class SpamDetectorTest {
 

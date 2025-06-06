@@ -1,11 +1,8 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
-import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
-import java.util.Map;
-import jdk.jshell.execution.LocalExecutionControl;
 
 /**
  * Fuente de datos estática basada en archivo CSV.
@@ -13,14 +10,14 @@ import jdk.jshell.execution.LocalExecutionControl;
 public class FuenteEstatica extends Fuente {
 
   private final String rutaCsv;
-  private LectorCSV lectorCSV;
+  private final LectorCSV lectorCSV;
 
   /**
    * Constructor de la fuente estática.
    *
-   * @param nombre       Nombre de la fuente estática.
-   * @param rutaCsv      Ruta del archivo CSV que contiene los datos.
-   * @param lectorCSV    Carácter separador utilizado en el CSV.
+   * @param nombre    Nombre de la fuente estática.
+   * @param rutaCsv   Ruta del archivo CSV que contiene los datos.
+   * @param lectorCSV Carácter separador utilizado en el CSV.
    */
   public FuenteEstatica(
       String nombre,

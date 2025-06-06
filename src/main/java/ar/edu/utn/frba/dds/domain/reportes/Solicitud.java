@@ -2,7 +2,7 @@ package ar.edu.utn.frba.dds.domain.reportes;
 
 import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.main.Usuario;
+import ar.edu.utn.frba.dds.usuario.Usuario;
 
 /**
  * Solicitud.

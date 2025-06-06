@@ -4,12 +4,12 @@ import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.util.Date;
 
 public class HechoQuerys {    // Value Object for filters
-  private String categoria;
-  private PuntoGeografico ubicacion;
-  private Date fechaReporteDesde;
-  private Date fechaReporteHasta;
-  private Date fechaAcontecimientoDesde;
-  private Date fechaAcontecimientoHasta;
+  private final String categoria;
+  private final PuntoGeografico ubicacion;
+  private final Date fechaReporteDesde;
+  private final Date fechaReporteHasta;
+  private final Date fechaAcontecimientoDesde;
+  private final Date fechaAcontecimientoHasta;
 
   public HechoQuerys(
       String categoria,

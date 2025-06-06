@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.main;
+package ar.edu.utn.frba.dds.usuario;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
@@ -26,9 +26,9 @@ import java.util.UUID;
  */
 public class Usuario {
 
-  private String nombre;
-  private String email;
-  private UUID id;
+  private final String nombre;
+  private final String email;
+  private final UUID id;
   private Set<Rol> roles;
 
   /**

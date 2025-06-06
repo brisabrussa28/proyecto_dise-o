@@ -1,5 +1,16 @@
 package ar.edu.utn.frba.dds;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroIdentidad;
@@ -10,16 +21,12 @@ import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.rol.Rol;
 import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacion;
-import ar.edu.utn.frba.dds.main.Usuario;
+import ar.edu.utn.frba.dds.usuario.Usuario;
 import java.time.LocalDateTime;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import java.util.List;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class UsuarioTest {
 
@@ -55,10 +62,7 @@ public class UsuarioTest {
     assertFalse(usuario.tieneRol(Rol.ADMINISTRADOR));
     assertFalse(usuario.tieneRol(Rol.VISUALIZADOR));
     // Should not be able to visualize hechos
-    assertThrows(
-        RuntimeException.class, () ->
-            usuario.visualizarHechos(coleccion, gestor, servicio)
-    );
+    assertThrows(RuntimeException.class, () -> usuario.visualizarHechos(coleccion, gestor, servicio));
   }
 
   @Test
@@ -70,9 +74,7 @@ public class UsuarioTest {
 
   @Test
   void usuarioSinRolVisualizadorNoPuedeVisualizar() {
-    assertThrows(
-        RuntimeException.class, () -> contribuyente.visualizarHechos(coleccion, gestor, servicio)
-    );
+    assertThrows(RuntimeException.class, () -> contribuyente.visualizarHechos(coleccion, gestor, servicio));
   }
 
   @Test
@@ -120,16 +122,20 @@ public class UsuarioTest {
     Coleccion coleccion = usuario.crearColeccion("Titulo", "Descripcion", "Categoria", fuente);
     assertNotNull(coleccion);
 
-    // CONTRIBUYENTE: puede crear hecho
     FuenteDinamica fuenteDinamica = mock(FuenteDinamica.class);
     Hecho hecho = usuario.crearHecho(
-        "TituloHecho", "DescripcionHecho", "CategoriaHecho", "Direccion", null,
-        java.time.LocalDateTime.now(), List.of("etiqueta1"), fuenteDinamica
+        "TituloHecho",
+        "DescripcionHecho",
+        "CategoriaHecho",
+        "Direccion",
+        null,
+        java.time.LocalDateTime.now(),
+        List.of("etiqueta1"),
+        fuenteDinamica
     );
     assertNotNull(hecho);
     verify(fuenteDinamica).agregarHecho(hecho);
 
-    // VISUALIZADOR: puede visualizar y filtrar hechos
     GestorDeReportes gestor = mock(GestorDeReportes.class);
     ServicioDeVisualizacion servicio = mock(ServicioDeVisualizacion.class);
     Filtro filtro = new FiltroIdentidad();
@@ -151,8 +157,14 @@ public class UsuarioTest {
     FuenteDinamica fuente = mock(FuenteDinamica.class);
 
     Hecho hecho = usuario.crearHecho(
-        "Titulo", "Descripcion", "Categoria", "Direccion", null,
-        LocalDateTime.now(), List.of("etiqueta1"), fuente
+        "Titulo",
+        "Descripcion",
+        "Categoria",
+        "Direccion",
+        null,
+        LocalDateTime.now(),
+        List.of("etiqueta1"),
+        fuente
     );
 
     assertNotNull(hecho);
@@ -165,9 +177,16 @@ public class UsuarioTest {
     FuenteDinamica fuente = mock(FuenteDinamica.class);
 
     assertThrows(
-        RuntimeException.class, () -> usuario.crearHecho(
-            "Titulo", "Descripcion", "Categoria", "Direccion", null,
-            LocalDateTime.now(), List.of("etiqueta1"), fuente
+        RuntimeException.class,
+        () -> usuario.crearHecho(
+            "Titulo",
+            "Descripcion",
+            "Categoria",
+            "Direccion",
+            null,
+            LocalDateTime.now(),
+            List.of("etiqueta1"),
+            fuente
         )
     );
   }
@@ -188,10 +207,7 @@ public class UsuarioTest {
     Usuario usuario = new Usuario("NoAdmin", "noadmin@mail.com", Set.of(Rol.CONTRIBUYENTE));
     Fuente fuente = mock(Fuente.class);
 
-    assertThrows(
-        RuntimeException.class, () ->
-            usuario.crearColeccion("Titulo", "Descripcion", "Categoria", fuente)
-    );
+    assertThrows(RuntimeException.class, () -> usuario.crearColeccion("Titulo", "Descripcion", "Categoria", fuente));
   }
 
   @Test
@@ -200,15 +216,12 @@ public class UsuarioTest {
     GestorDeReportes gestorMock = mock(GestorDeReportes.class);
     Solicitud solicitudMock = mock(Solicitud.class);
 
-    // Mock behavior
     when(gestorMock.obtenerSolicitud()).thenReturn(solicitudMock);
 
-    // Obtener solicitud
     Solicitud solicitud = usuario.obtenerSolicitud(gestorMock);
     assertNotNull(solicitud);
     verify(gestorMock).obtenerSolicitud();
 
-    // Gestionar solicitud
     usuario.gestionarSolicitud(solicitud, true, gestorMock);
     verify(gestorMock).gestionarSolicitud(solicitud, true);
   }
@@ -219,10 +232,7 @@ public class UsuarioTest {
     GestorDeReportes gestorMock = mock(GestorDeReportes.class);
     Solicitud solicitudMock = mock(Solicitud.class);
 
-    // Intentar gestionar solicitud
-    assertThrows(
-        RuntimeException.class, () -> usuario.gestionarSolicitud(solicitudMock, true, gestorMock)
-    );
+    assertThrows(RuntimeException.class, () -> usuario.gestionarSolicitud(solicitudMock, true, gestorMock));
   }
 
   @Test
@@ -231,37 +241,19 @@ public class UsuarioTest {
     Filtro filtroMock = mock(Filtro.class);
     Hecho hechoMock = mock(Hecho.class);
 
-    // Mock behavior
     when(servicio.filtrarHechosColeccion(coleccion, filtroMock, gestor)).thenReturn(List.of(hechoMock));
 
-    // Filtrar hechos
     List<Hecho> hechosFiltrados = usuario.filtrarHechos(coleccion, filtroMock, gestor, servicio);
     assertEquals(1, hechosFiltrados.size());
     assertEquals(hechoMock, hechosFiltrados.get(0));
 
-    // No puede crear colección
     assertThrows(
-        RuntimeException.class, () -> usuario.crearColeccion("Titulo", "Descripcion", "Categoria", mock(Fuente.class))
+        RuntimeException.class,
+        () -> usuario.crearColeccion("Titulo", "Descripcion", "Categoria", mock(Fuente.class))
     );
 
-    // No puede gestionar solicitudes
-    assertThrows(
-        RuntimeException.class, () -> usuario.gestionarSolicitud(mock(Solicitud.class), true, gestor)
-    );
+    assertThrows(RuntimeException.class, () -> usuario.gestionarSolicitud(mock(Solicitud.class), true, gestor));
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

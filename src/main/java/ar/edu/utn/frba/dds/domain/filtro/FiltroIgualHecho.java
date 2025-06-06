@@ -35,11 +35,8 @@ public class FiltroIgualHecho extends Filtro {
                                                                        .equals(h.getFechaCarga())) {
                               return false;
                             }
-                            if (hecho.getUbicacion() != null && !hecho.getUbicacion()
-                                                                      .equals(h.getUbicacion())) {
-                              return false;
-                            }
-                            return true;
+                            return hecho.getUbicacion() == null || hecho.getUbicacion()
+                                                                        .equals(h.getUbicacion());
                           })
                           .toList());
   }

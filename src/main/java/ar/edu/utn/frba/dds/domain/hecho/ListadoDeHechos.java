@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ListadoDeHechos {
-  private List<Hecho> hechos = new ArrayList<>();
+  private final List<Hecho> hechos = new ArrayList<>();
 
   public List<Hecho> getHechos() {
     return new ArrayList<>(hechos); // Return a copy to ensure immutability

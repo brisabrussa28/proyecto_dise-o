@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,14 +11,14 @@ import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
 import ar.edu.utn.frba.dds.domain.fuentes.Conexion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDemo;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
 public class FuenteDemoTest {
@@ -58,7 +58,10 @@ public class FuenteDemoTest {
 
     List<Hecho> hechos = fuenteDemo.obtenerHechos();
     assertEquals(1, hechos.size());
-    assertEquals("Incendio en zona rural", hechos.get(0).getTitulo());
+    assertEquals("Incendio en zona rural",
+                 hechos.get(0)
+                       .getTitulo()
+    );
   }
 
   @Test
@@ -81,8 +84,9 @@ public class FuenteDemoTest {
         () -> fuenteDemo.actualizarHechos()
     );
 
-    assertTrue(exception.getMessage().contains("Error al consultar FuenteDemo"));
-    assertTrue(exception.getCause() instanceof RuntimeException);
+    assertTrue(exception.getMessage()
+                        .contains("Error al consultar FuenteDemo"));
+    assertInstanceOf(RuntimeException.class, exception.getCause());
   }
 
   @Test
@@ -120,8 +124,14 @@ public class FuenteDemoTest {
 
     List<Hecho> hechos = fuenteDemo.obtenerHechos();
     assertEquals(2, hechos.size());
-    assertEquals("Incendio A", hechos.get(0).getTitulo());
-    assertEquals("Incendio B", hechos.get(1).getTitulo());
+    assertEquals("Incendio A",
+                 hechos.get(0)
+                       .getTitulo()
+    );
+    assertEquals("Incendio B",
+                 hechos.get(1)
+                       .getTitulo()
+    );
   }
 
   @Test

@@ -1,24 +1,32 @@
 package ar.edu.utn.frba.dds;
 
-import ar.edu.utn.frba.dds.domain.hecho.HechoQuerys;
-import ar.edu.utn.frba.dds.domain.hecho.ListadoDeHechos;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoQuerys;
+import ar.edu.utn.frba.dds.domain.hecho.ListadoDeHechos;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.serviciometamapa.ServicioMetaMapa;
-import ar.edu.utn.frba.dds.main.Usuario;
-
+import ar.edu.utn.frba.dds.usuario.Usuario;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import org.junit.jupiter.api.*;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ServicioMetaMapaTest {
 
@@ -54,7 +62,10 @@ public class ServicioMetaMapaTest {
 
     ListadoDeHechos listadoDeHechos = servicioMetaMapa.listadoDeHechos(filtros);
     assertNotNull(listadoDeHechos);
-    assertEquals(1, listadoDeHechos.getHechos().size());
+    assertEquals(1,
+                 listadoDeHechos.getHechos()
+                                .size()
+    );
   }
 
   @Test
@@ -70,7 +81,10 @@ public class ServicioMetaMapaTest {
 
     ListadoDeHechos listado = servicioMetaMapa.listadoDeHechosPorColeccion(1, filtros);
     assertNotNull(listado);
-    assertEquals(1, listado.getHechos().size());
+    assertEquals(1,
+                 listado.getHechos()
+                        .size()
+    );
   }
 
   @Test
@@ -91,9 +105,11 @@ public class ServicioMetaMapaTest {
         "#NOalaVIOLENCIAcontraABUELITAS"
     );
 
-    Hecho hecho = new Hecho("titulo", "desc", "Robos", "direccion", pgAux,
-                            LocalDateTime.now(), LocalDateTime.now(),
-                            Origen.PROVISTO_CONTRIBUYENTE, etiquetasAux);
+    Hecho hecho = new Hecho(
+        "titulo", "desc", "Robos", "direccion", pgAux,
+        LocalDateTime.now(), LocalDateTime.now(),
+        Origen.PROVISTO_CONTRIBUYENTE, etiquetasAux
+    );
 
     FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
     fuente.agregarHecho(hecho);

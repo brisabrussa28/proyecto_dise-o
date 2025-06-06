@@ -9,8 +9,8 @@ import java.util.List;
 
 
 public class FuenteMetaMapa extends FuenteProxy {
-  private ServicioMetaMapa servicio;
-  private HechoQuerys query;
+  private final ServicioMetaMapa servicio;
+  private final HechoQuerys query;
 
   public FuenteMetaMapa(String nombre, ServicioMetaMapa servicio, HechoQuerys query) {
     super(nombre);

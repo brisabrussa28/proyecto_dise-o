@@ -19,7 +19,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServicioMetaMapa {
   private static ServicioMetaMapa instancia = null;
-  private Retrofit retrofit;
+  private final Retrofit retrofit;
 
   private ServicioMetaMapa(String urlApi) {
     Gson gson = new GsonBuilder()
