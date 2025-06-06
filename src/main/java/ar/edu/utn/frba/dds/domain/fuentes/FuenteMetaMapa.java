@@ -22,10 +22,10 @@ public class FuenteMetaMapa extends FuenteProxy {
   public List<Hecho> obtenerHechos() {
     try {
       return servicio.listadoDeHechos(query)
-                     .getHechos(); // Use the getter method to access the list
+                     .getHechos();
     } catch (IOException e) {
       System.err.println("Error al consultar MetaMapa: " + e.getMessage());
-      return Collections.emptyList(); // Return an empty list in case of an error
+      return Collections.emptyList();
     }
   }
 }

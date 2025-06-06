@@ -15,10 +15,7 @@ public abstract class Fuente {
    * @param nombre Nombre de la fuente.
    */
   public Fuente(String nombre) {
-    if (nombre == null || nombre.isEmpty()) {
-      throw new IllegalArgumentException("El nombre de la fuente no puede ser nulo ni vacío.");
-    }
-
+    this.validarFuente(nombre);
     this.nombre = nombre;
   }
 
@@ -48,4 +45,9 @@ public abstract class Fuente {
     return obtenerHechos().contains(unHecho);
   }
 
+  private void validarFuente(String nombre) {
+    if (nombre == null || nombre.isEmpty()) {
+      throw new RuntimeException("El nombre de la fuente no puede ser nulo ni vacío.");
+    }
+  }
 }

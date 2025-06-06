@@ -58,9 +58,10 @@ public class FuenteDemoTest {
 
     List<Hecho> hechos = fuenteDemo.obtenerHechos();
     assertEquals(1, hechos.size());
-    assertEquals("Incendio en zona rural",
-                 hechos.get(0)
-                       .getTitulo()
+    assertEquals(
+        "Incendio en zona rural",
+        hechos.get(0)
+              .getTitulo()
     );
   }
 
@@ -124,13 +125,15 @@ public class FuenteDemoTest {
 
     List<Hecho> hechos = fuenteDemo.obtenerHechos();
     assertEquals(2, hechos.size());
-    assertEquals("Incendio A",
-                 hechos.get(0)
-                       .getTitulo()
+    assertEquals(
+        "Incendio A",
+        hechos.get(0)
+              .getTitulo()
     );
-    assertEquals("Incendio B",
-                 hechos.get(1)
-                       .getTitulo()
+    assertEquals(
+        "Incendio B",
+        hechos.get(1)
+              .getTitulo()
     );
   }
 

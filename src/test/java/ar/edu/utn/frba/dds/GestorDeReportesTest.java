@@ -23,13 +23,9 @@ import org.junit.jupiter.api.Test;
 
 public class GestorDeReportesTest {
 
-  private GestorDeReportes gestor;
-  private Usuario solicitante;
-
   PuntoGeografico pg = new PuntoGeografico(33.0, 44.0);
   LocalDateTime hora = LocalDateTime.now();
   List<String> etiquetas = List.of("#robo");
-
   Hecho hecho = new Hecho(
       "titulo",
       "desc",
@@ -41,6 +37,8 @@ public class GestorDeReportesTest {
       Origen.PROVISTO_CONTRIBUYENTE,
       etiquetas
   );
+  private GestorDeReportes gestor;
+  private Usuario solicitante;
 
   @BeforeEach
   public void setUp() {

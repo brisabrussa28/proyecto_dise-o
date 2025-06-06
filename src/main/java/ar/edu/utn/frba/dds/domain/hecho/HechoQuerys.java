@@ -1,41 +1,42 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class HechoQuerys {    // Value Object for filters
   private final String categoria;
   private final PuntoGeografico ubicacion;
-  private final Date fechaReporteDesde;
-  private final Date fechaReporteHasta;
-  private final Date fechaAcontecimientoDesde;
-  private final Date fechaAcontecimientoHasta;
+  private final LocalDateTime fechaReporteDesde;
+  private final LocalDateTime fechaReporteHasta;
+  private final LocalDateTime fechaAcontecimientoDesde;
+  private final LocalDateTime fechaAcontecimientoHasta;
 
   public HechoQuerys(
       String categoria,
       PuntoGeografico ubicacion,
-      Date fechaAcontecimientoHasta,
-      Date fechaReporteHasta,
-      Date fechaAcontecimientoDesde,
-      Date fechaReporteDesde
+      LocalDateTime fechaAcontecimientoHasta,
+      LocalDateTime fechaReporteHasta,
+      LocalDateTime fechaAcontecimientoDesde,
+      LocalDateTime fechaReporteDesde
   ) {
     this.categoria = categoria;
     this.ubicacion = ubicacion;
-    this.fechaAcontecimientoHasta = fechaAcontecimientoHasta != null
-                                    ? new Date(fechaAcontecimientoHasta.getTime())
-                                    : null;
-    this.fechaAcontecimientoDesde = fechaAcontecimientoDesde != null
-                                    ? new Date(fechaAcontecimientoDesde.getTime())
-                                    : null;
-    this.fechaReporteHasta = fechaReporteHasta != null
-                             ? new Date(fechaReporteHasta.getTime())
-                             : null;
-    this.fechaReporteDesde = fechaReporteDesde != null
-                             ? new Date(fechaReporteDesde.getTime())
-                             : null;
+    this.validarFecha(fechaAcontecimientoHasta);
+    this.validarFecha(fechaReporteHasta);
+    this.validarFecha(fechaAcontecimientoDesde);
+    this.validarFecha(fechaReporteDesde);
+    this.fechaAcontecimientoHasta = fechaAcontecimientoHasta;
+    this.fechaAcontecimientoDesde = fechaAcontecimientoDesde;
+    this.fechaReporteHasta = fechaReporteHasta;
+    this.fechaReporteDesde = fechaReporteDesde;
   }
 
-  // Getters with defensive copies
+  private void validarFecha(LocalDateTime fecha) {
+    if (fecha == null) {
+      throw new RuntimeException("Fecha no puede ser nulo");
+    }
+  }
+
   public String getCategoria() {
     return categoria;
   }
@@ -44,27 +45,19 @@ public class HechoQuerys {    // Value Object for filters
     return ubicacion;
   }
 
-  public Date getFechaReporteDesde() {
-    return fechaReporteDesde != null
-           ? new Date(fechaReporteDesde.getTime())
-           : null;
+  public LocalDateTime getFechaReporteDesde() {
+    return fechaReporteDesde;
   }
 
-  public Date getFechaReporteHasta() {
-    return fechaReporteHasta != null
-           ? new Date(fechaReporteHasta.getTime())
-           : null;
+  public LocalDateTime getFechaReporteHasta() {
+    return fechaReporteHasta;
   }
 
-  public Date getFechaAcontecimientoDesde() {
-    return fechaAcontecimientoDesde != null
-           ? new Date(fechaAcontecimientoDesde.getTime())
-           : null;
+  public LocalDateTime getFechaAcontecimientoDesde() {
+    return fechaAcontecimientoDesde;
   }
 
-  public Date getFechaAcontecimientoHasta() {
-    return fechaAcontecimientoHasta != null
-           ? new Date(fechaAcontecimientoHasta.getTime())
-           : null;
+  public LocalDateTime getFechaAcontecimientoHasta() {
+    return fechaAcontecimientoHasta;
   }
 }

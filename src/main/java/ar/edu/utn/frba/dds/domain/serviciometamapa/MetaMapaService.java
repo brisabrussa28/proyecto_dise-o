@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.domain.serviciometamapa;
 import ar.edu.utn.frba.dds.domain.hecho.ListadoDeHechos;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
+import java.time.LocalDateTime;
 import java.util.Date;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -17,10 +18,10 @@ public interface MetaMapaService {
   Call<ListadoDeHechos> hechos(
       @Query("categoria") String categoria,
       @Query("ubicacion") PuntoGeografico ubicacion,
-      @Query("fecha_reporte_desde") Date fechaReporteDesde,
-      @Query("fecha_reporte_hasta") Date fechaReporteHasta,
-      @Query("fecha_acontecimiento_desde") Date fechaAcontecimientoDesde,
-      @Query("fecha_acontecimiento_hasta") Date fechaAcontecimientoHasta
+      @Query("fecha_reporte_desde") LocalDateTime fechaReporteDesde,
+      @Query("fecha_reporte_hasta") LocalDateTime fechaReporteHasta,
+      @Query("fecha_acontecimiento_desde") LocalDateTime fechaAcontecimientoDesde,
+      @Query("fecha_acontecimiento_hasta") LocalDateTime fechaAcontecimientoHasta
   );
 
   @GET("colecciones/{id}/hechos")
@@ -28,10 +29,10 @@ public interface MetaMapaService {
       @Path("id") int groupId,
       @Query("categoria") String categoria,
       @Query("ubicacion") PuntoGeografico ubicacion,
-      @Query("fecha_reporte_desde") Date fechaReporteDesde,
-      @Query("fecha_reporte_hasta") Date fechaReporteHasta,
-      @Query("fecha_acontecimiento_desde") Date fechaAcontecimientoDesde,
-      @Query("fecha_acontecimiento_hasta") Date fechaAcontecimientoHasta
+      @Query("fecha_reporte_desde") LocalDateTime fechaReporteDesde,
+      @Query("fecha_reporte_hasta") LocalDateTime fechaReporteHasta,
+      @Query("fecha_acontecimiento_desde") LocalDateTime fechaAcontecimientoDesde,
+      @Query("fecha_acontecimiento_hasta") LocalDateTime fechaAcontecimientoHasta
   );
 
   @POST("solicitudes")
