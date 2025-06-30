@@ -12,9 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Provides utilities to save and load lists of objects of any type to a local JSON file.
- * This class does not keep a copy of the objects in memory; it always operates directly
- * with the provided JSON file.
+ * Provee utilidades para guardar y cargar listas de objetos de cualquier tipo en un archivo JSON local.
+ * Esta clase no mantiene una copia de los objetos en memoria; siempre opera directamente
+ * con el archivo JSON provisto.
  */
 public class ServicioDeCopiasLocales {
 
@@ -24,7 +24,7 @@ public class ServicioDeCopiasLocales {
   /**
    * Constructor.
    *
-   * @param jsonFilePath Path to the file where JSON copies will be saved and read.
+   * @param jsonFilePath Ruta al archivo donde se guardarán y leerán las copias JSON.
    */
   public ServicioDeCopiasLocales(String jsonFilePath) {
     this.jsonFilePath = jsonFilePath;
@@ -35,27 +35,27 @@ public class ServicioDeCopiasLocales {
   }
 
   /**
-   * Saves a local copy of the list of objects of any type in JSON format.
+   * Guarda una copia local de la lista de objetos de cualquier tipo en formato JSON.
    *
-   * @param <T>     The type of objects in the list.
-   * @param objetos The list of objects to save.
+   * @param <T>     Tipo de los objetos en la lista.
+   * @param objetos Lista de objetos a guardar.
    */
   public <T> void guardarCopiaLocalJson(List<T> objetos) {
     try {
       objectMapper.writeValue(new File(jsonFilePath), objetos);
-      System.out.println("ServicioDeCopiasLocales: Copia local de objetos guardada en: " + jsonFilePath);
+      System.out.println("Copia local de objetos guardada en " + jsonFilePath);
     } catch (IOException e) {
-      System.err.println("ServicioDeCopiasLocales: Error al escribir la copia JSON local en " + jsonFilePath + ": " + e.getMessage());
+      System.err.println("Error al escribir la copia JSON local en " + jsonFilePath);
     }
   }
 
   /**
-   * Reads the local JSON file and converts its content into a list of objects of any type.
+   * Lee el archivo JSON local y convierte su contenido en una lista de objetos de cualquier tipo.
    *
-   * @param <T>          The type of objects in the list.
-   * @param typeReference A TypeReference specifying the full type of the list to deserialize.
-   * @return A list of objects read from the JSON file, or an empty list if the file does not exist,
-   *         is empty, or if a read/syntax error occurs.
+   * @param <T>           Tipo de los objetos en la lista.
+   * @param typeReference Referencia de tipo que especifica el tipo completo de la lista a deserializar.
+   * @return Una lista de objetos leídos del archivo JSON, o una lista vacía si el archivo no existe,
+   *         está vacío o si ocurre un error de lectura/sintaxis.
    */
   public <T> List<T> cargarCopiaLocalJson(TypeReference<List<T>> typeReference) {
     File jsonFile = new File(jsonFilePath);
@@ -77,28 +77,28 @@ public class ServicioDeCopiasLocales {
   }
 
   /**
-   * Saves a local copy of a list of Hecho objects in JSON format.
+   * Guarda una copia local de una lista de objetos Hecho en formato JSON.
    *
-   * @param hechos The list of Hecho objects to save.
+   * @param hechos Lista de objetos Hecho a guardar.
    */
   public void guardarCopiaHechos(List<Hecho> hechos) {
     guardarCopiaLocalJson(hechos);
   }
 
   /**
-   * Reads the local JSON file and converts its content into a list of Hecho objects.
+   * Lee el archivo JSON local y convierte su contenido en una lista de objetos Hecho.
    *
-   * @return A list of Hecho objects read from the JSON file, or an empty list if the file does not exist,
-   *         is empty, or if a read/syntax error occurs.
+   * @return Una lista de objetos Hecho leídos del archivo JSON, o una lista vacía si el archivo no existe,
+   *         está vacío o si ocurre un error de lectura/sintaxis.
    */
   public List<Hecho> cargarCopiaHechos() {
     return cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {});
   }
 
   /**
-   * Gets the path of the JSON file used by this service.
+   * Obtiene la ruta del archivo JSON utilizado por este servicio.
    *
-   * @return The path of the JSON file.
+   * @return La ruta del archivo JSON.
    */
   public String getJsonFilePath() {
     return jsonFilePath;

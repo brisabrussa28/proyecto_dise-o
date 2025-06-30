@@ -101,34 +101,53 @@ public class FuenteDemo extends FuenteProxy {
   }
 
   private Hecho construirHechoIndividual(Map<String, Object> datos) {
-    String titulo = (String) datos.get("titulo");
-    String descripcion = (String) datos.get("descripcion");
-    String categoria = (String) datos.get("categoria");
-    String direccion = (String) datos.get("direccion");
+    try {
+      String titulo = (String) datos.get("titulo");
+      String descripcion = (String) datos.get("descripcion");
+      String categoria = (String) datos.get("categoria");
+      String direccion = (String) datos.get("direccion");
 
-    Map<String, Object> ubicacionMap = (Map<String, Object>) datos.get("ubicacion");
-    double latitud = ((Number) ubicacionMap.get("latitud")).doubleValue();
-    double longitud = ((Number) ubicacionMap.get("longitud")).doubleValue();
-    PuntoGeografico ubicacion = new PuntoGeografico(latitud, longitud);
+      if (titulo == null || descripcion == null || categoria == null || direccion == null) {
+        throw new IllegalArgumentException("Datos obligatorios faltantes");
+      }
 
-    LocalDateTime fechaSuceso = LocalDateTime.parse((String) datos.get("fechaSuceso"));
-    LocalDateTime fechaCarga = LocalDateTime.parse((String) datos.get("fechaCarga"));
+      Object ubicacionObj = datos.get("ubicacion");
+      double latitud = 0;
+      double longitud = 0;
+      if (ubicacionObj instanceof Map<?, ?> ubicacionMap) {
+        latitud = ((Number) ubicacionMap.get("latitud")).doubleValue();
+        longitud = ((Number) ubicacionMap.get("longitud")).doubleValue();
+      } else {
+        throw new IllegalArgumentException("Ubicación inválida");
+      }
+      PuntoGeografico ubicacion = new PuntoGeografico(latitud, longitud);
 
-    Origen fuenteOrigen = Origen.valueOf((String) datos.get("fuenteOrigen"));
+      LocalDateTime fechaSuceso = LocalDateTime.parse((String) datos.get("fechaSuceso"));
+      LocalDateTime fechaCarga = LocalDateTime.parse((String) datos.get("fechaCarga"));
 
-    @SuppressWarnings("unchecked")
-    List<String> etiquetas = (List<String>) datos.get("etiquetas");
+      Origen fuenteOrigen = Origen.valueOf((String) datos.get("fuenteOrigen"));
 
-    return new Hecho(
-        titulo,
-        descripcion,
-        categoria,
-        direccion,
-        ubicacion,
-        fechaSuceso,
-        fechaCarga,
-        fuenteOrigen,
-        etiquetas
-    );
+      Object etiquetasObj = datos.get("etiquetas");
+      List<String> etiquetas = new ArrayList<>();
+      if (etiquetasObj instanceof List) {
+        for (Object o : (List<?>) etiquetasObj) {
+          etiquetas.add(String.valueOf(o));
+        }
+      }
+
+      return new Hecho(
+          titulo,
+          descripcion,
+          categoria,
+          direccion,
+          ubicacion,
+          fechaSuceso,
+          fechaCarga,
+          fuenteOrigen,
+          etiquetas
+      );
+    } catch (Exception e) {
+      throw new ConexionFuenteDemoException("Error al construir Hecho individual", e);
+    }
   }
 }
