@@ -1,5 +1,7 @@
 package ar.edu.utn.frba.dds.domain.info;
 
+import com.fasterxml.jackson.annotation.JsonCreator; // Import para @JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty; // Import para @JsonProperty
 import java.util.Objects;
 
 /**
@@ -15,7 +17,11 @@ public class PuntoGeografico {
    * @param latitud  Latitud del punto geográfico
    * @param longitud Longitud del punto geográfico
    */
-  public PuntoGeografico(double latitud, double longitud) {
+  // Anotaciones para que Jackson pueda usar este constructor para la deserialización
+  @JsonCreator
+  public PuntoGeografico(
+      @JsonProperty("latitud") double latitud,
+      @JsonProperty("longitud") double longitud) {
     this.latitud = latitud;
     this.longitud = longitud;
   }

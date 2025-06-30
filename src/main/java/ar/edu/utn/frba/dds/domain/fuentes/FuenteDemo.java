@@ -4,6 +4,7 @@ import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
+import ar.edu.utn.frba.dds.domain.serviciodecopiaslocales.ServicioDeCopiasLocales; // Import the new service
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,9 +19,8 @@ import java.util.concurrent.TimeUnit;
  * ficticio utilizando una biblioteca externa provista (clase Conexion).
  * Es stateful y consulta nuevos hechos cada una hora mediante programación interna.
  * Si se consulta antes de la hora, devuelve una copia del resultado anterior (cache).
+ * Ahora colabora con ServicioDeCopiasLocales para guardar copias JSON.
  */
-
-
 public class FuenteDemo extends FuenteProxy {
   private final Conexion conexion;
   private final URL url;
@@ -28,28 +28,38 @@ public class FuenteDemo extends FuenteProxy {
   private ScheduledExecutorService scheduler;
   private List<Hecho> cacheUltimosHechos = new ArrayList<>();
 
-  public FuenteDemo(URL url, Conexion conexion) {
+  // Instancia del servicio de copias locales
+  private final ServicioDeCopiasLocales servicioDeCopiasLocales;
+
+  public FuenteDemo(URL url, Conexion conexion, String jsonFilePathParaCopias) {
     super("FuenteDemo");
     this.url = url;
     this.conexion = conexion;
     this.ultimaActualizacion = null;
+    // Initialize the ServicioDeCopiasLocales with the provided file path
+    this.servicioDeCopiasLocales = new ServicioDeCopiasLocales(jsonFilePathParaCopias);
     iniciarScheduler();
+    // Load existing facts from JSON on startup
+    this.cacheUltimosHechos = servicioDeCopiasLocales.cargarCopiaHechos();
+    System.out.println("FuenteDemo: Hechos cargados inicialmente desde JSON (" + cacheUltimosHechos.size() + ").");
   }
 
   /**
-   * Devuelve los hechos más recientes cacheados. No consulta la fuente externa.
+   * Returns the most recently cached facts. Does not query the external source.
    */
   @Override
   public List<Hecho> obtenerHechos() {
-    return new ArrayList<>(cacheUltimosHechos); // copia defensiva
+    return new ArrayList<>(cacheUltimosHechos); // defensive copy
   }
 
   /**
-   * Scheduler interno: consulta a la fuente externa una vez por hora.
+   * Internal scheduler: queries the external source once per hour
+   * and then notifies ServicioDeCopiasLocales to save the copy.
    */
   public void iniciarScheduler() {
     scheduler = Executors.newSingleThreadScheduledExecutor();
-    scheduler.scheduleAtFixedRate(this::actualizarHechos, 0, 1, TimeUnit.HOURS);
+    // Schedule to update facts and save to JSON immediately, then every hour
+    scheduler.scheduleAtFixedRate(this::actualizarHechosYGuardarCopia, 0, 1, TimeUnit.HOURS);
   }
 
   public void detenerScheduler() {
@@ -58,10 +68,15 @@ public class FuenteDemo extends FuenteProxy {
     }
   }
 
-  public void actualizarHechos() {
+  /**
+   * Updates facts from the external source and then passes the list to
+   * ServicioDeCopiasLocales for saving.
+   */
+  public void actualizarHechosYGuardarCopia() {
     try {
       LocalDateTime ahora = LocalDateTime.now();
 
+      // The update logic remains the same for FuenteDemo
       if (ultimaActualizacion == null || ahora.isAfter(ultimaActualizacion.plusHours(1))) {
         List<Hecho> nuevosHechos = new ArrayList<>();
         Map<String, Object> datos;
@@ -75,6 +90,9 @@ public class FuenteDemo extends FuenteProxy {
         ultimaActualizacion = ahora;
 
         System.out.println("FuenteDemo actualizó hechos (" + nuevosHechos.size() + ").");
+
+        // After updating its cache, it notifies ServicioDeCopiasLocales to save the copy
+        servicioDeCopiasLocales.guardarCopiaHechos(cacheUltimosHechos);
       }
     } catch (Exception e) {
       System.err.println("Error al consultar FuenteDemo: " + e.getMessage());

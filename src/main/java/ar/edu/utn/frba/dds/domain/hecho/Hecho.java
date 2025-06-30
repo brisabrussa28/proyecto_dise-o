@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds.domain.hecho;
 
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
+import com.fasterxml.jackson.annotation.JsonProperty; // Importar esta anotación
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,17 +12,27 @@ import java.util.UUID;
  * Hecho.
  */
 public class Hecho {
-  private final List<String> etiquetas;
-  private final UUID id;
-  private final UUID idUsuarioCreador;
-  private final LocalDateTime fechaCarga;
-  private final Origen fuenteOrigen;
+  // Los campos que eran 'final' ahora son no-final para permitir la deserialización de Jackson
+  private List<String> etiquetas;
+  private UUID id;
+  private UUID idUsuarioCreador;
+  private LocalDateTime fechaCarga;
+  private Origen fuenteOrigen; // Ya no es final
   private String titulo;
   private String descripcion;
   private String categoria;
   private String direccion;
   private PuntoGeografico ubicacion;
   private LocalDateTime fechaSuceso;
+
+  // Constructor público sin argumentos: NECESARIO para la deserialización de Jackson
+  public Hecho() {
+    this.etiquetas = new ArrayList<>(); // Inicializar para evitar NullPointerException
+    this.id = UUID.randomUUID(); // Generar un ID por defecto (puede ser sobrescrito por JSON)
+    this.idUsuarioCreador = null; // Puede ser sobrescrito por JSON
+    this.fechaCarga = LocalDateTime.now(); // Puede ser sobrescrito por JSON
+    this.fuenteOrigen = null; // Puede ser sobrescrito por JSON
+  }
 
   /**
    * Constructor básico.
@@ -268,5 +279,53 @@ public class Hecho {
       }
       this.fechaSuceso = nuevaFechaSuceso;
     }
+  }
+
+  // Setters para los campos que no son 'final' y que Jackson necesita para la deserialización
+  public void setTitulo(String titulo) {
+    this.titulo = titulo;
+  }
+
+  public void setDescripcion(String descripcion) {
+    this.descripcion = descripcion;
+  }
+
+  public void setCategoria(String categoria) {
+    this.categoria = categoria;
+  }
+
+  public void setDireccion(String direccion) {
+    this.direccion = direccion;
+  }
+
+  public void setUbicacion(PuntoGeografico ubicacion) {
+    this.ubicacion = ubicacion;
+  }
+
+  public void setFechaSuceso(LocalDateTime fechaSuceso) {
+    this.fechaSuceso = fechaSuceso;
+  }
+
+  // Nuevos setters para los campos que eran 'final' y ahora son no-final
+  public void setEtiquetas(List<String> etiquetas) {
+    this.etiquetas = new ArrayList<>(etiquetas);
+  }
+
+  public void setId(UUID id) {
+    this.id = id;
+  }
+
+  public void setIdUsuarioCreador(UUID idUsuarioCreador) {
+    this.idUsuarioCreador = idUsuarioCreador;
+  }
+
+  public void setFechaCarga(LocalDateTime fechaCarga) {
+    this.fechaCarga = fechaCarga;
+  }
+
+  // Anotación para mapear la propiedad JSON "origen" al setter de 'fuenteOrigen'
+  @JsonProperty("origen")
+  public void setFuenteOrigen(Origen fuenteOrigen) {
+    this.fuenteOrigen = fuenteOrigen;
   }
 }
