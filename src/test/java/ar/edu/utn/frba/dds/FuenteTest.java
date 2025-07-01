@@ -15,10 +15,30 @@ import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach; // Import for cleanup after each test
+import org.junit.jupiter.api.BeforeEach; // Import for setup before each test
 import org.junit.jupiter.api.Test;
 
 public class FuenteTest {
+
+  // Common setup for FuenteDeAgregacion tests
+  private Path tempJsonFilePathAgregacion;
+
+  @BeforeEach
+  void setUpCommon() throws IOException {
+    // Create a temporary JSON file for FuenteDeAgregacion tests
+    tempJsonFilePathAgregacion = Files.createTempFile("test_agregacion", ".json");
+  }
+
+  @AfterEach
+  void tearDownCommon() throws IOException {
+    // Clean up the temporary JSON file after FuenteDeAgregacion tests
+    Files.deleteIfExists(tempJsonFilePathAgregacion);
+  }
 
   // Tests FuenteDinamica
 
@@ -26,7 +46,7 @@ public class FuenteTest {
   public void fuenteDinamicaIniciaConListaVaciaSiNoSeProporciona() {
     FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
     assertTrue(fuente.obtenerHechos()
-                     .isEmpty());
+        .isEmpty());
   }
 
   @Test
@@ -37,12 +57,12 @@ public class FuenteTest {
     assertEquals(
         1,
         fuente.obtenerHechos()
-              .size()
+            .size()
     );
     assertEquals(
         hechoMock,
         fuente.obtenerHechos()
-              .get(0)
+            .get(0)
     );
   }
 
@@ -62,10 +82,10 @@ public class FuenteTest {
     assertEquals(
         1,
         fuente.obtenerHechos()
-              .size()
+            .size()
     );
     assertTrue(fuente.obtenerHechos()
-                     .contains(hecho));
+        .contains(hecho));
   }
 
   @Test
@@ -75,10 +95,10 @@ public class FuenteTest {
     assertEquals(
         1,
         fuente.obtenerHechos()
-              .size()
+            .size()
     );
     assertNull(fuente.obtenerHechos()
-                     .get(0));
+        .get(0));
   }
 
   // Tests FuenteEstatica
@@ -88,10 +108,10 @@ public class FuenteTest {
     Hecho hechoMock = mock(Hecho.class);
     LectorCSV lectorMock = mock(LectorCSV.class);
 
-    // Ajusta los argumentos según los cambios en el método importar
+    // Adjust arguments according to changes in the import method
     when(lectorMock.importar("ruta.csv")).thenReturn(List.of(hechoMock));
 
-    // Ajusta el constructor de FuenteEstatica si cambió
+    // Adjust FuenteEstatica constructor if it changed
     FuenteEstatica fuente = new FuenteEstatica("MiFuente", "ruta.csv", lectorMock);
 
     List<Hecho> hechos = fuente.obtenerHechos();
@@ -105,10 +125,10 @@ public class FuenteTest {
   public void fuenteEstaticaDevuelveListaVaciaSiCSVEstaVacio() {
     LectorCSV lectorMock = mock(LectorCSV.class);
 
-    // Ajusta los argumentos según los cambios en el método importar
+    // Adjust arguments according to changes in the import method
     when(lectorMock.importar(anyString())).thenReturn(List.of());
 
-    // Ajusta el constructor de FuenteEstatica si cambió
+    // Adjust FuenteEstatica constructor if it changed
     FuenteEstatica fuente = new FuenteEstatica("Vacia", "vac.csv", lectorMock);
 
     List<Hecho> hechos = fuente.obtenerHechos();
@@ -116,8 +136,9 @@ public class FuenteTest {
     assertTrue(hechos.isEmpty());
   }
 
-  @Test
+  // Tests FuenteDeAgregacion
 
+  @Test
   public void fuenteDeAgregacionCombinaHechosDeTodasLasFuentes() {
     Hecho hecho1 = mock(Hecho.class);
     Hecho hecho2 = mock(Hecho.class);
@@ -125,13 +146,21 @@ public class FuenteTest {
     Fuente fuente2 = mock(Fuente.class);
     when(fuente1.obtenerHechos()).thenReturn(List.of(hecho1));
     when(fuente2.obtenerHechos()).thenReturn(List.of(hecho2));
-    FuenteDeAgregacion agregadora = new FuenteDeAgregacion("Agregada");
+
+    // Update constructor call for FuenteDeAgregacion
+    FuenteDeAgregacion agregadora = new FuenteDeAgregacion("Agregada", tempJsonFilePathAgregacion.toString());
     agregadora.agregarFuente(fuente1);
     agregadora.agregarFuente(fuente2);
+    // Explicitly call to update the cache for the test
+    agregadora.actualizarHechosAgregadosYGuardarCopia(); // ADDED THIS LINE
+
     List<Hecho> todos = agregadora.obtenerHechos();
     assertEquals(2, todos.size());
     assertTrue(todos.contains(hecho1));
     assertTrue(todos.contains(hecho2));
+
+    // Stop the scheduler after the test
+    agregadora.detenerScheduler();
   }
 
   @Test
@@ -140,23 +169,37 @@ public class FuenteTest {
     Fuente vacia2 = mock(Fuente.class);
     when(vacia1.obtenerHechos()).thenReturn(List.of());
     when(vacia2.obtenerHechos()).thenReturn(List.of());
-    FuenteDeAgregacion agregadora = new FuenteDeAgregacion("AgregadoraVacia");
+
+    // Update constructor call for FuenteDeAgregacion
+    FuenteDeAgregacion agregadora = new FuenteDeAgregacion("AgregadoraVacia", tempJsonFilePathAgregacion.toString());
     agregadora.agregarFuente(vacia1);
     agregadora.agregarFuente(vacia2);
+    // Explicitly call to update the cache for the test
+    agregadora.actualizarHechosAgregadosYGuardarCopia(); // ADDED THIS LINE
     assertTrue(agregadora.obtenerHechos()
-                         .isEmpty());
+        .isEmpty());
+
+    // Stop the scheduler after the test
+    agregadora.detenerScheduler();
   }
 
   @Test
   public void fuenteDeAgregacionAdmiteFuentesDinamicamente() {
     Fuente fuente = mock(Fuente.class);
     when(fuente.obtenerHechos()).thenReturn(List.of(mock(Hecho.class)));
-    FuenteDeAgregacion agregadora = new FuenteDeAgregacion("Dinámica");
+
+    // Update constructor call for FuenteDeAgregacion
+    FuenteDeAgregacion agregadora = new FuenteDeAgregacion("Dinámica", tempJsonFilePathAgregacion.toString());
     agregadora.agregarFuente(fuente);
+    // Explicitly call to update the cache for the test
+    agregadora.actualizarHechosAgregadosYGuardarCopia(); // ADDED THIS LINE
     assertEquals(
         1,
         agregadora.obtenerHechos()
-                  .size()
+            .size()
     );
+
+    // Stop the scheduler after the test
+    agregadora.detenerScheduler();
   }
 }
