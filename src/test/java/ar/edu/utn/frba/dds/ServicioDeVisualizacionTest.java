@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
+import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacion;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ public class ServicioDeVisualizacionTest {
 
   private ServicioDeVisualizacion servicio;
   private Coleccion coleccionMock;
-  private GestorDeReportes gestorMock;
+  private RepositorioDeSolicitudes repositorioMock;
   private Filtro filtroMock;
   private Hecho hecho1;
   private Hecho hecho2;
@@ -27,7 +27,7 @@ public class ServicioDeVisualizacionTest {
   public void setUp() {
     servicio = new ServicioDeVisualizacion();
     coleccionMock = mock(Coleccion.class);
-    gestorMock = mock(GestorDeReportes.class);
+    repositorioMock = mock(RepositorioDeSolicitudes.class);
     filtroMock = mock(Filtro.class);
 
     hecho1 = mock(Hecho.class);
@@ -37,9 +37,9 @@ public class ServicioDeVisualizacionTest {
   @Test
   public void obtenerHechosDevuelveLosHechosDeLaColeccion() {
     List<Hecho> hechos = List.of(hecho1, hecho2);
-    when(coleccionMock.getHechos(gestorMock)).thenReturn(hechos);
+    when(coleccionMock.getHechos(repositorioMock)).thenReturn(hechos);
 
-    List<Hecho> resultado = servicio.obtenerHechosColeccion(coleccionMock, gestorMock);
+    List<Hecho> resultado = servicio.obtenerHechosColeccion(coleccionMock, repositorioMock);
 
     assertEquals(2, resultado.size());
     assertTrue(resultado.contains(hecho1));
@@ -50,10 +50,10 @@ public class ServicioDeVisualizacionTest {
     List<Hecho> hechos = List.of(hecho1, hecho2);
     List<Hecho> filtrados = List.of(hecho2);
 
-    when(coleccionMock.getHechos(gestorMock)).thenReturn(hechos);
+    when(coleccionMock.getHechos(repositorioMock)).thenReturn(hechos);
     when(filtroMock.filtrar(hechos)).thenReturn(filtrados);
 
-    List<Hecho> resultado = servicio.filtrarHechosColeccion(coleccionMock, filtroMock, gestorMock);
+    List<Hecho> resultado = servicio.filtrarHechosColeccion(coleccionMock, filtroMock, repositorioMock);
 
     assertEquals(1, resultado.size());
     assertEquals(hecho2, resultado.get(0));
@@ -61,10 +61,10 @@ public class ServicioDeVisualizacionTest {
 
   @Test
   public void coleccionDevuelveListaVaciaYFiltrarTambien() {
-    when(coleccionMock.getHechos(gestorMock)).thenReturn(List.of());
+    when(coleccionMock.getHechos(repositorioMock)).thenReturn(List.of());
     when(filtroMock.filtrar(List.of())).thenReturn(List.of());
 
-    List<Hecho> resultado = servicio.filtrarHechosColeccion(coleccionMock, filtroMock, gestorMock);
+    List<Hecho> resultado = servicio.filtrarHechosColeccion(coleccionMock, filtroMock, repositorioMock);
 
     assertTrue(resultado.isEmpty());
   }

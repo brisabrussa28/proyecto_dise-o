@@ -19,18 +19,14 @@ import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
-import ar.edu.utn.frba.dds.domain.rol.Rol;
+import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacion;
-import ar.edu.utn.frba.dds.usuario.Usuario;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 public class FiltroTest {
-  Usuario contribuyenteA = new Usuario("Jorge", "jorgesampa@outlook.com", Set.of(Rol.ADMINISTRADOR, Rol.CONTRIBUYENTE));
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
   LocalDateTime horaAux = LocalDateTime.of(2025, 5, 6, 20, 9);
@@ -42,31 +38,27 @@ public class FiltroTest {
       "#NOalaVIOLENCIAcontraABUELITAS"
   );
   private DetectorSpam detectorSpam;
-  private final GestorDeReportes gestor = new GestorDeReportes(detectorSpam);
+  private final RepositorioDeSolicitudes repositorio = new RepositorioDeSolicitudes(detectorSpam);
 
   public List<Hecho> crearColeccionHechoYDevolverlo() {
-    contribuyenteA.crearHecho(
+    fuenteAuxD.crearHecho(
         "titulo",
         "Un día más siendo del conurbano",
         "Robos",
         "dire",
         pgAux,
         horaAux,
-        etiquetasAux,
-        fuenteAuxD
+        etiquetasAux
     );
-    Usuario illuminati = new Usuario(
-        "△",
-        "libellumcipher@incognito.com",
-        Set.of(Rol.CONTRIBUYENTE, Rol.ADMINISTRADOR, Rol.VISUALIZADOR)
-    );
-    Coleccion bonaerense = illuminati.crearColeccion(
+
+    Coleccion bonaerense = fuenteAuxD.crearColeccion(
         "Robos",
         "Un día más siendo del conurbano",
-        "Robos",
-        fuenteAuxD
+        "Robos"
     );
-    return illuminati.visualizarHechos(bonaerense, gestor, new ServicioDeVisualizacion());
+
+    ServicioDeVisualizacion servicio = new ServicioDeVisualizacion();
+    return servicio.obtenerHechosColeccion(bonaerense, repositorio);
   }
 
   @Test

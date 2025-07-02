@@ -1,6 +1,5 @@
 package ar.edu.utn.frba.dds.domain.serviciometamapa;
 
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoQuerys;
 import ar.edu.utn.frba.dds.domain.hecho.ListadoDeHechos;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
@@ -18,10 +17,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServicioMetaMapa {
-  private static ServicioMetaMapa instancia = null;
   private final Retrofit retrofit;
 
-  private ServicioMetaMapa(String urlApi) {
+  public ServicioMetaMapa(String urlApi) {
     Gson gson = new GsonBuilder()
         .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
         .create();
@@ -30,17 +28,6 @@ public class ServicioMetaMapa {
         .baseUrl(urlApi)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build();
-  }
-
-  public static ServicioMetaMapa instancia(String urlApi) {
-    if (instancia == null) {
-      instancia = new ServicioMetaMapa(urlApi);
-    }
-    return instancia;
-  }
-
-  public static void reiniciarInstancia(String urlApi) {
-    instancia = new ServicioMetaMapa(urlApi);
   }
 
   public ListadoDeHechos listadoDeHechos(HechoQuerys querys) throws IOException {
@@ -59,11 +46,6 @@ public class ServicioMetaMapa {
     // Ensure the returned object is not null
     if (listadoDeHechos == null) {
       listadoDeHechos = new ListadoDeHechos();
-    }
-
-    // Safely iterate over the list using getHechos
-    for (Hecho hecho : listadoDeHechos.getHechos()) {
-      System.out.println("Hecho: " + hecho);
     }
 
     return listadoDeHechos;
@@ -86,11 +68,6 @@ public class ServicioMetaMapa {
     // Ensure the returned object is not null
     if (listadoDeHechos == null) {
       listadoDeHechos = new ListadoDeHechos();
-    }
-
-    // Safely iterate over the list using getHechos
-    for (Hecho hecho : listadoDeHechos.getHechos()) {
-      System.out.println("Hecho: " + hecho);
     }
 
     return listadoDeHechos;
