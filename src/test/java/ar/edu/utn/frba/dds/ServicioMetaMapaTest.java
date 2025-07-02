@@ -94,7 +94,10 @@ public class ServicioMetaMapaTest {
 
   @Test
   public void obtenerHechosDeColeccionUno() throws IOException {
-    String body = "{ \"hechos\": [ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\", \"descripcion\": \"Colección simulada\" } ] }";
+    String body = "{ \"hechos\": " +
+        "[ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\"," +
+          " \"descripcion\": \"Colección simulada\" " + "} " +
+        "] }";
 
     stubFor(get(urlPathEqualTo("/colecciones/1/hechos")).withQueryParam("categoria", equalTo("desastres"))
                                                         .willReturn(aResponse().withStatus(200)
