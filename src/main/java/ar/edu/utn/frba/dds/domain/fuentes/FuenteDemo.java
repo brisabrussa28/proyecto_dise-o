@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * Si se consulta antes de la hora, devuelve una copia del resultado anterior (cache).
  * Ahora colabora con ServicioDeCopiasLocales para guardar copias JSON.
  */
-public class FuenteDemo extends FuenteProxy {
+public class FuenteDemo implements Fuente {
   private final Conexion conexion;
   private final URL url;
   private LocalDateTime ultimaActualizacion;
@@ -32,7 +32,6 @@ public class FuenteDemo extends FuenteProxy {
   private final ServicioDeCopiasLocales servicioDeCopiasLocales;
 
   public FuenteDemo(URL url, Conexion conexion, String jsonFilePathParaCopias) {
-    super("FuenteDemo");
     this.url = url;
     this.conexion = conexion;
     this.ultimaActualizacion = null;

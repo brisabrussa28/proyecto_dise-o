@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * Ahora cuenta con un mecanismo para guardar copias locales de los hechos agregados
  * de forma periódica, utilizando ServicioDeCopiasLocales.
  */
-public class FuenteDeAgregacion extends Fuente {
+public class FuenteDeAgregacion implements Fuente {
   private final List<Fuente> fuentesCargadas;
   private final ServicioDeCopiasLocales servicioDeCopiasLocales; // Instance of local copy service
   private ScheduledExecutorService scheduler; // Scheduler for periodic updates
@@ -29,7 +29,6 @@ public class FuenteDeAgregacion extends Fuente {
    * @param jsonFilePathParaCopias Ruta del archivo JSON para las copias locales
    */
   public FuenteDeAgregacion(String nombre, String jsonFilePathParaCopias) {
-    super(nombre);
     this.fuentesCargadas = new ArrayList<>();
     this.servicioDeCopiasLocales = new ServicioDeCopiasLocales(jsonFilePathParaCopias);
     // Load existing facts from JSON on startup
