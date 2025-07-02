@@ -6,36 +6,36 @@ import java.util.List;
 
 public class MultiplesMenciones implements AlgoritmoDeConcenso {
   @Override
-  public List<Hecho> listaDeHechosConcensuados(List<Hecho> listaDeHechos, List<Fuente> fuentesNodo) {
+  public List<Hecho> listaDeHechosConcensuados(
+      List<Hecho> listaDeHechos,
+      List<Fuente> fuentesNodo
+  ) {
 
     return listaDeHechos.stream()
-                        .filter(hecho -> !hechoConVersionDistinta(hecho, fuentesNodo)
-                            && hechoEnDosOMasFuentes(hecho, fuentesNodo))
-                        .toList();
+        .filter(hecho -> !hechoConVersionDistinta(
+            hecho,
+            fuentesNodo
+        ) && hechoEnDosOMasFuentes(hecho, fuentesNodo))
+        .toList();
   }
-
+  
   boolean hechoEnDosOMasFuentes(Hecho hecho, List<Fuente> fuentes) {
     return 2 <= fuentes.stream()
-                       .filter(fuente -> fuente.obtenerHechos()
-                                               .contains(hecho))
-                       .toList()
-                       .size();
+        .filter(fuente -> fuente.obtenerHechos().contains(hecho))
+        .toList()
+        .size();
   }
 
   boolean hechoConVersionDistinta(Hecho hecho, List<Fuente> fuentes) {
     return fuentes.stream()
-                  .map(Fuente::obtenerHechos).
-                  filter(hechos -> hechos.stream().
-                                         anyMatch(hecho1 -> hecho1.getTitulo()
-                                                                  .equals(hecho.getTitulo()))).
-                  anyMatch(hechos -> hechos.stream()
-                                           .anyMatch(hecho1 -> !hecho1.getTitulo()
-                                                                      .equals(hecho.getTitulo())));
+        .map(Fuente::obtenerHechos)
+        .filter(hechos -> hechos.stream()
+            .anyMatch(hecho1 -> hecho1.getTitulo()
+                .equals(hecho.getTitulo())))
+
+        .anyMatch(hechos -> hechos.stream()
+            .anyMatch(hecho1 -> !hecho1.getTitulo()
+                .equals(hecho.getTitulo())));
   }
 
 }
-
-/*
-múltiples menciones: si al menos dos fuentes del nodo contienen un mismo hecho y
-ninguna otra fuente del nodo contiene otro de igual título pero diferentes atributos, se lo considera consensuado;
- */

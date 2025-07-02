@@ -1,8 +1,6 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.rol.Rol;
 import java.util.List;
 
 /**

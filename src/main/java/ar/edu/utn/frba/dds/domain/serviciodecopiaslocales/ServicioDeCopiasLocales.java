@@ -43,7 +43,6 @@ public class ServicioDeCopiasLocales {
   public <T> void guardarCopiaLocalJson(List<T> objetos) {
     try {
       objectMapper.writeValue(new File(jsonFilePath), objetos);
-      System.out.println("Copia local de objetos guardada en " + jsonFilePath);
     } catch (IOException e) {
       System.err.println("Error al escribir la copia JSON local en " + jsonFilePath);
     }
@@ -55,23 +54,19 @@ public class ServicioDeCopiasLocales {
    * @param <T>           Tipo de los objetos en la lista.
    * @param typeReference Referencia de tipo que especifica el tipo completo de la lista a deserializar.
    * @return Una lista de objetos leídos del archivo JSON, o una lista vacía si el archivo no existe,
-   *         está vacío o si ocurre un error de lectura/sintaxis.
+   * está vacío o si ocurre un error de lectura/sintaxis.
    */
   public <T> List<T> cargarCopiaLocalJson(TypeReference<List<T>> typeReference) {
     File jsonFile = new File(jsonFilePath);
     if (!jsonFile.exists() || jsonFile.length() == 0) {
-      System.out.println("Archivo JSON no encontrado o vacío en " + jsonFilePath);
       return new ArrayList<>();
     }
     try {
       List<T> objetosLeidos = objectMapper.readValue(jsonFile, typeReference);
-      System.out.println("Copia local de objetos cargada desde: " + jsonFilePath);
       return objetosLeidos != null ? objetosLeidos : new ArrayList<>();
     } catch (MismatchedInputException e) {
-      System.err.println("Error de sintaxis JSON o tipo al cargar la copia " + jsonFilePath);
       return new ArrayList<>();
     } catch (IOException e) {
-      System.err.println("Error de I/O al cargar la copia JSON " + jsonFilePath);
       return new ArrayList<>();
     }
   }
@@ -82,17 +77,18 @@ public class ServicioDeCopiasLocales {
    * @param hechos Lista de objetos Hecho a guardar.
    */
   public void guardarCopiaHechos(List<Hecho> hechos) {
-    guardarCopiaLocalJson(hechos);
+    guardarCopiaLocalJson(hechos); //misplaced method.
   }
 
   /**
    * Lee el archivo JSON local y convierte su contenido en una lista de objetos Hecho.
    *
    * @return Una lista de objetos Hecho leídos del archivo JSON, o una lista vacía si el archivo no existe,
-   *         está vacío o si ocurre un error de lectura/sintaxis.
+   * está vacío o si ocurre un error de lectura/sintaxis.
    */
   public List<Hecho> cargarCopiaHechos() {
-    return cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {});
+    return cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {
+    });
   }
 
   /**

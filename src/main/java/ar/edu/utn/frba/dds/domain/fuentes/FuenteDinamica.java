@@ -1,10 +1,11 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
+import ar.edu.utn.frba.dds.domain.AlgoritmosConcenso.AlgoritmoDeConcenso;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.hecho.Estado;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.rol.Rol;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,8 +64,13 @@ public class FuenteDinamica implements Fuente {
     return hecho;
   }
 
-  public Coleccion crearColeccion(String titulo, String descripcion, String categoria) {
-    return new Coleccion(titulo, this, descripcion, categoria);
+  public Coleccion crearColeccion(
+      String titulo,
+      String descripcion,
+      String categoria,
+      AlgoritmoDeConcenso algoritmo
+  ) {
+    return new Coleccion(titulo, this, descripcion, categoria, algoritmo);
   }
 
   /**
@@ -77,6 +83,53 @@ public class FuenteDinamica implements Fuente {
     return Collections.unmodifiableList(this.hechos);
   }
 
-  public String getNombre() { return nombre;}
+  public String getNombre() {
+    return nombre;
+  }
+
+  /**
+   * Edita los detalles del hecho.
+   * Permite cambiar el título, descripción, categoría, dirección, ubicación,
+   * etiquetas y fecha de suceso del hecho si el usuario tiene permisos para editarlo.
+   *
+   * @param hecho Hecho
+   */
+  public void editarHecho(
+      Hecho hecho,
+      String titulo,
+      String descripcion,
+      String categoria,
+      String direccion,
+      PuntoGeografico ubicacion,
+      List<String> etiquetas,
+      LocalDateTime fechaSuceso
+  ) {
+    if (LocalDateTime.now().isAfter(hecho.getFechaCarga().plusWeeks(1))) {
+      throw new RuntimeException("Flaco, te pasaste una semana");
+    } else {
+      if (titulo != null) {
+        hecho.setTitulo(titulo);
+      }
+      if (descripcion != null) {
+        hecho.setDescripcion(descripcion);
+      }
+      if (categoria != null) {
+        hecho.setCategoria(categoria);
+      }
+      if (direccion != null) {
+        hecho.setDireccion(direccion);
+      }
+      if (ubicacion != null) {
+        hecho.setUbicacion(ubicacion);
+      }
+      if (etiquetas != null) {
+        hecho.setEtiquetas(etiquetas);
+      }
+      if (fechaSuceso != null) {
+        hecho.setFechaSuceso(fechaSuceso);
+      }
+      hecho.setEstado(Estado.EDITADO);
+    }
+  }
 
 }

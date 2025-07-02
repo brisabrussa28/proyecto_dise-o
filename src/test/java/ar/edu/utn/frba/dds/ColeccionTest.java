@@ -169,10 +169,10 @@ public class ColeccionTest {
     assertEquals(
         1,
         coleccion.getHechos(repositorio)
-                 .size()
+            .size()
     );
     assertTrue(coleccion.getHechos(repositorio)
-                        .contains(hecho1));
+                   .contains(hecho1));
 
     when(fuente.obtenerHechos()).thenReturn(List.of(hecho1, hecho2));
 

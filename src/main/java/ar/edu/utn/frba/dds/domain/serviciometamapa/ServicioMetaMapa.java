@@ -43,7 +43,6 @@ public class ServicioMetaMapa {
     Response<ListadoDeHechos> listadoDeHechosResponse = requestListadoDeHechos.execute();
     ListadoDeHechos listadoDeHechos = listadoDeHechosResponse.body();
 
-    // Ensure the returned object is not null
     if (listadoDeHechos == null) {
       listadoDeHechos = new ListadoDeHechos();
     }
@@ -51,7 +50,10 @@ public class ServicioMetaMapa {
     return listadoDeHechos;
   }
 
-  public ListadoDeHechos listadoDeHechosPorColeccion(int id, HechoQuerys querys) throws IOException {
+  public ListadoDeHechos listadoDeHechosPorColeccion(
+      int id,
+      HechoQuerys querys
+  ) throws IOException {
     MetaMapaService metaMapaService = this.retrofit.create(MetaMapaService.class);
     Call<ListadoDeHechos> requestListadoDeHechos = metaMapaService.hechos(
         id,
