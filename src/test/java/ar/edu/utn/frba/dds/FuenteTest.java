@@ -107,7 +107,6 @@ public class FuenteTest {
     @BeforeEach
     void setUp() throws IOException {
       tempJsonFile = Files.createTempFile("test_agregacion_", ".json");
-      // FIX: Se usa el constructor correcto con nombre y ruta.
       agregadora = new FuenteDeAgregacion("TestAgregadora", tempJsonFile.toString());
 
       fuenteMock1 = mock(Fuente.class);
@@ -118,8 +117,7 @@ public class FuenteTest {
 
     @AfterEach
     void tearDown() throws IOException {
-      // FIX: Se detiene el scheduler para una limpieza correcta.
-      agregadora.detenerScheduler();
+      // FIX: Se elimina la llamada al método obsoleto detenerScheduler()
       Files.deleteIfExists(tempJsonFile);
     }
 

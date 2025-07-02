@@ -34,14 +34,12 @@ public class FuenteDemoTest {
   void setUp() throws Exception {
     dummyUrl = new URL("http://localhost:8080/hechos");
     tempJsonFilePath = Files.createTempFile("test_hechos_", ".json");
-    // FIX: Se agrega el parámetro 'nombre' faltante en el constructor.
     fuenteDemo = new FuenteDemo("TestDemo", dummyUrl, conexionMock, tempJsonFilePath.toString());
   }
 
   @AfterEach
   void tearDown() throws Exception {
-    // Es una buena práctica detener el scheduler para no dejar hilos corriendo.
-    fuenteDemo.detenerScheduler();
+    // FIX: Se elimina la llamada al método obsoleto detenerScheduler()
     Files.deleteIfExists(tempJsonFilePath);
   }
 
@@ -76,10 +74,8 @@ public class FuenteDemoTest {
         .thenReturn(hecho2)
         .thenReturn(null);
 
-    // ACT: Llamamos al método público para forzar la actualización síncrona.
     fuenteDemo.forzarActualizacionSincrona();
 
-    // ASSERT: Verificamos que la caché interna se haya actualizado.
     List<Hecho> hechos = fuenteDemo.obtenerHechos();
     assertEquals(2, hechos.size());
     assertEquals("Incendio A", hechos.get(0).getTitulo());
@@ -92,7 +88,6 @@ public class FuenteDemoTest {
     Map<String, Object> hechoInvalido = Map.of(
         "titulo", "Hecho inválido",
         "descripcion", "Falla en datos",
-        // Falta "ubicacion" y otros campos para causar un error de parseo.
         "fechaSuceso", "2024-05-01T10:00:00"
     );
 
@@ -100,10 +95,8 @@ public class FuenteDemoTest {
         .thenReturn(hechoInvalido)
         .thenReturn(null);
 
-    // ACT: La llamada a la actualización ahora captura la excepción internamente.
     fuenteDemo.forzarActualizacionSincrona();
 
-    // ASSERT: Verificamos que la caché siga vacía, ya que la actualización falló.
     assertTrue(
         fuenteDemo.obtenerHechos().isEmpty(),
         "La caché debería estar vacía si la actualización falla por datos inválidos."
