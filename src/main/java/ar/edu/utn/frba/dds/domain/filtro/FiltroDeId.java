@@ -1,19 +1,25 @@
 package ar.edu.utn.frba.dds.domain.filtro;
 
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import java.util.List;
+
 /**
  * Clase de filtro de id.
  */
-public class FiltroDeId extends Filtro {
-  /**
-   * Constructor de FiltroDeId.
-   *
-   * @param id Identificador del hecho a filtrar.
-   */
+public class FiltroDeId implements Filtro {
+  private final String id;
+
+
   public FiltroDeId(String id) {
-    super(hechos -> hechos.stream()
-                          .filter(h -> h.getId()
-                                        .toString()
-                                        .equals(id))
-                          .toList());
+    this.id = id;
+  }
+
+  @Override
+  public List<Hecho> filtrar(List<Hecho> hechos) {
+    return hechos.stream()
+                 .filter(h -> h.getId()
+                               .toString()
+                               .equals(id))
+                 .toList();
   }
 }

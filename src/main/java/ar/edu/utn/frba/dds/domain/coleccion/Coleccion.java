@@ -5,7 +5,7 @@ import ar.edu.utn.frba.dds.domain.filtro.FiltroIdentidad;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.reportes.GestorDeReportes;
+import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import java.util.List;
 
 /**
@@ -31,6 +31,18 @@ public class Coleccion {
    */
 
   public Coleccion(String titulo, Fuente fuente, String descripcion, String categoria) {
+    if (titulo == null || titulo.isBlank()) {
+      throw new RuntimeException("El titulo es campo obligatorio.");
+    }
+    if (fuente == null) {
+      throw new RuntimeException("La fuente es campo obligatorio.");
+    }
+    if (descripcion == null || descripcion.isBlank()) {
+      throw new RuntimeException("La descripcion es campo obligatorio.");
+    }
+    if (categoria == null || categoria.isBlank()) {
+      throw new RuntimeException("La categoria es campo obligatorio.");
+    }
     this.titulo = titulo;
     this.fuente = fuente;
     this.descripcion = descripcion;
@@ -90,17 +102,8 @@ public class Coleccion {
    * @param gestorDeReportes GestorDeReportes
    * @return Lista de hechos filtrados.
    */
-  public List<Hecho> getHechos(GestorDeReportes gestorDeReportes) {
-    if (fuente == null) {
-      throw new IllegalStateException("Fuente cannot be null");
-    }
-    if (gestorDeReportes == null) {
-      throw new IllegalArgumentException("GestorDeReportes cannot be null");
-    }
+  public List<Hecho> getHechos(RepositorioDeSolicitudes gestorDeReportes) {
     List<Hecho> hechos = fuente.obtenerHechos();
-    if (hechos == null) {
-      throw new IllegalStateException("La fuente devolvió una lista de hechos nula");
-    }
     return filtrarHechos(gestorDeReportes.filtroExcluyente()).filtrar(hechos);
   }
 
@@ -136,8 +139,7 @@ public class Coleccion {
    * @return true si el hecho está en la colección, false en caso contrario.
    */
 
-  public boolean contieneA(Hecho unHecho, GestorDeReportes gestorDeReportes) {
-    return this.getHechos(gestorDeReportes)
-               .contains(unHecho);
+  public boolean contieneA(Hecho unHecho, RepositorioDeSolicitudes gestorDeReportes) {
+    return this.getHechos(gestorDeReportes).contains(unHecho);
   }
 }

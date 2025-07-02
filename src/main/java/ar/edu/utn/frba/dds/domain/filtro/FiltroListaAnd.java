@@ -6,19 +6,20 @@ import java.util.List;
 /**
  * Clase filtro de lista and.
  */
-public class FiltroListaAnd extends Filtro {
-  /**
-   * Constructor de FiltroListaAnd.
-   *
-   * @param filtros Lista de filtros a combinar con una operación AND
-   */
+public class FiltroListaAnd implements Filtro {
+  private final List<Filtro> filtros;
+
   public FiltroListaAnd(List<Filtro> filtros) {
-    super(hechos -> {
-      List<Hecho> resultado = hechos;
-      for (Filtro filtro : filtros) {
-        resultado = filtro.filtrar(resultado);
-      }
-      return resultado;
-    });
+    this.filtros = filtros;
   }
+
+  @Override
+  public List<Hecho> filtrar(List<Hecho> hechos) {
+    List<Hecho> resultado = hechos;
+    for (Filtro filtro : filtros) {
+      resultado = filtro.filtrar(resultado);
+    }
+    return resultado;
+  }
+
 }

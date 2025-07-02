@@ -20,11 +20,11 @@ import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.serviciometamapa.ServicioMetaMapa;
-import ar.edu.utn.frba.dds.usuario.Usuario;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,8 +52,7 @@ public class ServicioMetaMapaTest {
     wireMockServer.start();
     configureFor("localhost", 8080);
 
-    ServicioMetaMapa.reiniciarInstancia("http://localhost:8080");
-    this.servicioMetaMapa = ServicioMetaMapa.instancia("http://localhost:8080");
+    this.servicioMetaMapa = new ServicioMetaMapa("http://localhost:8080");
   }
 
   @AfterEach
@@ -146,7 +145,7 @@ public class ServicioMetaMapaTest {
     FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
     fuente.agregarHecho(hecho);
 
-    Solicitud solicitud = new Solicitud(new Usuario("Niko Bellic", ""), hecho, motivo);
+    Solicitud solicitud = new Solicitud(UUID.randomUUID(), hecho, motivo);
     int codigo = servicioMetaMapa.enviarSolicitud(solicitud);
     assertEquals(201, codigo);
   }

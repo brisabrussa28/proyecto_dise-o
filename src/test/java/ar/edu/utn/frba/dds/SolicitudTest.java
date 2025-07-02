@@ -9,9 +9,9 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
-import ar.edu.utn.frba.dds.usuario.Usuario;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 public class SolicitudTest {
@@ -30,34 +30,33 @@ public class SolicitudTest {
       Origen.PROVISTO_CONTRIBUYENTE,
       etiquetas
   );
-  Usuario solicitante = mock(Usuario.class);
 
 
   @Test
   public void crearSolicitudValida() {
     String motivoLargo = "a".repeat(500);
-    Solicitud solicitud = new Solicitud(solicitante, hechoValido, motivoLargo);
+    Solicitud solicitud = new Solicitud(UUID.randomUUID(), hechoValido, motivoLargo);
     assertNotNull(solicitud);
   }
 
   @Test
   public void lanzaExcepcionSiRazonEsMuyCorta() {
     assertThrows(
-        RazonInvalidaException.class, () -> new Solicitud(solicitante, hechoValido, "corta")
+        RazonInvalidaException.class, () -> new Solicitud(UUID.randomUUID(), hechoValido, "corta")
     );
   }
 
   @Test
   public void lanzaExcepcionSiRazonEsNula() {
     assertThrows(
-        RazonInvalidaException.class, () -> new Solicitud(solicitante, hechoValido, null)
+        RazonInvalidaException.class, () -> new Solicitud(UUID.randomUUID(), hechoValido, null)
     );
   }
 
   @Test
   public void lanzaExcepcionSiRazonEstaVacia() {
     assertThrows(
-        RazonInvalidaException.class, () -> new Solicitud(solicitante, hechoValido, "     ")
+        RazonInvalidaException.class, () -> new Solicitud(UUID.randomUUID(), hechoValido, "     ")
     );
   }
 }

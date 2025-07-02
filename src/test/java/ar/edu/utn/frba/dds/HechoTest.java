@@ -11,33 +11,28 @@ import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.rol.Rol;
-import ar.edu.utn.frba.dds.usuario.Usuario;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 public class HechoTest {
 
   @Test
   public void seCreaHechoCorrectamente() {
-    Usuario usuario = new Usuario("Juan", "juan@mail.com", Set.of(Rol.CONTRIBUYENTE));
     FuenteDinamica fuente = new FuenteDinamica("Fuente X", null);
     PuntoGeografico ubicacion = new PuntoGeografico(33.0, 44.0);
     List<String> etiquetas = List.of("#robo", "#violencia");
     LocalDateTime fechaSuceso = LocalDateTime.now()
                                              .minusDays(5);
 
-    Hecho hecho = usuario.crearHecho(
+    Hecho hecho = fuente.crearHecho(
         "Robo",
         "Robo a mano armada",
         "DELITO",
         "Calle falsa 123",
         ubicacion,
         fechaSuceso,
-        etiquetas,
-        fuente
+        etiquetas
     );
 
     assertEquals("Robo", hecho.getTitulo());

@@ -8,11 +8,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Gestor de Reportes.
  */
-public class GestorDeReportes {
+public class RepositorioDeSolicitudes {
 
   private final Set<Solicitud> solicitudes = new HashSet<>();
   private final Set<Hecho> hechosEliminados = new HashSet<>(); // Usamos Set para evitar duplicados
@@ -23,37 +24,23 @@ public class GestorDeReportes {
    *
    * @param detectorSpam Detector de spam para filtrar solicitudes
    */
-  public GestorDeReportes(DetectorSpam detectorSpam) {
+  public RepositorioDeSolicitudes(DetectorSpam detectorSpam) {
     this.detectorSpam = detectorSpam;
   }
 
   /**
    * Agrega una solicitud al gestor de reportes.
    * Si la razón de eliminación es spam, no se agrega.
-   *
-   * @param solicitud Solicitud a agregar
    */
-  public void agregarSolicitud(Solicitud solicitud) {
-    if (solicitud == null) {
-      throw new NullPointerException("Solicitud no puede ser null");
+  public void agregarSolicitud(UUID id, Hecho hecho, String motivo) {
+
+    if (hecho == null || motivo == null || motivo.isBlank()) {
+      throw new IllegalArgumentException("Hecho y motivo deben estar definidos");
     }
+    Solicitud solicitud = new Solicitud(id, hecho, motivo);
     if (!detectorSpam.esSpam(solicitud.getRazonEliminacion())) {
       solicitudes.add(solicitud);
     }
-  }
-
-
-  /**
-   * Devuelve una lista de todas las solicitudes registradas.
-   *
-   * @param posicion Posición de la solicitud a obtener
-   * @return Lista de solicitudes
-   */
-  public Solicitud obtenerSolicitudPorPosicion(int posicion) {
-    if (posicion < 0 || posicion >= solicitudes.size()) {
-      throw new SolicitudInexistenteException("La posición es inválida o no existe en el gestor.");
-    }
-    return new ArrayList<>(solicitudes).get(posicion);
   }
 
   /**
@@ -84,14 +71,14 @@ public class GestorDeReportes {
    * @param aceptarSolicitud Indica si se acepta o rechaza la solicitud
    * @throws SolicitudInexistenteException Si la solicitud no existe en el gestor
    */
-  public void gestionarSolicitud(Solicitud solicitud, boolean aceptarSolicitud) {
+  public void gestionarSolicitud(Solicitud solicitud, Aceptar_Solicitud aceptarSolicitud) {
     if (!solicitudes.contains(solicitud)) {
       throw new SolicitudInexistenteException("La solicitud no existe en el gestor.");
     }
 
     solicitudes.remove(solicitud);
 
-    if (aceptarSolicitud) {
+    if (aceptarSolicitud == Aceptar_Solicitud.ACEPTAR) {
       marcarComoEliminado(solicitud.getHechoSolicitado());
     }
   }
@@ -125,10 +112,13 @@ public class GestorDeReportes {
    * @return Filtro que excluye los hechos eliminados
    */
   public Filtro filtroExcluyente() {
-    return new Filtro(hechos ->
-                          hechos.stream()
-                                .filter(h -> !hechosEliminados.contains(h))
-                                .toList()
-    );
+    return new Filtro() {
+      @Override
+      public List<Hecho> filtrar(List<Hecho> hechos) {
+        return hechos.stream()
+                     .filter(h -> !hechosEliminados.contains(h))
+                     .toList();
+      }
+    };
   }
 }

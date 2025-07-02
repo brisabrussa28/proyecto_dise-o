@@ -21,15 +21,16 @@ import java.util.concurrent.TimeUnit;
  */
 
 
-public class FuenteDemo extends FuenteProxy {
+public class FuenteDemo implements Fuente {
   private final Conexion conexion;
   private final URL url;
+  private final String nombre;
   private LocalDateTime ultimaActualizacion;
   private ScheduledExecutorService scheduler;
   private List<Hecho> cacheUltimosHechos = new ArrayList<>();
 
   public FuenteDemo(URL url, Conexion conexion) {
-    super("FuenteDemo");
+    this.nombre = "FuenteDemo";
     this.url = url;
     this.conexion = conexion;
     this.ultimaActualizacion = null;

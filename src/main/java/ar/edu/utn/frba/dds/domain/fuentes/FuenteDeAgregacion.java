@@ -10,8 +10,9 @@ import java.util.stream.Collectors;
  * Servicio de Agregación.
  * Permite agregar múltiples fuentes y obtener los hechos combinados de todas ellas.
  */
-public class FuenteDeAgregacion extends Fuente {
+public class FuenteDeAgregacion implements Fuente {
   private final List<Fuente> fuentesCargadas;
+  private final String nombre;
 
   /**
    * Constructor del Servicio de Agregación.
@@ -19,7 +20,8 @@ public class FuenteDeAgregacion extends Fuente {
    * @param nombre Nombre del servicio de agregación
    */
   public FuenteDeAgregacion(String nombre) {
-    super(nombre);
+    this.validarFuente(nombre);
+    this.nombre = nombre;
     this.fuentesCargadas = new ArrayList<>();
   }
 
@@ -53,5 +55,7 @@ public class FuenteDeAgregacion extends Fuente {
   public List<Fuente> getFuentesCargadas() {
     return new ArrayList<>(fuentesCargadas);
   }
+
+  public String getNombre() { return nombre;}
 
 }
