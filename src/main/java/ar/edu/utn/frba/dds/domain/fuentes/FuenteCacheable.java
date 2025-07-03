@@ -25,7 +25,6 @@ public abstract class FuenteCacheable implements Fuente {
     if (this.cacheDeHechos == null) {
       this.cacheDeHechos = new ArrayList<>();
     }
-    System.out.println(this.getClass().getSimpleName() + ": Hechos cargados inicialmente desde JSON (" + this.cacheDeHechos.size() + ").");
   }
 
   protected abstract List<Hecho> consultarNuevosHechos();
@@ -41,11 +40,9 @@ public abstract class FuenteCacheable implements Fuente {
    */
   public void forzarActualizacionSincrona() {
     try {
-      System.out.println(this.getClass().getSimpleName() + ": Iniciando actualización de la caché...");
       List<Hecho> nuevosHechos = this.consultarNuevosHechos();
       this.cacheDeHechos = nuevosHechos;
       this.servicioDeCopiasLocales.guardarCopiaHechos(this.cacheDeHechos);
-      System.out.println(this.getClass().getSimpleName() + ": Caché actualizada y guardada con " + nuevosHechos.size() + " hechos.");
     } catch (Exception e) {
       System.err.println("Error durante la actualización de la caché para " + this.getClass().getSimpleName() + ": " + e.getMessage());
     }

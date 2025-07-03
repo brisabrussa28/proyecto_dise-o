@@ -29,6 +29,7 @@ public class FuenteDeAgregacion extends FuenteCacheable {
     return this.fuentesCargadas.stream()
                                .flatMap(fuente -> fuente.obtenerHechos()
                                                         .stream())
+                               .distinct()
                                .collect(Collectors.toList());
   }
 }
