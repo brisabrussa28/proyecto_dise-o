@@ -29,7 +29,6 @@ public class FuenteDemo extends FuenteCacheable {
   @Override
   protected List<Hecho> consultarNuevosHechos() {
     try {
-      System.out.println("FuenteDemo: Consultando nuevos hechos desde la URL externa...");
       List<Hecho> nuevosHechos = new ArrayList<>();
       Map<String, Object> datos;
 

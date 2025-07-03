@@ -67,6 +67,14 @@ public class FuenteDinamica implements Fuente {
   public Coleccion crearColeccion(
       String titulo,
       String descripcion,
+      String categoria
+  ) {
+    return new Coleccion(titulo, this, descripcion, categoria);
+  }
+
+  public Coleccion crearColeccionConAlgoritmo(
+      String titulo,
+      String descripcion,
       String categoria,
       AlgoritmoDeConcenso algoritmo
   ) {

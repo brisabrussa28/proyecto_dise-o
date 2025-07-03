@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -212,126 +213,39 @@ public class HechoTest {
 
 
   @Test
-  public void edicionDeHechoModificaSusCampos() {
-    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
-    List<String> etiquetas = List.of("#test");
-    LocalDateTime fechaSuceso = LocalDateTime.now()
-                                             .minusDays(2);
-    LocalDateTime fechaCarga = LocalDateTime.now()
-                                            .minusDays(1);
-    java.util.UUID idUsuario = java.util.UUID.randomUUID();
+  public void esEditableAntesDeUnaSemana() {
+    LocalDateTime hace3Dias = LocalDateTime.now().minusDays(3);
     Hecho hecho = new Hecho(
         "titulo",
         "desc",
         "cat",
         "dir",
-        ubicacion,
-        fechaSuceso,
-        fechaCarga,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetas,
-        idUsuario
+        new PuntoGeografico(1,1),
+        hace3Dias,
+        hace3Dias,
+        Origen.DATASET,
+        List.of("etiqueta")
     );
 
-    hecho.editarHecho(
-        idUsuario,
-        "nuevo titulo",
-        "nueva desc",
-        "nueva cat",
-        "nueva dir",
-        new PuntoGeografico(2.0, 2.0),
-        List.of("#nueva"),
-        fechaSuceso
-    );
-
-    assertEquals("nuevo titulo", hecho.getTitulo());
-    assertEquals("nueva desc", hecho.getDescripcion());
-    assertEquals("nueva cat", hecho.getCategoria());
-    assertEquals("nueva dir", hecho.getDireccion());
-    assertEquals(new PuntoGeografico(2.0, 2.0), hecho.getUbicacion());
-    assertEquals(List.of("#nueva"), hecho.getEtiquetas());
-    assertEquals(fechaSuceso, hecho.getFechaSuceso());
+    assertTrue(hecho.esEditable(), "El hecho debería ser editable antes de una semana");
   }
 
-
   @Test
-  public void editarHechoConFechaSucesoFuturaLanzaExcepcion() {
-    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
-    List<String> etiquetas = List.of("#test");
-    LocalDateTime fechaSuceso = LocalDateTime.now()
-                                             .minusDays(2);
-    LocalDateTime fechaCarga = LocalDateTime.now()
-                                            .minusDays(1);
-    java.util.UUID idUsuario = java.util.UUID.randomUUID();
+  public void noEsEditablePasadaUnaSemana() {
+    LocalDateTime hace10Dias = LocalDateTime.now().minusDays(10);
     Hecho hecho = new Hecho(
         "titulo",
         "desc",
         "cat",
         "dir",
-        ubicacion,
-        fechaSuceso,
-        fechaCarga,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetas,
-        idUsuario
+        new PuntoGeografico(1,1),
+        hace10Dias,
+        hace10Dias,
+        Origen.DATASET,
+        List.of("etiqueta")
     );
 
-    LocalDateTime fechaFutura = LocalDateTime.now()
-                                             .plusDays(1);
-
-    assertThrows(
-        RuntimeException.class,
-        () -> hecho.editarHecho(
-            idUsuario,
-            "nuevo titulo",
-            "nueva desc",
-            "nueva cat",
-            "nueva dir",
-            new PuntoGeografico(2.0, 2.0),
-            List.of("#nueva"),
-            fechaFutura
-        )
-    );
-  }
-
-
-  @Test
-  public void editarHechoConUsuarioDistintoLanzaExcepcion() {
-    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
-    List<String> etiquetas = List.of("#test");
-    LocalDateTime fechaSuceso = LocalDateTime.now()
-                                             .minusDays(2);
-    LocalDateTime fechaCarga = LocalDateTime.now()
-                                            .minusDays(1);
-    java.util.UUID idUsuarioCreador = java.util.UUID.randomUUID();
-    java.util.UUID idUsuarioOtro = java.util.UUID.randomUUID();
-    Hecho hecho = new Hecho(
-        "titulo",
-        "desc",
-        "cat",
-        "dir",
-        ubicacion,
-        fechaSuceso,
-        fechaCarga,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetas,
-        idUsuarioCreador
-    );
-
-    Exception exception = assertThrows(
-        RuntimeException.class,
-        () -> hecho.editarHecho(
-            idUsuarioOtro,
-            "nuevo titulo",
-            "nueva desc",
-            "nueva cat",
-            "nueva dir",
-            new PuntoGeografico(2.0, 2.0),
-            List.of("#nueva"),
-            fechaSuceso
-        )
-    );
-    assertEquals("Solo el usuario creador puede editar el hecho", exception.getMessage());
+    assertFalse(hecho.esEditable(), "El hecho NO debería ser editable después de una semana");
   }
 
 }

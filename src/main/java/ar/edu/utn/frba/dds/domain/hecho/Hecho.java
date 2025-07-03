@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -218,13 +219,9 @@ public class Hecho {
    * Verifica si el hecho es editable por un usuario específico.
    * Un hecho es editable por su creador durante una semana desde su fecha de carga.
    *
-   * @param idUsuarioEditor ID del usuario que intenta editar el hecho
    * @return true si el hecho es editable por el usuario, false en caso contrario
    */
-  public boolean esEditablePor(UUID idUsuarioEditor) {
-    if (this.idUsuarioCreador == null || !this.idUsuarioCreador.equals(idUsuarioEditor)) {
-      return false;
-    }
+  public boolean esEditable() {
     LocalDateTime hoy = LocalDateTime.now();
     return hoy.isBefore(fechaCarga.plusWeeks(1));
   }
@@ -279,5 +276,23 @@ public class Hecho {
   @JsonProperty("origen")
   public void setFuenteOrigen(Origen fuenteOrigen) {
     this.fuenteOrigen = fuenteOrigen;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Hecho hecho = (Hecho) o;
+    return Objects.equals(titulo, hecho.titulo) &&
+        Objects.equals(descripcion, hecho.descripcion) &&
+        Objects.equals(categoria, hecho.categoria) &&
+        Objects.equals(direccion, hecho.direccion) &&
+        Objects.equals(ubicacion, hecho.ubicacion) &&
+        Objects.equals(fechaSuceso, hecho.fechaSuceso);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(titulo, descripcion, categoria, direccion, ubicacion, fechaSuceso);
   }
 }

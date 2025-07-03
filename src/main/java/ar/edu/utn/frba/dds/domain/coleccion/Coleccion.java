@@ -5,6 +5,7 @@ import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroIdentidad;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import java.util.List;
@@ -21,7 +22,7 @@ public class Coleccion {
   private final String descripcion;
   private final String categoria;
   private Filtro filtro;
-  private final AlgoritmoDeConcenso algoritmo;
+  private AlgoritmoDeConcenso algoritmo;
 
   /**
    * Constructor de la colección.
@@ -31,6 +32,30 @@ public class Coleccion {
    * @param descripcion Descripción de la colección.
    * @param categoria   Categoría de la colección.
    */
+  public Coleccion(
+      String titulo,
+      Fuente fuente,
+      String descripcion,
+      String categoria
+  ) {
+    if (titulo == null || titulo.isBlank()) {
+      throw new RuntimeException("El titulo es campo obligatorio.");
+    }
+    if (fuente == null) {
+      throw new RuntimeException("La fuente es campo obligatorio.");
+    }
+    if (descripcion == null || descripcion.isBlank()) {
+      throw new RuntimeException("La descripcion es campo obligatorio.");
+    }
+    if (categoria == null || categoria.isBlank()) {
+      throw new RuntimeException("La categoria es campo obligatorio.");
+    }
+    this.titulo = titulo;
+    this.fuente = fuente;
+    this.descripcion = descripcion;
+    this.categoria = categoria;
+    this.filtro = new FiltroIdentidad();
+  }
 
   public Coleccion(
       String titulo,
@@ -111,17 +136,15 @@ public class Coleccion {
    * @param repositorioDeReportes RepositorioDeReportes
    * @return Lista de hechos filtrados.
    */
-  public List<Hecho> getHechos(
-      RepositorioDeSolicitudes repositorioDeReportes
-  ) {
+  public List<Hecho> getHechos(RepositorioDeSolicitudes repositorioDeReportes) {
     List<Hecho> hechos = fuente.obtenerHechos();
     if (algoritmoNulo()) {
       return repositorioDeReportes.filtroExcluyente().filtrar(hechos);
     } else {
+      List<Fuente> fuentesNodo = this.obtenerFuentesDelNodo();
       return algoritmo.listaDeHechosConcensuados(
-          (repositorioDeReportes.filtroExcluyente()).filtrar(
-              hechos), List.of(fuente)
-      );
+          (repositorioDeReportes.filtroExcluyente())
+              .filtrar(hechos), fuentesNodo);
     }
   }
 
@@ -163,5 +186,18 @@ public class Coleccion {
 
   public boolean contieneA(Hecho unHecho, RepositorioDeSolicitudes repositorioDeReportes) {
     return this.getHechos(repositorioDeReportes).contains(unHecho);
+  }
+
+
+  public void setAlgoritmoDeConcenso(AlgoritmoDeConcenso algoritmo) {
+    this.algoritmo = algoritmo;
+  }
+
+  private List<Fuente> obtenerFuentesDelNodo() {
+    if (this.fuente instanceof FuenteDeAgregacion agregador) {
+      return agregador.getFuentesCargadas();
+    } else {
+      return List.of(this.fuente);
+    }
   }
 }
