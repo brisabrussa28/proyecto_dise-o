@@ -16,7 +16,6 @@ public class Hecho {
   // Los campos que eran 'final' ahora son no-final para permitir la deserialización de Jackson
   private List<String> etiquetas;
   private UUID id;
-  private UUID idUsuarioCreador;
   private LocalDateTime fechaCarga;
   private Origen fuenteOrigen; // Ya no es final
   private String titulo;
@@ -34,48 +33,9 @@ public class Hecho {
   public Hecho() {
     this.etiquetas = new ArrayList<>(); // Inicializar para evitar NullPointerException
     this.id = UUID.randomUUID(); // Generar un ID por defecto (puede ser sobrescrito por JSON)
-    this.idUsuarioCreador = null; // Puede ser sobrescrito por JSON
     this.fechaCarga = LocalDateTime.now(); // Puede ser sobrescrito por JSON
     this.fuenteOrigen = null; // Puede ser sobrescrito por JSON
     this.estado = Estado.ORIGINAL;
-  }
-
-  /**
-   * Constructor básico.
-   *
-   * @param titulo       string
-   * @param descripcion  string
-   * @param categoria    string
-   * @param direccion    string
-   * @param ubicacion    PuntoGeografico
-   * @param fechaSuceso  LocalDateTime
-   * @param fechaCarga   LocalDateTime
-   * @param fuenteOrigen Origen
-   * @param etiquetas    List
-   */
-  public Hecho(
-      String titulo,
-      String descripcion,
-      String categoria,
-      String direccion,
-      PuntoGeografico ubicacion,
-      LocalDateTime fechaSuceso,
-      LocalDateTime fechaCarga,
-      Origen fuenteOrigen,
-      List<String> etiquetas
-  ) {
-    this(
-        titulo,
-        descripcion,
-        categoria,
-        direccion,
-        ubicacion,
-        fechaSuceso,
-        fechaCarga,
-        fuenteOrigen,
-        etiquetas,
-        null
-    );
   }
 
   /**
@@ -90,7 +50,6 @@ public class Hecho {
    * @param fechaCarga       LocalDateTime
    * @param fuenteOrigen     Origen
    * @param etiquetas        List
-   * @param idUsuarioCreador UUID
    */
   public Hecho(
       String titulo,
@@ -101,8 +60,7 @@ public class Hecho {
       LocalDateTime fechaSuceso,
       LocalDateTime fechaCarga,
       Origen fuenteOrigen,
-      List<String> etiquetas,
-      UUID idUsuarioCreador
+      List<String> etiquetas
   ) {
     if (fechaSuceso != null && fechaCarga != null) {
       if (fechaSuceso.isAfter(fechaCarga)) {
@@ -122,7 +80,6 @@ public class Hecho {
     this.fuenteOrigen = fuenteOrigen;
     this.etiquetas = new ArrayList<>(etiquetas);
     this.id = UUID.randomUUID();
-    this.idUsuarioCreador = idUsuarioCreador;
   }
 
   /**
@@ -258,10 +215,6 @@ public class Hecho {
 
   public void setId(UUID id) {
     this.id = id;
-  }
-
-  public void setIdUsuarioCreador(UUID idUsuarioCreador) {
-    this.idUsuarioCreador = idUsuarioCreador;
   }
 
   public void setEstado(Estado estado) {
