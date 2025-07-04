@@ -26,9 +26,10 @@ public class FuenteDeAgregacion extends FuenteCacheable {
 
   @Override
   protected List<Hecho> consultarNuevosHechos() {
-    System.out.println("FuenteDeAgregacion: Consultando hechos de " + fuentesCargadas.size() + " fuentes internas...");
     return this.fuentesCargadas.stream()
-        .flatMap(fuente -> fuente.obtenerHechos().stream())
-        .collect(Collectors.toList());
+                               .flatMap(fuente -> fuente.obtenerHechos()
+                                                        .stream())
+                               .distinct()
+                               .collect(Collectors.toList());
   }
 }

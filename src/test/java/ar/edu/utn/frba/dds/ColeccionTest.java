@@ -10,6 +10,8 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ar.edu.utn.frba.dds.domain.AlgoritmosConcenso.Absoluta;
+import ar.edu.utn.frba.dds.domain.AlgoritmosConcenso.AlgoritmoDeConcenso;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
@@ -37,11 +39,13 @@ public class ColeccionTest {
   );
   private RepositorioDeSolicitudes repositorio;
   private DetectorSpam detectorSpam;
+  private AlgoritmoDeConcenso absoluta;
 
   @BeforeEach
   void initFileSystem() {
     detectorSpam = mock(DetectorSpam.class);
     repositorio = new RepositorioDeSolicitudes(detectorSpam);
+    absoluta = new Absoluta();
   }
 
 
@@ -169,10 +173,10 @@ public class ColeccionTest {
     assertEquals(
         1,
         coleccion.getHechos(repositorio)
-                 .size()
+            .size()
     );
     assertTrue(coleccion.getHechos(repositorio)
-                        .contains(hecho1));
+                   .contains(hecho1));
 
     when(fuente.obtenerHechos()).thenReturn(List.of(hecho1, hecho2));
 

@@ -20,6 +20,7 @@ public class App {
 
   /**
    * Registra una nueva fuente cacheable para que pueda ser actualizada por esta aplicación.
+   *
    * @param fuente La instancia de la fuente a registrar.
    */
   public void registrarFuente(FuenteCacheable fuente) {
@@ -30,18 +31,19 @@ public class App {
 
   /**
    * Ejecuta la actualización para una fuente específica por su nombre.
+   *
    * @param nombreFuente El nombre de la fuente a actualizar.
    */
   public void ejecutarActualizacion(String nombreFuente) {
     FuenteCacheable fuenteAActualizar = fuentesRegistradas.get(nombreFuente);
 
     if (fuenteAActualizar != null) {
-      System.out.println("Iniciando actualización para la fuente: " + nombreFuente);
+      //System.out.println("Iniciando actualización para la fuente: " + nombreFuente);
       fuenteAActualizar.forzarActualizacionSincrona();
-      System.out.println("Actualización para " + nombreFuente + " completada.");
+      //System.out.println("Actualización para " + nombreFuente + " completada.");
     } else {
-      System.err.println("Error: No se encontró una fuente registrada con el nombre '" + nombreFuente + "'.");
-      System.err.println("Fuentes disponibles: " + fuentesRegistradas.keySet());
+      //System.err.println("Error: No se encontró una fuente registrada con el nombre '" + nombreFuente + "'.");
+      //System.err.println("Fuentes disponibles: " + fuentesRegistradas.keySet());
       System.exit(1);
     }
   }
@@ -49,6 +51,7 @@ public class App {
   /**
    * Configura la aplicación creando y registrando todas las fuentes disponibles.
    * Este es el lugar central para añadir nuevas fuentes al sistema.
+   *
    * @return una instancia de App completamente configurada.
    */
   private static App configurarAplicacion() {
@@ -59,7 +62,10 @@ public class App {
       // Para agregar una nueva fuente, hágalo aquí.
 
       // 1. Crear y registrar la fuente de agregación.
-      FuenteDeAgregacion agregadora = new FuenteDeAgregacion("agregadora_principal", "copias/agregados.json");
+      FuenteDeAgregacion agregadora = new FuenteDeAgregacion(
+          "agregadora_principal",
+          "copias/agregados.json"
+      );
       aplicacion.registrarFuente(agregadora);
 
       // 2. Crear y registrar la fuente demo externa.
@@ -83,6 +89,7 @@ public class App {
   /**
    * El método main que será ejecutado por el Programador de Tareas o Crontab.
    * Su responsabilidad es configurar la app y luego ejecutar la tarea.
+   *
    * @param args Argumentos de la línea de comandos. Se espera el nombre de la fuente a actualizar.
    */
   public static void main(String[] args) {
