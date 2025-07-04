@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-import ar.edu.utn.frba.dds.domain.algoritmosconcenso.AlgoritmoDeConcenso;
+import ar.edu.utn.frba.dds.domain.algoritmosconsenso.AlgoritmoDeConsenso;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.hecho.Estado;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
@@ -76,7 +76,7 @@ public class FuenteDinamica implements Fuente {
       String titulo,
       String descripcion,
       String categoria,
-      AlgoritmoDeConcenso algoritmo
+      AlgoritmoDeConsenso algoritmo
   ) {
     return new Coleccion(titulo, this, descripcion, categoria, algoritmo);
   }

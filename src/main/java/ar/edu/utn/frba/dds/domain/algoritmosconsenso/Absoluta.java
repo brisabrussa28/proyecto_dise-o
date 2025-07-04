@@ -1,10 +1,10 @@
-package ar.edu.utn.frba.dds.domain.algoritmosconcenso;
+package ar.edu.utn.frba.dds.domain.algoritmosconsenso;
 
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 
-public class Absoluta implements AlgoritmoDeConcenso {
+public class Absoluta implements AlgoritmoDeConsenso {
   @Override
   public List<Hecho> listaDeHechosConcensuados(
       List<Hecho> listaDeHechos,

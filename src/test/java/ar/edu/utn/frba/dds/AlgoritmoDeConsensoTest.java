@@ -7,10 +7,10 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.algoritmosconcenso.Absoluta;
-import ar.edu.utn.frba.dds.domain.algoritmosconcenso.AlgoritmoDeConcenso;
-import ar.edu.utn.frba.dds.domain.algoritmosconcenso.MayoriaSimple;
-import ar.edu.utn.frba.dds.domain.algoritmosconcenso.MultiplesMenciones;
+import ar.edu.utn.frba.dds.domain.algoritmosconsenso.Absoluta;
+import ar.edu.utn.frba.dds.domain.algoritmosconsenso.AlgoritmoDeConsenso;
+import ar.edu.utn.frba.dds.domain.algoritmosconsenso.MayoriaSimple;
+import ar.edu.utn.frba.dds.domain.algoritmosconsenso.MultiplesMenciones;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
@@ -19,18 +19,18 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class AlgoritmoDeConcensoTest {
+public class AlgoritmoDeConsensoTest {
   private RepositorioDeSolicitudes repo;
   private Filtro filtroExcluyente;
   private FuenteDeAgregacion agregador;
-  private AlgoritmoDeConcenso absoluta;
-  private AlgoritmoDeConcenso mayoriaSimple;
-  private AlgoritmoDeConcenso multiplesMenciones;
+  private AlgoritmoDeConsenso absoluta;
+  private AlgoritmoDeConsenso mayoriaSimple;
+  private AlgoritmoDeConsenso multiplesMenciones;
   private static final LocalDateTime fecha = LocalDateTime.of(2023, 1, 1, 0, 0);
 
 
@@ -133,7 +133,13 @@ public class AlgoritmoDeConcensoTest {
         List.of()
     );
 
-    Coleccion coleccion = new Coleccion("MayoriaNoOk", agregador, "Desc", "Catgoria", mayoriaSimple);
+    Coleccion coleccion = new Coleccion(
+        "MayoriaNoOk",
+        agregador,
+        "Desc",
+        "Catgoria",
+        mayoriaSimple
+    );
 
     List<Hecho> result = coleccion.getHechos(repo);
     assertEquals(0, result.size());
@@ -149,7 +155,13 @@ public class AlgoritmoDeConcensoTest {
     );
     agregador.forzarActualizacionSincrona();
 
-    Coleccion coleccion = new Coleccion("MultiplesOk", agregador, "Desc", "Catgoria", multiplesMenciones);
+    Coleccion coleccion = new Coleccion(
+        "MultiplesOk",
+        agregador,
+        "Desc",
+        "Catgoria",
+        multiplesMenciones
+    );
 
     List<Hecho> result = coleccion.getHechos(repo);
     assertEquals(1, result.size());
@@ -166,7 +178,13 @@ public class AlgoritmoDeConcensoTest {
         List.of(hDistinto)
     );
 
-    Coleccion coleccion = new Coleccion("MultiplesNoOk", agregador, "Desc", "Catgoria", multiplesMenciones);
+    Coleccion coleccion = new Coleccion(
+        "MultiplesNoOk",
+        agregador,
+        "Desc",
+        "Catgoria",
+        multiplesMenciones
+    );
 
     List<Hecho> result = coleccion.getHechos(repo);
     assertEquals(0, result.size());

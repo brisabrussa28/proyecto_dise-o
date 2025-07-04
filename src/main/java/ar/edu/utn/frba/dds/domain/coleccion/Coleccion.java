@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.coleccion;
 
-import ar.edu.utn.frba.dds.domain.algoritmosconcenso.AlgoritmoDeConcenso;
+import ar.edu.utn.frba.dds.domain.algoritmosconsenso.AlgoritmoDeConsenso;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroIdentidad;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
@@ -22,7 +22,7 @@ public class Coleccion {
   private final String descripcion;
   private final String categoria;
   private Filtro filtro;
-  private AlgoritmoDeConcenso algoritmo;
+  private AlgoritmoDeConsenso algoritmo;
 
   /**
    * Constructor de la colección.
@@ -62,7 +62,7 @@ public class Coleccion {
       Fuente fuente,
       String descripcion,
       String categoria,
-      AlgoritmoDeConcenso algoritmo
+      AlgoritmoDeConsenso algoritmo
   ) {
     if (titulo == null || titulo.isBlank()) {
       throw new RuntimeException("El titulo es campo obligatorio.");
@@ -144,7 +144,8 @@ public class Coleccion {
       List<Fuente> fuentesNodo = this.obtenerFuentesDelNodo();
       return algoritmo.listaDeHechosConcensuados(
           (repositorioDeReportes.filtroExcluyente())
-              .filtrar(hechos), fuentesNodo);
+              .filtrar(hechos), fuentesNodo
+      );
     }
   }
 
@@ -189,7 +190,7 @@ public class Coleccion {
   }
 
 
-  public void setAlgoritmoDeConcenso(AlgoritmoDeConcenso algoritmo) {
+  public void setAlgoritmoDeConcenso(AlgoritmoDeConsenso algoritmo) {
     this.algoritmo = algoritmo;
   }
 

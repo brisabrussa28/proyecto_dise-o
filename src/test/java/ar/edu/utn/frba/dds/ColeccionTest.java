@@ -11,8 +11,8 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.algoritmosconcenso.Absoluta;
-import ar.edu.utn.frba.dds.domain.algoritmosconcenso.AlgoritmoDeConcenso;
+import ar.edu.utn.frba.dds.domain.algoritmosconsenso.Absoluta;
+import ar.edu.utn.frba.dds.domain.algoritmosconsenso.AlgoritmoDeConsenso;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
@@ -40,7 +40,7 @@ public class ColeccionTest {
   );
   private RepositorioDeSolicitudes repositorio;
   private DetectorSpam detectorSpam;
-  private AlgoritmoDeConcenso absoluta;
+  private AlgoritmoDeConsenso absoluta;
 
   @BeforeEach
   void initFileSystem() {
@@ -135,29 +135,29 @@ public class ColeccionTest {
     assertTrue(coleccion.contieneFuente(fuenteAuxD));
   }
 
- @Test
+  @Test
   public void testFiltradoYSpamDetectadoCorrectamente() {
-      Fuente fuente = mock(Fuente.class);
-      Hecho valido = mock(Hecho.class);
-      Hecho spam = mock(Hecho.class);
-      when(fuente.obtenerHechos()).thenReturn(List.of(valido, spam));
+    Fuente fuente = mock(Fuente.class);
+    Hecho valido = mock(Hecho.class);
+    Hecho spam = mock(Hecho.class);
+    when(fuente.obtenerHechos()).thenReturn(List.of(valido, spam));
 
-      Coleccion coleccion = new Coleccion("Test", fuente, "Descripcion", "Categoria");
+    Coleccion coleccion = new Coleccion("Test", fuente, "Descripcion", "Categoria");
 
-      Filtro filtroMock = mock(Filtro.class);
-      when(filtroMock.filtrar(anyList())).thenReturn(List.of(valido));
-      coleccion.setFiltro(filtroMock);
+    Filtro filtroMock = mock(Filtro.class);
+    when(filtroMock.filtrar(anyList())).thenReturn(List.of(valido));
+    coleccion.setFiltro(filtroMock);
 
-      RepositorioDeSolicitudes repositorio = mock(RepositorioDeSolicitudes.class);
-      Filtro filtroExcluyente = mock(Filtro.class);
-      when(repositorio.filtroExcluyente()).thenReturn(filtroExcluyente);
-      when(filtroExcluyente.filtrar(anyList())).thenReturn(List.of(valido));
+    RepositorioDeSolicitudes repositorio = mock(RepositorioDeSolicitudes.class);
+    Filtro filtroExcluyente = mock(Filtro.class);
+    when(repositorio.filtroExcluyente()).thenReturn(filtroExcluyente);
+    when(filtroExcluyente.filtrar(anyList())).thenReturn(List.of(valido));
 
-      // Call the real method
-      List<Hecho> hechosFinales = coleccion.getHechos(repositorio);
+    // Call the real method
+    List<Hecho> hechosFinales = coleccion.getHechos(repositorio);
 
-      assertEquals(1, hechosFinales.size());
-      assertTrue(hechosFinales.contains(valido));
+    assertEquals(1, hechosFinales.size());
+    assertTrue(hechosFinales.contains(valido));
   }
 
   @Test

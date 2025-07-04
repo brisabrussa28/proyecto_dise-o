@@ -1,10 +1,10 @@
-package ar.edu.utn.frba.dds.domain.algoritmosconcenso;
+package ar.edu.utn.frba.dds.domain.algoritmosconsenso;
 
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 
-public class MultiplesMenciones implements AlgoritmoDeConcenso {
+public class MultiplesMenciones implements AlgoritmoDeConsenso {
   @Override
   public List<Hecho> listaDeHechosConcensuados(
       List<Hecho> listaDeHechos,
@@ -18,7 +18,7 @@ public class MultiplesMenciones implements AlgoritmoDeConcenso {
         ) && hechoEnDosOMasFuentes(hecho, fuentesNodo))
         .toList();
   }
-  
+
   boolean hechoEnDosOMasFuentes(Hecho hecho, List<Fuente> fuentes) {
     return 2 <= fuentes.stream()
         .filter(fuente -> fuente.obtenerHechos().contains(hecho))
