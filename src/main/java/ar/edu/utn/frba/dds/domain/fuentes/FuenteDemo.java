@@ -44,31 +44,42 @@ public class FuenteDemo extends FuenteCacheable {
     }
   }
 
-  private Hecho construirHechoIndividual(Map<String, Object> datos) {
-    try {
-      String titulo = (String) datos.get("titulo");
-      String descripcion = (String) datos.get("descripcion");
-      String categoria = (String) datos.get("categoria");
-      String direccion = (String) datos.get("direccion");
+private Hecho construirHechoIndividual(Map<String, Object> datos) {
+  try {
+    String titulo = (String) datos.get("titulo");
+    String descripcion = (String) datos.get("descripcion");
+    String categoria = (String) datos.get("categoria");
+    String direccion = (String) datos.get("direccion");
 
-      if (titulo == null || descripcion == null || categoria == null || direccion == null) {
-        throw new IllegalArgumentException("Datos obligatorios faltantes en el hecho recibido.");
-      }
-
-      Map<?, ?> ubicacionMap = (Map<?, ?>) datos.get("ubicacion");
-      double latitud = ((Number) ubicacionMap.get("latitud")).doubleValue();
-      double longitud = ((Number) ubicacionMap.get("longitud")).doubleValue();
-      PuntoGeografico ubicacion = new PuntoGeografico(latitud, longitud);
-
-      LocalDateTime fechaSuceso = LocalDateTime.parse((String) datos.get("fechaSuceso"));
-      LocalDateTime fechaCarga = LocalDateTime.parse((String) datos.get("fechaCarga"));
-      Origen fuenteOrigen = Origen.valueOf((String) datos.get("fuenteOrigen"));
-
-      List<String> etiquetas = new ArrayList<>((List<String>) datos.get("etiquetas"));
-
-      return new Hecho(titulo, descripcion, categoria, direccion, ubicacion, fechaSuceso, fechaCarga, fuenteOrigen, etiquetas);
-    } catch (Exception e) {
-      throw new ConexionFuenteDemoException("Error al parsear un hecho individual desde la fuente Demo", e);
+    if (titulo == null || descripcion == null || categoria == null || direccion == null) {
+      throw new IllegalArgumentException("Datos obligatorios faltantes en el hecho recibido.");
     }
+
+    Map<?, ?> ubicacionMap = (Map<?, ?>) datos.get("ubicacion");
+    if (ubicacionMap == null || ubicacionMap.get("latitud") == null || ubicacionMap.get("longitud") == null) {
+      throw new IllegalArgumentException("Ubicación faltante o incompleta en el hecho recibido.");
+    }
+    double latitud = ((Number) ubicacionMap.get("latitud")).doubleValue();
+    double longitud = ((Number) ubicacionMap.get("longitud")).doubleValue();
+    PuntoGeografico ubicacion = new PuntoGeografico(latitud, longitud);
+
+    LocalDateTime fechaSuceso = LocalDateTime.parse((String) datos.get("fechaSuceso"));
+    LocalDateTime fechaCarga = LocalDateTime.parse((String) datos.get("fechaCarga"));
+    Origen fuenteOrigen = Origen.valueOf((String) datos.get("fuenteOrigen"));
+
+    List<String> etiquetas = new ArrayList<>();
+    Object etiquetasObj = datos.get("etiquetas");
+    if (etiquetasObj instanceof List<?>) {
+      for (Object o : (List<?>) etiquetasObj) {
+        if (o instanceof String) {
+          etiquetas.add((String) o);
+        }
+      }
+    }
+
+    return new Hecho(titulo, descripcion, categoria, direccion, ubicacion, fechaSuceso, fechaCarga, fuenteOrigen, etiquetas);
+  } catch (Exception e) {
+    throw new ConexionFuenteDemoException("Error al parsear un hecho individual desde la fuente Demo", e);
   }
+}
 }

@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows; // Importar assertThrows
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +36,10 @@ public class FuenteDemoTest {
     dummyUrl = new URL("http://localhost:8080/hechos");
     tempJsonFilePath = Files.createTempFile("test_hechos_", ".json");
     fuenteDemo = new FuenteDemo("TestDemo", dummyUrl, conexionMock, tempJsonFilePath.toString());
+
+    // Configurar el mock para que devuelva null por defecto para siguienteHecho.
+    // Esto asegura que la primera llamada a forzarActualizacionSincrona() no falle si no hay datos.
+    when(conexionMock.siguienteHecho(any(), any())).thenReturn(null);
   }
 
   @AfterEach
@@ -69,6 +74,7 @@ public class FuenteDemoTest {
         "etiquetas", List.of("fuego", "alerta")
     );
 
+    // Sobreescribir el comportamiento del mock para esta prueba específica
     when(conexionMock.siguienteHecho(any(), any()))
         .thenReturn(hecho1)
         .thenReturn(hecho2)
@@ -85,21 +91,28 @@ public class FuenteDemoTest {
   @Test
   @DisplayName("No debe actualizar la caché si la fuente externa devuelve datos inválidos")
   void noSeActualizaLaCacheSiLosDatosSonInvalidos() {
+    // Asegurarse de que la caché esté vacía al inicio del test.
+    // Esta llamada inicial debería completarse sin errores gracias a la configuración en setUp.
+    fuenteDemo.forzarActualizacionSincrona();
+    assertTrue(fuenteDemo.obtenerHechos().isEmpty());
+
     Map<String, Object> hechoInvalido = Map.of(
         "titulo", "Hecho inválido",
         "descripcion", "Falla en datos",
         "fechaSuceso", "2024-05-01T10:00:00"
+        // Faltan categoria, direccion, ubicacion, fechaCarga, fuenteOrigen
     );
 
+    // Configurar el mock para esta prueba específica para devolver el hecho inválido
     when(conexionMock.siguienteHecho(any(), any()))
         .thenReturn(hechoInvalido)
         .thenReturn(null);
 
-    fuenteDemo.forzarActualizacionSincrona();
+    // Se espera que se lance una RuntimeException cuando se procesan datos inválidos.
+    assertThrows(RuntimeException.class, () -> fuenteDemo.forzarActualizacionSincrona(),
+        "Se esperaba una RuntimeException al procesar datos inválidos.");
 
-    assertTrue(
-        fuenteDemo.obtenerHechos().isEmpty(),
-        "La caché debería estar vacía si la actualización falla por datos inválidos."
-    );
+    // Después de la excepción, la caché debería seguir vacía o no modificada por el dato inválido.
+    assertTrue(fuenteDemo.obtenerHechos().isEmpty());
   }
 }
