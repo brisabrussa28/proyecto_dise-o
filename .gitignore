@@ -28,3 +28,7 @@ target/**
 # IJ files
 *.iml
 .idea/**
+
+# Archivos json
+agregados.json
+dinamica.json
