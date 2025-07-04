@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -134,28 +135,29 @@ public class ColeccionTest {
     assertTrue(coleccion.contieneFuente(fuenteAuxD));
   }
 
-  @Test
+ @Test
   public void testFiltradoYSpamDetectadoCorrectamente() {
-    Fuente fuente = mock(Fuente.class);
-    Hecho valido = mock(Hecho.class);
-    Hecho spam = mock(Hecho.class);
-    when(fuente.obtenerHechos()).thenReturn(List.of(valido, spam));
+      Fuente fuente = mock(Fuente.class);
+      Hecho valido = mock(Hecho.class);
+      Hecho spam = mock(Hecho.class);
+      when(fuente.obtenerHechos()).thenReturn(List.of(valido, spam));
 
-    Coleccion coleccion = new Coleccion("Test", fuente, "Descripcion", "Categoria");
+      Coleccion coleccion = new Coleccion("Test", fuente, "Descripcion", "Categoria");
 
-    Filtro filtroMock = mock(Filtro.class);
-    when(filtroMock.filtrar(List.of(valido, spam))).thenReturn(List.of(valido));
-    coleccion.setFiltro(filtroMock);
+      Filtro filtroMock = mock(Filtro.class);
+      when(filtroMock.filtrar(anyList())).thenReturn(List.of(valido));
+      coleccion.setFiltro(filtroMock);
 
-    RepositorioDeSolicitudes repositorio = mock(RepositorioDeSolicitudes.class);
-    Filtro filtroExcluyente = mock(Filtro.class);
-    when(repositorio.filtroExcluyente()).thenReturn(filtroExcluyente);
-    when(filtroExcluyente.filtrar(List.of(valido))).thenReturn(List.of(valido));
+      RepositorioDeSolicitudes repositorio = mock(RepositorioDeSolicitudes.class);
+      Filtro filtroExcluyente = mock(Filtro.class);
+      when(repositorio.filtroExcluyente()).thenReturn(filtroExcluyente);
+      when(filtroExcluyente.filtrar(anyList())).thenReturn(List.of(valido));
 
-    List<Hecho> hechosFinales = coleccion.getHechos(repositorio);
+      // Call the real method
+      List<Hecho> hechosFinales = coleccion.getHechos(repositorio);
 
-    assertEquals(1, hechosFinales.size());
-    assertTrue(hechosFinales.contains(valido));
+      assertEquals(1, hechosFinales.size());
+      assertTrue(hechosFinales.contains(valido));
   }
 
   @Test
