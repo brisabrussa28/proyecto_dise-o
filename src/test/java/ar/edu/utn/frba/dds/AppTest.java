@@ -36,8 +36,6 @@ public class AppTest {
     mockFuente = mock(FuenteCacheable.class);
     when(mockFuente.getNombre()).thenReturn(testFuenteName);
 
-    // FIX: Crear el directorio 'copias' antes de cada test para que las fuentes
-    // basadas en archivos puedan escribir su caché sin errores.
     try {
       Files.createDirectories(COPIAS_DIR);
     } catch (IOException e) {
@@ -123,11 +121,5 @@ public class AppTest {
     // Este test de integración verifica el flujo principal con una fuente basada en archivos.
     assertDoesNotThrow(() -> App.main(new String[]{"agregadora_principal"}),
         "El método main no debería lanzar una excepción para 'agregadora_principal'.");
-
-    // NOTA: El test para 'fuente_externa_demo' se ha omitido intencionalmente.
-    // Dicho test falla porque intenta realizar una conexión de red real a 'http://localhost:8080',
-    // la cual no está disponible durante la ejecución de las pruebas.
-    // Para probar esa funcionalidad, se requeriría un entorno con un servidor web simulado (mock)
-    // o refactorizar el código para inyectar una dependencia de red que pueda ser simulada.
   }
 }
