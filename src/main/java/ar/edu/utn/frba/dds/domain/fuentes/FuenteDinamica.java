@@ -1,33 +1,27 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-import ar.edu.utn.frba.dds.domain.algoritmosconsenso.AlgoritmoDeConsenso;
-import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.hecho.Estado;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * Clase fuente dinámica.
+ * Ahora extiende FuenteCacheable para soportar copias de seguridad en JSON.
  */
-public class FuenteDinamica implements Fuente {
-  List<Hecho> hechos;
-  private final String nombre;
+public class FuenteDinamica extends FuenteCacheable { // Cambiado para extender FuenteCacheable
+
+  // Los hechos ahora se gestionan a través de cacheDeHechos en FuenteCacheable
 
   /**
    * Constructor de la clase FuenteDinamica.
    *
    * @param nombre Nombre de la fuente dinámica.
-   * @param hechos Lista de hechos iniciales para la fuente dinámica.
+   * @param jsonFilePathParaCopias Ruta al archivo JSON para copias de seguridad.
    */
-  public FuenteDinamica(String nombre, List<Hecho> hechos) {
-    this.validarFuente(nombre);
-    this.nombre = nombre;
-    this.hechos = hechos != null ? new ArrayList<>(hechos) : new ArrayList<>();
+  public FuenteDinamica(String nombre, String jsonFilePathParaCopias) {
+    // Llama al constructor de la clase padre (FuenteCacheable)
+    super(nombre, jsonFilePathParaCopias);
   }
 
   /**
@@ -36,108 +30,32 @@ public class FuenteDinamica implements Fuente {
    * @param hecho Hecho a agregar a la fuente dinámica.
    */
   public void agregarHecho(Hecho hecho) {
-    this.hechos.add(hecho);
+    this.cacheDeHechos.add(hecho); // Usa cacheDeHechos de FuenteCacheable
+    this.servicioDeCopiasLocales.guardarCopiaLocalJson(this.cacheDeHechos); // Guarda inmediatamente
   }
 
-  public Hecho crearHecho(
-      String titulo,
-      String descripcion,
-      String categoria,
-      String direccion,
-      PuntoGeografico ubicacion,
-      LocalDateTime fecha,
-      List<String> etiquetas
-  ) {
-    Hecho hecho = new Hecho(
-        titulo,
-        descripcion,
-        categoria,
-        direccion,
-        ubicacion,
-        fecha,
-        LocalDateTime.now(),
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetas
-    );
-
-    agregarHecho(hecho);
-    return hecho;
-  }
-
-  public Coleccion crearColeccion(
-      String titulo,
-      String descripcion,
-      String categoria
-  ) {
-    return new Coleccion(titulo, this, descripcion, categoria);
-  }
-
-  public Coleccion crearColeccionConAlgoritmo(
-      String titulo,
-      String descripcion,
-      String categoria,
-      AlgoritmoDeConsenso algoritmo
-  ) {
-    return new Coleccion(titulo, this, descripcion, categoria, algoritmo);
-  }
 
   /**
    * Obtiene los hechos de la fuente dinámica.
    *
-   * @return Lista de hechos de la fuente dinámica.
+   * @return Lista de hechos de la fuente dinámica (copia inmutable).
    */
   @Override
   public List<Hecho> obtenerHechos() {
-    return Collections.unmodifiableList(this.hechos);
-  }
-
-  public String getNombre() {
-    return nombre;
+    return Collections.unmodifiableList(this.cacheDeHechos); // Usa cacheDeHechos de FuenteCacheable
   }
 
   /**
-   * Edita los detalles del hecho.
-   * Permite cambiar el título, descripción, categoría, dirección, ubicación,
-   * etiquetas y fecha de suceso del hecho si el usuario tiene permisos para editarlo.
+   * Implementación del método abstracto para consultar nuevos hechos.
+   * Para FuenteDinamica, los "nuevos hechos" son simplemente los que ya tiene en caché,
+   * ya que no consulta una fuente externa de forma periódica.
+   * Este método es llamado por forzarActualizacionSincrona() de FuenteCacheable.
    *
-   * @param hecho Hecho
+   * @return Una copia de la lista actual de hechos.
    */
-  public void editarHecho(
-      Hecho hecho,
-      String titulo,
-      String descripcion,
-      String categoria,
-      String direccion,
-      PuntoGeografico ubicacion,
-      List<String> etiquetas,
-      LocalDateTime fechaSuceso
-  ) {
-    if (LocalDateTime.now().isAfter(hecho.getFechaCarga().plusWeeks(1))) {
-      throw new RuntimeException("Flaco, te pasaste una semana");
-    } else {
-      if (titulo != null) {
-        hecho.setTitulo(titulo);
-      }
-      if (descripcion != null) {
-        hecho.setDescripcion(descripcion);
-      }
-      if (categoria != null) {
-        hecho.setCategoria(categoria);
-      }
-      if (direccion != null) {
-        hecho.setDireccion(direccion);
-      }
-      if (ubicacion != null) {
-        hecho.setUbicacion(ubicacion);
-      }
-      if (etiquetas != null) {
-        hecho.setEtiquetas(etiquetas);
-      }
-      if (fechaSuceso != null) {
-        hecho.setFechaSuceso(fechaSuceso);
-      }
-      hecho.setEstado(Estado.EDITADO);
-    }
+  @Override
+  protected List<Hecho> consultarNuevosHechos() {
+    return new ArrayList<>(this.cacheDeHechos); // Devuelve una copia de la caché actual
   }
 
 }

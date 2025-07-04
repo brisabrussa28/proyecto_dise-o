@@ -252,6 +252,51 @@ public class Hecho {
     return  clonHecho;
   }
 
+  /**
+   * Edita los detalles del hecho.
+   * Permite cambiar el título, descripción, categoría, dirección, ubicación,
+   * etiquetas y fecha de suceso del hecho si el usuario tiene permisos para editarlo.
+   *
+   * @param hecho Hecho
+   */
+  public void editarHecho(
+      Hecho hecho,
+      String titulo,
+      String descripcion,
+      String categoria,
+      String direccion,
+      PuntoGeografico ubicacion,
+      List<String> etiquetas,
+      LocalDateTime fechaSuceso
+  ) {
+    if (LocalDateTime.now().isAfter(hecho.getFechaCarga().plusWeeks(1))) {
+      throw new RuntimeException("Flaco, te pasaste una semana");
+    } else {
+      if (titulo != null) {
+        hecho.setTitulo(titulo);
+      }
+      if (descripcion != null) {
+        hecho.setDescripcion(descripcion);
+      }
+      if (categoria != null) {
+        hecho.setCategoria(categoria);
+      }
+      if (direccion != null) {
+        hecho.setDireccion(direccion);
+      }
+      if (ubicacion != null) {
+        hecho.setUbicacion(ubicacion);
+      }
+      if (etiquetas != null) {
+        hecho.setEtiquetas(etiquetas);
+      }
+      if (fechaSuceso != null) {
+        hecho.setFechaSuceso(fechaSuceso);
+      }
+      hecho.setEstado(Estado.EDITADO);
+    }
+  }
+
   // Anotación para mapear la propiedad JSON "origen" al setter de 'fuenteOrigen'
   @JsonProperty("origen")
   public void setFuenteOrigen(Origen fuenteOrigen) {

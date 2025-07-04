@@ -55,7 +55,7 @@ public class App {
    *
    * @return una instancia de App completamente configurada.
    */
-  private static App configurarAplicacion() {
+  public static App configurarAplicacion() {
     App aplicacion = new App();
 
     try {
@@ -107,5 +107,9 @@ public class App {
     // 2. Ejecución: Usar el primer argumento para decidir qué fuente actualizar.
     String nombreFuenteAActualizar = args[0];
     aplicacion.ejecutarActualizacion(nombreFuenteAActualizar);
+  }
+
+  public Map<String, FuenteCacheable> getFuentesRegistradas() {
+    return new HashMap<>(fuentesRegistradas); // Retorna una copia para evitar modificaciones externas
   }
 }

@@ -31,10 +31,18 @@ public class FuenteTest {
   @DisplayName("Pruebas para FuenteDinamica")
   class FuenteDinamicaTests {
     private FuenteDinamica fuente;
+    private Path tempJsonFile; // Declarar la variable para el archivo temporal
 
     @BeforeEach
-    void setUp() {
-      fuente = new FuenteDinamica("MiFuente", null);
+    void setUp() throws IOException { // Añadir throws IOException
+      // Crear un archivo JSON temporal para la FuenteDinamica
+      tempJsonFile = Files.createTempFile("test_fuente_dinamica_", ".json");
+      fuente = new FuenteDinamica("MiFuente", tempJsonFile.toString());
+    }
+
+    @AfterEach
+    void tearDown() throws IOException { // Método para limpiar el archivo temporal
+      Files.deleteIfExists(tempJsonFile);
     }
 
     @Test
@@ -55,14 +63,6 @@ public class FuenteTest {
       fuente.agregarHecho(mock(Hecho.class));
       List<Hecho> hechos = fuente.obtenerHechos();
       assertThrows(UnsupportedOperationException.class, () -> hechos.add(mock(Hecho.class)));
-    }
-
-    @Test
-    public void puedeIniciarseConHechos() {
-      Hecho hecho = mock(Hecho.class);
-      FuenteDinamica fuenteConHechos = new FuenteDinamica("FuenteConHechos", List.of(hecho));
-      assertEquals(1, fuenteConHechos.obtenerHechos().size());
-      assertTrue(fuenteConHechos.obtenerHechos().contains(hecho));
     }
   }
 
@@ -117,7 +117,6 @@ public class FuenteTest {
 
     @AfterEach
     void tearDown() throws IOException {
-      // FIX: Se elimina la llamada al método obsoleto detenerScheduler()
       Files.deleteIfExists(tempJsonFile);
     }
 

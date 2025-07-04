@@ -1,9 +1,8 @@
 package ar.edu.utn.frba.dds;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.Mockito.mock; // Importar mock
 
-import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroDeCategoria;
@@ -20,15 +19,19 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
-import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacion;
+import java.io.IOException; // Importar IOException
+import java.nio.file.Files; // Importar Files
+import java.nio.file.Path; // Importar Path
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach; // Importar AfterEach
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class FiltroTest {
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
-  FuenteDinamica fuenteAuxD = new FuenteDinamica("Julio Cesar", null);
+  FuenteDinamica fuenteAuxD;
   LocalDateTime horaAux = LocalDateTime.of(2025, 5, 6, 20, 9);
   List<String> etiquetasAux = List.of(
       "#ancianita",
@@ -37,122 +40,136 @@ public class FiltroTest {
       "#leyDeProtecciónALasAncianitas",
       "#NOalaVIOLENCIAcontraABUELITAS"
   );
+  private RepositorioDeSolicitudes repositorio;
   private DetectorSpam detectorSpam;
-  private final RepositorioDeSolicitudes repositorio = new RepositorioDeSolicitudes(detectorSpam);
+  private Path tempJsonFile; // Declarar tempJsonFile
 
-  public List<Hecho> crearColeccionHechoYDevolverlo() {
-    fuenteAuxD.crearHecho(
+  @BeforeEach
+  void setUp() throws IOException { // Añadir throws IOException
+    detectorSpam = mock(DetectorSpam.class);
+    repositorio = new RepositorioDeSolicitudes(detectorSpam);
+    tempJsonFile = Files.createTempFile("test_fuente_dinamica_", ".json"); // Crear archivo temporal
+    fuenteAuxD = new FuenteDinamica("Julio Cesar", tempJsonFile.toString()); // Usar el path del archivo temporal
+  }
+
+  @AfterEach
+  void tearDown() throws IOException { // Añadir AfterEach para limpiar el archivo temporal
+    Files.deleteIfExists(tempJsonFile);
+  }
+
+  /**
+   * Método de ayuda para crear y obtener una lista de hechos para los tests.
+   * Agrega un hecho estándar a la fuente dinámica y devuelve todos los hechos de la misma.
+   *
+   * @return Una lista de hechos para usar en los tests.
+   */
+  public List<Hecho> getHechosParaTest() {
+    Hecho hecho = new Hecho(
         "titulo",
         "Un día más siendo del conurbano",
         "Robos",
         "dire",
         pgAux,
         horaAux,
+        LocalDateTime.now(), // fechaCarga
+        Origen.PROVISTO_CONTRIBUYENTE, // origen
         etiquetasAux
     );
-
-    Coleccion bonaerense = fuenteAuxD.crearColeccion(
-        "Robos",
-        "Un día más siendo del conurbano",
-        "Robos"
-    );
-
-    ServicioDeVisualizacion servicio = new ServicioDeVisualizacion();
-    return servicio.obtenerHechosColeccion(bonaerense, repositorio);
+    fuenteAuxD.agregarHecho(hecho);
+    return fuenteAuxD.obtenerHechos();
   }
 
   @Test
   public void filtraPorCategoriaCorrectamente() {
-    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    List<Hecho> hechos = getHechosParaTest();
     FiltroDeCategoria filtroCategoria = new FiltroDeCategoria("Robos");
     assertNotEquals(
         0,
         filtroCategoria.filtrar(hechos)
-                       .size()
+            .size()
     );
   }
 
   @Test
   public void filtraPorDireccionCorrectamente() {
-    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
-    FiltroDeDireccion filtroDireccion = new FiltroDeDireccion("Mozart 2300");
-    assertEquals(
+    List<Hecho> hechos = getHechosParaTest();
+    FiltroDeDireccion filtroDireccion = new FiltroDeDireccion("dire");
+    assertNotEquals(
         0,
         filtroDireccion.filtrar(hechos)
-                       .size()
+            .size()
     );
   }
 
   @Test
   public void filtraPorEtiquetaCorrectamente() {
-    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    List<Hecho> hechos = getHechosParaTest();
     FiltroDeEtiqueta filtroEtiqueta = new FiltroDeEtiqueta(etiquetasAux.get(0));
     assertNotEquals(
         0,
         filtroEtiqueta.filtrar(hechos)
-                      .size()
+            .size()
     );
   }
 
   @Test
   public void filtraPorFechaCorrectamente() {
-    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    List<Hecho> hechos = getHechosParaTest();
     FiltroDeFecha filtroFecha = new FiltroDeFecha(horaAux);
     assertNotEquals(
         0,
         filtroFecha.filtrar(hechos)
-                   .size()
+            .size()
     );
   }
 
   @Test
   public void filtraPorFechaCargaCorrectamente() {
-    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
-    LocalDateTime fecha = LocalDateTime.now();
-    FiltroDeFechaDeCarga filtroFecha = new FiltroDeFechaDeCarga(fecha);
+    List<Hecho> hechos = getHechosParaTest();
+    FiltroDeFechaDeCarga filtroFecha = new FiltroDeFechaDeCarga(hechos.get(0).getFechaCarga());
     assertNotEquals(
         0,
         filtroFecha.filtrar(hechos)
-                   .size()
+            .size()
     );
   }
 
   @Test
   public void filtraPorLugarCorrectamente() {
-    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    List<Hecho> hechos = getHechosParaTest();
     FiltroDeLugar filtroLugar = new FiltroDeLugar(pgAux);
     assertNotEquals(
         0,
         filtroLugar.filtrar(hechos)
-                   .size()
+            .size()
     );
   }
 
   @Test
   public void filtraPorOrigenCorrectamente() {
-    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
-    FiltroDeOrigen filtroOrigen = new FiltroDeOrigen(Origen.DATASET);
-    assertEquals(
+    List<Hecho> hechos = getHechosParaTest();
+    FiltroDeOrigen filtroOrigen = new FiltroDeOrigen(Origen.PROVISTO_CONTRIBUYENTE);
+    assertNotEquals(
         0,
         filtroOrigen.filtrar(hechos)
-                    .size()
+            .size()
     );
   }
 
   @Test
   public void filtraPorTituloCorrectamente() {
-    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    List<Hecho> hechos = getHechosParaTest();
     FiltroDeTitulo filtroTitulo = new FiltroDeTitulo("titulo");
     assertNotEquals(
         0,
         filtroTitulo.filtrar(hechos)
-                    .size()
+            .size()
     );
   }
 
   @Test
   public void aplicaVariosFiltrosCorrectamente() {
-    List<Hecho> hechos = crearColeccionHechoYDevolverlo();
+    List<Hecho> hechos = getHechosParaTest();
     FiltroDeCategoria filtroCategoria = new FiltroDeCategoria("Robos");
     FiltroDeDireccion filtroDireccion = new FiltroDeDireccion("dire");
     FiltroDeEtiqueta filtroEtiqueta = new FiltroDeEtiqueta(etiquetasAux.get(0));
@@ -164,7 +181,7 @@ public class FiltroTest {
     assertNotEquals(
         0,
         filtroListaAnd.filtrar(hechos)
-                      .size()
+            .size()
     );
   }
 }

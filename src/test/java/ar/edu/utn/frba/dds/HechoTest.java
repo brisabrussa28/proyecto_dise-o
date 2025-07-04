@@ -20,19 +20,22 @@ public class HechoTest {
 
   @Test
   public void seCreaHechoCorrectamente() {
-    FuenteDinamica fuente = new FuenteDinamica("Fuente X", null);
+    // FuenteDinamica fuente = new FuenteDinamica("Fuente X", null); // Ya no es necesaria para crear el hecho
     PuntoGeografico ubicacion = new PuntoGeografico(33.0, 44.0);
     List<String> etiquetas = List.of("#robo", "#violencia");
     LocalDateTime fechaSuceso = LocalDateTime.now()
-                                             .minusDays(5);
+        .minusDays(5);
+    LocalDateTime fechaCarga = LocalDateTime.now(); // Se añade fechaCarga para el constructor de Hecho
 
-    Hecho hecho = fuente.crearHecho(
+    Hecho hecho = new Hecho( // Se crea el Hecho directamente con el constructor
         "Robo",
         "Robo a mano armada",
         "DELITO",
         "Calle falsa 123",
         ubicacion,
         fechaSuceso,
+        fechaCarga, // Se pasa la fecha de carga
+        Origen.PROVISTO_CONTRIBUYENTE,
         etiquetas
     );
 
@@ -50,7 +53,7 @@ public class HechoTest {
   @Test
   public void filtroDetectaHechoIdentico() {
     LocalDateTime fecha = LocalDateTime.now()
-                                       .minusDays(2);
+        .minusDays(2);
     PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
     List<String> etiquetas = List.of("#etiqueta");
 
@@ -81,6 +84,11 @@ public class HechoTest {
 
     List<Hecho> filtrados = filtro.filtrar(List.of(copia));
 
+    // La lógica de equals de Hecho solo considera titulo, descripcion, categoria, direccion, ubicacion y fechaSuceso.
+    // Aunque la descripción y las etiquetas son diferentes, el filtro podría considerarlos "idénticos"
+    // si la implementación de FiltroIgualHecho solo compara los campos que se usan en el equals de Hecho.
+    // Si la intención es que sean idénticos en todos los aspectos para el filtro, se debería ajustar el mock o la lógica del filtro.
+    // Para este test, asumo que el filtro se basa en el método equals de Hecho.
     assertEquals(1, filtrados.size());
     assertEquals(copia, filtrados.get(0));
   }
@@ -88,7 +96,7 @@ public class HechoTest {
   @Test
   public void filtroNoDetectaHechoDistinto() {
     LocalDateTime fecha = LocalDateTime.now()
-                                       .minusDays(2);
+        .minusDays(2);
     PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
 
     Hecho original = new Hecho(
@@ -149,7 +157,7 @@ public class HechoTest {
     PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
     List<String> etiquetas = List.of("#test");
     LocalDateTime fechaFutura = LocalDateTime.now()
-                                             .plusDays(1);
+        .plusDays(1);
 
     assertThrows(
         RuntimeException.class,
@@ -172,7 +180,7 @@ public class HechoTest {
     PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
     List<String> etiquetas = List.of("#test");
     LocalDateTime fechaFutura = LocalDateTime.now()
-                                             .plusDays(1);
+        .plusDays(1);
 
     assertThrows(
         RuntimeException.class,
@@ -202,9 +210,9 @@ public class HechoTest {
           "dir",
           ubicacion,
           LocalDateTime.now()
-                       .minusDays(2),
+              .minusDays(2),
           LocalDateTime.now()
-                       .minusDays(1),
+              .minusDays(1),
           Origen.PROVISTO_CONTRIBUYENTE,
           etiquetas
       );

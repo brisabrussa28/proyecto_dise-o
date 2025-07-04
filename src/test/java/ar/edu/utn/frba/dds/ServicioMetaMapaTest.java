@@ -21,6 +21,8 @@ import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.serviciometamapa.ServicioMetaMapa;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import java.io.IOException;
+import java.nio.file.Files; // Importar Files
+import java.nio.file.Path; // Importar Path
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -34,29 +36,33 @@ public class ServicioMetaMapaTest {
       "desastres",
       pgAux,
       LocalDateTime.now()
-                   .plusDays(10),
+          .plusDays(10),
       LocalDateTime.now()
-                   .plusDays(10),
+          .plusDays(10),
       LocalDateTime.now()
-                   .minusDays(10),
+          .minusDays(10),
       LocalDateTime.now()
-                   .minusDays(10)
+          .minusDays(10)
   );
   private WireMockServer wireMockServer;
   private ServicioMetaMapa servicioMetaMapa;
+  private Path tempJsonFile; // Declarar la variable para el archivo temporal
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws IOException { // Añadir throws IOException
     wireMockServer = new WireMockServer(8080);
     wireMockServer.start();
     configureFor("localhost", 8080);
 
     this.servicioMetaMapa = new ServicioMetaMapa("http://localhost:8080");
+    // Crear un archivo JSON temporal para la FuenteDinamica
+    tempJsonFile = Files.createTempFile("test_servicio_metamapa_", ".json");
   }
 
   @AfterEach
-  public void tearDown() {
+  public void tearDown() throws IOException { // Añadir throws IOException
     wireMockServer.stop();
+    Files.deleteIfExists(tempJsonFile); // Limpiar el archivo temporal
   }
 
   @Test
@@ -104,9 +110,9 @@ public class ServicioMetaMapaTest {
   @Test
   public void seCreaSolicitud() throws IOException {
     stubFor(post(urlEqualTo("/solicitudes")).willReturn(aResponse().withStatus(201)
-                                                                   .withHeader("Content-Type", "application/json")
-                                                                   .withBody(
-                                                                       "{ \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\" }")));
+        .withHeader("Content-Type", "application/json")
+        .withBody(
+            "{ \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\" }")));
 
     PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
     String motivo = "a".repeat(600);
@@ -130,7 +136,8 @@ public class ServicioMetaMapaTest {
         etiquetasAux
     );
 
-    FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
+    // Inicializar FuenteDinamica con el archivo JSON temporal
+    FuenteDinamica fuente = new FuenteDinamica("MiFuente", tempJsonFile.toString());
     fuente.agregarHecho(hecho);
 
     Solicitud solicitud = new Solicitud(UUID.randomUUID(), hecho, motivo);
