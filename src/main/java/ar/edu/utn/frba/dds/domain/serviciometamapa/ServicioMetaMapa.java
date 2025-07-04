@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds.domain.serviciometamapa;
 
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoQuerys;
-import ar.edu.utn.frba.dds.domain.hecho.ListadoDeHechos;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,6 +11,8 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -30,44 +32,44 @@ public class ServicioMetaMapa {
         .build();
   }
 
-  public ListadoDeHechos listadoDeHechos(HechoQuerys querys) throws IOException {
+  public List<Hecho> listadoDeHechos(HechoQuerys querys) throws IOException {
     MetaMapaService metaMapaService = this.retrofit.create(MetaMapaService.class);
-    Call<ListadoDeHechos> requestListadoDeHechos = metaMapaService.hechos(
+    Call<List<Hecho>> requestListadoDeHechos = metaMapaService.hechos(
         querys.getCategoria(),
-        querys.getUbicacion(),
+        querys.getUbicacion().toString(),
         querys.getFechaReporteDesde(),
         querys.getFechaReporteHasta(),
         querys.getFechaAcontecimientoDesde(),
         querys.getFechaAcontecimientoHasta()
     );
-    Response<ListadoDeHechos> listadoDeHechosResponse = requestListadoDeHechos.execute();
-    ListadoDeHechos listadoDeHechos = listadoDeHechosResponse.body();
+    Response<List<Hecho>> listadoDeHechosResponse = requestListadoDeHechos.execute();
+    List<Hecho> listadoDeHechos = listadoDeHechosResponse.body();
 
     // Ensure the returned object is not null
     if (listadoDeHechos == null) {
-      listadoDeHechos = new ListadoDeHechos();
+      listadoDeHechos = new ArrayList<>();
     }
 
     return listadoDeHechos;
   }
 
-  public ListadoDeHechos listadoDeHechosPorColeccion(int id, HechoQuerys querys) throws IOException {
+  public List<Hecho> listadoDeHechosPorColeccion(int id, HechoQuerys querys) throws IOException {
     MetaMapaService metaMapaService = this.retrofit.create(MetaMapaService.class);
-    Call<ListadoDeHechos> requestListadoDeHechos = metaMapaService.hechos(
+    Call<List<Hecho>> requestListadoDeHechos = metaMapaService.hechos(
         id,
         querys.getCategoria(),
-        querys.getUbicacion(),
+        querys.getUbicacion().toString(),
         querys.getFechaReporteDesde(),
         querys.getFechaReporteHasta(),
         querys.getFechaAcontecimientoDesde(),
         querys.getFechaAcontecimientoHasta()
     );
-    Response<ListadoDeHechos> listadoDeHechosResponse = requestListadoDeHechos.execute();
-    ListadoDeHechos listadoDeHechos = listadoDeHechosResponse.body();
+    Response<List<Hecho>> listadoDeHechosResponse = requestListadoDeHechos.execute();
+    List<Hecho> listadoDeHechos = listadoDeHechosResponse.body();
 
     // Ensure the returned object is not null
     if (listadoDeHechos == null) {
-      listadoDeHechos = new ListadoDeHechos();
+      listadoDeHechos = new ArrayList<>();
     }
 
     return listadoDeHechos;
@@ -79,7 +81,6 @@ public class ServicioMetaMapa {
     Response<Void> response = request.execute();
     return response.code(); // ⬅ Devuelve el código HTTP
   }
-
 
   // Adaptador para serializar/deserializar LocalDateTime con Gson
   static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {

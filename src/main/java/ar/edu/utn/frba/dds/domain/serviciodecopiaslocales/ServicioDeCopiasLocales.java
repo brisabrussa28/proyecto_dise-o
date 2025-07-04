@@ -77,25 +77,6 @@ public class ServicioDeCopiasLocales {
   }
 
   /**
-   * Guarda una copia local de una lista de objetos Hecho en formato JSON.
-   *
-   * @param hechos Lista de objetos Hecho a guardar.
-   */
-  public void guardarCopiaHechos(List<Hecho> hechos) {
-    guardarCopiaLocalJson(hechos);
-  }
-
-  /**
-   * Lee el archivo JSON local y convierte su contenido en una lista de objetos Hecho.
-   *
-   * @return Una lista de objetos Hecho leídos del archivo JSON, o una lista vacía si el archivo no existe,
-   *         está vacío o si ocurre un error de lectura/sintaxis.
-   */
-  public List<Hecho> cargarCopiaHechos() {
-    return cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {});
-  }
-
-  /**
    * Obtiene la ruta del archivo JSON utilizado por este servicio.
    *
    * @return La ruta del archivo JSON.

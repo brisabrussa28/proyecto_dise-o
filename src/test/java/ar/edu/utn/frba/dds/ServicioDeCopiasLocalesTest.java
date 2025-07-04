@@ -1,15 +1,11 @@
 package ar.edu.utn.frba.dds;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.serviciodecopiaslocales.ServicioDeCopiasLocales;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.IOException;
@@ -64,9 +60,9 @@ public class ServicioDeCopiasLocalesTest {
         List.of("trafico", "accidente", "autopista")
     ));
 
-    servicio.guardarCopiaHechos(originalHechos);
+    servicio.guardarCopiaLocalJson(originalHechos);
 
-    List<Hecho> loadedHechos = servicio.cargarCopiaHechos();
+    List<Hecho> loadedHechos = servicio.cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {});
 
     assertNotNull(loadedHechos);
     assertEquals(originalHechos.size(), loadedHechos.size());
@@ -91,7 +87,7 @@ public class ServicioDeCopiasLocalesTest {
       e.printStackTrace();
     }
 
-    List<Hecho> loadedHechos = servicio.cargarCopiaHechos();
+    List<Hecho> loadedHechos = servicio.cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {});
 
     assertNotNull(loadedHechos);
     assertTrue(loadedHechos.isEmpty());
@@ -101,7 +97,7 @@ public class ServicioDeCopiasLocalesTest {
   void testCargarCopiaHechosArchivoVacio() throws IOException {
     Files.write(tempJsonFilePath, new byte[0]);
 
-    List<Hecho> loadedHechos = servicio.cargarCopiaHechos();
+    List<Hecho> loadedHechos = servicio.cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {});
 
     assertNotNull(loadedHechos);
     assertTrue(loadedHechos.isEmpty());
@@ -111,9 +107,9 @@ public class ServicioDeCopiasLocalesTest {
   void testGuardarCopiaHechosListaVacia() throws IOException {
     List<Hecho> emptyList = new ArrayList<>();
 
-    servicio.guardarCopiaHechos(emptyList);
+    servicio.guardarCopiaLocalJson(emptyList);
 
-    List<Hecho> loadedHechos = servicio.cargarCopiaHechos();
+    List<Hecho> loadedHechos = servicio.cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {});
 
     assertNotNull(loadedHechos);
     assertTrue(loadedHechos.isEmpty());

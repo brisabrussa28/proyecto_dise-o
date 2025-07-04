@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoQuerys;
-import ar.edu.utn.frba.dds.domain.hecho.ListadoDeHechos;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
@@ -76,44 +75,30 @@ public class ServicioMetaMapaTest {
 
   @Test
   public void obtenerHechos() throws IOException {
-    String body = "{ \"hechos\": [ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\", \"descripcion\": \"Simulado\" } ] }";
+    String body = "[ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\", \"descripcion\": \"Simulado\" } ]";
 
     stubFor(get(urlPathEqualTo("/hechos")).withQueryParam("categoria", equalTo("desastres"))
-                                          .willReturn(aResponse().withStatus(200)
-                                                                 .withHeader("Content-Type", "application/json")
-                                                                 .withBody(body)));
+        .willReturn(aResponse().withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(body)));
 
-    ListadoDeHechos listadoDeHechos = servicioMetaMapa.listadoDeHechos(filtros);
+    List<Hecho> listadoDeHechos = servicioMetaMapa.listadoDeHechos(filtros);
     assertNotNull(listadoDeHechos);
-    assertEquals(
-        1,
-        listadoDeHechos.getHechos()
-                       .size()
-    );
+    assertEquals(1, listadoDeHechos.size());
   }
 
   @Test
   public void obtenerHechosDeColeccionUno() throws IOException {
-    String body = "{ \"hechos\": " +
-        "[ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\"," +
-          " \"descripcion\": \"Colección simulada\" " + "} " +
-        "] }";
+    String body = "[ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\", \"descripcion\": \"Colección simulada\" } ]";
 
     stubFor(get(urlPathEqualTo("/colecciones/1/hechos")).withQueryParam("categoria", equalTo("desastres"))
-                                                        .willReturn(aResponse().withStatus(200)
-                                                                               .withHeader(
-                                                                                   "Content-Type",
-                                                                                   "application/json"
-                                                                               )
-                                                                               .withBody(body)));
+        .willReturn(aResponse().withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(body)));
 
-    ListadoDeHechos listado = servicioMetaMapa.listadoDeHechosPorColeccion(1, filtros);
+    List<Hecho> listado = servicioMetaMapa.listadoDeHechosPorColeccion(1, filtros);
     assertNotNull(listado);
-    assertEquals(
-        1,
-        listado.getHechos()
-               .size()
-    );
+    assertEquals(1, listado.size());
   }
 
   @Test

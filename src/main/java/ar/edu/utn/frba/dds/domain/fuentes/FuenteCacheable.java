@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.domain.fuentes;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.serviciodecopiaslocales.ServicioDeCopiasLocales;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public abstract class FuenteCacheable implements Fuente {
     this.validarFuente(nombre);
     this.nombre = nombre;
     this.servicioDeCopiasLocales = new ServicioDeCopiasLocales(jsonFilePathParaCopias);
-    this.cacheDeHechos = this.servicioDeCopiasLocales.cargarCopiaHechos();
+    this.cacheDeHechos = this.servicioDeCopiasLocales.cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {});
     if (this.cacheDeHechos == null) {
       this.cacheDeHechos = new ArrayList<>();
     }
@@ -44,7 +45,7 @@ public abstract class FuenteCacheable implements Fuente {
       System.out.println(this.getClass().getSimpleName() + ": Iniciando actualización de la caché...");
       List<Hecho> nuevosHechos = this.consultarNuevosHechos();
       this.cacheDeHechos = nuevosHechos;
-      this.servicioDeCopiasLocales.guardarCopiaHechos(this.cacheDeHechos);
+      this.servicioDeCopiasLocales.guardarCopiaLocalJson(this.cacheDeHechos);
       System.out.println(this.getClass().getSimpleName() + ": Caché actualizada y guardada con " + nuevosHechos.size() + " hechos.");
     } catch (Exception e) {
       System.err.println("Error durante la actualización de la caché para " + this.getClass().getSimpleName() + ": " + e.getMessage());

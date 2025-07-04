@@ -23,8 +23,7 @@ public class FuenteMetaMapa implements Fuente {
   @Override
   public List<Hecho> obtenerHechos() {
     try {
-      return servicio.listadoDeHechos(query)
-                     .getHechos();
+      return servicio.listadoDeHechos(query);
     } catch (IOException e) {
       System.err.println("Error al consultar MetaMapa: " + e.getMessage());
       return Collections.emptyList();
@@ -32,4 +31,4 @@ public class FuenteMetaMapa implements Fuente {
   }
 
   public String getNombre() { return nombre;}
-}
+  }
