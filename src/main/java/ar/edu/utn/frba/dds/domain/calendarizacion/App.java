@@ -3,7 +3,12 @@ package ar.edu.utn.frba.dds.domain.calendarizacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteCacheable;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.origen.Origen;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,11 +35,13 @@ public class App {
    *
    * @param nombreFuente El nombre de la fuente a actualizar.
    */
+
   public void ejecutarActualizacion(String nombreFuente) {
     FuenteCacheable fuenteAActualizar = fuentesRegistradas.get(nombreFuente);
 
     if (fuenteAActualizar != null) {
       fuenteAActualizar.forzarActualizacionSincrona();
+      System.out.println("Se actualizo la fuente " + nombreFuente + " y se le agrego un hecho.");
     } else {
       throw new IllegalStateException("Error al actualizar...");
     }
@@ -59,6 +66,20 @@ public class App {
     FuenteDinamica dinamica = new FuenteDinamica("dinamica_principal", "dinamica.json");
     aplicacion.registrarFuente(dinamica);
 
+    Hecho hecho = new Hecho(
+        "Un hecho",
+        "Descripcion",
+        "PRUEBA",
+        "Direccion de prueba 123",
+        new PuntoGeografico(-123123, 123123),
+        LocalDateTime.now().minusWeeks(2),
+        LocalDateTime.now(),
+        Origen.PROVISTO_CONTRIBUYENTE,
+        List.of("#PRUEBA", "#ESTOESUNAPRUEBA")
+    );
+
+    dinamica.agregarHecho(hecho);
+
     return aplicacion;
   }
 
@@ -77,10 +98,10 @@ public class App {
 
     String nombreFuenteAActualizar = args[0];
     aplicacion.ejecutarActualizacion(nombreFuenteAActualizar);
-    System.out.println(nombreFuenteAActualizar);
   }
 
   public Map<String, FuenteCacheable> getFuentesRegistradas() {
-    return new HashMap<>(fuentesRegistradas); // Retorna una copia para evitar modificaciones externas
+    // Retorna una copia para evitar modificaciones externas
+    return new HashMap<>(fuentesRegistradas);
   }
 }
