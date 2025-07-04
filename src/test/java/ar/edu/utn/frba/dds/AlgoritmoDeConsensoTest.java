@@ -63,7 +63,7 @@ public class AlgoritmoDeConsensoTest {
   }
 
   private void agregarFuentesConHechos(List<Hecho>... listasDeHechos) {
-    agregador = new FuenteDeAgregacion("Agregador", "/tmp/fake.json"); // reinicia cada vez
+    agregador = new FuenteDeAgregacion("Agregador", "tmp/fake.json"); // reinicia cada vez
     for (List<Hecho> lista : listasDeHechos) {
       Fuente f = mock(Fuente.class);
       when(f.obtenerHechos()).thenReturn(lista);

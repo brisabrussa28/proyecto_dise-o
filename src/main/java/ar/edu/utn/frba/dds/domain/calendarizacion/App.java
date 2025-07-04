@@ -77,6 +77,7 @@ public class App {
 
     String nombreFuenteAActualizar = args[0];
     aplicacion.ejecutarActualizacion(nombreFuenteAActualizar);
+    System.out.println(nombreFuenteAActualizar);
   }
 
   public Map<String, FuenteCacheable> getFuentesRegistradas() {
