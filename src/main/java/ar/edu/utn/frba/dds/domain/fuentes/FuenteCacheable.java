@@ -24,9 +24,6 @@ public abstract class FuenteCacheable implements Fuente {
     this.servicioDeCopiasLocales = new ServicioDeCopiasLocales(jsonFilePathParaCopias);
     this.cacheDeHechos = this.servicioDeCopiasLocales
         .cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {});
-    if (this.cacheDeHechos == null) {
-      this.cacheDeHechos = new ArrayList<>();
-    }
   }
 
   protected abstract List<Hecho> consultarNuevosHechos();

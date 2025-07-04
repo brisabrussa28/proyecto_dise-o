@@ -10,7 +10,7 @@ public class FiltroListaAnd implements Filtro {
   private final List<Filtro> filtros;
 
   public FiltroListaAnd(List<Filtro> filtros) {
-    this.filtros = filtros;
+    this.filtros = List.copyOf(filtros);
   }
 
   @Override

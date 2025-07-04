@@ -82,6 +82,7 @@ public class Hecho {
     this.id = UUID.randomUUID();
   }
 
+
   /**
    * Obtiene el ID del hecho.
    *
@@ -173,6 +174,15 @@ public class Hecho {
   }
 
   /**
+   * Obtiene el estado del del hecho.
+   *
+   * @return estado del del hecho.
+   */
+  public Estado getEstado() {
+    return estado;
+  }
+
+  /**
    * Verifica si el hecho es editable por un usuario específico.
    * Un hecho es editable por su creador durante una semana desde su fecha de carga.
    *
@@ -182,6 +192,7 @@ public class Hecho {
     LocalDateTime hoy = LocalDateTime.now();
     return hoy.isBefore(fechaCarga.plusWeeks(1));
   }
+
 
   // Setters para los campos que no son 'final' y que Jackson necesita para la deserialización
   public void setTitulo(String titulo) {
