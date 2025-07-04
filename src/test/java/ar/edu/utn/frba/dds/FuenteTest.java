@@ -123,7 +123,10 @@ public class FuenteTest {
     @Test
     @DisplayName("Debe iniciar con una lista vacía si no existe caché")
     public void iniciaVaciaSiNoHayCache() {
-      assertTrue(agregadora.obtenerHechos().isEmpty(), "La lista de hechos debería estar vacía al inicio.");
+      assertTrue(
+          agregadora.obtenerHechos().isEmpty(),
+          "La lista de hechos debería estar vacía al inicio."
+      );
     }
 
     @Test
@@ -134,11 +137,14 @@ public class FuenteTest {
       agregadora.agregarFuente(fuenteMock1);
       agregadora.agregarFuente(fuenteMock2);
 
-      agregadora.forzarActualizacionSincrona();
+      agregadora.actualizarHechos();
 
       List<Hecho> todos = agregadora.obtenerHechos();
       assertEquals(2, todos.size(), "Debería haber 2 hechos en total.");
-      assertTrue(todos.containsAll(List.of(hechoMock1, hechoMock2)), "Debería contener los hechos de ambas fuentes.");
+      assertTrue(
+          todos.containsAll(List.of(hechoMock1, hechoMock2)),
+          "Debería contener los hechos de ambas fuentes."
+      );
     }
   }
 }

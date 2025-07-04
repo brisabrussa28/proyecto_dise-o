@@ -79,7 +79,7 @@ public class AlgoritmoDeConsensoTest {
         List.of(h1, h2),
         List.of(h1, h2)
     );
-    agregador.forzarActualizacionSincrona();
+    agregador.actualizarHechos();
 
     Coleccion coleccion = new Coleccion("AbsolutaOk", agregador, "Desc", "Catgoria", absoluta);
 
@@ -97,7 +97,7 @@ public class AlgoritmoDeConsensoTest {
         List.of(h1, h2),
         List.of(h1) // h2 falta
     );
-    agregador.forzarActualizacionSincrona();
+    agregador.actualizarHechos();
 
     Coleccion coleccion = new Coleccion("AbsolutaNoOk", agregador, "Desc", "Catgoria", absoluta);
 
@@ -115,7 +115,7 @@ public class AlgoritmoDeConsensoTest {
         List.of(h1),
         List.of()
     );
-    agregador.forzarActualizacionSincrona();
+    agregador.actualizarHechos();
 
     Coleccion coleccion = new Coleccion("MayoriaOk", agregador, "Desc", "Catgoria", mayoriaSimple);
 
@@ -153,7 +153,7 @@ public class AlgoritmoDeConsensoTest {
         List.of(h1),
         List.of()
     );
-    agregador.forzarActualizacionSincrona();
+    agregador.actualizarHechos();
 
     Coleccion coleccion = new Coleccion(
         "MultiplesOk",

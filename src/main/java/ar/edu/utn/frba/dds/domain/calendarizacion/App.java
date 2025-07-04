@@ -40,7 +40,7 @@ public class App {
     FuenteCacheable fuenteAActualizar = fuentesRegistradas.get(nombreFuente);
 
     if (fuenteAActualizar != null) {
-      fuenteAActualizar.forzarActualizacionSincrona();
+      fuenteAActualizar.actualizarHechos();
       System.out.println("Se actualizo la fuente " + nombreFuente + " y se le agrego un hecho.");
     } else {
       throw new IllegalStateException("Error al actualizar...");

@@ -37,7 +37,7 @@ public abstract class FuenteCacheable implements Fuente {
    * Actualizamos la fuente de forma sincronica.
    * Este es el método que llamamos desde el crontab.
    */
-  public void forzarActualizacionSincrona() {
+  public void actualizarHechos() {
     try {
       List<Hecho> nuevosHechos = this.consultarNuevosHechos();
       this.cacheDeHechos = nuevosHechos;

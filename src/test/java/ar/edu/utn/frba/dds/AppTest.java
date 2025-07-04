@@ -99,7 +99,7 @@ public class AppTest {
     app.registrarFuente(mockFuente);
     app.ejecutarActualizacion(testFuenteName);
 
-    verify(mockFuente, times(1)).forzarActualizacionSincrona();
+    verify(mockFuente, times(1)).actualizarHechos();
   }
 
 

@@ -1,8 +1,8 @@
 package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows; // Importar assertThrows
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -80,7 +80,7 @@ public class FuenteDemoTest {
         .thenReturn(hecho2)
         .thenReturn(null);
 
-    fuenteDemo.forzarActualizacionSincrona();
+    fuenteDemo.actualizarHechos();
 
     List<Hecho> hechos = fuenteDemo.obtenerHechos();
     assertEquals(2, hechos.size());
@@ -93,7 +93,7 @@ public class FuenteDemoTest {
   void noSeActualizaLaCacheSiLosDatosSonInvalidos() {
     // Asegurarse de que la caché esté vacía al inicio del test.
     // Esta llamada inicial debería completarse sin errores gracias a la configuración en setUp.
-    fuenteDemo.forzarActualizacionSincrona();
+    fuenteDemo.actualizarHechos();
     assertTrue(fuenteDemo.obtenerHechos().isEmpty());
 
     Map<String, Object> hechoInvalido = Map.of(
@@ -109,8 +109,10 @@ public class FuenteDemoTest {
         .thenReturn(null);
 
     // Se espera que se lance una RuntimeException cuando se procesan datos inválidos.
-    assertThrows(RuntimeException.class, () -> fuenteDemo.forzarActualizacionSincrona(),
-        "Se esperaba una RuntimeException al procesar datos inválidos.");
+    assertThrows(
+        RuntimeException.class, () -> fuenteDemo.actualizarHechos(),
+        "Se esperaba una RuntimeException al procesar datos inválidos."
+    );
 
     // Después de la excepción, la caché debería seguir vacía o no modificada por el dato inválido.
     assertTrue(fuenteDemo.obtenerHechos().isEmpty());
