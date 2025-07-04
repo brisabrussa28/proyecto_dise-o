@@ -17,12 +17,10 @@ public class FuenteDemo extends FuenteCacheable {
   private LocalDateTime ultimaActualizacion;
 
   public FuenteDemo(String nombre, URL url, Conexion conexion, String jsonFilePathParaCopias) {
-    // FIX: Se llama al constructor del padre con todos los parámetros necesarios.
     super(nombre, jsonFilePathParaCopias);
     this.url = url;
     this.conexion = conexion;
     this.ultimaActualizacion = null;
-    // FIX: Se elimina la llamada a iniciarScheduler del constructor.
   }
 
   @Override

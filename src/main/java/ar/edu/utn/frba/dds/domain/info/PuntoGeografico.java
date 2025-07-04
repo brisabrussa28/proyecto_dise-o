@@ -17,7 +17,6 @@ public class PuntoGeografico {
    * @param latitud  Latitud del punto geográfico
    * @param longitud Longitud del punto geográfico
    */
-  // Anotaciones para que Jackson pueda usar este constructor para la deserialización
   @JsonCreator
   public PuntoGeografico(
       @JsonProperty("latitud") double latitud,
@@ -33,9 +32,6 @@ public class PuntoGeografico {
   public double getLongitud() {
     return longitud;
   }
-
-  // Necesario para que el punto geográfico pueda ser comparado en filtros y otras operaciones
-
 
   @Override
   public boolean equals(Object o) {

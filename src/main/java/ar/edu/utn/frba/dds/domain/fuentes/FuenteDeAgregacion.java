@@ -10,10 +10,8 @@ public class FuenteDeAgregacion extends FuenteCacheable {
   private final List<Fuente> fuentesCargadas;
 
   public FuenteDeAgregacion(String nombre, String jsonFilePathParaCopias) {
-    // FIX: Se llama al constructor del padre con todos los parámetros necesarios.
     super(nombre, jsonFilePathParaCopias);
     this.fuentesCargadas = new ArrayList<>();
-    // FIX: Se elimina la llamada a iniciarScheduler del constructor.
   }
 
   public void agregarFuente(Fuente fuente) {

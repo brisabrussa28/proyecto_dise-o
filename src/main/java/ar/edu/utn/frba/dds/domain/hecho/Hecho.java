@@ -194,7 +194,6 @@ public class Hecho {
   }
 
 
-  // Setters para los campos que no son 'final' y que Jackson necesita para la deserialización
   public void setTitulo(String titulo) {
     this.titulo = titulo;
   }

@@ -37,10 +37,13 @@ public class ServicioDeCopiasLocales {
 
   public <T> List<T> cargarCopiaLocalJson(TypeReference<List<T>> typeReference) {
     File jsonFile = new File(jsonFilePath);
-    if (!jsonFile.exists() || jsonFile.length() == 0) {
-      LOGGER.info("Archivo JSON no encontrado o vacío en " + jsonFilePath);
+
+    // El constructor ya asegura que el archivo existe, pero podría estar vacío.
+    if (jsonFile.length() == 0) {
+      LOGGER.warning("El archivo JSON en " + jsonFilePath + " está vacío. Se retorna una lista vacía.");
       return new ArrayList<>();
     }
+
     try {
       List<T> objetosLeidos = objectMapper.readValue(jsonFile, typeReference);
       LOGGER.info("Copia local de objetos cargada desde: " + jsonFilePath);
