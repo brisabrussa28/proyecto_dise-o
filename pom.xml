@@ -146,7 +146,6 @@
                         JavadocParagraph,
                         SummaryJavadoc,
                         LineLength,
-                        AbbreviationAsWordInName,
                         AbbreviationAsWordInName
                     </violationIgnore>
                 </configuration>
@@ -199,7 +198,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.0</minimum>
+                                            <minimum>0.6</minimum>
                                         </limit>
                                     </limits>
                                 </rule>

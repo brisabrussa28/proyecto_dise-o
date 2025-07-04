@@ -6,7 +6,7 @@ import java.util.List;
 
 public class MultiplesMenciones implements AlgoritmoDeConsenso {
   @Override
-  public List<Hecho> listaDeHechosConcensuados(
+  public List<Hecho> listaDeHechosConsensuados(
       List<Hecho> listaDeHechos,
       List<Fuente> fuentesNodo
   ) {

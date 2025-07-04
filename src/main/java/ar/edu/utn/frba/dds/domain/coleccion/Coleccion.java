@@ -142,7 +142,7 @@ public class Coleccion {
       return repositorioDeReportes.filtroExcluyente().filtrar(hechos);
     } else {
       List<Fuente> fuentesNodo = this.obtenerFuentesDelNodo();
-      return algoritmo.listaDeHechosConcensuados(
+      return algoritmo.listaDeHechosConsensuados(
           (repositorioDeReportes.filtroExcluyente())
               .filtrar(hechos), fuentesNodo
       );

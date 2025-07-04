@@ -5,5 +5,5 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 
 public interface AlgoritmoDeConsenso {
-  public List<Hecho> listaDeHechosConcensuados(List<Hecho> listaDeHechos, List<Fuente> fuentesNodo);
+  public List<Hecho> listaDeHechosConsensuados(List<Hecho> listaDeHechos, List<Fuente> fuentesNodo);
 }
