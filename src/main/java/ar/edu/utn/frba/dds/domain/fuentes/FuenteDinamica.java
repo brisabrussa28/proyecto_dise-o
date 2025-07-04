@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-import ar.edu.utn.frba.dds.domain.AlgoritmosConcenso.AlgoritmoDeConcenso;
+import ar.edu.utn.frba.dds.domain.algoritmosconcenso.AlgoritmoDeConcenso;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.hecho.Estado;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
