@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteMetaMapa;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoQuerys;
-import ar.edu.utn.frba.dds.domain.hecho.ListadoDeHechos;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.serviciometamapa.ServicioMetaMapa;
@@ -23,21 +22,19 @@ public class FuenteMetaMapaTest {
 
   private ServicioMetaMapa servicioMock;
   private HechoQuerys queryMock;
-  private ListadoDeHechos listadoMock;
   private FuenteMetaMapa fuenteMetaMapa;
 
   @BeforeEach
   public void setUp() {
     servicioMock = mock(ServicioMetaMapa.class);
     queryMock = mock(HechoQuerys.class);
-    listadoMock = mock(ListadoDeHechos.class);
     fuenteMetaMapa = new FuenteMetaMapa("MetaMapa Fuente", servicioMock, queryMock);
   }
 
   @Test
   public void devuelveHechosDesdeServicioMetaMapa() throws IOException {
     PuntoGeografico ubicacion = new PuntoGeografico(1.0, 2.0);
-    Origen origen = Origen.DATASET; // ✅ uso real en lugar de mock
+    Origen origen = Origen.DATASET;
 
     Hecho hecho1 = new Hecho(
         "Inundación grave",
@@ -45,8 +42,7 @@ public class FuenteMetaMapaTest {
         "inundacion",
         "Calle Falsa 123",
         ubicacion,
-        LocalDateTime.now()
-                     .minusDays(1),
+        LocalDateTime.now().minusDays(1),
         LocalDateTime.now(),
         origen,
         List.of("clima", "urgente")
@@ -58,16 +54,13 @@ public class FuenteMetaMapaTest {
         "terremoto",
         "Avenida Siempre Viva",
         ubicacion,
-        LocalDateTime.now()
-                     .minusDays(2),
+        LocalDateTime.now().minusDays(2),
         LocalDateTime.now(),
         origen,
         List.of("movimiento", "alerta")
     );
 
-
-    when(servicioMock.listadoDeHechos(queryMock)).thenReturn(listadoMock);
-    when(listadoMock.getHechos()).thenReturn(List.of(hecho1, hecho2));
+    when(servicioMock.listadoDeHechos(queryMock)).thenReturn(List.of(hecho1, hecho2));
 
     List<Hecho> hechos = fuenteMetaMapa.obtenerHechos();
 

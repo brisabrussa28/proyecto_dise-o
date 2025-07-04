@@ -2,14 +2,15 @@ package ar.edu.utn.frba.dds.domain.reportes;
 
 import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.usuario.Usuario;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Solicitud.
  */
 public class Solicitud {
 
-  Usuario solicitante;
+  UUID solicitante;
   Hecho hechoSolicitado;
   String razonEliminacion;
 
@@ -20,7 +21,7 @@ public class Solicitud {
    * @param hechoSolicitado Hecho solicitado para eliminar
    * @param motivo          Razón de la eliminación
    */
-  public Solicitud(Usuario solicitante, Hecho hechoSolicitado, String motivo) {
+  public Solicitud(UUID solicitante, Hecho hechoSolicitado, String motivo) {
     if (solicitante == null) {
       throw new NullPointerException("El solicitante no puede ser null");
     }
@@ -32,19 +33,19 @@ public class Solicitud {
     }
     this.validarMotivo(motivo);
     this.solicitante = solicitante;
-    this.hechoSolicitado = hechoSolicitado;
+    this.hechoSolicitado = hechoSolicitado.copiar();
     this.razonEliminacion = motivo;
   }
 
   public Hecho getHechoSolicitado() {
-    return hechoSolicitado;
+    return hechoSolicitado.copiar();
   }
 
   public String getRazonEliminacion() {
     return razonEliminacion;
   }
 
-  public Usuario getSolicitante() {
+  public UUID getSolicitante() {
     return solicitante;
   }
 
@@ -58,4 +59,32 @@ public class Solicitud {
       throw new RazonInvalidaException("Tiene menos de 500 caracteres.");
     }
   }
+
+
+  /**
+   * Si no modifico equals y hassCode no puede comparar solicitudes
+   *
+   * @param o
+   * @return
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    Solicitud solicitud = (Solicitud) o;
+    return Objects.equals(solicitante, solicitud.solicitante)
+        && Objects.equals(hechoSolicitado, solicitud.hechoSolicitado)
+        && Objects.equals(razonEliminacion, solicitud.razonEliminacion);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(solicitante, hechoSolicitado, razonEliminacion);
+  }
+
 }

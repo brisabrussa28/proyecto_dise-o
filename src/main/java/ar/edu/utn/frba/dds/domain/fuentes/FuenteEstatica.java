@@ -7,10 +7,11 @@ import java.util.List;
 /**
  * Fuente de datos estática basada en archivo CSV.
  */
-public class FuenteEstatica extends Fuente {
+public class FuenteEstatica implements Fuente {
 
   private final String rutaCsv;
   private final LectorCSV lectorCSV;
+  private final String nombre;
 
   /**
    * Constructor de la fuente estática.
@@ -19,12 +20,12 @@ public class FuenteEstatica extends Fuente {
    * @param rutaCsv   Ruta del archivo CSV que contiene los datos.
    * @param lectorCSV Carácter separador utilizado en el CSV.
    */
-  public FuenteEstatica(
-      String nombre,
-      String rutaCsv,
-      LectorCSV lectorCSV
-  ) {
-    super(nombre); // no carga los hechos en el constructor
+  public FuenteEstatica(String nombre, String rutaCsv, LectorCSV lectorCSV) {
+    this.validarFuente(nombre);
+    this.nombre = nombre; // no carga los hechos en el constructor
+    if (rutaCsv == null || lectorCSV == null) {
+      throw new IllegalArgumentException("Ruta y lector deben estar definidos");
+    }
     this.rutaCsv = rutaCsv;
     this.lectorCSV = lectorCSV;
   }
@@ -37,5 +38,9 @@ public class FuenteEstatica extends Fuente {
   @Override
   public List<Hecho> obtenerHechos() {
     return lectorCSV.importar(rutaCsv);
+  }
+
+  public String getNombre() {
+    return nombre;
   }
 }

@@ -5,53 +5,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+public class FuenteDeAgregacion extends FuenteCacheable {
 
-/**
- * Servicio de Agregación.
- * Permite agregar múltiples fuentes y obtener los hechos combinados de todas ellas.
- */
-public class FuenteDeAgregacion extends Fuente {
   private final List<Fuente> fuentesCargadas;
 
-  /**
-   * Constructor del Servicio de Agregación.
-   *
-   * @param nombre Nombre del servicio de agregación
-   */
-  public FuenteDeAgregacion(String nombre) {
-    super(nombre);
+  public FuenteDeAgregacion(String nombre, String jsonFilePathParaCopias) {
+    super(nombre, jsonFilePathParaCopias);
     this.fuentesCargadas = new ArrayList<>();
   }
 
-  /**
-   * agrega una fuente al servicio de agregación.
-   *
-   * @param fuente Fuente a agregar
-   */
   public void agregarFuente(Fuente fuente) {
     this.fuentesCargadas.add(fuente);
   }
 
-  /**
-   * obtiene los hechos de todas las fuentes cargadas.
-   *
-   * @return Lista de hechos combinados de todas las fuentes
-   */
-  @Override
-  public List<Hecho> obtenerHechos() {
-    return fuentesCargadas.stream()
-                          .flatMap(fuente -> fuente.obtenerHechos()
-                                                   .stream())
-                          .collect(Collectors.toList());
-  }
-
-  /**
-   * obtiene las fuentes cargadas en el servicio de agregación.
-   *
-   * @return Lista de fuentes cargadas
-   */
   public List<Fuente> getFuentesCargadas() {
-    return new ArrayList<>(fuentesCargadas);
+    return new ArrayList<>(this.fuentesCargadas);
   }
 
+  @Override
+  protected List<Hecho> consultarNuevosHechos() {
+    return this.fuentesCargadas.stream()
+                               .flatMap(fuente -> fuente.obtenerHechos()
+                                                        .stream())
+                               .distinct()
+                               .collect(Collectors.toList());
+  }
 }

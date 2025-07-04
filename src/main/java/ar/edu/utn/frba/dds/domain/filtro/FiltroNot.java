@@ -7,20 +7,19 @@ import java.util.List;
 /**
  * Filtro excluyente.
  */
-public class FiltroNot extends Filtro {
-  /**
-   * Constructor de FiltroNot.
-   *
-   * @param filtro Filtro a aplicar como negación.
-   */
-
+public class FiltroNot implements Filtro {
+  private final Filtro filtro;
 
   public FiltroNot(Filtro filtro) {
-    super(hechos -> {
-      List<Hecho> originales = new ArrayList<>(hechos);
-      List<Hecho> excluidos = filtro.filtrar(hechos);
-      originales.removeAll(excluidos);
-      return originales;
-    });
+    this.filtro = filtro;
   }
+
+  @Override
+  public List<Hecho> filtrar(List<Hecho> hechos) {
+    List<Hecho> originales = new ArrayList<>(hechos);
+    List<Hecho> excluidos = filtro.filtrar(hechos);
+    originales.removeAll(excluidos);
+    return originales;
+  }
+
 }

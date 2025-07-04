@@ -1,22 +1,24 @@
 package ar.edu.utn.frba.dds.domain.filtro;
 
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 
 /**
  * Clase filtro lista or.
  */
-public class FiltroListaOr extends Filtro {
-  /**
-   * Constructor de FiltroListaOr.
-   *
-   * @param filtros Lista de filtros a combinar con una operación OR.
-   */
+public class FiltroListaOr implements Filtro {
+  private final List<Filtro> filtros;
 
   public FiltroListaOr(List<Filtro> filtros) {
-    super(hechos -> filtros.stream()
-                           .flatMap(f -> f.filtrar(hechos)
-                                          .stream())
-                           .distinct()
-                           .toList());
+    this.filtros = List.copyOf(filtros);
   }
+
+  @Override
+  public List<Hecho> filtrar(List<Hecho> hechos) {
+    return filtros.stream()
+                  .flatMap(f -> f.filtrar(hechos).stream())
+                  .distinct()
+                  .toList();
+  }
+
 }

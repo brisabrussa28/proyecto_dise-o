@@ -8,7 +8,6 @@ import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroDeDireccion;
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.usuario.Usuario;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
@@ -17,8 +16,6 @@ import org.junit.jupiter.api.Test;
 
 public class LectorCsvTest {
   private final String dir = "src/test/java/ar/edu/utn/frba/dds/CsvDePrueba/";
-  Usuario iluminati = new Usuario("△", "libellumcipher@incognito.com");
-  Usuario admin = new Usuario("pipocapo", "makenipipo@gmail.com");
 
   @Test
   public void importarCSVformatoCorrecto() {

@@ -9,108 +9,75 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-/**
- * FuenteDemo representa una fuente proxy que se conecta a un sistema externo
- * ficticio utilizando una biblioteca externa provista (clase Conexion).
- * Es stateful y consulta nuevos hechos cada una hora mediante programación interna.
- * Si se consulta antes de la hora, devuelve una copia del resultado anterior (cache).
- */
+public class FuenteDemo extends FuenteCacheable {
 
-
-public class FuenteDemo extends FuenteProxy {
   private final Conexion conexion;
   private final URL url;
   private LocalDateTime ultimaActualizacion;
-  private ScheduledExecutorService scheduler;
-  private List<Hecho> cacheUltimosHechos = new ArrayList<>();
 
-  public FuenteDemo(URL url, Conexion conexion) {
-    super("FuenteDemo");
+  public FuenteDemo(String nombre, URL url, Conexion conexion, String jsonFilePathParaCopias) {
+    super(nombre, jsonFilePathParaCopias);
     this.url = url;
     this.conexion = conexion;
     this.ultimaActualizacion = null;
-    iniciarScheduler();
   }
 
-  /**
-   * Devuelve los hechos más recientes cacheados. No consulta la fuente externa.
-   */
   @Override
-  public List<Hecho> obtenerHechos() {
-    return new ArrayList<>(cacheUltimosHechos); // copia defensiva
-  }
-
-  /**
-   * Scheduler interno: consulta a la fuente externa una vez por hora.
-   */
-  public void iniciarScheduler() {
-    scheduler = Executors.newSingleThreadScheduledExecutor();
-    scheduler.scheduleAtFixedRate(this::actualizarHechos, 0, 1, TimeUnit.HOURS);
-  }
-
-  public void detenerScheduler() {
-    if (scheduler != null && !scheduler.isShutdown()) {
-      scheduler.shutdown();
-    }
-  }
-
-  public void actualizarHechos() {
+  protected List<Hecho> consultarNuevosHechos() {
     try {
-      LocalDateTime ahora = LocalDateTime.now();
+      List<Hecho> nuevosHechos = new ArrayList<>();
+      Map<String, Object> datos;
 
-      if (ultimaActualizacion == null || ahora.isAfter(ultimaActualizacion.plusHours(1))) {
-        List<Hecho> nuevosHechos = new ArrayList<>();
-        Map<String, Object> datos;
-
-        while ((datos = conexion.siguienteHecho(url, ultimaActualizacion)) != null) {
-          Hecho hecho = construirHechoIndividual(datos);
-          nuevosHechos.add(hecho);
-        }
-
-        cacheUltimosHechos = nuevosHechos;
-        ultimaActualizacion = ahora;
-
-        System.out.println("FuenteDemo actualizó hechos (" + nuevosHechos.size() + ").");
+      while ((datos = conexion.siguienteHecho(url, ultimaActualizacion)) != null) {
+        Hecho hecho = construirHechoIndividual(datos);
+        nuevosHechos.add(hecho);
       }
+
+      this.ultimaActualizacion = LocalDateTime.now();
+      return nuevosHechos;
+
     } catch (Exception e) {
-      System.err.println("Error al consultar FuenteDemo: " + e.getMessage());
-      throw new ConexionFuenteDemoException("Error al consultar FuenteDemo", e);
+      throw new ConexionFuenteDemoException("Error al consultar la fuente externa de Demo", e);
     }
   }
 
   private Hecho construirHechoIndividual(Map<String, Object> datos) {
-    String titulo = (String) datos.get("titulo");
-    String descripcion = (String) datos.get("descripcion");
-    String categoria = (String) datos.get("categoria");
-    String direccion = (String) datos.get("direccion");
+    try {
+      String titulo = (String) datos.get("titulo");
+      String descripcion = (String) datos.get("descripcion");
+      String categoria = (String) datos.get("categoria");
+      String direccion = (String) datos.get("direccion");
 
-    Map<String, Object> ubicacionMap = (Map<String, Object>) datos.get("ubicacion");
-    double latitud = ((Number) ubicacionMap.get("latitud")).doubleValue();
-    double longitud = ((Number) ubicacionMap.get("longitud")).doubleValue();
-    PuntoGeografico ubicacion = new PuntoGeografico(latitud, longitud);
+      if (titulo == null || descripcion == null || categoria == null || direccion == null) {
+        throw new IllegalArgumentException("Datos obligatorios faltantes en el hecho recibido.");
+      }
 
-    LocalDateTime fechaSuceso = LocalDateTime.parse((String) datos.get("fechaSuceso"));
-    LocalDateTime fechaCarga = LocalDateTime.parse((String) datos.get("fechaCarga"));
+      Map<?, ?> ubicacionMap = (Map<?, ?>) datos.get("ubicacion");
+      if (ubicacionMap == null || ubicacionMap.get("latitud") == null || ubicacionMap.get("longitud") == null) {
+        throw new IllegalArgumentException("Ubicación faltante o incompleta en el hecho recibido.");
+      }
+      double latitud = ((Number) ubicacionMap.get("latitud")).doubleValue();
+      double longitud = ((Number) ubicacionMap.get("longitud")).doubleValue();
+      PuntoGeografico ubicacion = new PuntoGeografico(latitud, longitud);
 
-    Origen fuenteOrigen = Origen.valueOf((String) datos.get("fuenteOrigen"));
+      LocalDateTime fechaSuceso = LocalDateTime.parse((String) datos.get("fechaSuceso"));
+      LocalDateTime fechaCarga = LocalDateTime.parse((String) datos.get("fechaCarga"));
+      Origen fuenteOrigen = Origen.valueOf((String) datos.get("fuenteOrigen"));
 
-    @SuppressWarnings("unchecked")
-    List<String> etiquetas = (List<String>) datos.get("etiquetas");
+      List<String> etiquetas = new ArrayList<>();
+      Object etiquetasObj = datos.get("etiquetas");
+      if (etiquetasObj instanceof List<?>) {
+        for (Object o : (List<?>) etiquetasObj) {
+          if (o instanceof String) {
+            etiquetas.add((String) o);
+          }
+        }
+      }
 
-    return new Hecho(
-        titulo,
-        descripcion,
-        categoria,
-        direccion,
-        ubicacion,
-        fechaSuceso,
-        fechaCarga,
-        fuenteOrigen,
-        etiquetas
-    );
+      return new Hecho(titulo, descripcion, categoria, direccion, ubicacion, fechaSuceso, fechaCarga, fuenteOrigen, etiquetas);
+    } catch (Exception e) {
+      throw new ConexionFuenteDemoException("Error al parsear un hecho individual desde la fuente Demo", e);
+    }
   }
 }

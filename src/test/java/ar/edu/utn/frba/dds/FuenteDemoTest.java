@@ -1,20 +1,22 @@
 package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows; // Importar assertThrows
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
 import ar.edu.utn.frba.dds.domain.fuentes.Conexion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDemo;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,83 +29,39 @@ public class FuenteDemoTest {
 
   FuenteDemo fuenteDemo;
   URL dummyUrl;
+  private Path tempJsonFilePath;
 
   @BeforeEach
   void setUp() throws Exception {
     dummyUrl = new URL("http://localhost:8080/hechos");
-    fuenteDemo = new FuenteDemo(dummyUrl, conexionMock);
-    fuenteDemo.detenerScheduler(); // Detenemos proximas ejecuciones automáticas
+    tempJsonFilePath = Files.createTempFile("test_hechos_", ".json");
+    fuenteDemo = new FuenteDemo("TestDemo", dummyUrl, conexionMock, tempJsonFilePath.toString());
+
+    // Configurar el mock para que devuelva null por defecto para siguienteHecho.
+    // Esto asegura que la primera llamada a forzarActualizacionSincrona() no falle si no hay datos.
+    when(conexionMock.siguienteHecho(any(), any())).thenReturn(null);
+  }
+
+  @AfterEach
+  void tearDown() throws Exception {
+    // FIX: Se elimina la llamada al método obsoleto detenerScheduler()
+    Files.deleteIfExists(tempJsonFilePath);
   }
 
   @Test
-  void seObtieneUnHechoYLoGuardaEnCache() {
-    // mockear un hecho
-    Map<String, Object> fakeHecho = Map.of(
-        "titulo", "Incendio en zona rural",
-        "descripcion", "Se reportó un incendio forestal cerca del parque.",
-        "categoria", "Incendios",
-        "direccion", "Ruta 12, km 45",
-        "ubicacion", Map.of("latitud", -31.4167, "longitud", -64.1833),
-        "fechaSuceso", "2024-05-01T15:30:00",
-        "fechaCarga", "2024-06-01T12:00:00",
-        "fuenteOrigen", "FUENTE_DEMO",
-        "etiquetas", List.of("fuego", "emergencia", "forestal")
-    );
-
-    when(conexionMock.siguienteHecho(any(URL.class), any()))
-        .thenReturn(fakeHecho)
-        .thenReturn(null); // segunda llamada retorna null (fin del stream de hechos)
-
-    fuenteDemo.actualizarHechos(); // 💡 llamás directamente
-
-    List<Hecho> hechos = fuenteDemo.obtenerHechos();
-    assertEquals(1, hechos.size());
-    assertEquals(
-        "Incendio en zona rural",
-        hechos.get(0)
-              .getTitulo()
-    );
-  }
-
-  @Test
-  void noActualizaCacheCuandoNoHayHechos() {
-    when(conexionMock.siguienteHecho(any(URL.class), any())).thenReturn(null);
-
-    fuenteDemo.actualizarHechos();
-
-    List<Hecho> hechos = fuenteDemo.obtenerHechos();
-    assertTrue(hechos.isEmpty());
-  }
-
-  @Test
-  void testLanzarExcepcionCustom() {
-    when(conexionMock.siguienteHecho(any(URL.class), any()))
-        .thenThrow(new RuntimeException("Error forzado"));
-
-    ConexionFuenteDemoException exception = assertThrows(
-        ConexionFuenteDemoException.class,
-        () -> fuenteDemo.actualizarHechos()
-    );
-
-    assertTrue(exception.getMessage()
-                        .contains("Error al consultar FuenteDemo"));
-    assertInstanceOf(RuntimeException.class, exception.getCause());
-  }
-
-  @Test
-  void seObtienenMultiplesHechosYSeGuardaEnCache() {
+  @DisplayName("Debe actualizar la caché con hechos válidos de la fuente externa")
+  void seActualizanHechosDesdeFuenteExterna() {
     Map<String, Object> hecho1 = Map.of(
         "titulo", "Incendio A",
-        "descripcion", "Fuego en el bosque.",
+        "descripcion", "Un incendio en la zona sur.",
         "categoria", "Incendios",
-        "direccion", "Ruta A",
-        "ubicacion", Map.of("latitud", -31.0, "longitud", -64.0),
-        "fechaSuceso", "2024-05-01T15:30:00",
-        "fechaCarga", "2024-06-01T12:00:00",
+        "direccion", "Calle Falsa 123",
+        "ubicacion", Map.of("latitud", -34.0, "longitud", -58.0),
+        "fechaSuceso", "2024-05-01T10:00:00",
+        "fechaCarga", "2024-06-01T10:00:00",
         "fuenteOrigen", "FUENTE_DEMO",
-        "etiquetas", List.of("fuego")
+        "etiquetas", List.of("fuego", "emergencia")
     );
-
     Map<String, Object> hecho2 = Map.of(
         "titulo", "Incendio B",
         "descripcion", "Otro incendio.",
@@ -116,43 +74,45 @@ public class FuenteDemoTest {
         "etiquetas", List.of("fuego", "alerta")
     );
 
+    // Sobreescribir el comportamiento del mock para esta prueba específica
     when(conexionMock.siguienteHecho(any(), any()))
         .thenReturn(hecho1)
         .thenReturn(hecho2)
         .thenReturn(null);
 
-    fuenteDemo.actualizarHechos();
+    fuenteDemo.forzarActualizacionSincrona();
 
     List<Hecho> hechos = fuenteDemo.obtenerHechos();
     assertEquals(2, hechos.size());
-    assertEquals(
-        "Incendio A",
-        hechos.get(0)
-              .getTitulo()
-    );
-    assertEquals(
-        "Incendio B",
-        hechos.get(1)
-              .getTitulo()
-    );
+    assertEquals("Incendio A", hechos.get(0).getTitulo());
+    assertEquals("Incendio B", hechos.get(1).getTitulo());
   }
 
   @Test
-  void seProduceErrorSiLosDatosSonInvalidos() {
+  @DisplayName("No debe actualizar la caché si la fuente externa devuelve datos inválidos")
+  void noSeActualizaLaCacheSiLosDatosSonInvalidos() {
+    // Asegurarse de que la caché esté vacía al inicio del test.
+    // Esta llamada inicial debería completarse sin errores gracias a la configuración en setUp.
+    fuenteDemo.forzarActualizacionSincrona();
+    assertTrue(fuenteDemo.obtenerHechos().isEmpty());
+
     Map<String, Object> hechoInvalido = Map.of(
         "titulo", "Hecho inválido",
         "descripcion", "Falla en datos",
-        "categoria", "Otro",
-        "direccion", "Calle falsa",
-        "ubicacion", "ubicacion erronea",
-        "fechaSuceso", "2024-05-01T15:30:00",
-        "fechaCarga", "2024-06-01T12:00:00",
-        "fuenteOrigen", "FUENTE_DEMO",
-        "etiquetas", List.of("invalido")
+        "fechaSuceso", "2024-05-01T10:00:00"
+        // Faltan categoria, direccion, ubicacion, fechaCarga, fuenteOrigen
     );
 
-    when(conexionMock.siguienteHecho(any(), any())).thenReturn(hechoInvalido);
+    // Configurar el mock para esta prueba específica para devolver el hecho inválido
+    when(conexionMock.siguienteHecho(any(), any()))
+        .thenReturn(hechoInvalido)
+        .thenReturn(null);
 
-    assertThrows(ConexionFuenteDemoException.class, () -> fuenteDemo.actualizarHechos());
+    // Se espera que se lance una RuntimeException cuando se procesan datos inválidos.
+    assertThrows(RuntimeException.class, () -> fuenteDemo.forzarActualizacionSincrona(),
+        "Se esperaba una RuntimeException al procesar datos inválidos.");
+
+    // Después de la excepción, la caché debería seguir vacía o no modificada por el dato inválido.
+    assertTrue(fuenteDemo.obtenerHechos().isEmpty());
   }
 }

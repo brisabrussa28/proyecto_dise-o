@@ -15,16 +15,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoQuerys;
-import ar.edu.utn.frba.dds.domain.hecho.ListadoDeHechos;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.serviciometamapa.ServicioMetaMapa;
-import ar.edu.utn.frba.dds.usuario.Usuario;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import java.io.IOException;
+import java.nio.file.Files; // Importar Files
+import java.nio.file.Path; // Importar Path
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,30 +36,33 @@ public class ServicioMetaMapaTest {
       "desastres",
       pgAux,
       LocalDateTime.now()
-                   .plusDays(10),
+          .plusDays(10),
       LocalDateTime.now()
-                   .plusDays(10),
+          .plusDays(10),
       LocalDateTime.now()
-                   .minusDays(10),
+          .minusDays(10),
       LocalDateTime.now()
-                   .minusDays(10)
+          .minusDays(10)
   );
   private WireMockServer wireMockServer;
   private ServicioMetaMapa servicioMetaMapa;
+  private Path tempJsonFile; // Declarar la variable para el archivo temporal
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws IOException { // Añadir throws IOException
     wireMockServer = new WireMockServer(8080);
     wireMockServer.start();
     configureFor("localhost", 8080);
 
-    ServicioMetaMapa.reiniciarInstancia("http://localhost:8080");
-    this.servicioMetaMapa = ServicioMetaMapa.instancia("http://localhost:8080");
+    this.servicioMetaMapa = new ServicioMetaMapa("http://localhost:8080");
+    // Crear un archivo JSON temporal para la FuenteDinamica
+    tempJsonFile = Files.createTempFile("test_servicio_metamapa_", ".json");
   }
 
   @AfterEach
-  public void tearDown() {
+  public void tearDown() throws IOException { // Añadir throws IOException
     wireMockServer.stop();
+    Files.deleteIfExists(tempJsonFile); // Limpiar el archivo temporal
   }
 
   @Test
@@ -77,52 +81,38 @@ public class ServicioMetaMapaTest {
 
   @Test
   public void obtenerHechos() throws IOException {
-    String body = "{ \"hechos\": [ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\", \"descripcion\": \"Simulado\" } ] }";
+    String body = "[ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\", \"descripcion\": \"Simulado\" } ]";
 
     stubFor(get(urlPathEqualTo("/hechos")).withQueryParam("categoria", equalTo("desastres"))
-                                          .willReturn(aResponse().withStatus(200)
-                                                                 .withHeader("Content-Type", "application/json")
-                                                                 .withBody(body)));
+        .willReturn(aResponse().withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(body)));
 
-    ListadoDeHechos listadoDeHechos = servicioMetaMapa.listadoDeHechos(filtros);
+    List<Hecho> listadoDeHechos = servicioMetaMapa.listadoDeHechos(filtros);
     assertNotNull(listadoDeHechos);
-    assertEquals(
-        1,
-        listadoDeHechos.getHechos()
-                       .size()
-    );
+    assertEquals(1, listadoDeHechos.size());
   }
 
   @Test
   public void obtenerHechosDeColeccionUno() throws IOException {
-    String body = "{ \"hechos\": " +
-        "[ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\"," +
-          " \"descripcion\": \"Colección simulada\" " + "} " +
-        "] }";
+    String body = "[ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\", \"descripcion\": \"Colección simulada\" } ]";
 
     stubFor(get(urlPathEqualTo("/colecciones/1/hechos")).withQueryParam("categoria", equalTo("desastres"))
-                                                        .willReturn(aResponse().withStatus(200)
-                                                                               .withHeader(
-                                                                                   "Content-Type",
-                                                                                   "application/json"
-                                                                               )
-                                                                               .withBody(body)));
+        .willReturn(aResponse().withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(body)));
 
-    ListadoDeHechos listado = servicioMetaMapa.listadoDeHechosPorColeccion(1, filtros);
+    List<Hecho> listado = servicioMetaMapa.listadoDeHechosPorColeccion(1, filtros);
     assertNotNull(listado);
-    assertEquals(
-        1,
-        listado.getHechos()
-               .size()
-    );
+    assertEquals(1, listado.size());
   }
 
   @Test
   public void seCreaSolicitud() throws IOException {
     stubFor(post(urlEqualTo("/solicitudes")).willReturn(aResponse().withStatus(201)
-                                                                   .withHeader("Content-Type", "application/json")
-                                                                   .withBody(
-                                                                       "{ \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\" }")));
+        .withHeader("Content-Type", "application/json")
+        .withBody(
+            "{ \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\" }")));
 
     PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
     String motivo = "a".repeat(600);
@@ -146,10 +136,11 @@ public class ServicioMetaMapaTest {
         etiquetasAux
     );
 
-    FuenteDinamica fuente = new FuenteDinamica("MiFuente", null);
+    // Inicializar FuenteDinamica con el archivo JSON temporal
+    FuenteDinamica fuente = new FuenteDinamica("MiFuente", tempJsonFile.toString());
     fuente.agregarHecho(hecho);
 
-    Solicitud solicitud = new Solicitud(new Usuario("Niko Bellic", ""), hecho, motivo);
+    Solicitud solicitud = new Solicitud(UUID.randomUUID(), hecho, motivo);
     int codigo = servicioMetaMapa.enviarSolicitud(solicitud);
     assertEquals(201, codigo);
   }

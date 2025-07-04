@@ -2,63 +2,40 @@ package ar.edu.utn.frba.dds.domain.hecho;
 
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
  * Hecho.
  */
 public class Hecho {
-  private final List<String> etiquetas;
-  private final UUID id;
-  private final UUID idUsuarioCreador;
-  private final LocalDateTime fechaCarga;
-  private final Origen fuenteOrigen;
+  // Los campos que eran 'final' ahora son no-final para permitir la deserialización de Jackson
+  private List<String> etiquetas;
+  private UUID id;
+  private LocalDateTime fechaCarga;
+  private Origen fuenteOrigen; // Ya no es final
   private String titulo;
   private String descripcion;
   private String categoria;
   private String direccion;
   private PuntoGeografico ubicacion;
   private LocalDateTime fechaSuceso;
+  private Estado estado;
+  // Constructor público sin argumentos: NECESARIO para la deserialización de Jackson
 
   /**
-   * Constructor básico.
-   *
-   * @param titulo       string
-   * @param descripcion  string
-   * @param categoria    string
-   * @param direccion    string
-   * @param ubicacion    PuntoGeografico
-   * @param fechaSuceso  LocalDateTime
-   * @param fechaCarga   LocalDateTime
-   * @param fuenteOrigen Origen
-   * @param etiquetas    List
+   * Constructor para un Hecho.
    */
-  public Hecho(
-      String titulo,
-      String descripcion,
-      String categoria,
-      String direccion,
-      PuntoGeografico ubicacion,
-      LocalDateTime fechaSuceso,
-      LocalDateTime fechaCarga,
-      Origen fuenteOrigen,
-      List<String> etiquetas
-  ) {
-    this(
-        titulo,
-        descripcion,
-        categoria,
-        direccion,
-        ubicacion,
-        fechaSuceso,
-        fechaCarga,
-        fuenteOrigen,
-        etiquetas,
-        null
-    );
+  public Hecho() {
+    this.etiquetas = new ArrayList<>(); // Inicializar para evitar NullPointerException
+    this.id = UUID.randomUUID(); // Generar un ID por defecto (puede ser sobrescrito por JSON)
+    this.fechaCarga = LocalDateTime.now(); // Puede ser sobrescrito por JSON
+    this.fuenteOrigen = null; // Puede ser sobrescrito por JSON
+    this.estado = Estado.ORIGINAL;
   }
 
   /**
@@ -73,7 +50,6 @@ public class Hecho {
    * @param fechaCarga       LocalDateTime
    * @param fuenteOrigen     Origen
    * @param etiquetas        List
-   * @param idUsuarioCreador UUID
    */
   public Hecho(
       String titulo,
@@ -84,8 +60,7 @@ public class Hecho {
       LocalDateTime fechaSuceso,
       LocalDateTime fechaCarga,
       Origen fuenteOrigen,
-      List<String> etiquetas,
-      UUID idUsuarioCreador
+      List<String> etiquetas
   ) {
     if (fechaSuceso != null && fechaCarga != null) {
       if (fechaSuceso.isAfter(fechaCarga)) {
@@ -105,8 +80,8 @@ public class Hecho {
     this.fuenteOrigen = fuenteOrigen;
     this.etiquetas = new ArrayList<>(etiquetas);
     this.id = UUID.randomUUID();
-    this.idUsuarioCreador = idUsuarioCreador;
   }
+
 
   /**
    * Obtiene el ID del hecho.
@@ -199,18 +174,81 @@ public class Hecho {
   }
 
   /**
+   * Obtiene el estado del del hecho.
+   *
+   * @return estado del del hecho.
+   */
+  public Estado getEstado() {
+    return estado;
+  }
+
+  /**
    * Verifica si el hecho es editable por un usuario específico.
    * Un hecho es editable por su creador durante una semana desde su fecha de carga.
    *
-   * @param idUsuarioEditor ID del usuario que intenta editar el hecho
    * @return true si el hecho es editable por el usuario, false en caso contrario
    */
-  public boolean esEditablePor(UUID idUsuarioEditor) {
-    if (this.idUsuarioCreador == null || !this.idUsuarioCreador.equals(idUsuarioEditor)) {
-      return false;
-    }
+  public boolean esEditable() {
     LocalDateTime hoy = LocalDateTime.now();
     return hoy.isBefore(fechaCarga.plusWeeks(1));
+  }
+
+
+  public void setTitulo(String titulo) {
+    this.titulo = titulo;
+  }
+
+  public void setDescripcion(String descripcion) {
+    this.descripcion = descripcion;
+  }
+
+  public void setCategoria(String categoria) {
+    this.categoria = categoria;
+  }
+
+  public void setDireccion(String direccion) {
+    this.direccion = direccion;
+  }
+
+  public void setUbicacion(PuntoGeografico ubicacion) {
+    this.ubicacion = ubicacion;
+  }
+
+  public void setFechaSuceso(LocalDateTime fechaSuceso) {
+    this.fechaSuceso = fechaSuceso;
+  }
+
+  // Nuevos setters para los campos que eran 'final' y ahora son no-final
+  public void setEtiquetas(List<String> etiquetas) {
+    this.etiquetas = new ArrayList<>(etiquetas);
+  }
+
+  public void setId(UUID id) {
+    this.id = id;
+  }
+
+  public void setEstado(Estado estado) {
+    this.estado = estado;
+  }
+
+  public void setFechaCarga(LocalDateTime fechaCarga) {
+    this.fechaCarga = fechaCarga;
+  }
+
+  public Hecho copiar() {
+    Hecho clonHecho = new Hecho(
+        this.titulo,
+        this.descripcion,
+        this.categoria,
+        this.direccion,
+        this.ubicacion,
+        this.fechaSuceso,
+        this.fechaCarga,
+        this.fuenteOrigen,
+        this.etiquetas
+    );
+    clonHecho.setId(this.id);
+    return  clonHecho;
   }
 
   /**
@@ -218,55 +256,71 @@ public class Hecho {
    * Permite cambiar el título, descripción, categoría, dirección, ubicación,
    * etiquetas y fecha de suceso del hecho si el usuario tiene permisos para editarlo.
    *
-   * @param idUsuarioEditor  ID del usuario que intenta editar el hecho
-   * @param nuevoTitulo      Nuevo título del hecho
-   * @param nuevaDescripcion Nueva descripción del hecho
-   * @param nuevaCategoria   Nueva categoría del hecho
-   * @param nuevaDireccion   Nueva dirección del hecho
-   * @param nuevaUbicacion   Nueva ubicación del hecho
-   * @param nuevasEtiquetas  Nuevas etiquetas del hecho
-   * @param nuevaFechaSuceso Nueva fecha de suceso del hecho
+   * @param hecho Hecho
    */
   public void editarHecho(
-      UUID idUsuarioEditor,
-      String nuevoTitulo,
-      String nuevaDescripcion,
-      String nuevaCategoria,
-      String nuevaDireccion,
-      PuntoGeografico nuevaUbicacion,
-      List<String> nuevasEtiquetas,
-      LocalDateTime nuevaFechaSuceso
+      Hecho hecho,
+      String titulo,
+      String descripcion,
+      String categoria,
+      String direccion,
+      PuntoGeografico ubicacion,
+      List<String> etiquetas,
+      LocalDateTime fechaSuceso
   ) {
-    if (!this.esEditablePor(idUsuarioEditor)) {
-      throw new RuntimeException("Solo el usuario creador puede editar el hecho");
-    }
-
-    if (nuevoTitulo != null && !nuevoTitulo.isBlank()) {
-      this.titulo = nuevoTitulo;
-    }
-    if (nuevaDescripcion != null && !nuevaDescripcion.isBlank()) {
-      this.descripcion = nuevaDescripcion;
-    }
-    if (nuevaCategoria != null && !nuevaCategoria.isBlank()) {
-      this.categoria = nuevaCategoria;
-    }
-    if (nuevaDireccion != null && !nuevaDireccion.isBlank()) {
-      this.direccion = nuevaDireccion;
-    }
-    if (nuevaUbicacion != null) {
-      this.ubicacion = nuevaUbicacion;
-    }
-    if (nuevasEtiquetas != null) {
-      this.etiquetas.clear();
-      this.etiquetas.addAll(nuevasEtiquetas);
-    }
-    if (nuevaFechaSuceso != null) {
-      if (this.fechaCarga != null) {
-        if (nuevaFechaSuceso.isAfter(LocalDateTime.now())) {
-          throw new RuntimeException("Fecha de suceso no puede ser posterior al momento actual");
-        }
+    if (LocalDateTime.now().isAfter(hecho.getFechaCarga().plusWeeks(1))) {
+      throw new RuntimeException("Flaco, te pasaste una semana");
+    } else {
+      if (titulo != null) {
+        hecho.setTitulo(titulo);
       }
-      this.fechaSuceso = nuevaFechaSuceso;
+      if (descripcion != null) {
+        hecho.setDescripcion(descripcion);
+      }
+      if (categoria != null) {
+        hecho.setCategoria(categoria);
+      }
+      if (direccion != null) {
+        hecho.setDireccion(direccion);
+      }
+      if (ubicacion != null) {
+        hecho.setUbicacion(ubicacion);
+      }
+      if (etiquetas != null) {
+        hecho.setEtiquetas(etiquetas);
+      }
+      if (fechaSuceso != null) {
+        hecho.setFechaSuceso(fechaSuceso);
+      }
+      hecho.setEstado(Estado.EDITADO);
     }
+  }
+
+  // Anotación para mapear la propiedad JSON "origen" al setter de 'fuenteOrigen'
+  @JsonProperty("origen")
+  public void setFuenteOrigen(Origen fuenteOrigen) {
+    this.fuenteOrigen = fuenteOrigen;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Hecho hecho = (Hecho) o;
+    return Objects.equals(titulo, hecho.titulo)
+        && Objects.equals(descripcion, hecho.descripcion)
+        && Objects.equals(categoria, hecho.categoria)
+        && Objects.equals(direccion, hecho.direccion)
+        && Objects.equals(ubicacion, hecho.ubicacion)
+        && Objects.equals(fechaSuceso, hecho.fechaSuceso);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(titulo, descripcion, categoria, direccion, ubicacion, fechaSuceso);
   }
 }
