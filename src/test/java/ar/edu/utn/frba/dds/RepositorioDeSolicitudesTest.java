@@ -13,7 +13,7 @@ import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.reportes.Aceptar_Solicitud;
+import ar.edu.utn.frba.dds.domain.reportes.AceptarSolicitud;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import java.time.LocalDateTime;
@@ -84,7 +84,7 @@ public class RepositorioDeSolicitudesTest {
   public void gestionarSolicitudInexistenteLanzaExcepcion() {
     Solicitud solicitudFalsa = mock(Solicitud.class);
     assertThrows(
-        SolicitudInexistenteException.class, () -> repositorio.gestionarSolicitud(solicitudFalsa, Aceptar_Solicitud.ACEPTAR)
+        SolicitudInexistenteException.class, () -> repositorio.gestionarSolicitud(solicitudFalsa, AceptarSolicitud.ACEPTAR)
     );
   }
 

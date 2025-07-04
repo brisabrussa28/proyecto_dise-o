@@ -71,14 +71,14 @@ public class RepositorioDeSolicitudes {
    * @param aceptarSolicitud Indica si se acepta o rechaza la solicitud
    * @throws SolicitudInexistenteException Si la solicitud no existe en el gestor
    */
-  public void gestionarSolicitud(Solicitud solicitud, Aceptar_Solicitud aceptarSolicitud) {
+  public void gestionarSolicitud(Solicitud solicitud, AceptarSolicitud aceptarSolicitud) {
     if (!solicitudes.contains(solicitud)) {
       throw new SolicitudInexistenteException("La solicitud no existe en el gestor.");
     }
 
     solicitudes.remove(solicitud);
 
-    if (aceptarSolicitud == Aceptar_Solicitud.ACEPTAR) {
+    if (aceptarSolicitud == AceptarSolicitud.ACEPTAR) {
       marcarComoEliminado(solicitud.getHechoSolicitado());
     }
   }

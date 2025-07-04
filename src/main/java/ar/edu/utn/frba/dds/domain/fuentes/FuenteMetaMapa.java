@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-
 public class FuenteMetaMapa implements Fuente {
   private final ServicioMetaMapa servicio;
   private final HechoQuerys query;
@@ -30,5 +29,7 @@ public class FuenteMetaMapa implements Fuente {
     }
   }
 
-  public String getNombre() { return nombre;}
+  public String getNombre() {
+    return nombre;
   }
+}

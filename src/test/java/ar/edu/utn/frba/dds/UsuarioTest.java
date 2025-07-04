@@ -14,7 +14,7 @@ import ar.edu.utn.frba.dds.domain.filtro.FiltroIdentidad;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.reportes.Aceptar_Solicitud;
+import ar.edu.utn.frba.dds.domain.reportes.AceptarSolicitud;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacion;
@@ -107,8 +107,8 @@ public class UsuarioTest {
     assertNotNull(solicitud);
     verify(repositorioMock).obtenerSolicitud();
 
-    repositorioMock.gestionarSolicitud(solicitud, Aceptar_Solicitud.ACEPTAR);
-    verify(repositorioMock).gestionarSolicitud(solicitud, Aceptar_Solicitud.ACEPTAR);
+    repositorioMock.gestionarSolicitud(solicitud, AceptarSolicitud.ACEPTAR);
+    verify(repositorioMock).gestionarSolicitud(solicitud, AceptarSolicitud.ACEPTAR);
   }
 
 }

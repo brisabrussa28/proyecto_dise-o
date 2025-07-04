@@ -44,7 +44,8 @@ public class App {
     } else {
       //System.err.println("Error: No se encontró una fuente registrada con el nombre '" + nombreFuente + "'.");
       //System.err.println("Fuentes disponibles: " + fuentesRegistradas.keySet());
-      System.exit(1);
+      throw new IllegalStateException("Error al actualizar...");
+      //System.exit(1);
     }
   }
 
@@ -79,8 +80,9 @@ public class App {
       // aplicacion.registrarFuente(estatica);
 
     } catch (MalformedURLException e) {
-      System.err.println("Error fatal en la configuración: La URL de una fuente es inválida. " + e.getMessage());
-      System.exit(1);
+      throw new IllegalStateException("Error fatal en la configuración: La URL de una fuente es inválida. " + e.getMessage());
+      // System.err.println("Error fatal en la configuración: La URL de una fuente es inválida. " + e.getMessage());
+      //System.exit(1);
     }
 
     return aplicacion;
@@ -94,8 +96,9 @@ public class App {
    */
   public static void main(String[] args) {
     if (args.length == 0) {
-      System.err.println("Error: Se requiere el nombre de la fuente a actualizar como argumento.");
-      System.exit(1);
+      throw new IllegalStateException("Error: Se requiere el nombre de la fuente a actualizar como argumento.");
+      // System.err.println("Error: Se requiere el nombre de la fuente a actualizar como argumento.");
+      // System.exit(1);
     }
 
     // 1. Configurar la aplicación obteniendo una instancia lista para usar.

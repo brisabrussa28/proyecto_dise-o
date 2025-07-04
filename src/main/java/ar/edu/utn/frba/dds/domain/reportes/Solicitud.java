@@ -63,17 +63,23 @@ public class Solicitud {
 
   /**
    * Si no modifico equals y hassCode no puede comparar solicitudes
+   *
    * @param o
    * @return
    */
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
     Solicitud solicitud = (Solicitud) o;
-    return Objects.equals(solicitante, solicitud.solicitante) &&
-        Objects.equals(hechoSolicitado, solicitud.hechoSolicitado) &&
-        Objects.equals(razonEliminacion, solicitud.razonEliminacion);
+    return Objects.equals(solicitante, solicitud.solicitante)
+        && Objects.equals(hechoSolicitado, solicitud.hechoSolicitado)
+        && Objects.equals(razonEliminacion, solicitud.razonEliminacion);
   }
 
   @Override

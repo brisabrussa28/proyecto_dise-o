@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.reportes;
 
-public enum Aceptar_Solicitud {
+public enum AceptarSolicitud {
   ACEPTAR,
   RECHAZAR
 }

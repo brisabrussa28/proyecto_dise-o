@@ -20,13 +20,9 @@ public class FuenteEstatica implements Fuente {
    * @param rutaCsv   Ruta del archivo CSV que contiene los datos.
    * @param lectorCSV Carácter separador utilizado en el CSV.
    */
-  public FuenteEstatica(
-      String nombre,
-      String rutaCsv,
-      LectorCSV lectorCSV
-  ) {
+  public FuenteEstatica(String nombre, String rutaCsv, LectorCSV lectorCSV) {
     this.validarFuente(nombre);
-    this.nombre = nombre;// no carga los hechos en el constructor
+    this.nombre = nombre; // no carga los hechos en el constructor
     if (rutaCsv == null || lectorCSV == null) {
       throw new IllegalArgumentException("Ruta y lector deben estar definidos");
     }
@@ -44,5 +40,7 @@ public class FuenteEstatica implements Fuente {
     return lectorCSV.importar(rutaCsv);
   }
 
-  public String getNombre() { return nombre;}
+  public String getNombre() {
+    return nombre;
+  }
 }

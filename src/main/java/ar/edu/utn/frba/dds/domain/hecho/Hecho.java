@@ -233,15 +233,19 @@ public class Hecho {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     Hecho hecho = (Hecho) o;
-    return Objects.equals(titulo, hecho.titulo) &&
-        Objects.equals(descripcion, hecho.descripcion) &&
-        Objects.equals(categoria, hecho.categoria) &&
-        Objects.equals(direccion, hecho.direccion) &&
-        Objects.equals(ubicacion, hecho.ubicacion) &&
-        Objects.equals(fechaSuceso, hecho.fechaSuceso);
+    return Objects.equals(titulo, hecho.titulo)
+        && Objects.equals(descripcion, hecho.descripcion)
+        && Objects.equals(categoria, hecho.categoria)
+        && Objects.equals(direccion, hecho.direccion)
+        && Objects.equals(ubicacion, hecho.ubicacion)
+        && Objects.equals(fechaSuceso, hecho.fechaSuceso);
   }
 
   @Override

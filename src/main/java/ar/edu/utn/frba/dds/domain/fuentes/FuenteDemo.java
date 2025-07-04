@@ -4,7 +4,6 @@ import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

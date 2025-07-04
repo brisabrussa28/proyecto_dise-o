@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Provee utilidades para guardar y cargar listas de objetos de cualquier tipo en un archivo JSON local.
+ * Provee utilidades para guardar y cargar listas de objetos de cualquier tipo en un
+ * archivo JSON local.
  * Esta clase no mantiene una copia de los objetos en memoria; siempre opera directamente
  * con el archivo JSON provisto.
  */
@@ -50,13 +51,13 @@ public class ServicioDeCopiasLocales {
   }
 
   /**
-   * Lee el archivo JSON local y convierte su contenido en una lista de objetos de cualquier tipo.
-   *
-   * @param <T>           Tipo de los objetos en la lista.
-   * @param typeReference Referencia de tipo que especifica el tipo completo de la lista a deserializar.
-   * @return Una lista de objetos leídos del archivo JSON, o una lista vacía si el archivo no existe,
-   *         está vacío o si ocurre un error de lectura/sintaxis.
-   */
+  * Lee el archivo JSON local y convierte su contenido en una lista de objetos de cualquier tipo.
+  *
+  * @param <T>           Tipo de los objetos en la lista.
+  * @param typeReference Referencia de tipo, especifica tipo completo de la lista a deserializar.
+  * @return Una lista de objetos leídos del archivo JSON, o una lista vacía si el archivo no existe,
+  *     está vacío o si ocurre un error de lectura/sintaxis.
+  */
   public <T> List<T> cargarCopiaLocalJson(TypeReference<List<T>> typeReference) {
     File jsonFile = new File(jsonFilePath);
     if (!jsonFile.exists() || jsonFile.length() == 0) {
@@ -77,10 +78,30 @@ public class ServicioDeCopiasLocales {
   }
 
   /**
-   * Obtiene la ruta del archivo JSON utilizado por este servicio.
-   *
-   * @return La ruta del archivo JSON.
-   */
+  * Guarda una copia local de una lista de objetos Hecho en formato JSON.
+  *
+  * @param hechos Lista de objetos Hecho a guardar.
+  */
+  public void guardarCopiaHechos(List<Hecho> hechos) {
+    guardarCopiaLocalJson(hechos); //misplaced method.
+  }
+
+  /**
+  * Lee el archivo JSON local y convierte su contenido en una lista de objetos Hecho.
+  *
+  * @return Una lista de objetos leídos del archivo JSON, o una lista vacía si el archivo no existe,
+  *     está vacío o si ocurre un error de lectura/sintaxis.
+  */
+  public List<Hecho> cargarCopiaHechos() {
+    return cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {
+    });
+  }
+
+  /**
+  * Obtiene la ruta del archivo JSON utilizado por este servicio.
+  *
+  * @return La ruta del archivo JSON.
+  */
   public String getJsonFilePath() {
     return jsonFilePath;
   }

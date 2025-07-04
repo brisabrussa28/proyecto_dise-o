@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.coleccion;
 
-import ar.edu.utn.frba.dds.domain.AlgoritmosConcenso.AlgoritmoDeConcenso;
+import ar.edu.utn.frba.dds.domain.algoritmosconcenso.AlgoritmoDeConcenso;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroIdentidad;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
