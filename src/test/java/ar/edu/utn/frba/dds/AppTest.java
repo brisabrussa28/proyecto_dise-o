@@ -122,7 +122,10 @@ public class AppTest {
         registeredSources.containsKey("agregadora_principal"),
         "Debería contener 'agregadora_principal'."
     );
-    //assertTrue(registeredSources.containsKey("fuente_externa_demo"), "Debería contener 'fuente_externa_demo'.");
+    assertTrue(
+        registeredSources.containsKey("dinamica_principal"), "Debería contener " +
+            "'dinamica_principal'."
+    );
   }
 
   @Test

@@ -7,8 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Punto de entrada para ejecutar actualizaciones de fuentes desde una tarea programada.
- * Actúa como un orquestador que se configura y luego ejecuta una tarea específica.
+ * Punto de entrada para nuestro crontab.
  */
 public class App {
 
@@ -35,14 +34,9 @@ public class App {
     FuenteCacheable fuenteAActualizar = fuentesRegistradas.get(nombreFuente);
 
     if (fuenteAActualizar != null) {
-      //System.out.println("Iniciando actualización para la fuente: " + nombreFuente);
       fuenteAActualizar.forzarActualizacionSincrona();
-      //System.out.println("Actualización para " + nombreFuente + " completada.");
     } else {
-      //System.err.println("Error: No se encontró una fuente registrada con el nombre '" + nombreFuente + "'.");
-      //System.err.println("Fuentes disponibles: " + fuentesRegistradas.keySet());
       throw new IllegalStateException("Error al actualizar...");
-      //System.exit(1);
     }
   }
 
@@ -55,9 +49,7 @@ public class App {
   public static App configurarAplicacion() {
     App aplicacion = new App();
     // --- Bloque de Configuración de Fuentes ---
-    // Para agregar una nueva fuente, hágalo aquí.
 
-    // 1. Crear y registrar la fuente de agregación.
     FuenteDeAgregacion agregadora = new FuenteDeAgregacion(
         "agregadora_principal",
         "agregados.json"
@@ -66,16 +58,12 @@ public class App {
 
     FuenteDinamica dinamica = new FuenteDinamica("dinamica_principal", "dinamica.json");
     aplicacion.registrarFuente(dinamica);
-    // 3. (Ejemplo) Crear y registrar otra fuente si existiera.
-    // FuenteEstatica estatica = new FuenteEstatica("fuente_estatica_csv", "datos/hechos.csv", new LectorCSV());
-    // aplicacion.registrarFuente(estatica);
 
     return aplicacion;
   }
 
   /**
-   * El método main que será ejecutado por el Programador de Tareas o Crontab.
-   * Su responsabilidad es configurar la app y luego ejecutar la tarea.
+   * Esto ejecuta el crontab periodicamente.
    *
    * @param args Argumentos de la línea de comandos. Se espera el nombre de la fuente a actualizar.
    */
@@ -83,14 +71,10 @@ public class App {
     if (args.length == 0) {
       throw new IllegalStateException(
           "Error: Se requiere el nombre de la fuente a actualizar como argumento.");
-      // System.err.println("Error: Se requiere el nombre de la fuente a actualizar como argumento.");
-      // System.exit(1);
     }
 
-    // 1. Configurar la aplicación obteniendo una instancia lista para usar.
     App aplicacion = configurarAplicacion();
 
-    // 2. Ejecución: Usar el primer argumento para decidir qué fuente actualizar.
     String nombreFuenteAActualizar = args[0];
     aplicacion.ejecutarActualizacion(nombreFuenteAActualizar);
   }
