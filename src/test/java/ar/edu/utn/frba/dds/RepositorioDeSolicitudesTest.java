@@ -84,14 +84,8 @@ public class RepositorioDeSolicitudesTest {
   public void gestionarSolicitudInexistenteLanzaExcepcion() {
     Solicitud solicitudFalsa = mock(Solicitud.class);
     assertThrows(
-        SolicitudInexistenteException.class, () -> repositorio.gestionarSolicitud(solicitudFalsa, AceptarSolicitud.ACEPTAR)
-    );
-  }
-
-  @Test
-  public void marcarComoEliminadoNullLanzaExcepcion() {
-    assertThrows(
-        NullPointerException.class, () -> repositorio.marcarComoEliminado(null)
+        SolicitudInexistenteException.class,
+        () -> repositorio.gestionarSolicitud(solicitudFalsa, AceptarSolicitud.ACEPTAR)
     );
   }
 
@@ -105,14 +99,34 @@ public class RepositorioDeSolicitudesTest {
 
   @Test
   public void filtroExcluyenteNoIncluyeHechosEliminados() {
-    Hecho hecho1 = new Hecho("t1", "d1", "c1", "dir1", pg, hora, hora, Origen.PROVISTO_CONTRIBUYENTE, etiquetas);
-    Hecho hecho2 = new Hecho("t2", "d2", "c2", "dir2", pg, hora, hora, Origen.PROVISTO_CONTRIBUYENTE, etiquetas);
+    Hecho hecho1 = new Hecho(
+        "t1",
+        "d1",
+        "c1",
+        "dir1",
+        pg,
+        hora,
+        hora,
+        Origen.PROVISTO_CONTRIBUYENTE,
+        etiquetas
+    );
+    Hecho hecho2 = new Hecho(
+        "t2",
+        "d2",
+        "c2",
+        "dir2",
+        pg,
+        hora,
+        hora,
+        Origen.PROVISTO_CONTRIBUYENTE,
+        etiquetas
+    );
 
     repositorio.marcarComoEliminado(hecho1);
 
     List<Hecho> hechos = List.of(hecho1, hecho2);
     List<Hecho> filtrados = repositorio.filtroExcluyente()
-                                       .filtrar(hechos);
+        .filtrar(hechos);
 
     assertFalse(filtrados.contains(hecho1));
     assertTrue(filtrados.contains(hecho2));

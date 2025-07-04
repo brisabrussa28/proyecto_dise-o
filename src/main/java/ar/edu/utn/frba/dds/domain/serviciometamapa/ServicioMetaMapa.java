@@ -66,8 +66,7 @@ public class ServicioMetaMapa {
     );
     Response<List<Hecho>> listadoDeHechosResponse = requestListadoDeHechos.execute();
     List<Hecho> listadoDeHechos = listadoDeHechosResponse.body();
-
-    // Ensure the returned object is not null
+    
     if (listadoDeHechos == null) {
       listadoDeHechos = new ArrayList<>();
     }

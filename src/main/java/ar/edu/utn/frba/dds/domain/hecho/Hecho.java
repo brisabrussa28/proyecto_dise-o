@@ -41,15 +41,15 @@ public class Hecho {
   /**
    * Constructor completo.
    *
-   * @param titulo           string
-   * @param descripcion      string
-   * @param categoria        string
-   * @param direccion        string
-   * @param ubicacion        PuntoGeografico
-   * @param fechaSuceso      LocalDateTime
-   * @param fechaCarga       LocalDateTime
-   * @param fuenteOrigen     Origen
-   * @param etiquetas        List
+   * @param titulo       string
+   * @param descripcion  string
+   * @param categoria    string
+   * @param direccion    string
+   * @param ubicacion    PuntoGeografico
+   * @param fechaSuceso  LocalDateTime
+   * @param fechaCarga   LocalDateTime
+   * @param fuenteOrigen Origen
+   * @param etiquetas    List
    */
   public Hecho(
       String titulo,
@@ -80,6 +80,7 @@ public class Hecho {
     this.fuenteOrigen = fuenteOrigen;
     this.etiquetas = new ArrayList<>(etiquetas);
     this.id = UUID.randomUUID();
+    this.estado = Estado.ORIGINAL;
   }
 
 
@@ -189,8 +190,7 @@ public class Hecho {
    * @return true si el hecho es editable por el usuario, false en caso contrario
    */
   public boolean esEditable() {
-    LocalDateTime hoy = LocalDateTime.now();
-    return hoy.isBefore(fechaCarga.plusWeeks(1));
+    return LocalDateTime.now().isBefore(fechaCarga.plusWeeks(1));
   }
 
 
@@ -248,7 +248,7 @@ public class Hecho {
         this.etiquetas
     );
     clonHecho.setId(this.id);
-    return  clonHecho;
+    return clonHecho;
   }
 
   /**
@@ -256,10 +256,15 @@ public class Hecho {
    * Permite cambiar el título, descripción, categoría, dirección, ubicación,
    * etiquetas y fecha de suceso del hecho si el usuario tiene permisos para editarlo.
    *
-   * @param hecho Hecho
+   * @param titulo      String
+   * @param descripcion String
+   * @param categoria   String
+   * @param direccion   String
+   * @param ubicacion   PuntoGeografico
+   * @param etiquetas   List
+   * @param fechaSuceso LocalDateTime
    */
   public void editarHecho(
-      Hecho hecho,
       String titulo,
       String descripcion,
       String categoria,
@@ -268,31 +273,31 @@ public class Hecho {
       List<String> etiquetas,
       LocalDateTime fechaSuceso
   ) {
-    if (LocalDateTime.now().isAfter(hecho.getFechaCarga().plusWeeks(1))) {
+    if (!this.esEditable()) {
       throw new RuntimeException("Flaco, te pasaste una semana");
     } else {
       if (titulo != null) {
-        hecho.setTitulo(titulo);
+        this.setTitulo(titulo);
       }
       if (descripcion != null) {
-        hecho.setDescripcion(descripcion);
+        this.setDescripcion(descripcion);
       }
       if (categoria != null) {
-        hecho.setCategoria(categoria);
+        this.setCategoria(categoria);
       }
       if (direccion != null) {
-        hecho.setDireccion(direccion);
+        this.setDireccion(direccion);
       }
       if (ubicacion != null) {
-        hecho.setUbicacion(ubicacion);
+        this.setUbicacion(ubicacion);
       }
       if (etiquetas != null) {
-        hecho.setEtiquetas(etiquetas);
+        this.setEtiquetas(etiquetas);
       }
       if (fechaSuceso != null) {
-        hecho.setFechaSuceso(fechaSuceso);
+        this.setFechaSuceso(fechaSuceso);
       }
-      hecho.setEstado(Estado.EDITADO);
+      this.setEstado(Estado.EDITADO);
     }
   }
 

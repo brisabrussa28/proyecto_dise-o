@@ -2,13 +2,12 @@ package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ar.edu.utn.frba.dds.domain.filtro.FiltroIgualHecho;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
+import ar.edu.utn.frba.dds.domain.hecho.Estado;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
@@ -28,15 +27,15 @@ public class HechoTest {
     LocalDateTime fechaCarga = LocalDateTime.now(); // Se añade fechaCarga para el constructor de Hecho
 
     Hecho hecho = new Hecho( // Se crea el Hecho directamente con el constructor
-        "Robo",
-        "Robo a mano armada",
-        "DELITO",
-        "Calle falsa 123",
-        ubicacion,
-        fechaSuceso,
-        fechaCarga, // Se pasa la fecha de carga
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetas
+                             "Robo",
+                             "Robo a mano armada",
+                             "DELITO",
+                             "Calle falsa 123",
+                             ubicacion,
+                             fechaSuceso,
+                             fechaCarga, // Se pasa la fecha de carga
+                             Origen.PROVISTO_CONTRIBUYENTE,
+                             etiquetas
     );
 
     assertEquals("Robo", hecho.getTitulo());
@@ -228,7 +227,7 @@ public class HechoTest {
         "desc",
         "cat",
         "dir",
-        new PuntoGeografico(1,1),
+        new PuntoGeografico(1, 1),
         hace3Dias,
         hace3Dias,
         Origen.DATASET,
@@ -246,14 +245,39 @@ public class HechoTest {
         "desc",
         "cat",
         "dir",
-        new PuntoGeografico(1,1),
+        new PuntoGeografico(1, 1),
         hace10Dias,
         hace10Dias,
         Origen.DATASET,
         List.of("etiqueta")
     );
 
-    assertFalse(hecho.esEditable(), "El hecho NO debería ser editable después de una semana");
+    assertThrows(
+        RuntimeException.class,
+        () -> hecho.editarHecho("Hola", null, null, null, null, null, null)
+    );
+    assertEquals(Estado.ORIGINAL, hecho.getEstado());
+  }
+
+  @Test
+  public void ahoraSiPuedoEditarElHechoPorqueEstoyDentroDelPlazo() {
+    LocalDateTime hace2Dias = LocalDateTime.now().minusDays(2);
+    Hecho hecho = new Hecho(
+        "titulo",
+        "desc",
+        "cat",
+        "dir",
+        new PuntoGeografico(1, 1),
+        hace2Dias,
+        hace2Dias,
+        Origen.DATASET,
+        List.of("#ETIQUETA")
+    );
+
+    hecho.editarHecho("Hola", null, null, null, null, null, null);
+
+    assertEquals("Hola", hecho.getTitulo());
+    assertEquals(Estado.EDITADO, hecho.getEstado());
   }
 
 }

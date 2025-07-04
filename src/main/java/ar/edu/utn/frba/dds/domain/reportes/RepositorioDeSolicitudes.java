@@ -33,7 +33,9 @@ public class RepositorioDeSolicitudes {
    * Si la razón de eliminación es spam, no se agrega.
    */
   public void agregarSolicitud(UUID id, Hecho hecho, String motivo) {
-
+    
+    //TODO: definir si conviene que desde el repositorio de solicitudes se cree una solicitud y se agregue o que simplemente reciba por parametro una solicitud y simplemente la agregue.
+    //Mas que nada porque se esta validando algo que ya se esta validando en el constructor de Solicitud.
     if (hecho == null || motivo == null || motivo.isBlank()) {
       throw new IllegalArgumentException("Hecho y motivo deben estar definidos");
     }
@@ -90,9 +92,6 @@ public class RepositorioDeSolicitudes {
    * @param hecho Hecho a marcar como eliminado
    */
   public void marcarComoEliminado(Hecho hecho) {
-    if (hecho == null) {
-      throw new NullPointerException("Hecho no puede ser null");
-    }
     hechosEliminados.add(hecho);
   }
 
@@ -116,8 +115,8 @@ public class RepositorioDeSolicitudes {
       @Override
       public List<Hecho> filtrar(List<Hecho> hechos) {
         return hechos.stream()
-                     .filter(h -> !hechosEliminados.contains(h))
-                     .toList();
+            .filter(h -> !hechosEliminados.contains(h))
+            .toList();
       }
     };
   }

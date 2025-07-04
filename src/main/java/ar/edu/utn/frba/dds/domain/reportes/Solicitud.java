@@ -22,15 +22,6 @@ public class Solicitud {
    * @param motivo          Razón de la eliminación
    */
   public Solicitud(UUID solicitante, Hecho hechoSolicitado, String motivo) {
-    if (solicitante == null) {
-      throw new NullPointerException("El solicitante no puede ser null");
-    }
-    if (hechoSolicitado == null) {
-      throw new NullPointerException("El hecho solicitado no puede ser null");
-    }
-    if (motivo == null) {
-      throw new RazonInvalidaException("El motivo no puede ser null");
-    }
     this.validarMotivo(motivo);
     this.solicitante = solicitante;
     this.hechoSolicitado = hechoSolicitado.copiar();
