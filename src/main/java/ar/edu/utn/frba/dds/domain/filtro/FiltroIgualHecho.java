@@ -10,7 +10,7 @@ public class FiltroIgualHecho implements Filtro {
   private final Hecho hecho;
 
   public FiltroIgualHecho(Hecho hecho) {
-    this.hecho = hecho;
+    this.hecho = hecho.copiar();
   }
 
   @Override

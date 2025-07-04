@@ -236,6 +236,22 @@ public class Hecho {
     this.fechaCarga = fechaCarga;
   }
 
+  public Hecho copiar() {
+    Hecho clonHecho = new Hecho(
+        this.titulo,
+        this.descripcion,
+        this.categoria,
+        this.direccion,
+        this.ubicacion,
+        this.fechaSuceso,
+        this.fechaCarga,
+        this.fuenteOrigen,
+        this.etiquetas
+    );
+    clonHecho.setId(this.id);
+    return  clonHecho;
+  }
+
   // Anotación para mapear la propiedad JSON "origen" al setter de 'fuenteOrigen'
   @JsonProperty("origen")
   public void setFuenteOrigen(Origen fuenteOrigen) {

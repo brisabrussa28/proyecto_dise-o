@@ -33,12 +33,12 @@ public class Solicitud {
     }
     this.validarMotivo(motivo);
     this.solicitante = solicitante;
-    this.hechoSolicitado = hechoSolicitado;
+    this.hechoSolicitado = hechoSolicitado.copiar();
     this.razonEliminacion = motivo;
   }
 
   public Hecho getHechoSolicitado() {
-    return hechoSolicitado;
+    return hechoSolicitado.copiar();
   }
 
   public String getRazonEliminacion() {
