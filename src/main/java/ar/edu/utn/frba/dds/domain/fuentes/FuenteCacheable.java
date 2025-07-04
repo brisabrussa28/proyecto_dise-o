@@ -22,7 +22,8 @@ public abstract class FuenteCacheable implements Fuente {
     this.nombre = nombre;
     this.servicioDeCopiasLocales = new ServicioDeCopiasLocales(jsonFilePathParaCopias);
     this.cacheDeHechos = this.servicioDeCopiasLocales
-        .cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {});
+        .cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {
+        });
   }
 
   protected abstract List<Hecho> consultarNuevosHechos();
@@ -33,8 +34,8 @@ public abstract class FuenteCacheable implements Fuente {
   }
 
   /**
-   * Orquesta el proceso de actualización de forma síncrona.
-   * Este es el método que será llamado por el proceso externo (ej. Crontab).
+   * Actualizamos la fuente de forma sincronica.
+   * Este es el método que llamamos desde el crontab.
    */
   public void forzarActualizacionSincrona() {
     try {
@@ -42,8 +43,10 @@ public abstract class FuenteCacheable implements Fuente {
       this.cacheDeHechos = nuevosHechos;
       this.servicioDeCopiasLocales.guardarCopiaLocalJson(this.cacheDeHechos);
     } catch (Exception e) {
-      throw new RuntimeException("Error durante la actualización de la caché para "
-          + this.getClass().getSimpleName(), e);
+      throw new RuntimeException(
+          "Error durante la actualización de la caché para "
+              + this.getClass().getSimpleName(), e
+      );
     }
   }
 

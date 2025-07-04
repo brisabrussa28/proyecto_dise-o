@@ -115,7 +115,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        ar.edu.utn.frba.dds.domain.calendarizacion.app
+                                        ar.edu.utn.frba.dds.domain.calendarizacion.App
                                     </mainClass>
                                 </manifest>
                             </archive>

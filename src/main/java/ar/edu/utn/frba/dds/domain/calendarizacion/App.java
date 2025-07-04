@@ -1,11 +1,8 @@
 package ar.edu.utn.frba.dds.domain.calendarizacion;
 
-import ar.edu.utn.frba.dds.domain.fuentes.Conexion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteCacheable;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDemo;
-import java.net.MalformedURLException;
-import java.net.URL;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,33 +54,21 @@ public class App {
    */
   public static App configurarAplicacion() {
     App aplicacion = new App();
+    // --- Bloque de Configuración de Fuentes ---
+    // Para agregar una nueva fuente, hágalo aquí.
 
-    try {
-      // --- Bloque de Configuración de Fuentes ---
-      // Para agregar una nueva fuente, hágalo aquí.
+    // 1. Crear y registrar la fuente de agregación.
+    FuenteDeAgregacion agregadora = new FuenteDeAgregacion(
+        "agregadora_principal",
+        "agregados.json"
+    );
+    aplicacion.registrarFuente(agregadora);
 
-      // 1. Crear y registrar la fuente de agregación.
-      FuenteDeAgregacion agregadora = new FuenteDeAgregacion(
-          "agregadora_principal",
-          "copias/agregados.json"
-      );
-      aplicacion.registrarFuente(agregadora);
-
-      // 2. Crear y registrar la fuente demo externa.
-      URL url = new URL("http://localhost:8080/hechos");
-      Conexion conexion = new Conexion(); // Se asume que esta clase existe
-      FuenteDemo demo = new FuenteDemo("fuente_externa_demo", url, conexion, "copias/demo.json");
-      aplicacion.registrarFuente(demo);
-
-      // 3. (Ejemplo) Crear y registrar otra fuente si existiera.
-      // FuenteEstatica estatica = new FuenteEstatica("fuente_estatica_csv", "datos/hechos.csv", new LectorCSV());
-      // aplicacion.registrarFuente(estatica);
-
-    } catch (MalformedURLException e) {
-      throw new IllegalStateException("Error fatal en la configuración: La URL de una fuente es inválida. " + e.getMessage());
-      // System.err.println("Error fatal en la configuración: La URL de una fuente es inválida. " + e.getMessage());
-      //System.exit(1);
-    }
+    FuenteDinamica dinamica = new FuenteDinamica("dinamica_principal", "dinamica.json");
+    aplicacion.registrarFuente(dinamica);
+    // 3. (Ejemplo) Crear y registrar otra fuente si existiera.
+    // FuenteEstatica estatica = new FuenteEstatica("fuente_estatica_csv", "datos/hechos.csv", new LectorCSV());
+    // aplicacion.registrarFuente(estatica);
 
     return aplicacion;
   }
@@ -96,7 +81,8 @@ public class App {
    */
   public static void main(String[] args) {
     if (args.length == 0) {
-      throw new IllegalStateException("Error: Se requiere el nombre de la fuente a actualizar como argumento.");
+      throw new IllegalStateException(
+          "Error: Se requiere el nombre de la fuente a actualizar como argumento.");
       // System.err.println("Error: Se requiere el nombre de la fuente a actualizar como argumento.");
       // System.exit(1);
     }
