@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.calendarizacion.App;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteCacheable;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeCopiaLocal;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,14 +26,14 @@ import org.junit.jupiter.api.Test;
 public class AppTest {
 
   private App app;
-  private FuenteCacheable mockFuente;
+  private FuenteDeCopiaLocal mockFuente;
   private final String testFuenteName = "TestFuente";
   private static final Path COPIAS_DIR = Paths.get("copias");
 
   @BeforeEach
   void setUp() {
     app = new App();
-    mockFuente = mock(FuenteCacheable.class);
+    mockFuente = mock(FuenteDeCopiaLocal.class);
     when(mockFuente.getNombre()).thenReturn(testFuenteName);
 
     try {
@@ -68,7 +68,7 @@ public class AppTest {
   @DisplayName("Una fuente puede ser registrada correctamente")
   void registrarFuenteCorrectamente() {
     app.registrarFuente(mockFuente);
-    Map<String, FuenteCacheable> fuentes = app.getFuentesRegistradas();
+    Map<String, FuenteDeCopiaLocal> fuentes = app.getFuentesRegistradas();
 
     assertNotNull(fuentes, "El mapa de fuentes no debería ser nulo.");
     assertEquals(1, fuentes.size(), "El tamaño del mapa debería ser 1.");
@@ -87,7 +87,7 @@ public class AppTest {
   @DisplayName("Registrar una fuente nula no debe agregarla ni lanzar excepción")
   void registrarFuenteNula() {
     app.registrarFuente(null);
-    Map<String, FuenteCacheable> fuentes = app.getFuentesRegistradas();
+    Map<String, FuenteDeCopiaLocal> fuentes = app.getFuentesRegistradas();
 
     assertNotNull(fuentes, "El mapa de fuentes no debería ser nulo.");
     assertTrue(fuentes.isEmpty(), "El mapa de fuentes debería estar vacío.");
@@ -115,7 +115,7 @@ public class AppTest {
     App configuredApp = App.configurarAplicacion();
     assertNotNull(configuredApp, "La aplicación configurada no debería ser nula.");
 
-    Map<String, FuenteCacheable> registeredSources = configuredApp.getFuentesRegistradas();
+    Map<String, FuenteDeCopiaLocal> registeredSources = configuredApp.getFuentesRegistradas();
 
     assertEquals(2, registeredSources.size(), "Deberían registrarse 2 fuentes por defecto.");
     assertTrue(

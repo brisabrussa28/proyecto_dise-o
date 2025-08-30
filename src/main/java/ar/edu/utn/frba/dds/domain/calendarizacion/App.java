@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.calendarizacion;
 
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteCacheable;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
@@ -17,14 +17,14 @@ import java.util.Map;
 public class App {
 
   // El registro de fuentes ahora es una variable de instancia, no estática.
-  private final Map<String, FuenteCacheable> fuentesRegistradas = new HashMap<>();
+  private final Map<String, FuenteDeCopiaLocal> fuentesRegistradas = new HashMap<>();
 
   /**
    * Registra una nueva fuente cacheable para que pueda ser actualizada por esta aplicación.
    *
    * @param fuente La instancia de la fuente a registrar.
    */
-  public void registrarFuente(FuenteCacheable fuente) {
+  public void registrarFuente(FuenteDeCopiaLocal fuente) {
     if (fuente != null) {
       this.fuentesRegistradas.put(fuente.getNombre(), fuente);
     }
@@ -35,17 +35,32 @@ public class App {
    *
    * @param nombreFuente El nombre de la fuente a actualizar.
    */
-
+// no se si dejarlo pero creo que debriamos borrarlo
   public void ejecutarActualizacion(String nombreFuente) {
-    FuenteCacheable fuenteAActualizar = fuentesRegistradas.get(nombreFuente);
+    FuenteDeCopiaLocal fuenteAActualizar = fuentesRegistradas.get(nombreFuente);
 
     if (fuenteAActualizar != null) {
       fuenteAActualizar.forzarActualizacionSincrona();
-      System.out.println("Se actualizo la fuente " + nombreFuente + " y se le agrego un hecho.");
-    } else {
+      }
+    //agregar log
+    else {
       throw new IllegalStateException("Error al actualizar...");
     }
   }
+
+  /**
+   * Ejecuta la actualización para una todas las fuentes.
+   *
+   */
+  public void ejecutarActualizacionTodasLasFuentes() {
+    fuentesRegistradas.values().forEach(fuente -> {
+      fuente.forzarActualizacionSincrona();
+      // agregar log
+    });
+  }
+
+  // TODO: Aca dice que podriamos poner un try catch, ustds lo pondrian dentro del forEach o afuera?
+
 
   /**
    * Configura la aplicación creando y registrando todas las fuentes disponibles.
@@ -96,11 +111,10 @@ public class App {
 
     App aplicacion = configurarAplicacion();
 
-    String nombreFuenteAActualizar = args[0];
-    aplicacion.ejecutarActualizacion(nombreFuenteAActualizar);
+    aplicacion.ejecutarActualizacionTodasLasFuentes();
   }
 
-  public Map<String, FuenteCacheable> getFuentesRegistradas() {
+  public Map<String, FuenteDeCopiaLocal> getFuentesRegistradas() {
     // Retorna una copia para evitar modificaciones externas
     return new HashMap<>(fuentesRegistradas);
   }

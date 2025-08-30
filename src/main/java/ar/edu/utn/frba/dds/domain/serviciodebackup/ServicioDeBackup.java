@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serviciodecopiaslocales;
+package ar.edu.utn.frba.dds.domain.serviciodebackup;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ServicioDeCopiasLocales {
+public class ServicioDeBackup {
 
-  private static final Logger LOGGER = Logger.getLogger(ServicioDeCopiasLocales.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(ServicioDeBackup.class.getName());
   private final String jsonFilePath;
   private final ObjectMapper objectMapper;
 
-  public ServicioDeCopiasLocales(String jsonFilePath) {
+  public ServicioDeBackup(String jsonFilePath) {
     this.jsonFilePath = jsonFilePath;
     this.objectMapper = new ObjectMapper();
     this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);

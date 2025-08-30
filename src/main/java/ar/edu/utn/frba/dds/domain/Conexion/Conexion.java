@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.fuentes;
+package ar.edu.utn.frba.dds.domain.Conexion;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Conexion {
+
+  //todo: se que es una paja pero si vamos a hacer esto hagamos un wrapper que podamos utilizar en todos lados para consultas api
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   public Map<String, Object> siguienteHecho(URL url, LocalDateTime fechaUltimaConsulta) {

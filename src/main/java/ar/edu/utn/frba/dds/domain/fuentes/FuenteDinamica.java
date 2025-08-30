@@ -9,7 +9,7 @@ import java.util.List;
  * Clase fuente dinámica.
  * Ahora extiende FuenteCacheable para soportar copias de seguridad en JSON.
  */
-public class FuenteDinamica extends FuenteCacheable { // Cambiado para extender FuenteCacheable
+public class FuenteDinamica extends FuenteDeCopiaLocal { // Cambiado para extender FuenteCacheable
 
   // Los hechos ahora se gestionan a través de cacheDeHechos en FuenteCacheable
 
@@ -31,7 +31,7 @@ public class FuenteDinamica extends FuenteCacheable { // Cambiado para extender 
    */
   public void agregarHecho(Hecho hecho) {
     this.cacheDeHechos.add(hecho); // Usa cacheDeHechos de FuenteCacheable
-    this.servicioDeCopiasLocales.guardarCopiaLocalJson(this.cacheDeHechos); // Guarda inmediatamente
+    this.servicioDeBackup.guardarCopiaLocalJson(this.cacheDeHechos); // Guarda inmediatamente
   }
 
 

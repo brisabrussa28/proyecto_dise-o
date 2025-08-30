@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
+import ar.edu.utn.frba.dds.domain.Conexion.Conexion;
 import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class FuenteDemo extends FuenteCacheable {
+public class FuenteDemo extends FuenteDeCopiaLocal {
 
   private final Conexion conexion;
   private final URL url;

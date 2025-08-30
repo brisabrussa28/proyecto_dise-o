@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FuenteDeAgregacion extends FuenteCacheable {
+public class FuenteDeAgregacion extends FuenteDeCopiaLocal {
 
   private final List<Fuente> fuentesCargadas;
 

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.serviciodecopiaslocales.ServicioDeCopiasLocales;
+import ar.edu.utn.frba.dds.domain.serviciodebackup.ServicioDeBackup;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.IOException;
@@ -18,15 +18,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ServicioDeCopiasLocalesTest {
+public class ServicioDeBackupTest {
 
-  private ServicioDeCopiasLocales servicio;
+  private ServicioDeBackup servicio;
   private Path tempJsonFilePath;
 
   @BeforeEach
   void setUp() throws IOException {
     tempJsonFilePath = Files.createTempFile("test_copias_locales", ".json");
-    servicio = new ServicioDeCopiasLocales(tempJsonFilePath.toString());
+    servicio = new ServicioDeBackup(tempJsonFilePath.toString());
   }
 
   @AfterEach

@@ -2,7 +2,7 @@ package ar.edu.utn.frba.dds.domain.fuentes;
 
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serviciodecopiaslocales.ServicioDeCopiasLocales;
+import ar.edu.utn.frba.dds.domain.serviciodebackup.ServicioDeBackup;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 
@@ -11,17 +11,17 @@ import java.util.List;
  * Ya NO maneja su propia programación de tareas. Su actualización debe ser
  * invocada desde un proceso externo.
  */
-public abstract class FuenteCacheable implements Fuente {
+public abstract class FuenteDeCopiaLocal implements Fuente {
 
   protected final String nombre;
   protected List<Hecho> cacheDeHechos;
-  protected final ServicioDeCopiasLocales servicioDeCopiasLocales;
+  protected final ServicioDeBackup servicioDeBackup;
 
-  public FuenteCacheable(String nombre, String jsonFilePathParaCopias) {
+  public FuenteDeCopiaLocal(String nombre, String jsonFilePathParaCopias) {
     this.validarFuente(nombre);
     this.nombre = nombre;
-    this.servicioDeCopiasLocales = new ServicioDeCopiasLocales(jsonFilePathParaCopias);
-    this.cacheDeHechos = this.servicioDeCopiasLocales
+    this.servicioDeBackup = new ServicioDeBackup(jsonFilePathParaCopias);
+    this.cacheDeHechos = this.servicioDeBackup
         .cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {
         });
   }
@@ -38,16 +38,9 @@ public abstract class FuenteCacheable implements Fuente {
    * Este es el método que llamamos desde el crontab.
    */
   public void forzarActualizacionSincrona() {
-    try {
-      List<Hecho> nuevosHechos = this.consultarNuevosHechos();
-      this.cacheDeHechos = nuevosHechos;
-      this.servicioDeCopiasLocales.guardarCopiaLocalJson(this.cacheDeHechos);
-    } catch (Exception e) {
-      throw new RuntimeException(
-          "Error durante la actualización de la caché para "
-              + this.getClass().getSimpleName(), e
-      );
-    }
+    List<Hecho> nuevosHechos = this.consultarNuevosHechos();
+    this.cacheDeHechos = nuevosHechos;
+    this.servicioDeBackup.guardarCopiaLocalJson(this.cacheDeHechos);
   }
 
   public String getNombre() {
