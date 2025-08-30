@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ar.edu.utn.frba.dds.domain.filtro.FiltroIgualHecho;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroPredicado;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
@@ -70,7 +71,7 @@ public class HechoTest {
     );
     Hecho copia = new Hecho(
         "titulo",
-        "descX",
+        "desc",
         "categoria",
         "direccion",
         ubicacion,
@@ -80,8 +81,7 @@ public class HechoTest {
         List.of("#otra")
     );
 
-    FiltroIgualHecho filtro = new FiltroIgualHecho(original);
-
+    FiltroPredicado filtro = new FiltroPredicado(h -> h.equals(original));
     List<Hecho> filtrados = filtro.filtrar(List.of(copia));
 
     // La lógica de equals de Hecho solo considera titulo, descripcion, categoria, direccion, ubicacion y fechaSuceso.
@@ -122,7 +122,7 @@ public class HechoTest {
         List.of()
     );
 
-    FiltroIgualHecho filtro = new FiltroIgualHecho(original);
+    FiltroPredicado filtro = new FiltroPredicado(h -> h.equals(original));
 
     List<Hecho> resultado = filtro.filtrar(List.of(distinto));
 

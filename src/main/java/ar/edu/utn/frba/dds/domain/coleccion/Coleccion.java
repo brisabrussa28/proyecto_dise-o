@@ -2,8 +2,8 @@ package ar.edu.utn.frba.dds.domain.coleccion;
 
 import ar.edu.utn.frba.dds.domain.algoritmosconsenso.AlgoritmoDeConsenso;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroIdentidad;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroPredicado;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
@@ -32,6 +32,7 @@ public class Coleccion {
    * @param descripcion Descripción de la colección.
    * @param categoria   Categoría de la colección.
    */
+  @SuppressWarnings("checkstyle:ParenPad")
   public Coleccion(
       String titulo,
       Fuente fuente,
@@ -54,7 +55,7 @@ public class Coleccion {
     this.fuente = fuente;
     this.descripcion = descripcion;
     this.categoria = categoria;
-    this.filtro = new FiltroIdentidad();
+    this.filtro = new FiltroPredicado(h -> true);
   }
 
   public Coleccion(
@@ -80,7 +81,7 @@ public class Coleccion {
     this.fuente = fuente;
     this.descripcion = descripcion;
     this.categoria = categoria;
-    this.filtro = new FiltroIdentidad();
+    this.filtro = new FiltroPredicado(h -> true);
     this.algoritmo = algoritmo;
   }
 
@@ -127,7 +128,7 @@ public class Coleccion {
    */
 
   public void setFiltro(Filtro filtro) {
-    this.filtro = filtro != null ? filtro : new FiltroIdentidad();
+    this.filtro = filtro != null ? filtro : new FiltroPredicado(h -> true);;
   }
 
   /**

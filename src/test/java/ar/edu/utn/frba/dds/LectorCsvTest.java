@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroDeDireccion;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroPredicado;
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.io.FileWriter;
@@ -31,7 +31,7 @@ public class LectorCsvTest {
 
     List<Hecho> csv = new LectorCSV(',', "dd/MM/yyyy", mapeoColumnas).importar(
         dir + "ejemplo.csv");
-    FiltroDeDireccion filtroDireccion = new FiltroDeDireccion("EL NESTORNAUTA");
+    FiltroPredicado filtroDireccion = new FiltroPredicado(h -> h.getDireccion().equals("EL NESTORNAUTA"));
     List<Hecho> hechosFiltrados = filtroDireccion.filtrar(csv);
     Hecho hecho = hechosFiltrados.get(0);
 

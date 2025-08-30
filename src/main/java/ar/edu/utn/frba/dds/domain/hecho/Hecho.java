@@ -12,6 +12,9 @@ import java.util.UUID;
 /**
  * Hecho.
  */
+
+//todo: creo que teniamos que eliminar a la mierda el UUID
+
 public class Hecho {
   // Los campos que eran 'final' ahora son no-final para permitir la deserialización de Jackson
   private List<String> etiquetas;

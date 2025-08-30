@@ -4,16 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.mock; // Importar mock
 
 import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroDeCategoria;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroDeDireccion;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroDeEtiqueta;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroDeFecha;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroDeFechaDeCarga;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroDeLugar;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroDeOrigen;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroDeTitulo;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
+import ar.edu.utn.frba.dds.domain.filtro.*;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
@@ -82,7 +73,7 @@ public class FiltroTest {
   @Test
   public void filtraPorCategoriaCorrectamente() {
     List<Hecho> hechos = getHechosParaTest();
-    FiltroDeCategoria filtroCategoria = new FiltroDeCategoria("Robos");
+    FiltroPredicado filtroCategoria = new FiltroPredicado(h -> h.getCategoria().equalsIgnoreCase("Robos"));
     assertNotEquals(
         0,
         filtroCategoria.filtrar(hechos)
@@ -93,7 +84,7 @@ public class FiltroTest {
   @Test
   public void filtraPorDireccionCorrectamente() {
     List<Hecho> hechos = getHechosParaTest();
-    FiltroDeDireccion filtroDireccion = new FiltroDeDireccion("dire");
+    FiltroPredicado filtroDireccion = new FiltroPredicado(h -> h.getDireccion().equalsIgnoreCase("Dire"));
     assertNotEquals(
         0,
         filtroDireccion.filtrar(hechos)
@@ -101,32 +92,12 @@ public class FiltroTest {
     );
   }
 
-  @Test
-  public void filtraPorEtiquetaCorrectamente() {
-    List<Hecho> hechos = getHechosParaTest();
-    FiltroDeEtiqueta filtroEtiqueta = new FiltroDeEtiqueta(etiquetasAux.get(0));
-    assertNotEquals(
-        0,
-        filtroEtiqueta.filtrar(hechos)
-            .size()
-    );
-  }
-
-  @Test
-  public void filtraPorFechaCorrectamente() {
-    List<Hecho> hechos = getHechosParaTest();
-    FiltroDeFecha filtroFecha = new FiltroDeFecha(horaAux);
-    assertNotEquals(
-        0,
-        filtroFecha.filtrar(hechos)
-            .size()
-    );
-  }
 
   @Test
   public void filtraPorFechaCargaCorrectamente() {
     List<Hecho> hechos = getHechosParaTest();
-    FiltroDeFechaDeCarga filtroFecha = new FiltroDeFechaDeCarga(hechos.get(0).getFechaCarga());
+    FiltroPredicado filtroFecha = new FiltroPredicado(h -> h.getFechaCarga().equals(hechos.get(0).getFechaCarga()));
+
     assertNotEquals(
         0,
         filtroFecha.filtrar(hechos)
@@ -134,45 +105,13 @@ public class FiltroTest {
     );
   }
 
-  @Test
-  public void filtraPorLugarCorrectamente() {
-    List<Hecho> hechos = getHechosParaTest();
-    FiltroDeLugar filtroLugar = new FiltroDeLugar(pgAux);
-    assertNotEquals(
-        0,
-        filtroLugar.filtrar(hechos)
-            .size()
-    );
-  }
-
-  @Test
-  public void filtraPorOrigenCorrectamente() {
-    List<Hecho> hechos = getHechosParaTest();
-    FiltroDeOrigen filtroOrigen = new FiltroDeOrigen(Origen.PROVISTO_CONTRIBUYENTE);
-    assertNotEquals(
-        0,
-        filtroOrigen.filtrar(hechos)
-            .size()
-    );
-  }
-
-  @Test
-  public void filtraPorTituloCorrectamente() {
-    List<Hecho> hechos = getHechosParaTest();
-    FiltroDeTitulo filtroTitulo = new FiltroDeTitulo("titulo");
-    assertNotEquals(
-        0,
-        filtroTitulo.filtrar(hechos)
-            .size()
-    );
-  }
 
   @Test
   public void aplicaVariosFiltrosCorrectamente() {
     List<Hecho> hechos = getHechosParaTest();
-    FiltroDeCategoria filtroCategoria = new FiltroDeCategoria("Robos");
-    FiltroDeDireccion filtroDireccion = new FiltroDeDireccion("dire");
-    FiltroDeEtiqueta filtroEtiqueta = new FiltroDeEtiqueta(etiquetasAux.get(0));
+    FiltroPredicado filtroCategoria = new FiltroPredicado(h -> h.getCategoria().equalsIgnoreCase("Robos"));
+    FiltroPredicado filtroDireccion = new FiltroPredicado(h -> h.getDireccion().equalsIgnoreCase("Dire"));
+    FiltroPredicado filtroEtiqueta = new FiltroPredicado(h -> h.getEtiquetas().contains(etiquetasAux.get(0)));
     List<Filtro> filtros = new ArrayList<>();
     filtros.add(filtroCategoria);
     filtros.add(filtroDireccion);

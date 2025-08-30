@@ -37,3 +37,4 @@ public class FiltroIgualHecho implements Filtro {
                  .toList();
   }
 }
+// voy a reemplazar el equals en Hecho, sino es un lio
