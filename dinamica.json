@@ -1,0 +1,31 @@
+[ {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "id" : "7b6c684a-9e54-471b-a5c6-b7b92faa6a34",
+  "fechaCarga" : "2025-07-14T04:02:06.473533013",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-06-30T04:02:06.473481306",
+  "estado" : "ORIGINAL",
+  "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "id" : "a86959ad-ebea-4176-8786-9f24d364218d",
+  "fechaCarga" : "2025-07-14T04:02:06.718848331",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-06-30T04:02:06.718811262",
+  "estado" : "ORIGINAL",
+  "origen" : "PROVISTO_CONTRIBUYENTE"
+} ]
