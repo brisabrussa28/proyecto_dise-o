@@ -31,7 +31,7 @@
 - [x] El cron tiene que hacer un forEach() para todas las fuentes.
 - [ ] Se podría ir pensando en implementar loggers.
 - [x] Try/catch de fuenteCacheable en la linea 40 sobra, ya que hay una excepcion runtime que ya sería lanzada.
-- [ ] Ese mismo try/catch se podría hacer en el mismo forEach().
+- [x] Ese mismo try/catch se podría hacer en el mismo forEach().
 - [ ] No utilizar List.copyOf() si sólo se va a leer, es más conveniente utilizar el método Collection.unmodifiableList().
 - [ ] En fuente dinámica se podría, en lugar se podría redefinir al ḿetodo para que no haga nada.
 - [ ] Se podría agregar otra interfaz para buscar hechos para los casos donde no haya un algoritmo de consenso definido.
@@ -43,7 +43,7 @@
 ## COSAS PT4
 - [ ] Agregar componente de estadisticas (Con el tipo de estadisticas incluido)
 - [ ] Agregar provincia al hecho -> No se deberia sacar con googlemapas? pero no funca eso jsj
-- [ ] Agregar modulo de exportacion de csvs (seria mejor directamente que sea capaz de exportar cualquier obj)
+- [x] Agregar modulo de exportacion de csvs (seria mejor directamente que sea capaz de exportar cualquier obj)
 - [ ] Sumar busqueda por full text search (al menos del titulo y descripcion del hecho pero extensible a todos los demas campos)
 - [ ] Se deberán persistir las entidades del modelo planteado. Para ello se debe utilizar un ORM.
 - [ ] TESTS DE TODO

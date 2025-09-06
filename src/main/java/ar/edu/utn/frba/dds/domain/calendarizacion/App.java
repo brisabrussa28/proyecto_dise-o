@@ -54,8 +54,11 @@ public class App {
    */
   public void ejecutarActualizacionTodasLasFuentes() {
     fuentesRegistradas.values().forEach(fuente -> {
-      fuente.forzarActualizacionSincrona();
-      // agregar log
+      try {
+        fuente.forzarActualizacionSincrona();
+      } catch (Exception e) {
+        System.err.println("Error al actualizar la fuente '" + fuente.getNombre());
+      }
     });
   }
 
