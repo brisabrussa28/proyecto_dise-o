@@ -39,3 +39,14 @@
 - [ ] Los algoritmos se deberían ejecutar en un cron.
 - [ ] Por más que tengo un algoritmo de consenso, tengo que poder visualizar todos los hechos aunque no se cumpla con el algoritmo si así se desea.
 - Nodo -> Computadora ejecutando.
+
+## COSAS PT4
+- [ ] Agregar componente de estadisticas (Con el tipo de estadisticas incluido)
+- [ ] Agregar provincia al hecho -> No se deberia sacar con googlemapas? pero no funca eso jsj
+- [ ] Agregar modulo de exportacion de csvs (seria mejor directamente que sea capaz de exportar cualquier obj)
+- [ ] Sumar busqueda por full text search (al menos del titulo y descripcion del hecho pero extensible a todos los demas campos)
+- [ ] Se deberán persistir las entidades del modelo planteado. Para ello se debe utilizar un ORM.
+- [ ] TESTS DE TODO
+- [ ] Diagrama de clases actualizado
+- [ ] Justificacion de disenio (no tengo enie)
+- [ ] Diagrama der fisico

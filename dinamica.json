@@ -28,4 +28,34 @@
   "fechaSuceso" : "2025-06-30T04:02:06.718811262",
   "estado" : "ORIGINAL",
   "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "id" : "5a489612-1516-4b8f-a444-b8d263e4ae37",
+  "fechaCarga" : "2025-09-05T23:27:23.332629202",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-08-22T23:27:23.332577464",
+  "estado" : null,
+  "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "id" : "58cf28fd-e46a-4a6a-b71e-4110175cf35d",
+  "fechaCarga" : "2025-09-05T23:27:23.399777841",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-08-22T23:27:23.399757823",
+  "estado" : null,
+  "origen" : "PROVISTO_CONTRIBUYENTE"
 } ]
