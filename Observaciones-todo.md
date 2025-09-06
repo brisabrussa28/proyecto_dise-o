@@ -42,7 +42,7 @@
 
 ## COSAS PT4
 - [ ] Agregar componente de estadisticas (Con el tipo de estadisticas incluido)
-- [ ] Agregar provincia al hecho -> No se deberia sacar con googlemapas? pero no funca eso jsj
+- [ ] Agregar provincia al hecho
 - [x] Agregar modulo de exportacion de csvs (seria mejor directamente que sea capaz de exportar cualquier obj)
 - [ ] Sumar busqueda por full text search (al menos del titulo y descripcion del hecho pero extensible a todos los demas campos)
 - [ ] Se deberán persistir las entidades del modelo planteado. Para ello se debe utilizar un ORM.
