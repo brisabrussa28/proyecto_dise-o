@@ -2,10 +2,10 @@ package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
@@ -19,17 +19,18 @@ public class SolicitudTest {
   PuntoGeografico pg = new PuntoGeografico(33.0, 44.0);
   LocalDateTime hora = LocalDateTime.now();
   List<String> etiquetas = List.of("#robo");
-  Hecho hechoValido = new Hecho(
-      "titulo",
-      "desc",
-      "Robos",
-      "direccion",
-      pg,
-      hora,
-      hora,
-      Origen.PROVISTO_CONTRIBUYENTE,
-      etiquetas
-  );
+  Hecho hechoValido = new HechoBuilder()
+      .conTitulo("titulo")
+      .conDescripcion("desc")
+      .conCategoria("Robos")
+      .conDireccion("direccion")
+      .conProvincia("CABA")
+      .conUbicacion(pg)
+      .conFechaSuceso(hora)
+      .conFechaCarga(hora)
+      .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+      .conEtiquetas(etiquetas)
+      .build();
 
 
   @Test

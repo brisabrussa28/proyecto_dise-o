@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.serviciodebackup.ServicioDeBackup;
@@ -37,28 +38,32 @@ public class ServicioDeBackupTest {
   @Test
   void testGuardarYCargarCopiaHechos() throws IOException {
     List<Hecho> originalHechos = new ArrayList<>();
-    originalHechos.add(new Hecho(
-        "Incendio en Fábrica",
-        "Incendio de grandes proporciones en una fábrica textil.",
-        "Incendios",
-        "Av. Siempreviva 742",
-        new PuntoGeografico(-34.6037, -58.3816),
-        LocalDateTime.of(2024, 6, 20, 10, 30, 0),
-        LocalDateTime.of(2024, 6, 20, 11, 0, 0),
-        Origen.DATASET,
-        List.of("fuego", "fabrica", "emergencia")
-    ));
-    originalHechos.add(new Hecho(
-        "Accidente de Tráfico",
-        "Colisión múltiple en la autopista.",
-        "Accidentes",
-        "Autopista 25 de Mayo KM 5",
-        new PuntoGeografico(-34.6000, -58.4000),
-        LocalDateTime.of(2024, 6, 21, 15, 0, 0),
-        LocalDateTime.of(2024, 6, 21, 15, 15, 0),
-        Origen.DATASET,
-        List.of("trafico", "accidente", "autopista")
-    ));
+    originalHechos.add(new HechoBuilder()
+        .conTitulo("Incendio en Fábrica")
+        .conDescripcion("Incendio de grandes proporciones en una fábrica textil.")
+        .conCategoria("Incendios")
+        .conDireccion("Av. Siempreviva 742")
+        .conProvincia("Provincia Test")
+        .conUbicacion(new PuntoGeografico(-34.6037, -58.3816))
+        .conFechaSuceso(LocalDateTime.of(2024, 6, 20, 10, 30, 0))
+        .conFechaCarga(LocalDateTime.of(2024, 6, 20, 11, 0, 0))
+        .conFuenteOrigen(Origen.DATASET)
+        .conEtiquetas(List.of("fuego", "fabrica", "emergencia"))
+        .build()
+    );
+    originalHechos.add(new HechoBuilder()
+        .conTitulo("Accidente de Tráfico")
+        .conDescripcion("Colisión múltiple en la autopista.")
+        .conCategoria("Accidentes")
+        .conDireccion("Autopista 25 de Mayo KM 5")
+        .conProvincia("Provincia Test")
+        .conUbicacion(new PuntoGeografico(-34.6000, -58.4000))
+        .conFechaSuceso(LocalDateTime.of(2024, 6, 21, 15, 0, 0))
+        .conFechaCarga(LocalDateTime.of(2024, 6, 21, 15, 15, 0))
+        .conFuenteOrigen(Origen.DATASET)
+        .conEtiquetas(List.of("trafico", "accidente", "autopista"))
+        .build()
+    );
 
     servicio.guardarCopiaLocalJson(originalHechos);
 

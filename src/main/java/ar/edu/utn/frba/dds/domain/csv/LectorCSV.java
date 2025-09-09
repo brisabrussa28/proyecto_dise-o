@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds.domain.csv;
 
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import com.opencsv.CSVParserBuilder;
@@ -30,9 +31,15 @@ import java.util.logging.Logger;
 public class LectorCSV {
 
   private static final Logger logger = Logger.getLogger(LectorCSV.class.getName());
-  char separator;
-  String dateFormatStr;
-  Map<CampoHecho, List<String>> mapeoColumnas;
+
+  private static final Set<CampoHecho> CAMPOS_REQUERIDOS = Set.of(
+      CampoHecho.TITULO,
+      CampoHecho.FECHA_SUCESO
+  );
+
+  private final char separator;
+  private final String dateFormatStr;
+  private final Map<CampoHecho, List<String>> mapeoColumnas;
 
   public LectorCSV(
       char separator,
@@ -41,8 +48,20 @@ public class LectorCSV {
   ) {
     this.separator = separator;
     this.dateFormatStr = dateFormatStr;
-    // Defensive copy to avoid exposing internal representation
     this.mapeoColumnas = new HashMap<>(mapeoColumnas);
+
+    //validacion basica para evitar errores al crear hechos
+    validarConfiguracion();
+  }
+
+  private void validarConfiguracion() {
+    for (CampoHecho campoRequerido : CAMPOS_REQUERIDOS) {
+      if (!this.mapeoColumnas.containsKey(campoRequerido) || this.mapeoColumnas.get(campoRequerido).isEmpty()) {
+        throw new IllegalArgumentException(
+            "Configuración inválida. El mapeo de columnas debe contener una entrada para el campo requerido: " + campoRequerido
+        );
+      }
+    }
   }
 
   /**
@@ -58,13 +77,8 @@ public class LectorCSV {
 
     try (
         CSVReader reader = new CSVReaderBuilder(
-            new InputStreamReader(
-                new java.io.FileInputStream(path), StandardCharsets.UTF_8
-            )
-        )
-            .withCSVParser(new CSVParserBuilder().withSeparator(separator)
-                                                 .build())
-            .build()
+            new InputStreamReader(new java.io.FileInputStream(path), StandardCharsets.UTF_8)
+        ).withCSVParser(new CSVParserBuilder().withSeparator(separator).build()).build()
     ) {
       String[] headers = reader.readNext();
       if (headers == null || headers.length == 0) {
@@ -129,7 +143,12 @@ public class LectorCSV {
       Map<CampoHecho, List<String>> mapeo,
       SimpleDateFormat dateFormat
   ) {
+
     String titulo = extraerCampo(fila, mapeo.get(CampoHecho.TITULO), columnasPresentes, " ");
+    LocalDateTime fechaSuceso = parseFecha(
+        extraerCampo(fila, mapeo.get(CampoHecho.FECHA_SUCESO), columnasPresentes, "/"),
+        dateFormat
+    );
     String descripcion = extraerCampo(fila, mapeo.get(CampoHecho.DESCRIPCION), columnasPresentes, " ");
     String categoria = extraerCampo(fila, mapeo.get(CampoHecho.CATEGORIA), columnasPresentes, " ");
     String direccion = extraerCampo(fila, mapeo.get(CampoHecho.DIRECCION), columnasPresentes, ", ");
@@ -139,28 +158,24 @@ public class LectorCSV {
     Double latitud = parseDouble(latStr);
     Double longitud = parseDouble(lonStr);
     PuntoGeografico ubicacion = (latitud != null && longitud != null)
-                                ? new PuntoGeografico(latitud, longitud)
-                                : null;
-
-    String fechaStr = extraerCampo(fila, mapeo.get(CampoHecho.FECHA_SUCESO), columnasPresentes, "/");
-    LocalDateTime fechaSuceso = parseFecha(fechaStr, dateFormat);
-
-
-    if (titulo != null && fechaSuceso != null) {
-      return new Hecho(
-          titulo,
-          descripcion,
-          categoria,
-          direccion,
-          provincia,
-          ubicacion,
-          fechaSuceso,
-          LocalDateTime.now(),
-          Origen.DATASET,
-          List.of()
-      );
+        ? new PuntoGeografico(latitud, longitud)
+        : null;
+    try {
+      //Agregando el builder
+      return new HechoBuilder()
+          .conTitulo(titulo)
+          .conFechaSuceso(fechaSuceso)
+          .conDescripcion(descripcion)
+          .conCategoria(categoria)
+          .conDireccion(direccion)
+          .conProvincia(provincia)
+          .conUbicacion(ubicacion)
+          .conFuenteOrigen(Origen.DATASET)
+          .build();
+    } catch (RuntimeException e) {
+      logger.warning("Error al construir Hecho: " + e.getMessage());
+      return null;
     }
-    return null;
   }
 
   /**
@@ -181,18 +196,16 @@ public class LectorCSV {
     if (columnas == null) {
       return null;
     }
-
     return columnas.stream()
-                   .peek(col -> {
-                     if (!columnasPresentes.contains(col)) {
-                       logger.warning("Advertencia: columna " + col + " no encontrada en CSV");
-                     }
-                   })
-                   .map(fila::get)
-                   .filter(s -> s != null && !s.trim()
-                                               .isEmpty())
-                   .reduce((a, b) -> a + separador + b)
-                   .orElse(null);
+        .peek(col -> {
+          if (!columnasPresentes.contains(col)) {
+            logger.warning("Advertencia: columna " + col + " no encontrada en CSV");
+          }
+        })
+        .map(fila::get)
+        .filter(s -> s != null && !s.trim().isEmpty())
+        .reduce((a, b) -> a + separador + b)
+        .orElse(null);
   }
 
   /**
@@ -202,9 +215,10 @@ public class LectorCSV {
    * @return Double parseado o null si ocurre un error.
    */
   private Double parseDouble(String valor) {
+    if (valor == null) return null;
     try {
-      return valor != null ? Double.parseDouble(valor.trim()) : null;
-    } catch (Exception e) {
+      return Double.parseDouble(valor.trim());
+    } catch (NumberFormatException e) {
       logger.warning("Error al parsear double: '" + valor + "'");
       return null;
     }
@@ -218,15 +232,11 @@ public class LectorCSV {
    * @return Date parseada o null si ocurre un error.
    */
   private LocalDateTime parseFecha(String valor, SimpleDateFormat dateFormat) {
+    if (valor == null) return null;
     try {
-      return valor != null ? dateFormat
-          .parse(valor.trim())
-          .toInstant()
-          .atZone(ZoneId.systemDefault())
-          .toLocalDateTime()
-                           : null;
+      return dateFormat.parse(valor.trim()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     } catch (ParseException e) {
-      logger.warning("Error al parsear fecha: '" + valor + "'");
+      logger.warning("Error al parsear fecha: '" + valor + "' con formato '" + dateFormat.toPattern() + "'");
       return null;
     }
   }

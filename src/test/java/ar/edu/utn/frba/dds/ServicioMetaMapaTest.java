@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.HechoQuerys;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
@@ -34,15 +35,12 @@ public class ServicioMetaMapaTest {
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   private final HechoQuerys filtros = new HechoQuerys(
       "desastres",
+      "Buenos Aires",
       pgAux,
-      LocalDateTime.now()
-          .plusDays(10),
-      LocalDateTime.now()
-          .plusDays(10),
-      LocalDateTime.now()
-          .minusDays(10),
-      LocalDateTime.now()
-          .minusDays(10)
+      LocalDateTime.now().plusDays(10),
+      LocalDateTime.now().plusDays(10),
+      LocalDateTime.now().minusDays(10),
+      LocalDateTime.now().minusDays(10)
   );
   private WireMockServer wireMockServer;
   private ServicioMetaMapa servicioMetaMapa;
@@ -74,6 +72,7 @@ public class ServicioMetaMapaTest {
             null,
             null,
             null,
+            null,
             null
         )
     );
@@ -81,7 +80,7 @@ public class ServicioMetaMapaTest {
 
   @Test
   public void obtenerHechos() throws IOException {
-    String body = "[ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\", \"descripcion\": \"Simulado\" } ]";
+    String body = "[ { \"titulo\": \"Hecho Simulado\", \"descripcion\": \"Simulado\", \"fechaSuceso\": \"2023-10-27T10:00:00\" } ]";
 
     stubFor(get(urlPathEqualTo("/hechos")).withQueryParam("categoria", equalTo("desastres"))
         .willReturn(aResponse().withStatus(200)
@@ -95,7 +94,7 @@ public class ServicioMetaMapaTest {
 
   @Test
   public void obtenerHechosDeColeccionUno() throws IOException {
-    String body = "[ { \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\", \"descripcion\": \"Colección simulada\" } ]";
+    String body = "[ { \"titulo\": \"Hecho de Colección\", \"descripcion\": \"Colección simulada\", \"fechaSuceso\": \"2023-10-27T11:00:00\" } ]";
 
     stubFor(get(urlPathEqualTo("/colecciones/1/hechos")).withQueryParam("categoria", equalTo("desastres"))
         .willReturn(aResponse().withStatus(200)
@@ -124,17 +123,18 @@ public class ServicioMetaMapaTest {
         "#NOalaVIOLENCIAcontraABUELITAS"
     );
 
-    Hecho hecho = new Hecho(
-        "titulo",
-        "desc",
-        "Robos",
-        "direccion",
-        pgAux,
-        LocalDateTime.now(),
-        LocalDateTime.now(),
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetasAux
-    );
+    Hecho hecho = new HechoBuilder()
+        .conTitulo("titulo")
+        .conDescripcion("desc")
+        .conCategoria("Robos")
+        .conDireccion("direccion")
+        .conProvincia("CABA")
+        .conUbicacion(pgAux)
+        .conFechaSuceso(LocalDateTime.now())
+        .conFechaCarga(LocalDateTime.now())
+        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .conEtiquetas(etiquetasAux)
+        .build();
 
     // Inicializar FuenteDinamica con el archivo JSON temporal
     FuenteDinamica fuente = new FuenteDinamica("MiFuente", tempJsonFile.toString());

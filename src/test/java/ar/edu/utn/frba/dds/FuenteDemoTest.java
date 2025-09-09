@@ -1,8 +1,8 @@
 package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows; // Importar assertThrows
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -35,18 +35,17 @@ public class FuenteDemoTest {
   void setUp() throws Exception {
     dummyUrl = new URL("http://localhost:8080/hechos");
     tempJsonFilePath = Files.createTempFile("test_hechos_", ".json");
-    fuenteDemo = new FuenteDemo("TestDemo", dummyUrl, conexionMock, tempJsonFilePath.toString());
+    fuenteDemo = new FuenteDemo("Fuente Demo Test", dummyUrl, conexionMock, tempJsonFilePath.toString());
 
-    // Configurar el mock para que devuelva null por defecto para siguienteHecho.
-    // Esto asegura que la primera llamada a forzarActualizacionSincrona() no falle si no hay datos.
+    // Configuración por defecto para que los tests que no dependen de la respuesta no fallen.
     when(conexionMock.siguienteHecho(any(), any())).thenReturn(null);
   }
 
   @AfterEach
   void tearDown() throws Exception {
-    // FIX: Se elimina la llamada al método obsoleto detenerScheduler()
     Files.deleteIfExists(tempJsonFilePath);
   }
+
 
   @Test
   @DisplayName("Debe actualizar la caché con hechos válidos de la fuente externa")
@@ -56,10 +55,11 @@ public class FuenteDemoTest {
         "descripcion", "Un incendio en la zona sur.",
         "categoria", "Incendios",
         "direccion", "Calle Falsa 123",
+        "provincia", "Buenos Aires",
         "ubicacion", Map.of("latitud", -34.0, "longitud", -58.0),
         "fechaSuceso", "2024-05-01T10:00:00",
         "fechaCarga", "2024-06-01T10:00:00",
-        "fuenteOrigen", "FUENTE_DEMO",
+        "fuenteOrigen", "DATASET",
         "etiquetas", List.of("fuego", "emergencia")
     );
     Map<String, Object> hecho2 = Map.of(
@@ -67,14 +67,14 @@ public class FuenteDemoTest {
         "descripcion", "Otro incendio.",
         "categoria", "Incendios",
         "direccion", "Ruta B",
+        "provincia", "Córdoba",
         "ubicacion", Map.of("latitud", -32.0, "longitud", -65.0),
         "fechaSuceso", "2024-05-02T15:30:00",
         "fechaCarga", "2024-06-02T12:00:00",
-        "fuenteOrigen", "FUENTE_DEMO",
+        "fuenteOrigen", "DATASET",
         "etiquetas", List.of("fuego", "alerta")
     );
 
-    // Sobreescribir el comportamiento del mock para esta prueba específica
     when(conexionMock.siguienteHecho(any(), any()))
         .thenReturn(hecho1)
         .thenReturn(hecho2)
@@ -91,28 +91,25 @@ public class FuenteDemoTest {
   @Test
   @DisplayName("No debe actualizar la caché si la fuente externa devuelve datos inválidos")
   void noSeActualizaLaCacheSiLosDatosSonInvalidos() {
-    // Asegurarse de que la caché esté vacía al inicio del test.
-    // Esta llamada inicial debería completarse sin errores gracias a la configuración en setUp.
     fuenteDemo.forzarActualizacionSincrona();
-    assertTrue(fuenteDemo.obtenerHechos().isEmpty());
+    assertTrue(fuenteDemo.obtenerHechos().isEmpty(), "La caché debe estar vacía al inicio");
 
     Map<String, Object> hechoInvalido = Map.of(
         "titulo", "Hecho inválido",
-        "descripcion", "Falla en datos",
-        "fechaSuceso", "2024-05-01T10:00:00"
-        // Faltan categoria, direccion, ubicacion, fechaCarga, fuenteOrigen
+        "descripcion", "Falla en datos"
+        // Faltan categoria y fechaSuceso, que son obligatorios para el HechoBuilder
     );
 
-    // Configurar el mock para esta prueba específica para devolver el hecho inválido
     when(conexionMock.siguienteHecho(any(), any()))
         .thenReturn(hechoInvalido)
         .thenReturn(null);
 
-    // Se espera que se lance una RuntimeException cuando se procesan datos inválidos.
-    assertThrows(RuntimeException.class, () -> fuenteDemo.forzarActualizacionSincrona(),
-        "Se esperaba una RuntimeException al procesar datos inválidos.");
+    // Con el nuevo código resiliente, la actualización no debería lanzar una excepción.
+    assertDoesNotThrow(() -> fuenteDemo.forzarActualizacionSincrona(),
+        "El proceso de actualización no debe fallar por un único hecho inválido.");
 
-    // Después de la excepción, la caché debería seguir vacía o no modificada por el dato inválido.
-    assertTrue(fuenteDemo.obtenerHechos().isEmpty());
+    // La caché debe seguir vacía porque el único hecho proporcionado era inválido y fue omitido.
+    assertTrue(fuenteDemo.obtenerHechos().isEmpty(), "La caché debe permanecer vacía después de intentar procesar datos inválidos.");
   }
 }
+

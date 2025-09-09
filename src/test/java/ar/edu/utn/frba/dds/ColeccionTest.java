@@ -19,6 +19,7 @@ import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
@@ -35,7 +36,7 @@ public class ColeccionTest {
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   // FuenteDinamica se inicializará en setUp para asegurar un estado limpio en cada test
   FuenteDinamica fuenteAuxD;
-  LocalDateTime horaAux = LocalDateTime.of(2025, 5, 6, 20, 9);
+  LocalDateTime horaAux = LocalDateTime.now().minusDays(1);
   List<String> etiquetasAux = List.of(
       "#ancianita",
       "#robo_a_mano_armada",
@@ -84,17 +85,18 @@ public class ColeccionTest {
   public void coleccionContieneUnHecho() {
     // Se usa el constructor de Coleccion directamente
     Coleccion coleccion = new Coleccion("Robos", fuenteAuxD, "Descripcion", "Robos");
-    Hecho hecho = new Hecho(
-        "titulo",
-        "desc",
-        "Robos",
-        "direccion",
-        null,
-        horaAux,
-        LocalDateTime.now(), // Se añade fechaCarga
-        null,
-        etiquetasAux
-    );
+    Hecho hecho = new HechoBuilder()
+        .conTitulo("titulo")
+        .conDescripcion("desc")
+        .conCategoria("Robos")
+        .conDireccion("direccion")
+        .conProvincia("Provincia")
+        .conUbicacion(null)
+        .conFechaSuceso(horaAux)
+        .conFechaCarga(LocalDateTime.now()) // Se añade fechaCarga
+        .conFuenteOrigen(Origen.DATASET)
+        .conEtiquetas(etiquetasAux)
+        .build();
     fuenteAuxD.agregarHecho(hecho);
     assertTrue(coleccion.contieneA(hecho, repositorio));
   }
@@ -136,17 +138,18 @@ public class ColeccionTest {
   public void coleccionYaNoContieneHechoEliminadoPorGestor() {
     // Se usa el constructor de Coleccion directamente
     Coleccion coleccion = new Coleccion("Robos", fuenteAuxD, "Descripcion", "Robos");
-    Hecho hecho = new Hecho(
-        "titulo",
-        "desc",
-        "Robos",
-        "direccion",
-        pgAux,
-        horaAux,
-        LocalDateTime.now(), // Se añade fechaCarga
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetasAux
-    );
+    Hecho hecho = new HechoBuilder()
+        .conTitulo("titulo")
+        .conDescripcion("desc")
+        .conCategoria("Robos")
+        .conDireccion("direccion")
+        .conProvincia("Provincia")
+        .conUbicacion(pgAux)
+        .conFechaSuceso(horaAux)
+        .conFechaCarga(LocalDateTime.now()) // Se añade fechaCarga
+        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .conEtiquetas(etiquetasAux)
+        .build();
     fuenteAuxD.agregarHecho(hecho);
     when(detectorSpam.esSpam(anyString())).thenReturn(false);
     repositorio.marcarComoEliminado(hecho);
