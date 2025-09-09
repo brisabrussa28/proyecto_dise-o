@@ -26,6 +26,15 @@ public abstract class FuenteDeCopiaLocal implements Fuente {
         });
   }
 
+  public FuenteDeCopiaLocal(String nombre, ServicioDeBackup servicioDeBackup) {
+    this.validarFuente(nombre);
+    this.nombre = nombre;
+    this.servicioDeBackup = servicioDeBackup;
+    this.cacheDeHechos = this.servicioDeBackup
+        .cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {
+        });
+  }
+
   protected abstract List<Hecho> consultarNuevosHechos();
 
   @Override
