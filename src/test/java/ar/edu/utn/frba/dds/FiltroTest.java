@@ -7,6 +7,7 @@ import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.filtro.*;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
@@ -23,7 +24,7 @@ import org.junit.jupiter.api.Test;
 public class FiltroTest {
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD;
-  LocalDateTime horaAux = LocalDateTime.of(2025, 5, 6, 20, 9);
+  LocalDateTime horaAux = LocalDateTime.now().minusDays(1);
   List<String> etiquetasAux = List.of(
       "#ancianita",
       "#robo_a_mano_armada",
@@ -55,17 +56,18 @@ public class FiltroTest {
    * @return Una lista de hechos para usar en los tests.
    */
   public List<Hecho> getHechosParaTest() {
-    Hecho hecho = new Hecho(
-        "titulo",
-        "Un día más siendo del conurbano",
-        "Robos",
-        "dire",
-        pgAux,
-        horaAux,
-        LocalDateTime.now(), // fechaCarga
-        Origen.PROVISTO_CONTRIBUYENTE, // origen
-        etiquetasAux
-    );
+    Hecho hecho = new HechoBuilder()
+        .conTitulo("titulo")
+        .conDescripcion("Un día más siendo del conurbano")
+        .conCategoria("Robos")
+        .conDireccion("dire")
+        .conProvincia("Buenos Aires")
+        .conUbicacion(pgAux)
+        .conFechaSuceso(horaAux)
+        .conFechaCarga(LocalDateTime.now()) // fechaCarga
+        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE) // origen
+        .conEtiquetas(etiquetasAux)
+        .build();
     fuenteAuxD.agregarHecho(hecho);
     return fuenteAuxD.obtenerHechos();
   }
@@ -96,7 +98,7 @@ public class FiltroTest {
   @Test
   public void filtraPorFechaCargaCorrectamente() {
     List<Hecho> hechos = getHechosParaTest();
-    FiltroPredicado filtroFecha = new FiltroPredicado(h -> h.getFechaCarga().equals(hechos.get(0).getFechaCarga()));
+    FiltroPredicado filtroFecha = new FiltroPredicado(h -> h.getFechaCarga().toLocalDate().equals(hechos.get(0).getFechaCarga().toLocalDate()));
 
     assertNotEquals(
         0,

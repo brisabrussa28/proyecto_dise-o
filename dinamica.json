@@ -1,7 +1,6 @@
 [ {
   "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
-  "id" : "7b6c684a-9e54-471b-a5c6-b7b92faa6a34",
-  "fechaCarga" : "2025-07-14T04:02:06.473533013",
+  "fechaCarga" : "2025-09-09T11:42:03.963014905",
   "titulo" : "Un hecho",
   "descripcion" : "Descripcion",
   "categoria" : "PRUEBA",
@@ -10,13 +9,13 @@
     "latitud" : -123123.0,
     "longitud" : 123123.0
   },
-  "fechaSuceso" : "2025-06-30T04:02:06.473481306",
+  "fechaSuceso" : "2025-08-26T11:42:03.962968236",
   "estado" : "ORIGINAL",
+  "provincia" : "aaa",
   "origen" : "PROVISTO_CONTRIBUYENTE"
 }, {
   "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
-  "id" : "a86959ad-ebea-4176-8786-9f24d364218d",
-  "fechaCarga" : "2025-07-14T04:02:06.718848331",
+  "fechaCarga" : "2025-09-09T11:42:04.02039344",
   "titulo" : "Un hecho",
   "descripcion" : "Descripcion",
   "categoria" : "PRUEBA",
@@ -25,13 +24,13 @@
     "latitud" : -123123.0,
     "longitud" : 123123.0
   },
-  "fechaSuceso" : "2025-06-30T04:02:06.718811262",
+  "fechaSuceso" : "2025-08-26T11:42:04.020370567",
   "estado" : "ORIGINAL",
+  "provincia" : "aaa",
   "origen" : "PROVISTO_CONTRIBUYENTE"
 }, {
   "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
-  "id" : "5a489612-1516-4b8f-a444-b8d263e4ae37",
-  "fechaCarga" : "2025-09-05T23:27:23.332629202",
+  "fechaCarga" : "2025-09-09T11:54:32.226842573",
   "titulo" : "Un hecho",
   "descripcion" : "Descripcion",
   "categoria" : "PRUEBA",
@@ -40,13 +39,13 @@
     "latitud" : -123123.0,
     "longitud" : 123123.0
   },
-  "fechaSuceso" : "2025-08-22T23:27:23.332577464",
-  "estado" : null,
+  "fechaSuceso" : "2025-08-26T11:54:32.226806444",
+  "estado" : "ORIGINAL",
+  "provincia" : "aaa",
   "origen" : "PROVISTO_CONTRIBUYENTE"
 }, {
   "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
-  "id" : "58cf28fd-e46a-4a6a-b71e-4110175cf35d",
-  "fechaCarga" : "2025-09-05T23:27:23.399777841",
+  "fechaCarga" : "2025-09-09T11:54:32.265958632",
   "titulo" : "Un hecho",
   "descripcion" : "Descripcion",
   "categoria" : "PRUEBA",
@@ -55,7 +54,128 @@
     "latitud" : -123123.0,
     "longitud" : 123123.0
   },
-  "fechaSuceso" : "2025-08-22T23:27:23.399757823",
-  "estado" : null,
+  "fechaSuceso" : "2025-08-26T11:54:32.265941129",
+  "estado" : "ORIGINAL",
+  "provincia" : "aaa",
+  "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "fechaCarga" : "2025-09-09T11:57:22.180144142",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-08-26T11:57:22.180114075",
+  "estado" : "ORIGINAL",
+  "provincia" : "aaa",
+  "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "fechaCarga" : "2025-09-09T11:57:22.262860849",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-08-26T11:57:22.26281949",
+  "estado" : "ORIGINAL",
+  "provincia" : "aaa",
+  "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "fechaCarga" : "2025-09-09T12:29:34.581962975",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-08-26T12:29:34.581930208",
+  "estado" : "ORIGINAL",
+  "provincia" : "aaa",
+  "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "fechaCarga" : "2025-09-09T12:29:34.664390135",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-08-26T12:29:34.664371381",
+  "estado" : "ORIGINAL",
+  "provincia" : "aaa",
+  "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "fechaCarga" : "2025-09-09T12:37:47.959535432",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-08-26T12:37:47.959505816",
+  "estado" : "ORIGINAL",
+  "provincia" : "aaa",
+  "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "fechaCarga" : "2025-09-09T12:37:48.043816497",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-08-26T12:37:48.043797661",
+  "estado" : "ORIGINAL",
+  "provincia" : "aaa",
+  "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "fechaCarga" : "2025-09-09T12:51:13.134517378",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-08-26T12:51:13.134489244",
+  "estado" : "ORIGINAL",
+  "provincia" : "aaa",
+  "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "fechaCarga" : "2025-09-09T12:51:13.229904592",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-08-26T12:51:13.229854828",
+  "estado" : "ORIGINAL",
+  "provincia" : "aaa",
   "origen" : "PROVISTO_CONTRIBUYENTE"
 } ]

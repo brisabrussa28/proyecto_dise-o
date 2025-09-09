@@ -18,7 +18,6 @@ import java.util.UUID;
 public class Hecho {
   // Los campos que eran 'final' ahora son no-final para permitir la deserialización de Jackson
   private List<String> etiquetas;
-  private UUID id;
   private LocalDateTime fechaCarga;
   private Origen fuenteOrigen; // Ya no es final
   private String titulo;
@@ -35,11 +34,9 @@ public class Hecho {
    * Constructor para un Hecho.
    */
   public Hecho() {
-    this.etiquetas = new ArrayList<>(); // Inicializar para evitar NullPointerException
-    this.id = UUID.randomUUID(); // Generar un ID por defecto (puede ser sobrescrito por JSON)
-    this.fechaCarga = LocalDateTime.now(); // Puede ser sobrescrito por JSON
-    this.fuenteOrigen = null; // Puede ser sobrescrito por JSON
+    this.fechaCarga = LocalDateTime.now();
     this.estado = Estado.ORIGINAL;
+    this.etiquetas = new ArrayList<>();
   }
 
   /**
@@ -68,14 +65,6 @@ public class Hecho {
       Origen fuenteOrigen,
       List<String> etiquetas
   ) {
-    if (fechaSuceso != null && fechaCarga != null) {
-      if (fechaSuceso.isAfter(fechaCarga)) {
-        throw new RuntimeException("fechaSuceso no puede ser posterior a fechaCarga");
-      }
-      if (fechaSuceso.isAfter(LocalDateTime.now()) || fechaCarga.isAfter(LocalDateTime.now())) {
-        throw new RuntimeException("Las fechs no pueden ser futuras");
-      }
-    }
     this.titulo = titulo;
     this.descripcion = descripcion;
     this.categoria = categoria;
@@ -85,18 +74,8 @@ public class Hecho {
     this.fechaCarga = fechaCarga;
     this.fuenteOrigen = fuenteOrigen;
     this.etiquetas = new ArrayList<>(etiquetas);
-    this.id = UUID.randomUUID();
     this.provincia = provincia;
-  }
-
-
-  /**
-   * Obtiene el ID del hecho.
-   *
-   * @return UUID del hecho
-   */
-  public UUID getId() {
-    return id;
+    this.estado = Estado.ORIGINAL;
   }
 
   /**
@@ -192,21 +171,6 @@ public class Hecho {
   public String getProvincia() {
   return provincia;
 }
-  
-  
-  /**
-   * Verifica si el hecho es editable por un usuario específico.
-   * Un hecho es editable por su creador durante una semana desde su fecha de carga.
-   *
-   * @return true si el hecho es editable por el usuario, false en caso contrario
-   */
-  public boolean esEditable() {
-    LocalDateTime hoy = LocalDateTime.now();
-    return hoy.isBefore(fechaCarga.plusWeeks(1));
-  }
-
-  
-  
 
   public void setTitulo(String titulo) {
     this.titulo = titulo;
@@ -231,14 +195,9 @@ public class Hecho {
   public void setFechaSuceso(LocalDateTime fechaSuceso) {
     this.fechaSuceso = fechaSuceso;
   }
-
-  // Nuevos setters para los campos que eran 'final' y ahora son no-final
+  
   public void setEtiquetas(List<String> etiquetas) {
     this.etiquetas = new ArrayList<>(etiquetas);
-  }
-
-  public void setId(UUID id) {
-    this.id = id;
   }
 
   public void setEstado(Estado estado) {
@@ -252,73 +211,22 @@ public class Hecho {
   public void setProvincia(String provincia) {
     this.provincia = provincia;
   }
-  
-  public Hecho copiar() {
-    Hecho clonHecho = new Hecho(
-        this.titulo,
-        this.descripcion,
-        this.categoria,
-        this.direccion,
-        this.provincia,
-        this.ubicacion,
-        this.fechaSuceso,
-        this.fechaCarga,
-        this.fuenteOrigen,
-        this.etiquetas
-    );
-    clonHecho.setId(this.id);
-    return  clonHecho;
-  }
 
-  /**
-   * Edita los detalles del hecho.
-   * Permite cambiar el título, descripción, categoría, dirección, ubicación,
-   * etiquetas y fecha de suceso del hecho si el usuario tiene permisos para editarlo.
-   *
-   * @param hecho Hecho
-   */
-  public void editarHecho(
-      Hecho hecho,
-      String titulo,
-      String descripcion,
-      String categoria,
-      String direccion,
-      PuntoGeografico ubicacion,
-      List<String> etiquetas,
-      LocalDateTime fechaSuceso
-  ) {
-    if (LocalDateTime.now().isAfter(hecho.getFechaCarga().plusWeeks(1))) {
-      throw new RuntimeException("Flaco, te pasaste una semana");
-    } else {
-      if (titulo != null) {
-        hecho.setTitulo(titulo);
-      }
-      if (descripcion != null) {
-        hecho.setDescripcion(descripcion);
-      }
-      if (categoria != null) {
-        hecho.setCategoria(categoria);
-      }
-      if (direccion != null) {
-        hecho.setDireccion(direccion);
-      }
-      if (ubicacion != null) {
-        hecho.setUbicacion(ubicacion);
-      }
-      if (etiquetas != null) {
-        hecho.setEtiquetas(etiquetas);
-      }
-      if (fechaSuceso != null) {
-        hecho.setFechaSuceso(fechaSuceso);
-      }
-      hecho.setEstado(Estado.EDITADO);
-    }
-  }
-
-  // Anotación para mapear la propiedad JSON "origen" al setter de 'fuenteOrigen'
   @JsonProperty("origen")
   public void setFuenteOrigen(Origen fuenteOrigen) {
     this.fuenteOrigen = fuenteOrigen;
+  }
+
+  
+  
+  /**
+   * Verifica si el hecho es editable por un usuario específico.
+   * Un hecho es editable por su creador durante una semana desde su fecha de carga.
+   *
+   * @return true si el hecho es editable por el usuario, false en caso contrario
+   */
+  public boolean esEditable() {
+    return LocalDateTime.now().isBefore(fechaCarga.plusWeeks(1));
   }
 
   @Override

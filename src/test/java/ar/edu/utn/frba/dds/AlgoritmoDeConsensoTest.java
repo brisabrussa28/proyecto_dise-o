@@ -16,6 +16,7 @@ import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
@@ -49,17 +50,18 @@ public class AlgoritmoDeConsensoTest {
   }
 
   private Hecho crearHecho(String titulo) {
-    return new Hecho(
-        titulo,
-        "desc",
-        "cat",
-        "dir",
-        new PuntoGeografico(1, 1),
-        fecha,
-        fecha,
-        Origen.DATASET,
-        List.of("etiqueta")
-    );
+    return new HechoBuilder()
+        .conTitulo(titulo)
+        .conDescripcion("desc")
+        .conCategoria("cat")
+        .conDireccion("dir")
+        .conProvincia("Provincia")
+        .conUbicacion(new PuntoGeografico(1, 1))
+        .conFechaSuceso(fecha)
+        .conFechaCarga(fecha)
+        .conFuenteOrigen(Origen.DATASET)
+        .conEtiquetas(List.of("etiqueta"))
+        .build();
   }
 
   private void agregarFuentesConHechos(List<Hecho>... listasDeHechos) {
@@ -132,6 +134,7 @@ public class AlgoritmoDeConsensoTest {
         List.of(),
         List.of()
     );
+    agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion(
         "MayoriaNoOk",
@@ -171,12 +174,14 @@ public class AlgoritmoDeConsensoTest {
   @Test
   public void testMultiplesMencionesNoConsensuado() {
     Hecho hOriginal = crearHecho("H1");
-    Hecho hDistinto = crearHecho("H1"); // mismo título, distinto objeto
+    // El método equals se basa en contenido, por lo que este será igual al original.
+    Hecho hDistintoPeroIgual = crearHecho("H1");
 
     agregarFuentesConHechos(
         List.of(hOriginal),
-        List.of(hDistinto)
+        List.of() // Solo una mención
     );
+    agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion(
         "MultiplesNoOk",

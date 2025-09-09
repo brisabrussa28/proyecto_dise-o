@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteMetaMapa;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.HechoQuerys;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
@@ -36,29 +37,31 @@ public class FuenteMetaMapaTest {
     PuntoGeografico ubicacion = new PuntoGeografico(1.0, 2.0);
     Origen origen = Origen.DATASET;
 
-    Hecho hecho1 = new Hecho(
-        "Inundación grave",
-        "Zona anegada tras lluvias",
-        "inundacion",
-        "Calle Falsa 123",
-        ubicacion,
-        LocalDateTime.now().minusDays(1),
-        LocalDateTime.now(),
-        origen,
-        List.of("clima", "urgente")
-    );
+    Hecho hecho1 = new HechoBuilder()
+        .conTitulo("Inundación grave")
+        .conDescripcion("Zona anegada tras lluvias")
+        .conCategoria("inundacion")
+        .conDireccion("Calle Falsa 123")
+        .conProvincia("Buenos Aires") // Sume provincia
+        .conUbicacion(ubicacion)
+        .conFechaSuceso(LocalDateTime.now().minusDays(1))
+        .conFechaCarga(LocalDateTime.now())
+        .conFuenteOrigen(origen)
+        .conEtiquetas(List.of("clima", "urgente"))
+        .build();
 
-    Hecho hecho2 = new Hecho(
-        "Terremoto leve",
-        "Temblor sentido en el centro",
-        "terremoto",
-        "Avenida Siempre Viva",
-        ubicacion,
-        LocalDateTime.now().minusDays(2),
-        LocalDateTime.now(),
-        origen,
-        List.of("movimiento", "alerta")
-    );
+    Hecho hecho2 = new HechoBuilder()
+        .conTitulo("Terremoto leve")
+        .conDescripcion("Temblor sentido en el centro")
+        .conCategoria("terremoto")
+        .conDireccion("Avenida Siempre Viva")
+        .conProvincia("Mendoza") // Sume provincia
+        .conUbicacion(ubicacion)
+        .conFechaSuceso(LocalDateTime.now().minusDays(2))
+        .conFechaCarga(LocalDateTime.now())
+        .conFuenteOrigen(origen)
+        .conEtiquetas(List.of("movimiento", "alerta"))
+        .build();
 
     when(servicioMock.listadoDeHechos(queryMock)).thenReturn(List.of(hecho1, hecho2));
 

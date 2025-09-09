@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  Se ha cambiado la versión de 2.2 a 2.1 para alinearla con el estándar
+  'javax.persistence' que espera la librería de tests 'jpa-extras'.
+-->
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_1.xsd"
+             version="2.1">
+
+    <!--
+      El nombre "simple-persistence-unit" es el que la librería jpa-extras
+      busca por defecto. Al usar este nombre, todo se conecta automáticamente.
+    -->
+    <persistence-unit name="simple-persistence-unit" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!--
+          IMPORTANTE: Aquí debes listar TODAS tus clases que tengan la anotación @Entity.
+        -->
+        <class>ar.edu.utn.frba.dds.domain.hecho.Hecho</class>
+        <!-- <class>ar.edu.utn.frba.dds.domain.usuario.Usuario</class> -->
+
+
+        <properties>
+            <!-- Configuración para la base de datos en memoria H2. -->
+            <property name="hibernate.connection.driver_class" value="org.h2.Driver" />
+            <property name="hibernate.connection.url" value="jdbc:h2:mem:db;DB_CLOSE_DELAY=-1" />
+            <property name="hibernate.connection.username" value="sa" />
+            <property name="hibernate.connection.password" value="" />
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect" />
+
+            <!-- Crea el esquema de la BD al empezar los tests y lo borra al terminar. -->
+            <property name="hibernate.hbm2ddl.auto" value="create-drop" />
+
+            <!-- Muestra el SQL en la consola (muy útil para depurar). -->
+            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.format_sql" value="true" />
+        </properties>
+
+    </persistence-unit>
+</persistence>
+
