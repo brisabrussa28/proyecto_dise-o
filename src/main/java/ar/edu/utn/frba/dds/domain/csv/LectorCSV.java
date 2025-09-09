@@ -133,7 +133,7 @@ public class LectorCSV {
     String descripcion = extraerCampo(fila, mapeo.get(CampoHecho.DESCRIPCION), columnasPresentes, " ");
     String categoria = extraerCampo(fila, mapeo.get(CampoHecho.CATEGORIA), columnasPresentes, " ");
     String direccion = extraerCampo(fila, mapeo.get(CampoHecho.DIRECCION), columnasPresentes, ", ");
-
+    String provincia = extraerCampo(fila, mapeo.get(CampoHecho.PROVINCIA), columnasPresentes, ", ");
     String latStr = extraerCampo(fila, mapeo.get(CampoHecho.LATITUD), columnasPresentes, "");
     String lonStr = extraerCampo(fila, mapeo.get(CampoHecho.LONGITUD), columnasPresentes, "");
     Double latitud = parseDouble(latStr);
@@ -145,12 +145,14 @@ public class LectorCSV {
     String fechaStr = extraerCampo(fila, mapeo.get(CampoHecho.FECHA_SUCESO), columnasPresentes, "/");
     LocalDateTime fechaSuceso = parseFecha(fechaStr, dateFormat);
 
+
     if (titulo != null && fechaSuceso != null) {
       return new Hecho(
           titulo,
           descripcion,
           categoria,
           direccion,
+          provincia,
           ubicacion,
           fechaSuceso,
           LocalDateTime.now(),

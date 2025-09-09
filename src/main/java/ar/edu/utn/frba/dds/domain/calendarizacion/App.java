@@ -89,6 +89,7 @@ public class App {
         "Descripcion",
         "PRUEBA",
         "Direccion de prueba 123",
+        "aaa",
         new PuntoGeografico(-123123, 123123),
         LocalDateTime.now().minusWeeks(2),
         LocalDateTime.now(),

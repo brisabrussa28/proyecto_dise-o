@@ -28,6 +28,7 @@ public class Hecho {
   private PuntoGeografico ubicacion;
   private LocalDateTime fechaSuceso;
   private Estado estado;
+  private String provincia;
   // Constructor público sin argumentos: NECESARIO para la deserialización de Jackson
 
   /**
@@ -48,6 +49,7 @@ public class Hecho {
    * @param descripcion      string
    * @param categoria        string
    * @param direccion        string
+   * @param provincia        string
    * @param ubicacion        PuntoGeografico
    * @param fechaSuceso      LocalDateTime
    * @param fechaCarga       LocalDateTime
@@ -59,6 +61,7 @@ public class Hecho {
       String descripcion,
       String categoria,
       String direccion,
+      String provincia,
       PuntoGeografico ubicacion,
       LocalDateTime fechaSuceso,
       LocalDateTime fechaCarga,
@@ -83,6 +86,7 @@ public class Hecho {
     this.fuenteOrigen = fuenteOrigen;
     this.etiquetas = new ArrayList<>(etiquetas);
     this.id = UUID.randomUUID();
+    this.provincia = provincia;
   }
 
 
@@ -185,6 +189,11 @@ public class Hecho {
     return estado;
   }
 
+  public String getProvincia() {
+  return provincia;
+}
+  
+  
   /**
    * Verifica si el hecho es editable por un usuario específico.
    * Un hecho es editable por su creador durante una semana desde su fecha de carga.
@@ -196,6 +205,8 @@ public class Hecho {
     return hoy.isBefore(fechaCarga.plusWeeks(1));
   }
 
+  
+  
 
   public void setTitulo(String titulo) {
     this.titulo = titulo;
@@ -238,12 +249,17 @@ public class Hecho {
     this.fechaCarga = fechaCarga;
   }
 
+  public void setProvincia(String provincia) {
+    this.provincia = provincia;
+  }
+  
   public Hecho copiar() {
     Hecho clonHecho = new Hecho(
         this.titulo,
         this.descripcion,
         this.categoria,
         this.direccion,
+        this.provincia,
         this.ubicacion,
         this.fechaSuceso,
         this.fechaCarga,
