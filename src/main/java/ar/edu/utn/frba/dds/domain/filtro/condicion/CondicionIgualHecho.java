@@ -2,7 +2,7 @@ package ar.edu.utn.frba.dds.domain.filtro.condicion;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 
-public class CondicionIgualHecho implements Condicion {
+public class CondicionIgualHecho extends Condicion {
   private Hecho hechoAComparar;
 
   public CondicionIgualHecho(Hecho hechoAComparar) {

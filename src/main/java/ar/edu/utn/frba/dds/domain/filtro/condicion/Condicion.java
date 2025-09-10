@@ -2,7 +2,7 @@ package ar.edu.utn.frba.dds.domain.filtro.condicion;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 
-public interface Condicion {
+public abstract class Condicion {
     /**
      * Método abstracto que cada tipo de condición debe implementar para
      * determinar si un Hecho cumple con el criterio.

@@ -2,7 +2,7 @@ package ar.edu.utn.frba.dds.domain.filtro.condicion;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 
-public class CondicionNot implements Condicion {
+public class CondicionNot extends Condicion {
   private Condicion condicion;
 
   public CondicionNot(Condicion condicion) {
