@@ -8,6 +8,7 @@ import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,6 +24,7 @@ public class Coleccion {
   private final String categoria;
   private Filtro filtro;
   private AlgoritmoDeConsenso algoritmo;
+  private List<Hecho> hechosConsensuados = new ArrayList<>();
 
   /**
    * Constructor de la colección.
@@ -134,24 +136,27 @@ public class Coleccion {
   /**
    * Obtiene los hechos de la colección filtrados por un criterio y un filtro externo opcional.
    *
-   * @param repositorioDeReportes RepositorioDeReportes
+   * @param repo RepositorioDeReportes
    * @return Lista de hechos filtrados.
    */
-  public List<Hecho> getHechos(RepositorioDeSolicitudes repositorioDeReportes) {
-    List<Hecho> hechos = fuente.obtenerHechos();
-    if (algoritmoNulo()) {
-      return repositorioDeReportes.filtroExcluyente().filtrar(hechos);
-    } else {
-      List<Fuente> fuentesNodo = this.obtenerFuentesDelNodo();
-      return algoritmo.listaDeHechosConsensuados(
-          (repositorioDeReportes.filtroExcluyente())
-              .filtrar(hechos), fuentesNodo
-      );
+  public List<Hecho> getHechos(RepositorioDeSolicitudes repo) {
+      return repo.filtroExcluyente().filtrar(fuente.obtenerHechos());
+  }
+
+  public void recalcularHechosConsensuados(RepositorioDeSolicitudes repo) {
+    List<Fuente> fuentesNodo = this.obtenerFuentesDelNodo();
+    List<Hecho> hechos = getHechos(repo);
+
+    if(algoritmo == null) {
+      this.hechosConsensuados = hechos;
+    }
+    else{
+      this.hechosConsensuados = algoritmo.listaDeHechosConsensuados(hechos,fuentesNodo);
     }
   }
 
-  private boolean algoritmoNulo() {
-    return this.algoritmo == null;
+  public List<Hecho> getHechosConsensuados() {
+    return new ArrayList<>(hechosConsensuados);
   }
 
   /**
