@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serializadores.lectores.csv;
+package ar.edu.utn.frba.dds.domain.serializadores.csv.Lector;
 
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
@@ -28,9 +28,9 @@ import java.util.logging.Logger;
 /**
  * Lector de archivos CSV a objetos Hecho. ALTAMENTE ACOPLADO A LA ESTRUCTURA DE HECHO. TODO: DESACOPLAR
  */
-public class LectorCSV {
+public class LectorCSVold {
 
-  private static final Logger logger = Logger.getLogger(LectorCSV.class.getName());
+  private static final Logger logger = Logger.getLogger(LectorCSVold.class.getName());
 
   private static final Set<CampoHecho> CAMPOS_REQUERIDOS = Set.of(
       CampoHecho.TITULO,
@@ -41,7 +41,7 @@ public class LectorCSV {
   private final String dateFormatStr;
   private final Map<CampoHecho, List<String>> mapeoColumnas;
 
-  public LectorCSV(
+  public LectorCSVold(
       char separator,
       String dateFormatStr,
       Map<CampoHecho, List<String>> mapeoColumnas

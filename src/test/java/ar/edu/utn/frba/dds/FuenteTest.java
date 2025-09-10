@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.serializadores.lectores.csv.LectorCSV;
+import ar.edu.utn.frba.dds.domain.serializadores.csv.Lector.LectorCSVold;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
@@ -73,7 +73,7 @@ public class FuenteTest {
     @Test
     public void usaLectorCSVCorrectamente() {
       Hecho hechoMock = mock(Hecho.class);
-      LectorCSV lectorMock = mock(LectorCSV.class);
+      LectorCSVold lectorMock = mock(LectorCSVold.class);
       when(lectorMock.importar("ruta.csv")).thenReturn(List.of(hechoMock));
       FuenteEstatica fuente = new FuenteEstatica("MiFuente", "ruta.csv", lectorMock);
 
@@ -86,7 +86,7 @@ public class FuenteTest {
 
     @Test
     public void devuelveListaVaciaSiCSVEstaVacio() {
-      LectorCSV lectorMock = mock(LectorCSV.class);
+      LectorCSVold lectorMock = mock(LectorCSVold.class);
       when(lectorMock.importar(anyString())).thenReturn(List.of());
       FuenteEstatica fuente = new FuenteEstatica("Vacia", "vac.csv", lectorMock);
       assertTrue(fuente.obtenerHechos().isEmpty());

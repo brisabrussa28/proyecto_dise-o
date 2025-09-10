@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serializadores.exportadores.csv.ModoExportacion;
+package ar.edu.utn.frba.dds.domain.serializadores.csv.Exportador.ModoExportacion;
 
 import java.io.File;
 

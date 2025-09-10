@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-import ar.edu.utn.frba.dds.domain.serializadores.lectores.csv.LectorCSV;
+import ar.edu.utn.frba.dds.domain.serializadores.csv.Lector.LectorCSVold;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 
@@ -10,7 +10,7 @@ import java.util.List;
 public class FuenteEstatica implements Fuente {
 
   private final String rutaCsv;
-  private final LectorCSV lectorCSV;
+  private final LectorCSVold lectorCSV;
   private final String nombre;
 
   /**
@@ -20,7 +20,7 @@ public class FuenteEstatica implements Fuente {
    * @param rutaCsv   Ruta del archivo CSV que contiene los datos.
    * @param lectorCSV Carácter separador utilizado en el CSV.
    */
-  public FuenteEstatica(String nombre, String rutaCsv, LectorCSV lectorCSV) {
+  public FuenteEstatica(String nombre, String rutaCsv, LectorCSVold lectorCSV) {
     this.validarFuente(nombre);
     this.nombre = nombre; // no carga los hechos en el constructor
     if (rutaCsv == null || lectorCSV == null) {

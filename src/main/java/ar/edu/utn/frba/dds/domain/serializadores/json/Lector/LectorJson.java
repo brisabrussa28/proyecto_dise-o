@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serializadores.lectores.json;
+package ar.edu.utn.frba.dds.domain.serializadores.json.Lector;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

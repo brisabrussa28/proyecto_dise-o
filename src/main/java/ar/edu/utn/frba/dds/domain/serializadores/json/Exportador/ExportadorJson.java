@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serializadores.exportadores.json;
+package ar.edu.utn.frba.dds.domain.serializadores.json.Exportador;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

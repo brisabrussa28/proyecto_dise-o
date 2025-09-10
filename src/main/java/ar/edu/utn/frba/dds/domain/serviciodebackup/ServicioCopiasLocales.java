@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds.domain.serviciodebackup;
 
-import ar.edu.utn.frba.dds.domain.serializadores.exportadores.json.ExportadorJson;
-import ar.edu.utn.frba.dds.domain.serializadores.lectores.json.LectorJson;
+import ar.edu.utn.frba.dds.domain.serializadores.json.Exportador.ExportadorJson;
+import ar.edu.utn.frba.dds.domain.serializadores.json.Lector.LectorJson;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 
