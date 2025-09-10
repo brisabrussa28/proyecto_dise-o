@@ -22,17 +22,17 @@ public class HechoBuilder {
   private List<String> etiquetas = new ArrayList<>();
 
   public HechoBuilder copiar(Hecho original) {
-      this.titulo = original.getTitulo();
-      this.descripcion = original.getDescripcion();
-      this.categoria = original.getCategoria();
-      this.direccion = original.getDireccion();
-      this.provincia = original.getProvincia();
-      this.ubicacion = original.getUbicacion();
-      this.fechaSuceso = original.getFechaSuceso();
-      this.fechaCarga = original.getFechaCarga();
-      this.fuenteOrigen = original.getOrigen();
-      this.etiquetas = original.getEtiquetas();
-      return this;
+    this.titulo = original.getTitulo();
+    this.descripcion = original.getDescripcion();
+    this.categoria = original.getCategoria();
+    this.direccion = original.getDireccion();
+    this.provincia = original.getProvincia();
+    this.ubicacion = original.getUbicacion();
+    this.fechaSuceso = original.getFechaSuceso();
+    this.fechaCarga = original.getFechaCarga();
+    this.fuenteOrigen = original.getOrigen();
+    this.etiquetas = original.getEtiquetas();
+    return this;
   }
 
   public HechoBuilder conTitulo(String titulo) {
@@ -93,18 +93,19 @@ public class HechoBuilder {
    * @throws IllegalStateException si los datos obligatorios no se proporcionan o son inválidos.
    */
   public Hecho build() {
-    // La lógica de validación se centraliza aquí, antes de crear el objeto.
-    if (titulo == null) {
+    if (titulo == null || titulo.isBlank()) {
       throw new IllegalStateException("El título es obligatorio para crear un Hecho.");
     }
 
-    if (fechaSuceso != null) {
-      if (fechaSuceso.isAfter(fechaCarga)) {
-        throw new IllegalStateException("La fecha del suceso no puede ser posterior a la fecha de carga.");
-      }
-      if (fechaSuceso.isAfter(LocalDateTime.now())) {
-        throw new IllegalStateException("La fecha del suceso no puede ser una fecha futura.");
-      }
+    if (fechaSuceso == null) {
+      throw new IllegalStateException("La fecha del suceso es obligatoria para crear un Hecho.");
+    }
+
+    if (fechaSuceso.isAfter(fechaCarga)) {
+      throw new IllegalStateException("La fecha del suceso no puede ser posterior a la fecha de carga.");
+    }
+    if (fechaSuceso.isAfter(LocalDateTime.now())) {
+      throw new IllegalStateException("La fecha del suceso no puede ser una fecha futura.");
     }
 
     if (fechaCarga.isAfter(LocalDateTime.now())) {
@@ -114,4 +115,3 @@ public class HechoBuilder {
     return new Hecho(titulo, descripcion, categoria, direccion, provincia, ubicacion, fechaSuceso, fechaCarga, fuenteOrigen, etiquetas);
   }
 }
-

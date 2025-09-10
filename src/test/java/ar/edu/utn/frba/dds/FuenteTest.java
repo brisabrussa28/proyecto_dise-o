@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
+import ar.edu.utn.frba.dds.domain.serializadores.lectores.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;

@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.csv;
+package ar.edu.utn.frba.dds.domain.serializadores.lectores.csv;
 
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 /**
- * Lector de archivos CSV a objetos Hecho.
+ * Lector de archivos CSV a objetos Hecho. ALTAMENTE ACOPLADO A LA ESTRUCTURA DE HECHO. TODO: DESACOPLAR
  */
 public class LectorCSV {
 
@@ -203,7 +203,7 @@ public class LectorCSV {
           }
         })
         .map(fila::get)
-        .filter(s -> s != null && !s.trim().isEmpty())
+        .filter(s -> s != null && !s.isBlank()) // <<-- CAMBIO CLAVE AQUÍ
         .reduce((a, b) -> a + separador + b)
         .orElse(null);
   }

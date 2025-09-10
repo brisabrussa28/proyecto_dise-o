@@ -1,6 +1,6 @@
-package ar.edu.utn.frba.dds.domain.csv;
+package ar.edu.utn.frba.dds.domain.serializadores.exportadores.csv;
 
-import ar.edu.utn.frba.dds.domain.csv.ModoExportacion.ModoExportacion;
+import ar.edu.utn.frba.dds.domain.serializadores.exportadores.csv.ModoExportacion.ModoExportacion;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;

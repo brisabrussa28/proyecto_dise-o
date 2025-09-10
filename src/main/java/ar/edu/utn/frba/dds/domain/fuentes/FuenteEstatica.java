@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
+import ar.edu.utn.frba.dds.domain.serializadores.lectores.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 

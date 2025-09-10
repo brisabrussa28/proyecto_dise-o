@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
+import ar.edu.utn.frba.dds.domain.serializadores.lectores.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroPredicado;
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;

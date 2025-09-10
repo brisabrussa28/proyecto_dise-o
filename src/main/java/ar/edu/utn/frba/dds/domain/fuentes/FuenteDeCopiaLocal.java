@@ -2,7 +2,7 @@ package ar.edu.utn.frba.dds.domain.fuentes;
 
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serviciodebackup.ServicioDeBackup;
+import ar.edu.utn.frba.dds.domain.serviciodebackup.ServicioCopiasLocales;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 
@@ -15,18 +15,18 @@ public abstract class FuenteDeCopiaLocal implements Fuente {
 
   protected final String nombre;
   protected List<Hecho> cacheDeHechos;
-  protected final ServicioDeBackup servicioDeBackup;
+  protected final ServicioCopiasLocales servicioDeBackup;
 
   public FuenteDeCopiaLocal(String nombre, String jsonFilePathParaCopias) {
     this.validarFuente(nombre);
     this.nombre = nombre;
-    this.servicioDeBackup = new ServicioDeBackup(jsonFilePathParaCopias);
+    this.servicioDeBackup = new ServicioCopiasLocales(jsonFilePathParaCopias);
     this.cacheDeHechos = this.servicioDeBackup
         .cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {
         });
   }
 
-  public FuenteDeCopiaLocal(String nombre, ServicioDeBackup servicioDeBackup) {
+  public FuenteDeCopiaLocal(String nombre, ServicioCopiasLocales servicioDeBackup) {
     this.validarFuente(nombre);
     this.nombre = nombre;
     this.servicioDeBackup = servicioDeBackup;

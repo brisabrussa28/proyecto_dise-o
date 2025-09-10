@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serviciodebackup;
+package ar.edu.utn.frba.dds.domain.serializadores.lectores.json;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,35 +12,22 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ServicioDeBackup {
+public class LectorJson {
 
-  private static final Logger LOGGER = Logger.getLogger(ServicioDeBackup.class.getName());
-  private final String jsonFilePath;
+  private static final Logger LOGGER = Logger.getLogger(LectorJson.class.getName());
   private final ObjectMapper objectMapper;
 
-  public ServicioDeBackup(String jsonFilePath) {
-    this.jsonFilePath = jsonFilePath;
+  public LectorJson() {
     this.objectMapper = new ObjectMapper();
-    this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     this.objectMapper.registerModule(new JavaTimeModule());
     this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
   }
 
-  public <T> void guardarCopiaLocalJson(List<T> objetos) {
-    try {
-      objectMapper.writeValue(new File(jsonFilePath), objetos);
-      LOGGER.info("Copia local de objetos guardada en " + jsonFilePath);
-    } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Error al escribir la copia JSON local en " + jsonFilePath, e);
-    }
-  }
-
-  public <T> List<T> cargarCopiaLocalJson(TypeReference<List<T>> typeReference) {
+  public <T> List<T> cargarCopiaLocalJson(String jsonFilePath, TypeReference<List<T>> typeReference) {
     File jsonFile = new File(jsonFilePath);
 
-    // El constructor ya asegura que el archivo existe, pero podría estar vacío.
-    if (jsonFile.length() == 0) {
-      LOGGER.warning("El archivo JSON en " + jsonFilePath + " está vacío. Se retorna una lista vacía.");
+    if (!jsonFile.exists() || jsonFile.length() == 0) {
+      LOGGER.warning("El archivo JSON en " + jsonFilePath + " no existe o está vacío. Se retorna una lista vacía.");
       return new ArrayList<>();
     }
 
@@ -55,9 +42,5 @@ public class ServicioDeBackup {
       LOGGER.log(Level.SEVERE, "Error de I/O al cargar la copia JSON " + jsonFilePath, e);
       return new ArrayList<>();
     }
-  }
-
-  public String getJsonFilePath() {
-    return jsonFilePath;
   }
 }

@@ -1,12 +1,14 @@
-package ar.edu.utn.frba.dds.domain.csv.ModoExportacion;
+package ar.edu.utn.frba.dds.domain.serializadores.exportadores.csv.ModoExportacion;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
- * Busca el siguiente numero disponible para el nombre de archivo.
+ * Crea un nuevo archivo con un timestamp.
  * Nunca anexa, siempre crea un archivo nuevo (sobrescribe).
  */
-public class ModoNumerar implements ModoExportacion {
+public class ModoTimestamp implements ModoExportacion {
   @Override
   public String obtenerPathFinal(String pathOriginal) {
     File file = new File(pathOriginal);
@@ -24,19 +26,13 @@ public class ModoNumerar implements ModoExportacion {
       extension = "";
     }
 
-    int contador = 1;
-    File nuevoArchivo;
-    String nuevoPath;
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss-SSS");
+    String timestamp = LocalDateTime.now().format(formatter);
+    String newFileName = String.format("%s_%s%s", baseName, timestamp, extension);
 
-    do {
-      String nuevoNombre = String.format("%s_%d%s", baseName, contador, extension);
-      nuevoPath = (parentDir == null) ? nuevoNombre : new File(parentDir, nuevoNombre).getPath();
-      nuevoArchivo = new File(nuevoPath);
-      contador++;
-    } while (nuevoArchivo.exists());
-
-    return nuevoPath;
+    return (parentDir == null) ? newFileName : new File(parentDir, newFileName).getPath();
   }
+
 
   @Override
   public boolean debeAnexar() {
