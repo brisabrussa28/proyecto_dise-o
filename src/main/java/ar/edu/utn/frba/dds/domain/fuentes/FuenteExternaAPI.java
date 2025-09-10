@@ -23,11 +23,11 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
   @Override
   protected List<Hecho> consultarNuevosHechos() {
     try {
-      // Delega la responsabilidad de la consulta al adaptador inyectado.
+      // Delega la responsabilidad de la consulta al adaptador.
       return adaptador.consultarHechos();
     } catch (Exception e) {
       System.err.println("Error al consultar la fuente externa '" + this.getNombre() + "': " + e.getMessage());
-      e.printStackTrace(); // Es buena idea loggear el stack trace para debug
+      e.printStackTrace();
       return Collections.emptyList();
     }
   }

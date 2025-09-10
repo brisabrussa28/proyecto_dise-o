@@ -107,10 +107,6 @@ public class HechoBuilder {
       }
     }
 
-    if (fechaSuceso.isAfter(LocalDateTime.now())) {
-      throw new IllegalStateException("La fecha del suceso no puede ser una fecha futura.");
-    }
-
     if (fechaCarga.isAfter(LocalDateTime.now())) {
       throw new IllegalStateException("La fecha de carga no puede ser una fecha futura.");
     }

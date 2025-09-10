@@ -208,4 +208,34 @@
   "estado" : "ORIGINAL",
   "provincia" : "aaa",
   "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "fechaCarga" : "2025-09-09T22:07:27.063014679",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-08-26T22:07:27.062980755",
+  "estado" : "ORIGINAL",
+  "provincia" : "aaa",
+  "origen" : "PROVISTO_CONTRIBUYENTE"
+}, {
+  "etiquetas" : [ "#PRUEBA", "#ESTOESUNAPRUEBA" ],
+  "fechaCarga" : "2025-09-09T22:07:27.15607712",
+  "titulo" : "Un hecho",
+  "descripcion" : "Descripcion",
+  "categoria" : "PRUEBA",
+  "direccion" : "Direccion de prueba 123",
+  "ubicacion" : {
+    "latitud" : -123123.0,
+    "longitud" : 123123.0
+  },
+  "fechaSuceso" : "2025-08-26T22:07:27.156051812",
+  "estado" : "ORIGINAL",
+  "provincia" : "aaa",
+  "origen" : "PROVISTO_CONTRIBUYENTE"
 } ]
