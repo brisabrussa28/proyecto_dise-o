@@ -11,6 +11,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
@@ -20,16 +22,20 @@ import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.serviciometamapa.ServicioMetaMapa;
+import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import java.io.IOException;
-import java.nio.file.Files; // Importar Files
-import java.nio.file.Path; // Importar Path
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class ServicioMetaMapaTest {
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
@@ -44,23 +50,26 @@ public class ServicioMetaMapaTest {
   );
   private WireMockServer wireMockServer;
   private ServicioMetaMapa servicioMetaMapa;
-  private Path tempJsonFile; // Declarar la variable para el archivo temporal
+  private Path tempJsonFile;
+  @Mock
+  private Serializador<Hecho> serializadorMock;
 
   @BeforeEach
-  public void setUp() throws IOException { // Añadir throws IOException
+  public void setUp() throws IOException {
+    MockitoAnnotations.openMocks(this);
     wireMockServer = new WireMockServer(8080);
     wireMockServer.start();
     configureFor("localhost", 8080);
 
     this.servicioMetaMapa = new ServicioMetaMapa("http://localhost:8080");
-    // Crear un archivo JSON temporal para la FuenteDinamica
     tempJsonFile = Files.createTempFile("test_servicio_metamapa_", ".json");
+    when(serializadorMock.importar(anyString())).thenReturn(new ArrayList<>());
   }
 
   @AfterEach
-  public void tearDown() throws IOException { // Añadir throws IOException
+  public void tearDown() throws IOException {
     wireMockServer.stop();
-    Files.deleteIfExists(tempJsonFile); // Limpiar el archivo temporal
+    Files.deleteIfExists(tempJsonFile);
   }
 
   @Test
@@ -113,33 +122,14 @@ public class ServicioMetaMapaTest {
         .withBody(
             "{ \"id\": \"b6c5f3e1-77a0-4c4a-b922-2a4b0f4f89b1\" }")));
 
-    PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
-    String motivo = "a".repeat(600);
-    List<String> etiquetasAux = List.of(
-        "#ancianita",
-        "#robo_a_mano_armada",
-        "#violencia",
-        "#leyDeProtecciónALasAncianitas",
-        "#NOalaVIOLENCIAcontraABUELITAS"
-    );
-
     Hecho hecho = new HechoBuilder()
         .conTitulo("titulo")
-        .conDescripcion("desc")
-        .conCategoria("Robos")
-        .conDireccion("direccion")
-        .conProvincia("CABA")
-        .conUbicacion(pgAux)
-        .conFechaSuceso(LocalDateTime.now())
-        .conFechaCarga(LocalDateTime.now())
-        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conEtiquetas(etiquetasAux)
+        .conFechaSuceso(LocalDateTime.now().minusDays(1))
         .build();
 
-    // Inicializar FuenteDinamica con el archivo JSON temporal
-    FuenteDinamica fuente = new FuenteDinamica("MiFuente", tempJsonFile.toString());
+    FuenteDinamica fuente = new FuenteDinamica("MiFuente", tempJsonFile.toString(), serializadorMock);
     fuente.agregarHecho(hecho);
-
+    String motivo = "a".repeat(501);
     Solicitud solicitud = new Solicitud(UUID.randomUUID(), hecho, motivo);
     int codigo = servicioMetaMapa.enviarSolicitud(solicitud);
     assertEquals(201, codigo);

@@ -1,40 +1,39 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serviciodebackup.ServicioCopiasLocales;
-import com.fasterxml.jackson.core.type.TypeReference;
+import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
 import java.util.List;
 
 /**
- * Clase abstracta que encapsula la lógica de caching para una fuente de datos.
- * Ya NO maneja su propia programación de tareas. Su actualización debe ser
- * invocada desde un proceso externo.
+ * Clase abstracta que encapsula la lógica de caching para una fuente de datos,
+ * utilizando un Serializador para persistir la copia local.
  */
 public abstract class FuenteDeCopiaLocal implements Fuente {
 
   protected final String nombre;
   protected List<Hecho> cacheDeHechos;
-  protected final ServicioCopiasLocales servicioDeBackup;
+  protected final Serializador<Hecho> serializador;
+  protected final String rutaCopiaLocal;
 
-  public FuenteDeCopiaLocal(String nombre, String jsonFilePathParaCopias) {
+  /**
+   * Constructor que recibe un serializador para manejar la copia local.
+   *
+   * @param nombre         Nombre de la fuente.
+   * @param rutaCopiaLocal Ruta del archivo para guardar/cargar la copia (e.g., "copia.json").
+   * @param serializador   Serializador para manejar la persistencia de la caché.
+   */
+  public FuenteDeCopiaLocal(String nombre, String rutaCopiaLocal, Serializador<Hecho> serializador) {
     this.validarFuente(nombre);
     this.nombre = nombre;
-    this.servicioDeBackup = new ServicioCopiasLocales(jsonFilePathParaCopias);
-    this.cacheDeHechos = this.servicioDeBackup
-        .cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {
-        });
+    this.rutaCopiaLocal = rutaCopiaLocal;
+    this.serializador = serializador;
+    this.cacheDeHechos = this.serializador.importar(this.rutaCopiaLocal);
   }
 
-  public FuenteDeCopiaLocal(String nombre, ServicioCopiasLocales servicioDeBackup) {
-    this.validarFuente(nombre);
-    this.nombre = nombre;
-    this.servicioDeBackup = servicioDeBackup;
-    this.cacheDeHechos = this.servicioDeBackup
-        .cargarCopiaLocalJson(new TypeReference<List<Hecho>>() {
-        });
-  }
-
+  /**
+   * Lógica para consultar los nuevos hechos desde el origen real (API, etc.).
+   * @return La lista de hechos actualizada.
+   */
   protected abstract List<Hecho> consultarNuevosHechos();
 
   @Override
@@ -43,13 +42,13 @@ public abstract class FuenteDeCopiaLocal implements Fuente {
   }
 
   /**
-   * Actualizamos la fuente de forma sincronica.
-   * Este es el método que llamamos desde el crontab.
+   * Actualiza la fuente de forma síncrona: consulta nuevos hechos,
+   * actualiza la caché en memoria y persiste la caché en disco usando el serializador.
    */
   public void forzarActualizacionSincrona() {
     List<Hecho> nuevosHechos = this.consultarNuevosHechos();
     this.cacheDeHechos = nuevosHechos;
-    this.servicioDeBackup.guardarCopiaLocalJson(this.cacheDeHechos);
+    this.serializador.exportar(this.cacheDeHechos, this.rutaCopiaLocal);
   }
 
   public String getNombre() {

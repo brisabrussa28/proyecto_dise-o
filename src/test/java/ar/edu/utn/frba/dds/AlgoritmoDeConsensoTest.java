@@ -20,14 +20,23 @@ import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
+import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class AlgoritmoDeConsensoTest {
+  @Mock
   private RepositorioDeSolicitudes repo;
+  @Mock
   private Filtro filtroExcluyente;
+  @Mock
+  private Serializador<Hecho> serializadorMock;
+
   private FuenteDeAgregacion agregador;
   private AlgoritmoDeConsenso absoluta;
   private AlgoritmoDeConsenso mayoriaSimple;
@@ -37,12 +46,13 @@ public class AlgoritmoDeConsensoTest {
 
   @BeforeEach
   public void setUp() {
-    repo = mock(RepositorioDeSolicitudes.class);
-    filtroExcluyente = mock(Filtro.class);
+    MockitoAnnotations.openMocks(this);
     when(filtroExcluyente.filtrar(anyList()))
         .thenAnswer(invocation -> invocation.getArgument(0));
     when(repo.filtroExcluyente()).thenReturn(filtroExcluyente);
-    agregador = new FuenteDeAgregacion("Agregador", "/tmp/fake.json");
+    when(serializadorMock.importar("/tmp/fake.json")).thenReturn(new ArrayList<>());
+
+    agregador = new FuenteDeAgregacion("Agregador", "/tmp/fake.json", serializadorMock);
 
     absoluta = new Absoluta();
     mayoriaSimple = new MayoriaSimple();
@@ -52,20 +62,14 @@ public class AlgoritmoDeConsensoTest {
   private Hecho crearHecho(String titulo) {
     return new HechoBuilder()
         .conTitulo(titulo)
-        .conDescripcion("desc")
-        .conCategoria("cat")
-        .conDireccion("dir")
-        .conProvincia("Provincia")
-        .conUbicacion(new PuntoGeografico(1, 1))
         .conFechaSuceso(fecha)
-        .conFechaCarga(fecha)
-        .conFuenteOrigen(Origen.DATASET)
-        .conEtiquetas(List.of("etiqueta"))
         .build();
   }
 
+  @SafeVarargs
   private void agregarFuentesConHechos(List<Hecho>... listasDeHechos) {
-    agregador = new FuenteDeAgregacion("Agregador", "tmp/fake.json"); // reinicia cada vez
+    // Reinicia el agregador para cada test con las fuentes necesarias
+    agregador = new FuenteDeAgregacion("Agregador", "/tmp/fake.json", serializadorMock);
     for (List<Hecho> lista : listasDeHechos) {
       Fuente f = mock(Fuente.class);
       when(f.obtenerHechos()).thenReturn(lista);
@@ -74,7 +78,7 @@ public class AlgoritmoDeConsensoTest {
   }
 
   @Test
-  public void AlgoritmoAbsolutaHechosConsensuados() {
+  public void algoritmoAbsolutaHechosConsensuados() {
     Hecho h1 = crearHecho("H1");
     Hecho h2 = crearHecho("H2");
     agregarFuentesConHechos(
@@ -83,16 +87,15 @@ public class AlgoritmoDeConsensoTest {
     );
     agregador.forzarActualizacionSincrona();
 
-    Coleccion coleccion = new Coleccion("AbsolutaOk", agregador, "Desc", "Catgoria", absoluta);
+    Coleccion coleccion = new Coleccion("AbsolutaOk", agregador, "Desc", "Categoria", absoluta);
 
     List<Hecho> result = coleccion.getHechos(repo);
     assertEquals(2, result.size());
-    assertTrue(result.contains(h1));
-    assertTrue(result.contains(h2));
+    assertTrue(result.containsAll(List.of(h1, h2)));
   }
 
   @Test
-  public void AlgoritmoAbsolutaHechosNoConsensuados() {
+  public void algoritmoAbsolutaHechosNoConsensuados() {
     Hecho h1 = crearHecho("H1");
     Hecho h2 = crearHecho("H2");
     agregarFuentesConHechos(
@@ -101,7 +104,7 @@ public class AlgoritmoDeConsensoTest {
     );
     agregador.forzarActualizacionSincrona();
 
-    Coleccion coleccion = new Coleccion("AbsolutaNoOk", agregador, "Desc", "Catgoria", absoluta);
+    Coleccion coleccion = new Coleccion("AbsolutaNoOk", agregador, "Desc", "Categoria", absoluta);
 
     List<Hecho> result = coleccion.getHechos(repo);
     assertEquals(1, result.size());
@@ -110,7 +113,7 @@ public class AlgoritmoDeConsensoTest {
   }
 
   @Test
-  public void AlgoritmoMayoriaSimpleConsensuado() {
+  public void algoritmoMayoriaSimpleConsensuado() {
     Hecho h1 = crearHecho("H1");
     agregarFuentesConHechos(
         List.of(h1),
@@ -119,7 +122,7 @@ public class AlgoritmoDeConsensoTest {
     );
     agregador.forzarActualizacionSincrona();
 
-    Coleccion coleccion = new Coleccion("MayoriaOk", agregador, "Desc", "Catgoria", mayoriaSimple);
+    Coleccion coleccion = new Coleccion("MayoriaOk", agregador, "Desc", "Categoria", mayoriaSimple);
 
     List<Hecho> result = coleccion.getHechos(repo);
     assertEquals(1, result.size());
@@ -127,7 +130,7 @@ public class AlgoritmoDeConsensoTest {
   }
 
   @Test
-  public void AlgoritmoMayoriaSimpleNoConsensuado() {
+  public void algoritmoMayoriaSimpleNoConsensuado() {
     Hecho h1 = crearHecho("H1");
     agregarFuentesConHechos(
         List.of(h1),
@@ -140,7 +143,7 @@ public class AlgoritmoDeConsensoTest {
         "MayoriaNoOk",
         agregador,
         "Desc",
-        "Catgoria",
+        "Categoria",
         mayoriaSimple
     );
 
@@ -162,7 +165,7 @@ public class AlgoritmoDeConsensoTest {
         "MultiplesOk",
         agregador,
         "Desc",
-        "Catgoria",
+        "Categoria",
         multiplesMenciones
     );
 
@@ -174,9 +177,6 @@ public class AlgoritmoDeConsensoTest {
   @Test
   public void testMultiplesMencionesNoConsensuado() {
     Hecho hOriginal = crearHecho("H1");
-    // El método equals se basa en contenido, por lo que este será igual al original.
-    Hecho hDistintoPeroIgual = crearHecho("H1");
-
     agregarFuentesConHechos(
         List.of(hOriginal),
         List.of() // Solo una mención
@@ -187,7 +187,7 @@ public class AlgoritmoDeConsensoTest {
         "MultiplesNoOk",
         agregador,
         "Desc",
-        "Catgoria",
+        "Categoria",
         multiplesMenciones
     );
 

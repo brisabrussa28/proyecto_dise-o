@@ -1,125 +1,102 @@
 package ar.edu.utn.frba.dds.domain.calendarizacion;
 
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
+import ar.edu.utn.frba.dds.domain.serializadores.SerializadorJson;
+import ar.edu.utn.frba.dds.domain.serializadores.json.Exportador.ExportadorJson;
+import ar.edu.utn.frba.dds.domain.serializadores.json.Lector.LectorJson;
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Punto de entrada para nuestro crontab.
+ * Punto de entrada para la ejecución de tareas programadas (crontab).
+ * Se encarga de registrar y actualizar las fuentes de datos que requieren caché.
  */
 public class App {
 
-  // El registro de fuentes ahora es una variable de instancia, no estática.
+  private static final Logger logger = Logger.getLogger(App.class.getName());
   private final Map<String, FuenteDeCopiaLocal> fuentesRegistradas = new HashMap<>();
 
-  /**
-   * Registra una nueva fuente cacheable para que pueda ser actualizada por esta aplicación.
-   *
-   * @param fuente La instancia de la fuente a registrar.
-   */
   public void registrarFuente(FuenteDeCopiaLocal fuente) {
     if (fuente != null) {
       this.fuentesRegistradas.put(fuente.getNombre(), fuente);
     }
   }
 
-  /**
-   * Ejecuta la actualización para una fuente específica por su nombre.
-   *
-   * @param nombreFuente El nombre de la fuente a actualizar.
-   */
-// no se si dejarlo pero creo que debriamos borrarlo
-  public void ejecutarActualizacion(String nombreFuente) {
-    FuenteDeCopiaLocal fuenteAActualizar = fuentesRegistradas.get(nombreFuente);
-
-    if (fuenteAActualizar != null) {
-      fuenteAActualizar.forzarActualizacionSincrona();
-      }
-    //agregar log
-    else {
-      throw new IllegalStateException("Error al actualizar...");
-    }
-  }
-
-  /**
-   * Ejecuta la actualización para una todas las fuentes.
-   *
-   */
   public void ejecutarActualizacionTodasLasFuentes() {
+    logger.info("Iniciando la actualización de todas las fuentes registradas...");
     fuentesRegistradas.values().forEach(fuente -> {
       try {
+        logger.info("Actualizando fuente: '" + fuente.getNombre() + "'...");
         fuente.forzarActualizacionSincrona();
+        logger.info("Fuente '" + fuente.getNombre() + "' actualizada correctamente.");
       } catch (Exception e) {
-        System.err.println("Error al actualizar la fuente '" + fuente.getNombre());
+        logger.log(Level.SEVERE, "Error al actualizar la fuente '" + fuente.getNombre() + "'", e);
       }
     });
+    logger.info("Proceso de actualización de fuentes finalizado.");
   }
 
-  // TODO: Aca dice que podriamos poner un try catch, ustds lo pondrian dentro del forEach o afuera?
-
-
-  /**
-   * Configura la aplicación creando y registrando todas las fuentes disponibles.
-   * Este es el lugar central para añadir nuevas fuentes al sistema.
-   *
-   * @return una instancia de App completamente configurada.
-   */
   public static App configurarAplicacion() {
     App aplicacion = new App();
-    // --- Bloque de Configuración de Fuentes ---
 
+    // --- Serializador JSON Genérico para Hechos ---
+    Serializador<Hecho> serializadorJsonHechos = new SerializadorJson<>(
+        new LectorJson<>(new TypeReference<List<Hecho>>() {}),
+        new ExportadorJson()
+    );
+
+    // --- Configuración Fuente de Agregación ---
     FuenteDeAgregacion agregadora = new FuenteDeAgregacion(
         "agregadora_principal",
-        "agregados.json"
+        "agregados.json",
+        serializadorJsonHechos
     );
     aplicacion.registrarFuente(agregadora);
 
-    FuenteDinamica dinamica = new FuenteDinamica("dinamica_principal", "dinamica.json");
+    // --- Configuración Fuente Dinámica ---
+    FuenteDinamica dinamica = new FuenteDinamica(
+        "dinamica_principal",
+        "dinamica.json",
+        serializadorJsonHechos
+    );
     aplicacion.registrarFuente(dinamica);
 
-    Hecho hecho = new Hecho(
-        "Un hecho",
-        "Descripcion",
-        "PRUEBA",
-        "Direccion de prueba 123",
-        "aaa",
-        new PuntoGeografico(-123123, 123123),
-        LocalDateTime.now().minusWeeks(2),
-        LocalDateTime.now(),
-        Origen.PROVISTO_CONTRIBUYENTE,
-        List.of("#PRUEBA", "#ESTOESUNAPRUEBA")
-    );
+    // --- Ejemplo de uso: Agregar un hecho a la fuente dinámica ---
+    Hecho hechoDePrueba = new HechoBuilder()
+        .conTitulo("Hecho de prueba para la fuente dinámica")
+        .conFechaSuceso(LocalDateTime.now().minusWeeks(2))
+        .build();
+    dinamica.agregarHecho(hechoDePrueba);
 
-    dinamica.agregarHecho(hecho);
+    // Se podrían agregar aquí fuentes estáticas o de API a la agregadora
+    // agregadora.agregarFuente(fuenteEstatica);
 
     return aplicacion;
   }
 
   /**
-   * Esto ejecuta el crontab periodicamente.
+   * Punto de entrada principal para el proceso de actualización.
+   * Configura la aplicación y ejecuta la actualización de todas las fuentes.
    *
-   * @param args Argumentos de la línea de comandos. Se espera el nombre de la fuente a actualizar.
+   * @param args Argumentos de la línea de comandos (no se utilizan).
    */
   public static void main(String[] args) {
-    if (args.length == 0) {
-      throw new IllegalStateException(
-          "Error: Se requiere el nombre de la fuente a actualizar como argumento.");
-    }
-
+    logger.info("Iniciando el proceso de calendarización.");
     App aplicacion = configurarAplicacion();
-
     aplicacion.ejecutarActualizacionTodasLasFuentes();
   }
 
   public Map<String, FuenteDeCopiaLocal> getFuentesRegistradas() {
-    // Retorna una copia para evitar modificaciones externas
     return new HashMap<>(fuentesRegistradas);
   }
 }

@@ -4,96 +4,95 @@ import ar.edu.utn.frba.dds.domain.fuentes.FuenteExternaAPI;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import org.junit.jupiter.api.AfterEach;
+import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Test de prueba del comportamiento de FuenteExternaAPI.
+ * Pruebas del comportamiento de FuenteExternaAPI con la nueva arquitectura de serializadores.
  */
 @ExtendWith(MockitoExtension.class)
 public class FuenteExternaApiTest {
 
   @Mock
   private FuenteAdapter adaptadorMock;
+  @Mock
+  private Serializador<Hecho> serializadorMock;
 
   private FuenteExternaAPI fuenteExterna;
-  private Path tempJsonFilePath;
+  private final String RUTA_COPIA_LOCAL = "copia_api_test.json";
 
   @BeforeEach
-  void setUp() throws Exception {
-    tempJsonFilePath = Files.createTempFile("test_hechos_api_", ".json");
-    fuenteExterna = new FuenteExternaAPI("Fuente Unificada Test", adaptadorMock, tempJsonFilePath.toString());
-  }
-
-  @AfterEach
-  void tearDown() throws Exception {
-    Files.deleteIfExists(tempJsonFilePath);
+  void setUp() {
+    // Configuramos el mock del serializador para que devuelva una lista vacía al cargar
+    when(serializadorMock.importar(RUTA_COPIA_LOCAL)).thenReturn(new ArrayList<>());
+    // Inyectamos los mocks en el constructor de la clase a probar
+    fuenteExterna = new FuenteExternaAPI("FuenteAPITest", adaptadorMock, RUTA_COPIA_LOCAL, serializadorMock);
   }
 
   @Test
   @DisplayName("Obtiene y cachea una lista de hechos cuando el adaptador funciona")
   void obtieneYCacheaHechosExitosamente() throws IOException {
-    Hecho hecho1 = new HechoBuilder()
-        .conTitulo("Inundación grave")
-        .conCategoria("inundacion")
-        .conFechaSuceso(LocalDateTime.now().minusDays(1))
-        .build();
-
-    Hecho hecho2 = new HechoBuilder()
-        .conTitulo("Terremoto leve")
-        .conCategoria("terremoto")
-        .conFechaSuceso(LocalDateTime.now().minusDays(2))
-        .build();
-
-    List<Hecho> hechosEsperados = List.of(hecho1, hecho2);
-
+    // Arrange: Preparamos los datos de prueba y el comportamiento del mock del adaptador
+    Hecho hecho = new HechoBuilder().conTitulo("Test").conFechaSuceso(LocalDateTime.now().minusDays(1)).build();
+    List<Hecho> hechosEsperados = List.of(hecho);
     when(adaptadorMock.consultarHechos()).thenReturn(hechosEsperados);
 
+    // Act: Ejecutamos el método que queremos probar
     fuenteExterna.forzarActualizacionSincrona();
     List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
 
-    assertEquals(2, hechosObtenidos.size(), "Debería haber dos hechos en la lista.");
-    assertTrue(hechosObtenidos.containsAll(hechosEsperados), "La lista obtenida debe contener todos los hechos esperados.");
+    // Assert: Verificamos que los resultados sean los esperados
+    assertEquals(1, hechosObtenidos.size());
+    assertTrue(hechosObtenidos.contains(hecho));
+    // Verificamos que se llamó al método 'exportar' del serializador para persistir la nueva caché
+    verify(serializadorMock).exportar(hechosEsperados, RUTA_COPIA_LOCAL);
   }
 
   @Test
-  @DisplayName("Devuelve una lista vacía si el adaptador lanza una excepción")
-  void devuelveListaVaciaCuandoAdaptadorFalla() throws IOException {
+  @DisplayName("Persiste una lista vacía si el adaptador lanza una excepción")
+  void persisteListaVaciaCuandoAdaptadorFalla() throws IOException {
+    // Arrange: Simulamos una falla en el adaptador
     when(adaptadorMock.consultarHechos()).thenThrow(new IOException("Simulando error de red"));
 
+    // Act
     fuenteExterna.forzarActualizacionSincrona();
     List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
 
-    assertNotNull(hechosObtenidos, "La lista no debe ser nula.");
-    assertTrue(hechosObtenidos.isEmpty(), "La lista de hechos debería estar vacía tras un error del adaptador.");
+    // Assert
+    assertTrue(hechosObtenidos.isEmpty(), "La lista de hechos debería estar vacía.");
+    // Verificamos que se intentó guardar una lista vacía para no mantener datos viejos en la caché
+    verify(serializadorMock).exportar(eq(Collections.emptyList()), eq(RUTA_COPIA_LOCAL));
   }
 
   @Test
-  @DisplayName("Maneja correctamente una respuesta vacía del adaptador")
+  @DisplayName("Maneja y persiste una respuesta vacía del adaptador")
   void manejaRespuestaVaciaDelAdaptador() throws IOException {
+    // Arrange: Simulamos una respuesta vacía desde la API
     when(adaptadorMock.consultarHechos()).thenReturn(Collections.emptyList());
 
+    // Act
     fuenteExterna.forzarActualizacionSincrona();
     List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
 
-    assertNotNull(hechosObtenidos);
-    assertTrue(hechosObtenidos.isEmpty(), "La lista de hechos debería estar vacía");
+    // Assert
+    assertTrue(hechosObtenidos.isEmpty());
+    // Verificamos que se persiste la lista vacía correctamente
+    verify(serializadorMock).exportar(Collections.emptyList(), RUTA_COPIA_LOCAL);
   }
 }
+

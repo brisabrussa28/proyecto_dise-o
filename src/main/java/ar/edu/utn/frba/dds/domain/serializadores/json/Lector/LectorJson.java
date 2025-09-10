@@ -12,18 +12,33 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class LectorJson {
+/**
+ * Lee un archivo JSON y lo deserializa en una lista de objetos genéricos.
+ * @param <T> El tipo de objeto a deserializar.
+ */
+public class LectorJson<T> {
 
   private static final Logger LOGGER = Logger.getLogger(LectorJson.class.getName());
   private final ObjectMapper objectMapper;
+  private final TypeReference<List<T>> typeReference;
 
-  public LectorJson() {
+  /**
+   * Constructor que requiere un TypeReference para manejar la deserialización de listas genéricas.
+   * @param typeReference El TypeReference que describe el tipo de la lista, por ejemplo, new TypeReference<List<Hecho>>() {}.
+   */
+  public LectorJson(TypeReference<List<T>> typeReference) {
     this.objectMapper = new ObjectMapper();
     this.objectMapper.registerModule(new JavaTimeModule());
     this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    this.typeReference = typeReference;
   }
 
-  public <T> List<T> cargarCopiaLocalJson(String jsonFilePath, TypeReference<List<T>> typeReference) {
+  /**
+   * Carga una lista de objetos desde un archivo JSON.
+   * @param jsonFilePath La ruta al archivo JSON.
+   * @return Una lista de objetos de tipo T. Retorna una lista vacía si el archivo no existe o está vacío.
+   */
+  public List<T> cargarCopiaLocalJson(String jsonFilePath) {
     File jsonFile = new File(jsonFilePath);
 
     if (!jsonFile.exists() || jsonFile.length() == 0) {
@@ -32,14 +47,17 @@ public class LectorJson {
     }
 
     try {
+      // El método readValue utiliza el typeReference del objeto para deserializar correctamente
+      // la lista con el tipo genérico T de la clase.
       List<T> objetosLeidos = objectMapper.readValue(jsonFile, typeReference);
       LOGGER.info("Copia local de objetos cargada desde: " + jsonFilePath);
       return objetosLeidos != null ? objetosLeidos : new ArrayList<>();
     } catch (MismatchedInputException e) {
-      LOGGER.log(Level.WARNING, "Error de sintaxis JSON o tipo al cargar la copia " + jsonFilePath, e);
+      LOGGER.log(Level.WARNING, "Error de sintaxis JSON o de tipo al cargar la copia " + jsonFilePath, e);
       return new ArrayList<>();
     } catch (IOException e) {
       LOGGER.log(Level.SEVERE, "Error de I/O al cargar la copia JSON " + jsonFilePath, e);
+      // En un caso real, se podría relanzar una excepción personalizada.
       return new ArrayList<>();
     }
   }

@@ -1,61 +1,54 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
- * Clase fuente dinámica.
- * Ahora extiende FuenteCacheable para soportar copias de seguridad en JSON.
+ * Clase fuente dinámica que permite agregar hechos en tiempo de ejecución.
+ * Extiende FuenteDeCopiaLocal para soportar copias de seguridad a través de un Serializador.
  */
-public class FuenteDinamica extends FuenteDeCopiaLocal { // Cambiado para extender FuenteCacheable
-
-  // Los hechos ahora se gestionan a través de cacheDeHechos en FuenteCacheable
+public class FuenteDinamica extends FuenteDeCopiaLocal {
 
   /**
    * Constructor de la clase FuenteDinamica.
    *
-   * @param nombre Nombre de la fuente dinámica.
-   * @param jsonFilePathParaCopias Ruta al archivo JSON para copias de seguridad.
+   * @param nombre         Nombre de la fuente dinámica.
+   * @param rutaCopiaLocal Ruta al archivo para las copias de seguridad.
+   * @param serializador   Serializador para manejar la persistencia.
    */
-  public FuenteDinamica(String nombre, String jsonFilePathParaCopias) {
-    // Llama al constructor de la clase padre (FuenteCacheable)
-    super(nombre, jsonFilePathParaCopias);
+  public FuenteDinamica(String nombre, String rutaCopiaLocal, Serializador<Hecho> serializador) {
+    // Llama al constructor de la clase padre (FuenteDeCopiaLocal)
+    super(nombre, rutaCopiaLocal, serializador);
+    // La lista cargada por el serializador puede ser inmutable,
+    // así que la envolvemos en un ArrayList para asegurar que podamos agregarle hechos.
+    this.cacheDeHechos = new ArrayList<>(this.cacheDeHechos);
   }
 
   /**
-   * Agrega un hecho a la fuente dinámica.
+   * Agrega un hecho a la fuente dinámica y persiste la lista actualizada.
    *
    * @param hecho Hecho a agregar a la fuente dinámica.
    */
   public void agregarHecho(Hecho hecho) {
-    this.cacheDeHechos.add(hecho); // Usa cacheDeHechos de FuenteCacheable
-    this.servicioDeBackup.guardarCopiaLocalJson(this.cacheDeHechos); // Guarda inmediatamente
-  }
-
-
-  /**
-   * Obtiene los hechos de la fuente dinámica.
-   *
-   * @return Lista de hechos de la fuente dinámica (copia inmutable).
-   */
-  @Override
-  public List<Hecho> obtenerHechos() {
-    return Collections.unmodifiableList(this.cacheDeHechos); // Usa cacheDeHechos de FuenteCacheable
+    this.cacheDeHechos.add(hecho);
+    // Guarda inmediatamente la copia local usando el serializador
+    this.serializador.exportar(this.cacheDeHechos, this.rutaCopiaLocal);
   }
 
   /**
    * Implementación del método abstracto para consultar nuevos hechos.
    * Para FuenteDinamica, los "nuevos hechos" son simplemente los que ya tiene en caché,
-   * ya que no consulta una fuente externa de forma periódica.
-   * Este método es llamado por forzarActualizacionSincrona() de FuenteCacheable.
+   * ya que no consulta una fuente externa.
    *
    * @return Una copia de la lista actual de hechos.
    */
   @Override
   protected List<Hecho> consultarNuevosHechos() {
-    return new ArrayList<>(this.cacheDeHechos); // Devuelve una copia de la caché actual
+    // Este método es llamado por forzarActualizacionSincrona, que no es típicamente
+    // usado por FuenteDinamica, pero se implementa por la herencia.
+    // Simplemente devuelve el estado actual.
+    return new ArrayList<>(this.cacheDeHechos);
   }
-
 }

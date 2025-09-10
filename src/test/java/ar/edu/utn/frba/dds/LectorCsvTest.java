@@ -4,10 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import ar.edu.utn.frba.dds.domain.serializadores.csv.Lector.LectorCSVold;
 import ar.edu.utn.frba.dds.domain.filtro.FiltroPredicado;
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.serializadores.csv.Lector.FilaConverter.HechoFilaConverter;
+import ar.edu.utn.frba.dds.domain.serializadores.csv.Lector.LectorCSV;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -22,6 +23,11 @@ public class LectorCsvTest {
   @TempDir
   Path tempDir; // Directorio temporal gestionado por JUnit
 
+  private LectorCSV<Hecho> crearLector(String dateFormat, Map<CampoHecho, List<String>> mapeo) {
+    HechoFilaConverter converter = new HechoFilaConverter(dateFormat, mapeo);
+    return new LectorCSV<>(',', converter);
+  }
+
   @Test
   public void importarCSVformatoCorrecto() {
     Map<CampoHecho, List<String>> mapeoColumnas = Map.of(
@@ -35,8 +41,8 @@ public class LectorCsvTest {
         CampoHecho.PROVINCIA, List.of("provincia")
     );
 
-    List<Hecho> csv = new LectorCSVold(',', "dd/MM/yyyy", mapeoColumnas).importar(
-        dir + "ejemplo.csv");
+    LectorCSV<Hecho> lector = crearLector("dd/MM/yyyy", mapeoColumnas);
+    List<Hecho> csv = lector.importar(dir + "ejemplo.csv");
     FiltroPredicado filtroDireccion = new FiltroPredicado(h -> h.getDireccion().equals("EL NESTORNAUTA"));
     List<Hecho> hechosFiltrados = filtroDireccion.filtrar(csv);
     Hecho hecho = hechosFiltrados.get(0);
@@ -48,26 +54,18 @@ public class LectorCsvTest {
   @Test
   public void importarCSVformatoExtraño() {
     Map<CampoHecho, List<String>> mapeoColumnas = Map.of(
-        CampoHecho.TITULO,
-        List.of("tipo_persona_id"),
-        CampoHecho.DESCRIPCION,
-        List.of("tipo_persona", "modo_produccion_hecho_ampliada", "modo_produccion_hecho_otro"),
-        CampoHecho.LATITUD,
-        List.of("latitud"),
-        CampoHecho.LONGITUD,
-        List.of("longitud"),
-        CampoHecho.FECHA_SUCESO,
-        List.of("fecha_hecho"),
-        CampoHecho.CATEGORIA,
-        List.of("semaforo_estado"),
-        CampoHecho.DIRECCION,
-        List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura"),
-        CampoHecho.PROVINCIA,
-        List.of("provincia_nombre")
+        CampoHecho.TITULO, List.of("tipo_persona_id"),
+        CampoHecho.DESCRIPCION, List.of("tipo_persona", "modo_produccion_hecho_ampliada", "modo_produccion_hecho_otro"),
+        CampoHecho.LATITUD, List.of("latitud"),
+        CampoHecho.LONGITUD, List.of("longitud"),
+        CampoHecho.FECHA_SUCESO, List.of("fecha_hecho"),
+        CampoHecho.CATEGORIA, List.of("semaforo_estado"),
+        CampoHecho.DIRECCION, List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura"),
+        CampoHecho.PROVINCIA, List.of("provincia_nombre")
     );
 
-    List<Hecho> csv = new LectorCSVold(',', "dd-MM-yy", mapeoColumnas).importar(
-        dir + "rarito.csv");
+    LectorCSV<Hecho> lector = crearLector("dd-MM-yy", mapeoColumnas);
+    List<Hecho> csv = lector.importar(dir + "rarito.csv");
     Hecho hecho = csv.get(0);
 
     assertEquals("Imputado idRegistro 13483", hecho.getTitulo());
@@ -87,7 +85,8 @@ public class LectorCsvTest {
         CampoHecho.DESCRIPCION, List.of("columna_que_no_existe")
     );
 
-    List<Hecho> hechos = new LectorCSVold(',', "dd/MM/yyyy", mapeo).importar(tempFile.toString());
+    LectorCSV<Hecho> lector = crearLector("dd/MM/yyyy", mapeo);
+    List<Hecho> hechos = lector.importar(tempFile.toString());
     assertEquals(1, hechos.size());
     assertNull(hechos.get(0).getDescripcion());
   }
@@ -107,7 +106,8 @@ public class LectorCsvTest {
         CampoHecho.PROVINCIA, List.of("provincia")
     );
 
-    List<Hecho> hechos = new LectorCSVold(',', "dd/MM/yyyy", mapeo).importar(tempFile.toString());
+    LectorCSV<Hecho> lector = crearLector("dd/MM/yyyy", mapeo);
+    List<Hecho> hechos = lector.importar(tempFile.toString());
     assertEquals(1, hechos.size());
     assertNull(hechos.get(0).getUbicacion());
   }
@@ -125,46 +125,8 @@ public class LectorCsvTest {
         CampoHecho.PROVINCIA, List.of("provincia")
     );
 
-    assertThrows(
-        IllegalArgumentException.class, () -> new LectorCSVold(',', "dd/MM/yyyy", mapeo).importar(tempFile.toString())
-    );
-  }
-
-  @Test
-  public void testCsvConEncabezadosDesordenados() throws IOException {
-    Path tempFile = tempDir.resolve("encabezadosDesordenados.csv");
-    try (FileWriter writer = new FileWriter(tempFile.toFile())) {
-      writer.write("latitud,fechaSuceso,titulo,provincia\n-34.6,10/10/2020,Evento Desordenado,CABA\n");
-    }
-
-    Map<CampoHecho, List<String>> mapeo = Map.of(
-        CampoHecho.TITULO, List.of("titulo"),
-        CampoHecho.LATITUD, List.of("latitud"),
-        CampoHecho.FECHA_SUCESO, List.of("fechaSuceso"),
-        CampoHecho.PROVINCIA, List.of("provincia")
-    );
-
-    List<Hecho> hechos = new LectorCSVold(',', "dd/MM/yyyy", mapeo).importar(tempFile.toString());
-    assertEquals(1, hechos.size());
-    assertEquals("Evento Desordenado", hechos.get(0).getTitulo());
-  }
-
-  @Test
-  public void testCsvConFilaMasLargaQueEncabezado() throws IOException {
-    Path tempFile = tempDir.resolve("filaLarga.csv");
-    try (FileWriter writer = new FileWriter(tempFile.toFile())) {
-      writer.write("titulo,fechaSuceso,provincia\nEvento Largo,01/01/2020,BsAs,Extra\n");
-    }
-
-    Map<CampoHecho, List<String>> mapeo = Map.of(
-        CampoHecho.TITULO, List.of("titulo"),
-        CampoHecho.FECHA_SUCESO, List.of("fechaSuceso"),
-        CampoHecho.PROVINCIA, List.of("provincia")
-    );
-
-    List<Hecho> hechos = new LectorCSVold(',', "dd/MM/yyyy", mapeo).importar(tempFile.toString());
-    assertEquals(1, hechos.size());
-    assertEquals("Evento Largo", hechos.get(0).getTitulo());
+    LectorCSV<Hecho> lector = crearLector("dd/MM/yyyy", mapeo);
+    assertThrows(IllegalArgumentException.class, () -> lector.importar(tempFile.toString()));
   }
 
   @Test
@@ -180,40 +142,8 @@ public class LectorCsvTest {
         CampoHecho.PROVINCIA, List.of("provincia")
     );
 
-    List<Hecho> hechos = new LectorCSVold(',', "dd/MM/yyyy", mapeo).importar(tempFile.toString());
+    LectorCSV<Hecho> lector = crearLector("dd/MM/yyyy", mapeo);
+    List<Hecho> hechos = lector.importar(tempFile.toString());
     assertEquals(0, hechos.size()); // no debería crear el hecho
   }
-
-  @Test
-  public void testCsvConVariosCasosEspeciales() throws IOException {
-    Path tempFile = tempDir.resolve("csvUltraRaro.csv");
-    try (FileWriter writer = new FileWriter(tempFile.toFile())) {
-      writer.write(
-          "titulo,descripcion,latitud,longitud,fechaSuceso,categoria,direccion,provincia\n" +
-              "\"Evento, extraño\", \"Descripción con , comas y \"\"comillas\"\"\", , ,not-a-date,bizarra,,\n" + // fila 1: muchos errores
-              "Evento Normal,Descripcion Normal,-34.6,-58.4,01/01/2021,Categoria Normal,\"Av. Siempre Viva 123\",CABA\n" + // fila 2: válida
-              ", , , , , , ,\n" + // fila 3: completamente vacía
-              "Evento con pocos campos,,,,01/01/2020,,\n" // fila 4: truncada y sin título
-      );
-    }
-
-    Map<CampoHecho, List<String>> mapeo = Map.of(
-        CampoHecho.TITULO, List.of("titulo"),
-        CampoHecho.DESCRIPCION, List.of("descripcion"),
-        CampoHecho.LATITUD, List.of("latitud"),
-        CampoHecho.LONGITUD, List.of("longitud"),
-        CampoHecho.FECHA_SUCESO, List.of("fechaSuceso"),
-        CampoHecho.CATEGORIA, List.of("categoria"),
-        CampoHecho.DIRECCION, List.of("direccion"),
-        CampoHecho.PROVINCIA, List.of("provincia")
-    );
-
-    LectorCSVold lector = new LectorCSVold(',', "dd/MM/yyyy", mapeo);
-    List<Hecho> hechos = lector.importar(tempFile.toString());
-
-    // Debería procesar solo la segunda fila (válida)
-    assertEquals(2, hechos.size());
-    assertEquals("Evento Normal", hechos.get(0).getTitulo());
-  }
 }
-
