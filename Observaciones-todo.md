@@ -35,7 +35,7 @@
 - [x] No utilizar List.copyOf() si sólo se va a leer, es más conveniente utilizar el método Collection.unmodifiableList().
 - [ ] En fuente dinámica se podría, en lugar se podría redefinir al ḿetodo para que no haga nada.
 - [ ] Se podría agregar otra interfaz para buscar hechos para los casos donde no haya un algoritmo de consenso definido.
-- [ ] Algoritmo Absoluto está realizando varias operaciones de más
+- [x] Algoritmo Absoluto está realizando varias operaciones de más
 - [x] Los algoritmos se deberían ejecutar en un cron.
 - [x] Por más que tengo un algoritmo de consenso, tengo que poder visualizar todos los hechos aunque no se cumpla con el algoritmo si así se desea.
 - Nodo -> Computadora ejecutando.
