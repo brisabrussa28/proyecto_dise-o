@@ -32,7 +32,7 @@
 - [ ] Se podría ir pensando en implementar loggers.
 - [x] Try/catch de fuenteCacheable en la linea 40 sobra, ya que hay una excepcion runtime que ya sería lanzada.
 - [x] Ese mismo try/catch se podría hacer en el mismo forEach().
-- [ ] No utilizar List.copyOf() si sólo se va a leer, es más conveniente utilizar el método Collection.unmodifiableList().
+- [x] No utilizar List.copyOf() si sólo se va a leer, es más conveniente utilizar el método Collection.unmodifiableList().
 - [ ] En fuente dinámica se podría, en lugar se podría redefinir al ḿetodo para que no haga nada.
 - [ ] Se podría agregar otra interfaz para buscar hechos para los casos donde no haya un algoritmo de consenso definido.
 - [ ] Algoritmo Absoluto está realizando varias operaciones de más

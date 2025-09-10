@@ -4,6 +4,7 @@ package ar.edu.utn.frba.dds.domain.fuentes;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.serviciodebackup.ServicioDeBackup;
 import com.fasterxml.jackson.core.type.TypeReference;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public abstract class FuenteDeCopiaLocal implements Fuente {
 
   @Override
   public List<Hecho> obtenerHechos() {
-    return List.copyOf(this.cacheDeHechos);
+    return Collections.unmodifiableList(this.cacheDeHechos);
   }
 
   /**
