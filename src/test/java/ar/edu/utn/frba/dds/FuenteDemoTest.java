@@ -6,8 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.Conexion.Conexion;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDemo;
+import ar.edu.utn.frba.dds.domain.fuentes.apis.Conexion.Conexion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.net.URL;
 import java.nio.file.Files;

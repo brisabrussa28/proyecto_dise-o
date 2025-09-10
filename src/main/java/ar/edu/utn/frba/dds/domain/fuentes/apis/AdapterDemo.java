@@ -1,11 +1,11 @@
-package ar.edu.utn.frba.dds.domain.fuentes;
-
-import ar.edu.utn.frba.dds.domain.Conexion.Conexion;
+package ar.edu.utn.frba.dds.domain.fuentes.apis;
 import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
+import ar.edu.utn.frba.dds.domain.fuentes.apis.Conexion.Conexion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,22 +13,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class FuenteDemo extends FuenteDeCopiaLocal {
+/**
+ * Implementación del Adapter que sabe cómo comunicarse con la fuente Demo.
+ * Contiene toda la lógica que antes estaba en FuenteDemo.
+ */
 
-  private static final Logger logger = Logger.getLogger(FuenteDemo.class.getName());
+public class AdapterDemo implements FuenteAdapter {
+  private static final Logger logger = Logger.getLogger(AdapterDemo.class.getName());
   private final Conexion conexion;
   private final URL url;
   private LocalDateTime ultimaActualizacion;
 
-  public FuenteDemo(String nombre, URL url, Conexion conexion, String jsonFilePathParaCopias) {
-    super(nombre, jsonFilePathParaCopias);
-    this.url = url;
+  public AdapterDemo(Conexion conexion, URL url) {
     this.conexion = conexion;
+    this.url = url;
     this.ultimaActualizacion = null;
   }
 
   @Override
-  protected List<Hecho> consultarNuevosHechos() {
+  public List<Hecho> consultarHechos() throws IOException {
     List<Hecho> nuevosHechos = new ArrayList<>();
     Map<String, Object> datos;
 
@@ -38,16 +41,13 @@ public class FuenteDemo extends FuenteDeCopiaLocal {
           Hecho hecho = construirHechoIndividual(datos);
           nuevosHechos.add(hecho);
         } catch (ConexionFuenteDemoException e) {
-          // Si un hecho individual falla, se registra y se continúa con el siguiente.
-          // Esto hace que el proceso sea resiliente a datos corruptos.
-          logger.warning("Se omitió un hecho de la fuente Demo por datos inválidos. Causa: "
+          logger.warning("Se omitió un hecho de la fuente por datos inválidos. Causa: "
               + e.getCause().getMessage());
         }
       }
       this.ultimaActualizacion = LocalDateTime.now();
       return nuevosHechos;
     } catch (Exception e) {
-      // Este error captura problemas más grandes, como la imposibilidad de conectar con la fuente.
       throw new ConexionFuenteDemoException("Error al consultar la fuente externa de Demo", e);
     }
   }
@@ -101,7 +101,6 @@ public class FuenteDemo extends FuenteDeCopiaLocal {
       return builder.build();
 
     } catch (Exception e) {
-      // Se envuelve la excepción original para dar contexto claro del error.
       throw new ConexionFuenteDemoException("Error al parsear un hecho individual desde la fuente Demo", e);
     }
   }

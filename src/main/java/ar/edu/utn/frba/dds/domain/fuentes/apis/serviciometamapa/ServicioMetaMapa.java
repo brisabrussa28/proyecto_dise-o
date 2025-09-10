@@ -1,7 +1,6 @@
-package ar.edu.utn.frba.dds.domain.serviciometamapa;
+package ar.edu.utn.frba.dds.domain.fuentes.apis.serviciometamapa;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.HechoQuerys;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

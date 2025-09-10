@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serviciometamapa;
+package ar.edu.utn.frba.dds.domain.fuentes.apis.serviciometamapa;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;

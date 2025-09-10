@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.hecho;
+package ar.edu.utn.frba.dds.domain.fuentes.apis.serviciometamapa;
 
     import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
     import java.time.LocalDateTime;
