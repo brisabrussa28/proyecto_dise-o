@@ -38,60 +38,47 @@ public class FuenteExternaApiTest {
 
   @BeforeEach
   void setUp() {
-    // Configuramos el mock del serializador para que devuelva una lista vacía al cargar
     when(serializadorMock.importar(RUTA_COPIA_LOCAL)).thenReturn(new ArrayList<>());
-    // Inyectamos los mocks en el constructor de la clase a probar
+
     fuenteExterna = new FuenteExternaAPI("FuenteAPITest", adaptadorMock, RUTA_COPIA_LOCAL, serializadorMock);
   }
 
   @Test
   @DisplayName("Obtiene y cachea una lista de hechos cuando el adaptador funciona")
   void obtieneYCacheaHechosExitosamente() throws IOException {
-    // Arrange: Preparamos los datos de prueba y el comportamiento del mock del adaptador
     Hecho hecho = new HechoBuilder().conTitulo("Test").conFechaSuceso(LocalDateTime.now().minusDays(1)).build();
     List<Hecho> hechosEsperados = List.of(hecho);
     when(adaptadorMock.consultarHechos()).thenReturn(hechosEsperados);
 
-    // Act: Ejecutamos el método que queremos probar
     fuenteExterna.forzarActualizacionSincrona();
     List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
 
-    // Assert: Verificamos que los resultados sean los esperados
     assertEquals(1, hechosObtenidos.size());
     assertTrue(hechosObtenidos.contains(hecho));
-    // Verificamos que se llamó al método 'exportar' del serializador para persistir la nueva caché
     verify(serializadorMock).exportar(hechosEsperados, RUTA_COPIA_LOCAL);
   }
 
   @Test
   @DisplayName("Persiste una lista vacía si el adaptador lanza una excepción")
   void persisteListaVaciaCuandoAdaptadorFalla() throws IOException {
-    // Arrange: Simulamos una falla en el adaptador
     when(adaptadorMock.consultarHechos()).thenThrow(new IOException("Simulando error de red"));
 
-    // Act
     fuenteExterna.forzarActualizacionSincrona();
     List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
 
-    // Assert
     assertTrue(hechosObtenidos.isEmpty(), "La lista de hechos debería estar vacía.");
-    // Verificamos que se intentó guardar una lista vacía para no mantener datos viejos en la caché
     verify(serializadorMock).exportar(eq(Collections.emptyList()), eq(RUTA_COPIA_LOCAL));
   }
 
   @Test
   @DisplayName("Maneja y persiste una respuesta vacía del adaptador")
   void manejaRespuestaVaciaDelAdaptador() throws IOException {
-    // Arrange: Simulamos una respuesta vacía desde la API
     when(adaptadorMock.consultarHechos()).thenReturn(Collections.emptyList());
 
-    // Act
     fuenteExterna.forzarActualizacionSincrona();
     List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
 
-    // Assert
     assertTrue(hechosObtenidos.isEmpty());
-    // Verificamos que se persiste la lista vacía correctamente
     verify(serializadorMock).exportar(Collections.emptyList(), RUTA_COPIA_LOCAL);
   }
 }

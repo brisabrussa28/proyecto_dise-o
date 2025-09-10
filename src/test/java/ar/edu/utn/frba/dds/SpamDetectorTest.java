@@ -15,18 +15,14 @@ public class SpamDetectorTest {
   @Test
   @DisplayName("Un mock de DetectorSpam configurado para devolver 'true' funciona correctamente")
   public void mockDetectaSpamCuandoSeConfiguraParaSpam() {
-    // Arrange: Crear un mock del detector y definir su comportamiento
     DetectorSpam detectorMock = mock(DetectorSpam.class);
     String mensajeSpam = "Este es un mensaje spam";
     when(detectorMock.esSpam(mensajeSpam)).thenReturn(true);
 
-    // Act: Llamar al método en el mock
     boolean resultado = detectorMock.esSpam(mensajeSpam);
 
-    // Assert: Verificar que el resultado es el esperado
     assertTrue(resultado, "El mock debería haber devuelto true como se configuró.");
 
-    // Verify: Asegurarse de que el método fue llamado
     verify(detectorMock).esSpam(mensajeSpam);
   }
 
