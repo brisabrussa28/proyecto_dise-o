@@ -5,8 +5,12 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 
-public class Absoluta implements AlgoritmoDeConsenso {
+@Entity
+@DiscriminatorValue("Absoluta")
+public class Absoluta extends AlgoritmoDeConsenso {
   @Override
   public List<Hecho> listaDeHechosConsensuados(
       List<Hecho> listaDeHechos,
@@ -16,16 +20,21 @@ public class Absoluta implements AlgoritmoDeConsenso {
       return List.of();
     }
 
-    Set<Hecho> consensuados = new HashSet<>(fuentesNodo.get(0).obtenerHechos());
+    Set<Hecho> consensuados = new HashSet<>(fuentesNodo.get(0)
+                                                       .obtenerHechos());
     for (Fuente fuente : fuentesNodo) {
       consensuados.retainAll(fuente.obtenerHechos());
     }
 
-    return consensuados.stream().filter(listaDeHechos::contains).toList();
+    return consensuados.stream()
+                       .filter(listaDeHechos::contains)
+                       .toList();
   }
 
   boolean hechoEnTodasLasFuentes(Hecho hecho, List<Fuente> fuentes) {
-    return fuentes.stream().allMatch(fuente -> fuente.obtenerHechos().contains(hecho));
+    return fuentes.stream()
+                  .allMatch(fuente -> fuente.obtenerHechos()
+                                            .contains(hecho));
   }
 }
 

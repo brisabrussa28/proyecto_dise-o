@@ -8,10 +8,14 @@
     <persistence-unit name="simple-persistence-unit" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <class>src.main.java.ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica</class>
-        <class>src.main.java.ar.edu.utn.frba.dds.domain.coleccion.Coleccion</class>
-        <class>src.main.java.ar.edu.utn.frba.dds.domain.hecho.Hecho</class>
-
+        <class>ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica</class>
+        <class>ar.edu.utn.frba.dds.domain.coleccion.Coleccion</class>
+        <class>ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.AlgoritmoDeConsenso
+        </class>
+        <class>ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.Absoluta</class>
+        <class>ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.MayoriaSimple</class>
+        <class>ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.MultiplesMenciones</class>
+        <class>ar.edu.utn.frba.dds.domain.hecho.Hecho</class>
         <properties>
             <property name="hibernate.archive.autodetection" value="class"/>
 

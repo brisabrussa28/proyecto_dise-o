@@ -13,6 +13,8 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 /**
@@ -32,9 +34,9 @@ public class Coleccion {
   private final String categoria;
   @Transient
   private String condicionJson;
-  @Transient
+  @ManyToOne
   private AlgoritmoDeConsenso algoritmo;
-  @Transient
+  @ManyToMany
   private List<Hecho> hechosConsensuados = new ArrayList<>();
 
   /**
@@ -171,10 +173,12 @@ public class Coleccion {
     List<Hecho> hechosFuente = fuente.obtenerHechos();
 
     // 2. Aplica el filtro de exclusión del repositorio
-    List<Hecho> hechosSinExcluidos = repo.filtroExcluyente().filtrar(hechosFuente);
+    List<Hecho> hechosSinExcluidos = repo.filtroExcluyente()
+                                         .filtrar(hechosFuente);
 
     // 3. Aplica el filtro propio de la colección
-    return this.getFiltro().filtrar(hechosSinExcluidos);
+    return this.getFiltro()
+               .filtrar(hechosSinExcluidos);
   }
 
   /**
@@ -222,7 +226,7 @@ public class Coleccion {
    */
   public boolean contieneA(Hecho unHecho, RepositorioDeSolicitudes repositorioDeReportes) {
     return this.getHechos(repositorioDeReportes)
-        .contains(unHecho);
+               .contains(unHecho);
   }
 
   /**
