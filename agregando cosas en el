@@ -29,11 +29,11 @@
 - [x] Fuente cacheable no se llamaría caché, ya que es una fuente que no guarda los hechos realmente como una caché, es más una copia local (completa) de los datos.
 - [x] ServicioDeCopiasLocales -> ServicioBackup.
 - [x] El cron tiene que hacer un forEach() para todas las fuentes.
-- [ ] Se podría ir pensando en implementar loggers.
+- [X] Se podría ir pensando en implementar loggers.
 - [x] Try/catch de fuenteCacheable en la linea 40 sobra, ya que hay una excepcion runtime que ya sería lanzada.
 - [x] Ese mismo try/catch se podría hacer en el mismo forEach().
 - [ ] No utilizar List.copyOf() si sólo se va a leer, es más conveniente utilizar el método Collection.unmodifiableList().
-- [ ] En fuente dinámica se podría, en lugar se podría redefinir al ḿetodo para que no haga nada.
+- [X] En fuente dinámica se podría, en lugar se podría redefinir al ḿetodo para que no haga nada.
 - [ ] Se podría agregar otra interfaz para buscar hechos para los casos donde no haya un algoritmo de consenso definido.
 - [ ] Algoritmo Absoluto está realizando varias operaciones de más
 - [x] Los algoritmos se deberían ejecutar en un cron.
@@ -41,12 +41,14 @@
 - Nodo -> Computadora ejecutando.
 
 ## COSAS PT4
+- [ ] Volver una clase abstracta a la fuente, usando atributo nombre
+- [ ] Cambiar al filtro para que sea persistible
 - [ ] Agregar componente de estadisticas (Con el tipo de estadisticas incluido)
-- [ ] Agregar provincia al hecho
+- [x] Agregar provincia al hecho
 - [x] Agregar modulo de exportacion de csvs (seria mejor directamente que sea capaz de exportar cualquier obj)
-- [ ] Sumar busqueda por full text search (al menos del titulo y descripcion del hecho pero extensible a todos los demas campos)
+- [ ] Sumar busqueda por full text search (al menos del titulo y descripcion del hecho pero extensible a todos los demas campos) -> Definir idioma ->
 - [ ] Se deberán persistir las entidades del modelo planteado. Para ello se debe utilizar un ORM.
-- [ ] TESTS DE TODO
+- [ ] TESTS DE TODO 
 - [ ] Diagrama de clases actualizado
 - [ ] Justificacion de disenio (no tengo enie)
 - [ ] Diagrama der fisico
