@@ -12,12 +12,12 @@ public class MayoriaSimple implements AlgoritmoDeConsenso {
       List<Fuente> fuentesNodo
   ) {
 
-    return listaDeHechos.stream()
+    return listaDeHechos.stream().distinct()
         .filter(hecho -> hechoEnMayoriaDeFuentes(hecho, fuentesNodo)).toList();
   }
 
   boolean hechoEnMayoriaDeFuentes(Hecho hecho, List<Fuente> fuentes) {
-    return ((int) Math.ceil((double) fuentes.size() / 2)) <= fuentes.stream()
+    return ((int) Math.ceil((double) fuentes.size() / 2)) <= fuentes.stream().distinct()
         .filter(fuente -> fuente.obtenerHechos().contains(hecho)).toList().size();
   }
 }

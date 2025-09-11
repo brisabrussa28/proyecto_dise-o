@@ -8,20 +8,15 @@ import java.util.Set;
 
 public class Absoluta implements AlgoritmoDeConsenso {
   @Override
-  public List<Hecho> listaDeHechosConsensuados(
-      List<Hecho> listaDeHechos,
-      List<Fuente> fuentesNodo
-  ) {
+  public List<Hecho> listaDeHechosConsensuados(List<Hecho> listaDeHechos,List<Fuente> fuentesNodo) {
     if (fuentesNodo.isEmpty()) {
       return List.of();
     }
 
-    Set<Hecho> consensuados = new HashSet<>(fuentesNodo.get(0).obtenerHechos());
-    for (Fuente fuente : fuentesNodo) {
-      consensuados.retainAll(fuente.obtenerHechos());
-    }
-
-    return consensuados.stream().filter(listaDeHechos::contains).toList();
+    return listaDeHechos.stream()
+        .distinct()
+        .filter(hecho -> hechoEnTodasLasFuentes(hecho, fuentesNodo))
+        .toList();
   }
 
   boolean hechoEnTodasLasFuentes(Hecho hecho, List<Fuente> fuentes) {

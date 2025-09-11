@@ -11,7 +11,7 @@ public class MultiplesMenciones implements AlgoritmoDeConsenso {
       List<Fuente> fuentesNodo
   ) {
 
-    return listaDeHechos.stream()
+    return listaDeHechos.stream().distinct()
         .filter(hecho -> !hechoConVersionDistinta(
             hecho,
             fuentesNodo
@@ -28,13 +28,7 @@ public class MultiplesMenciones implements AlgoritmoDeConsenso {
 
   boolean hechoConVersionDistinta(Hecho hecho, List<Fuente> fuentes) {
     return fuentes.stream()
-        .map(Fuente::obtenerHechos)
-        .filter(hechos -> hechos.stream()
-            .anyMatch(hecho1 -> hecho1.getTitulo()
-                .equals(hecho.getTitulo())))
-
-        .anyMatch(hechos -> hechos.stream()
-            .anyMatch(hecho1 -> !hecho1.getTitulo()
-                .equals(hecho.getTitulo())));
+        .flatMap(f -> f.obtenerHechos().stream())
+        .anyMatch(h -> h.getTitulo().equals(hecho.getTitulo()) && !h.equals(hecho));
   }
 }
