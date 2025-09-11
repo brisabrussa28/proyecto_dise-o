@@ -103,10 +103,15 @@ public class HechoBuilder {
       throw new IllegalStateException("La fecha del suceso es obligatoria para crear un Hecho.");
     }
 
+    if (fechaCarga == null) {
+      throw new IllegalStateException("La fecha del suceso es obligatoria para crear un Hecho.");
+    }
+
     if (fechaSuceso.isAfter(fechaCarga)) {
       throw new IllegalStateException(
           "La fecha del suceso no puede ser posterior a la fecha de carga.");
     }
+
     if (fechaSuceso.isAfter(LocalDateTime.now())) {
       throw new IllegalStateException("La fecha del suceso no puede ser una fecha futura.");
     }

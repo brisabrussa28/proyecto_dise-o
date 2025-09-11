@@ -90,10 +90,8 @@ public class AdapterDemoTest {
         .thenReturn(hechoValido)
         .thenReturn(null);
 
-    // Act
     List<Hecho> resultado = adapter.consultarHechos();
 
-    // Assert
     assertEquals(1, resultado.size(), "Solo el hecho válido debe ser procesado");
     assertEquals("Hecho Válido", resultado.get(0).getTitulo());
   }
@@ -101,13 +99,10 @@ public class AdapterDemoTest {
   @Test
   @DisplayName("Devuelve una lista vacía si la conexión no devuelve ningún hecho")
   void devuelveListaVaciaSiConexionNoTieneHechos() throws IOException {
-    // Arrange
     when(conexionMock.siguienteHecho(any(URL.class), any())).thenReturn(null);
 
-    // Act
     List<Hecho> resultado = adapter.consultarHechos();
 
-    // Assert
     assertTrue(resultado.isEmpty());
   }
 }

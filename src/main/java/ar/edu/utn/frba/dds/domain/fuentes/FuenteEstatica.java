@@ -1,43 +1,43 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-import ar.edu.utn.frba.dds.domain.serializadores.csv.Lector.LectorCSVold;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
 import java.util.List;
 
 /**
- * Fuente de datos estática basada en archivo CSV.
+ * Fuente de datos estática que lee desde un archivo utilizando un Serializador.
  */
 public class FuenteEstatica implements Fuente {
 
-  private final String rutaCsv;
-  private final LectorCSVold lectorCSV;
+  private final String rutaArchivo;
+  private final Serializador<Hecho> serializador;
   private final String nombre;
 
   /**
    * Constructor de la fuente estática.
    *
-   * @param nombre    Nombre de la fuente estática.
-   * @param rutaCsv   Ruta del archivo CSV que contiene los datos.
-   * @param lectorCSV Carácter separador utilizado en el CSV.
+   * @param nombre      Nombre de la fuente.
+   * @param rutaArchivo Ruta del archivo que contiene los datos (e.g., "datos.csv").
+   * @param serializador Implementación de Serializador para leer los datos.
    */
-  public FuenteEstatica(String nombre, String rutaCsv, LectorCSVold lectorCSV) {
+  public FuenteEstatica(String nombre, String rutaArchivo, Serializador<Hecho> serializador) {
     this.validarFuente(nombre);
-    this.nombre = nombre; // no carga los hechos en el constructor
-    if (rutaCsv == null || lectorCSV == null) {
-      throw new IllegalArgumentException("Ruta y lector deben estar definidos");
+    this.nombre = nombre;
+    if (rutaArchivo == null || serializador == null) {
+      throw new IllegalArgumentException("La ruta del archivo y el serializador deben estar definidos.");
     }
-    this.rutaCsv = rutaCsv;
-    this.lectorCSV = lectorCSV;
+    this.rutaArchivo = rutaArchivo;
+    this.serializador = serializador;
   }
 
   /**
-   * Obtiene los hechos de la fuente estática.
+   * Obtiene los hechos de la fuente estática utilizando el serializador.
    *
-   * @return Lista de hechos importados desde el archivo CSV.
+   * @return Lista de hechos importados desde el archivo.
    */
   @Override
   public List<Hecho> obtenerHechos() {
-    return lectorCSV.importar(rutaCsv);
+    return serializador.importar(rutaArchivo);
   }
 
   public String getNombre() {
