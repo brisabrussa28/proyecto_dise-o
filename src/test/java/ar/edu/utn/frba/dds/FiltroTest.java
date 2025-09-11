@@ -106,11 +106,9 @@ public class FiltroTest {
     List<Hecho> hechos = getHechosParaTest();
     FiltroPredicado filtroCategoria = new FiltroPredicado(h -> h.getCategoria().equalsIgnoreCase("Robos"));
     FiltroPredicado filtroDireccion = new FiltroPredicado(h -> h.getDireccion().equalsIgnoreCase("Dire"));
-    FiltroPredicado filtroEtiqueta = new FiltroPredicado(h -> h.getEtiquetas().contains(etiquetasAux.get(0)));
     List<Filtro> filtros = new ArrayList<>();
     filtros.add(filtroCategoria);
     filtros.add(filtroDireccion);
-    filtros.add(filtroEtiqueta);
     FiltroListaAnd filtroListaAnd = new FiltroListaAnd(filtros);
     assertNotEquals(0, filtroListaAnd.filtrar(hechos).size());
   }

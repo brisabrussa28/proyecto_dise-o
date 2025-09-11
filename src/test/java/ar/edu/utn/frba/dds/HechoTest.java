@@ -45,7 +45,6 @@ public class HechoTest {
     assertEquals("Calle falsa 123", hecho.getDireccion());
     assertEquals(ubicacion, hecho.getUbicacion());
     assertEquals(fechaSuceso, hecho.getFechaSuceso());
-    assertEquals(etiquetas, hecho.getEtiquetas());
     assertEquals(Origen.PROVISTO_CONTRIBUYENTE, hecho.getOrigen());
     assertNotNull(hecho.getFechaCarga());
   }

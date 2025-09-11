@@ -7,6 +7,11 @@ import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
+import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
+import ar.edu.utn.frba.dds.domain.serializadores.SerializadorJson;
+import ar.edu.utn.frba.dds.domain.serializadores.json.Exportador.ExportadorJson;
+import ar.edu.utn.frba.dds.domain.serializadores.json.Lector.LectorJson;
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -76,13 +81,25 @@ public class App {
     App aplicacion = new App();
     // --- Bloque de Configuración de Fuentes ---
 
+    Serializador<Hecho> serializadorJsonHechos = new SerializadorJson<>(
+        new LectorJson<>(new TypeReference<List<Hecho>>() {}),
+        new ExportadorJson()
+    );
+
+    // --- Configuración Fuente de Agregación ---
     FuenteDeAgregacion agregadora = new FuenteDeAgregacion(
         "agregadora_principal",
-        "agregados.json"
+        "agregados.json",
+        serializadorJsonHechos
     );
     aplicacion.registrarFuente(agregadora);
 
-    FuenteDinamica dinamica = new FuenteDinamica("dinamica_principal", "dinamica.json");
+    // --- Configuración Fuente Dinámica ---
+    FuenteDinamica dinamica = new FuenteDinamica(
+        "dinamica_principal",
+        "dinamica.json",
+        serializadorJsonHechos
+    );
     aplicacion.registrarFuente(dinamica);
 
     var etiqueta1 = new Etiqueta("#PRUEBA");
@@ -112,16 +129,14 @@ public class App {
    * @param args Argumentos de la línea de comandos. Se espera el nombre de la fuente a actualizar.
    */
   public static void main(String[] args) {
-    if (args.length == 0) {
-      throw new IllegalStateException(
-          "Error: Se requiere el nombre de la fuente a actualizar como argumento.");
-    }
-
     App aplicacion = configurarAplicacion();
 
-    aplicacion.ejecutarActualizacionTodasLasFuentes();
+    if (args.length == 0) {
+      aplicacion.ejecutarActualizacionTodasLasFuentes();
+    } else {
+      aplicacion.ejecutarActualizacion(args[0]);
+    }
   }
-
   public Map<String, FuenteDeCopiaLocal> getFuentesRegistradas() {
     // Retorna una copia para evitar modificaciones externas
     return new HashMap<>(fuentesRegistradas);

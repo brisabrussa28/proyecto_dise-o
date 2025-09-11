@@ -5,6 +5,7 @@ import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -81,12 +82,23 @@ public class HechoBuilder {
     return this;
   }
 
-  public HechoBuilder conEtiquetas(List<Etiqueta> etiquetas) {
+  public HechoBuilder conEtiquetas(Collection<Etiqueta> etiquetas) {
     if (etiquetas != null) {
-      this.etiquetas = etiquetas;
+      this.etiquetas.addAll(etiquetas);
     }
     return this;
   }
+
+  public HechoBuilder conEtiquetas(List<String> etiquetas) {
+    if (etiquetas != null) {
+      etiquetas.stream()
+          .filter(nombre -> nombre != null && !nombre.isBlank())
+          .map(Etiqueta::new)
+          .forEach(this.etiquetas::add);
+    }
+    return this;
+  }
+
 
   /**
    * Construye y devuelve un objeto Hecho a partir de los datos proporcionados.
