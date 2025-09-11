@@ -1,20 +1,19 @@
 package ar.edu.utn.frba.dds;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroPredicado;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroPersistente;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionAnd;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
-import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,36 +31,20 @@ public class FiltroTest {
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD;
   LocalDateTime horaAux = LocalDateTime.now().minusDays(1);
-  List<String> etiquetasAux = List.of(
-      "#ancianita",
-      "#robo_a_mano_armada",
-      "#violencia",
-      "#leyDeProtecciónALasAncianitas",
-      "#NOalaVIOLENCIAcontraABUELITAS"
-  );
-  private RepositorioDeSolicitudes repositorio;
-  @Mock
-  private DetectorSpam detectorSpam;
+
   @Mock
   private Serializador<Hecho> serializadorMock;
   private Path tempJsonFile;
+  private Hecho hechoDePrueba;
 
   @BeforeEach
   void setUp() throws IOException {
     MockitoAnnotations.openMocks(this);
-    repositorio = new RepositorioDeSolicitudes(detectorSpam);
     tempJsonFile = Files.createTempFile("test_fuente_dinamica_", ".json");
     when(serializadorMock.importar(anyString())).thenReturn(new ArrayList<>());
     fuenteAuxD = new FuenteDinamica("Julio Cesar", tempJsonFile.toString(), serializadorMock);
-  }
 
-  @AfterEach
-  void tearDown() throws IOException {
-    Files.deleteIfExists(tempJsonFile);
-  }
-
-  public List<Hecho> getHechosParaTest() {
-    Hecho hecho = new HechoBuilder()
+    hechoDePrueba = new HechoBuilder()
         .conTitulo("titulo")
         .conDescripcion("Un día más siendo del conurbano")
         .conCategoria("Robos")
@@ -71,45 +54,67 @@ public class FiltroTest {
         .conFechaSuceso(horaAux)
         .conFechaCarga(LocalDateTime.now())
         .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conEtiquetas(etiquetasAux)
         .build();
-    fuenteAuxD.agregarHecho(hecho);
-    return fuenteAuxD.obtenerHechos();
+  }
+
+  @AfterEach
+  void tearDown() throws IOException {
+    Files.deleteIfExists(tempJsonFile);
   }
 
   @Test
   public void filtraPorCategoriaCorrectamente() {
-    List<Hecho> hechos = getHechosParaTest();
-    FiltroPredicado filtroCategoria = new FiltroPredicado(h -> h.getCategoria().equalsIgnoreCase("Robos"));
-    assertNotEquals(0, filtroCategoria.filtrar(hechos).size());
+    List<Hecho> hechos = List.of(hechoDePrueba);
+    Condicion condicionCategoria = new CondicionGenerica("categoria", "IGUAL", "Robos");
+    FiltroPersistente filtro = new FiltroPersistente(condicionCategoria);
+
+    List<Hecho> resultado = filtro.filtrar(hechos);
+    assertEquals(1, resultado.size());
+    assertEquals("Robos", resultado.get(0).getCategoria());
   }
 
   @Test
   public void filtraPorDireccionCorrectamente() {
-    List<Hecho> hechos = getHechosParaTest();
-    FiltroPredicado filtroDireccion = new FiltroPredicado(h -> h.getDireccion().equalsIgnoreCase("Dire"));
-    assertNotEquals(0, filtroDireccion.filtrar(hechos).size());
+    List<Hecho> hechos = List.of(hechoDePrueba);
+    Condicion condicionDireccion = new CondicionGenerica("direccion", "IGUAL", "dire");
+    FiltroPersistente filtro = new FiltroPersistente(condicionDireccion);
+
+    List<Hecho> resultado = filtro.filtrar(hechos);
+    assertEquals(1, resultado.size());
+    assertEquals("dire", resultado.get(0).getDireccion());
   }
 
-
   @Test
-  public void filtraPorFechaCargaCorrectamente() {
-    List<Hecho> hechos = getHechosParaTest();
-    FiltroPredicado filtroFecha = new FiltroPredicado(h -> h.getFechaCarga().toLocalDate().equals(hechos.get(0).getFechaCarga().toLocalDate()));
-
-    assertNotEquals(0, filtroFecha.filtrar(hechos).size());
+  public void filtraPorFechaSucesoCorrectamente() {
+    List<Hecho> hechos = List.of(hechoDePrueba);
+    Condicion condicionFecha = new CondicionGenerica("fechaSuceso", "IGUAL", horaAux);
+    FiltroPersistente filtro = new FiltroPersistente(condicionFecha);
+    assertEquals(1, filtro.filtrar(hechos).size());
   }
 
 
   @Test
   public void aplicaVariosFiltrosCorrectamente() {
-    List<Hecho> hechos = getHechosParaTest();
-    FiltroPredicado filtroCategoria = new FiltroPredicado(h -> h.getCategoria().equalsIgnoreCase("Robos"));
-    FiltroPredicado filtroDireccion = new FiltroPredicado(h -> h.getDireccion().equalsIgnoreCase("Dire"));
-    List<Filtro> filtros = new ArrayList<>();
-    filtros.add(filtroCategoria);
-    filtros.add(filtroDireccion);
-    FiltroListaAnd filtroListaAnd = new FiltroListaAnd(filtros);
-    assertNotEquals(0, filtroListaAnd.filtrar(hechos).size());
+    List<Hecho> hechos = List.of(hechoDePrueba);
+
+    CondicionAnd condicionAnd = new CondicionAnd();
+    condicionAnd.agregarCondicion(new CondicionGenerica("categoria", "IGUAL", "Robos"));
+    condicionAnd.agregarCondicion(new CondicionGenerica("direccion", "IGUAL", "dire"));
+
+    FiltroPersistente filtro = new FiltroPersistente(condicionAnd);
+    assertEquals(1, filtro.filtrar(hechos).size());
+  }
+
+  @Test
+  public void aplicaVariosFiltrosYFalla() {
+    List<Hecho> hechos = List.of(hechoDePrueba);
+
+    CondicionAnd condicionAnd = new CondicionAnd();
+    condicionAnd.agregarCondicion(new CondicionGenerica("categoria", "IGUAL", "Robos"));
+    condicionAnd.agregarCondicion(new CondicionGenerica("direccion", "IGUAL", "direccion_incorrecta"));
+
+    FiltroPersistente filtro = new FiltroPersistente(condicionAnd);
+    assertTrue(filtro.filtrar(hechos).isEmpty());
   }
 }
+

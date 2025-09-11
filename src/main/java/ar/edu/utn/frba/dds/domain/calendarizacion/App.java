@@ -1,12 +1,12 @@
 package ar.edu.utn.frba.dds.domain.calendarizacion;
 
-import ar.edu.utn.frba.dds.domain.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.Origen;
+import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
 import ar.edu.utn.frba.dds.domain.serializadores.SerializadorJson;
 import ar.edu.utn.frba.dds.domain.serializadores.json.Exportador.ExportadorJson;

@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.etiqueta;
+package ar.edu.utn.frba.dds.domain.hecho.etiqueta;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroPersistente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacion;
@@ -19,7 +19,7 @@ public class ServicioDeVisualizacionTest {
   private ServicioDeVisualizacion servicio;
   private Coleccion coleccionMock;
   private RepositorioDeSolicitudes repositorioMock;
-  private Filtro filtroMock;
+  private FiltroPersistente filtroMock;
   private Hecho hecho1;
   private Hecho hecho2;
 
@@ -28,7 +28,7 @@ public class ServicioDeVisualizacionTest {
     servicio = new ServicioDeVisualizacion();
     coleccionMock = mock(Coleccion.class);
     repositorioMock = mock(RepositorioDeSolicitudes.class);
-    filtroMock = mock(Filtro.class);
+    filtroMock = mock(FiltroPersistente.class);
 
     hecho1 = mock(Hecho.class);
     hecho2 = mock(Hecho.class);

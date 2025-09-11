@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
-import ar.edu.utn.frba.dds.domain.etiqueta.Etiqueta;
+import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -88,7 +88,7 @@ public class HechoEditor {
     direccion.ifPresent(hecho::setDireccion);
     ubicacion.ifPresent(hecho::setUbicacion);
     etiquetas.ifPresent(hecho::setEtiquetas);
-    fechaSuceso.ifPresent(hecho::setFechaSuceso);
+    fechaSuceso.ifPresent(hecho::setFechasuceso);
 
     // Una vez aplicados todos los cambios, se actualiza el estado.
     hecho.setEstado(Estado.EDITADO);

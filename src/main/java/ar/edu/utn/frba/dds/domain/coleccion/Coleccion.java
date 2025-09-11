@@ -1,9 +1,9 @@
 package ar.edu.utn.frba.dds.domain.coleccion;
 
-import ar.edu.utn.frba.dds.domain.algoritmosconsenso.AlgoritmoDeConsenso;
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroListaAnd;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroPredicado;
+import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.AlgoritmoDeConsenso;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroPersistente;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionFactory;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
@@ -17,7 +17,8 @@ import javax.persistence.Transient;
 
 /**
  * Clase Coleccion.
- * Representa una colección de hechos obtenidos de una fuente específica.
+ * Representa una colección de hechos obtenidos de una fuente específica,
+ * con la capacidad de aplicar filtros y algoritmos de consenso.
  */
 @Entity
 public class Coleccion {
@@ -30,7 +31,7 @@ public class Coleccion {
   private final String descripcion;
   private final String categoria;
   @Transient
-  private Filtro filtro;
+  private String condicionJson;
   @Transient
   private AlgoritmoDeConsenso algoritmo;
   @Transient
@@ -39,10 +40,11 @@ public class Coleccion {
   /**
    * Constructor de la colección.
    *
-   * @param titulo      Título de la colección.
-   * @param fuente      Fuente de la colección.
-   * @param descripcion Descripción de la colección.
-   * @param categoria   Categoría de la colección.
+   * @param titulo      Título de la colección. No puede ser nulo o vacío.
+   * @param fuente      Fuente de datos de la colección. No puede ser nula.
+   * @param descripcion Descripción de la colección. No puede ser nula o vacía.
+   * @param categoria   Categoría de la colección. No puede ser nula o vacía.
+   * @throws RuntimeException si alguno de los parámetros obligatorios es inválido.
    */
   @SuppressWarnings("checkstyle:ParenPad")
   public Coleccion(
@@ -67,9 +69,19 @@ public class Coleccion {
     this.fuente = fuente;
     this.descripcion = descripcion;
     this.categoria = categoria;
-    this.filtro = new FiltroPredicado(h -> true);
+    this.condicionJson = "{}";
   }
 
+  /**
+   * Constructor de la colección con un algoritmo de consenso.
+   *
+   * @param titulo      Título de la colección. No puede ser nulo o vacío.
+   * @param fuente      Fuente de datos de la colección. No puede ser nula.
+   * @param descripcion Descripción de la colección. No puede ser nula o vacía.
+   * @param categoria   Categoría de la colección. No puede ser nula o vacía.
+   * @param algoritmo   Algoritmo de consenso a aplicar sobre los hechos.
+   * @throws RuntimeException si alguno de los parámetros obligatorios es inválido.
+   */
   public Coleccion(
       String titulo,
       Fuente fuente,
@@ -93,68 +105,84 @@ public class Coleccion {
     this.fuente = fuente;
     this.descripcion = descripcion;
     this.categoria = categoria;
-    this.filtro = new FiltroPredicado(h -> true);
+    this.condicionJson = "{}";
     this.algoritmo = algoritmo;
   }
 
   /**
-   * Obtiene la fuente de la colección.
+   * Obtiene el título de la colección.
    *
-   * @return Fuente de la colección.
+   * @return El título.
    */
   public String getTitulo() {
     return titulo;
   }
 
   /**
-   * Obtiene la fuente de la colección.
+   * Obtiene la descripción de la colección.
    *
-   * @return Fuente de la colección.
+   * @return La descripción.
    */
   public String getDescripcion() {
     return descripcion;
   }
 
   /**
-   * Obtiene la fuente de la colección.
+   * Obtiene la categoría de la colección.
    *
-   * @return Fuente de la colección.
+   * @return La categoría.
    */
   public String getCategoria() {
     return categoria;
   }
 
   /**
-   * Obtiene la fuente de la colección.
+   * Construye y devuelve el filtro persistente basado en la condición JSON almacenada.
    *
-   * @return Fuente de la colección.
+   * @return Un objeto {@link FiltroPersistente} listo para ser usado.
    */
-  public Filtro getFiltro() {
-    return filtro;
+  public FiltroPersistente getFiltro() {
+    Condicion condicion = new CondicionFactory().crearCondicionDesdeJson(condicionJson);
+    return new FiltroPersistente(condicion);
   }
 
   /**
-   * Establece el filtro de la colección.
+   * Establece la condición de filtrado para la colección.
+   * La condición se convierte a formato JSON para su almacenamiento.
    *
-   * @param filtro Filtro
+   * @param condicion El objeto {@link Condicion} que define el filtro.
    */
-
-  public void setFiltro(Filtro filtro) {
-    this.filtro = filtro != null ? filtro : new FiltroPredicado(h -> true);
-    ;
+  public void setCondicion(Condicion condicion) {
+    if (condicion != null) {
+      this.condicionJson = condicion.aJsonString();
+    } else {
+      this.condicionJson = "{}";
+    }
   }
 
   /**
-   * Obtiene los hechos de la colección filtrados por un criterio y un filtro externo opcional.
+   * Obtiene los hechos de la colección después de aplicar los filtros correspondientes.
    *
-   * @param repo RepositorioDeReportes
-   * @return Lista de hechos filtrados.
+   * @param repo El repositorio de solicitudes que contiene el filtro de exclusión.
+   * @return Una lista de hechos filtrada y lista para su visualización o uso.
    */
   public List<Hecho> getHechos(RepositorioDeSolicitudes repo) {
-    return repo.filtroExcluyente()
-               .filtrar(fuente.obtenerHechos());
+    // 1. Obtiene los hechos de la fuente
+    List<Hecho> hechosFuente = fuente.obtenerHechos();
+
+    // 2. Aplica el filtro de exclusión del repositorio
+    List<Hecho> hechosSinExcluidos = repo.filtroExcluyente().filtrar(hechosFuente);
+
+    // 3. Aplica el filtro propio de la colección
+    return this.getFiltro().filtrar(hechosSinExcluidos);
   }
 
+  /**
+   * Recalcula la lista de hechos consensuados aplicando el algoritmo de consenso configurado.
+   * Si no hay algoritmo, los hechos consensuados serán los mismos que los hechos filtrados.
+   *
+   * @param repo El repositorio de solicitudes necesario para obtener los hechos base.
+   */
   public void recalcularHechosConsensuados(RepositorioDeSolicitudes repo) {
     List<Fuente> fuentesNodo = this.obtenerFuentesDelNodo();
     List<Hecho> hechos = getHechos(repo);
@@ -166,52 +194,53 @@ public class Coleccion {
     }
   }
 
+  /**
+   * Devuelve la lista de hechos que han pasado el algoritmo de consenso.
+   *
+   * @return Una copia de la lista de hechos consensuados.
+   */
   public List<Hecho> getHechosConsensuados() {
     return new ArrayList<>(hechosConsensuados);
   }
 
   /**
-   * filtra los hechos de la colección aplicando el filtro propio y un filtro excluyente.
-   *
-   * @param filtroExcluyente Filtro
-   * @return un nuevo filtro que combina el filtro de la colección con el filtro excluyente.
-   */
-
-  private Filtro filtrarHechos(Filtro filtroExcluyente) {
-    if (filtroExcluyente == null) {
-      return filtro;
-    }
-    return new FiltroListaAnd(List.of(filtro, filtroExcluyente));
-  }
-
-  /**
    * Valida si la colección contiene una fuente específica.
    *
-   * @param unaFuente Fuente
-   * @return true si la colección contiene la fuente, false en caso contrario.
+   * @param unaFuente La fuente a verificar.
+   * @return {@code true} si la colección contiene la fuente, {@code false} en caso contrario.
    */
   public boolean contieneFuente(Fuente unaFuente) {
     return fuente == unaFuente;
   }
 
   /**
-   * Verifica si un hecho está presente en la colección.
+   * Verifica si un hecho está presente en la colección después de aplicar todos los filtros.
    *
-   * @param unHecho               Hecho a verificar.
-   * @param repositorioDeReportes Repositorio de reportes para obtener los hechos.
-   * @return true si el hecho está en la colección, false en caso contrario.
+   * @param unHecho               El hecho a verificar.
+   * @param repositorioDeReportes El repositorio necesario para obtener la lista de hechos filtrados.
+   * @return {@code true} si el hecho está en la colección, {@code false} en caso contrario.
    */
-
   public boolean contieneA(Hecho unHecho, RepositorioDeSolicitudes repositorioDeReportes) {
     return this.getHechos(repositorioDeReportes)
-               .contains(unHecho);
+        .contains(unHecho);
   }
 
-
+  /**
+   * Establece el algoritmo de consenso para la colección.
+   *
+   * @param algoritmo El algoritmo de consenso a utilizar.
+   */
   public void setAlgoritmoDeConcenso(AlgoritmoDeConsenso algoritmo) {
     this.algoritmo = algoritmo;
   }
 
+  /**
+   * Mét0do auxiliar para obtener la lista de fuentes subyacentes.
+   * Si la fuente principal es un agregador, devuelve las fuentes que lo componen.
+   * Si es una fuente simple, la devuelve en una lista unitaria.
+   *
+   * @return La lista de fuentes base.
+   */
   private List<Fuente> obtenerFuentesDelNodo() {
     if (this.fuente instanceof FuenteDeAgregacion agregador) {
       return agregador.getFuentesCargadas();
@@ -220,3 +249,4 @@ public class Coleccion {
     }
   }
 }
+

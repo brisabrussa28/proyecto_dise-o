@@ -1,8 +1,7 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
-import ar.edu.utn.frba.dds.domain.etiqueta.Etiqueta;
+import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,8 +29,8 @@ public class HechoBuilder {
     this.direccion = original.getDireccion();
     this.provincia = original.getProvincia();
     this.ubicacion = original.getUbicacion();
-    this.fechaSuceso = original.getFechaSuceso();
-    this.fechaCarga = original.getFechaCarga();
+    this.fechaSuceso = original.getFechasuceso();
+    this.fechaCarga = original.getFechacarga();
     this.fuenteOrigen = original.getOrigen();
     this.etiquetas = original.getEtiquetas();
     return this;

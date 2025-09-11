@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.origen;
+package ar.edu.utn.frba.dds.domain.hecho;
 
 /**
  * Origen.

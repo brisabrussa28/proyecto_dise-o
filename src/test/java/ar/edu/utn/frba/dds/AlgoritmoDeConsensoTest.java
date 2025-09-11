@@ -7,18 +7,16 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.algoritmosconsenso.Absoluta;
-import ar.edu.utn.frba.dds.domain.algoritmosconsenso.AlgoritmoDeConsenso;
-import ar.edu.utn.frba.dds.domain.algoritmosconsenso.MayoriaSimple;
-import ar.edu.utn.frba.dds.domain.algoritmosconsenso.MultiplesMenciones;
+import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.Absoluta;
+import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.AlgoritmoDeConsenso;
+import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.MayoriaSimple;
+import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.MultiplesMenciones;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroPersistente;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
 import java.time.LocalDateTime;
@@ -33,7 +31,7 @@ public class AlgoritmoDeConsensoTest {
   @Mock
   private RepositorioDeSolicitudes repo;
   @Mock
-  private Filtro filtroExcluyente;
+  private FiltroPersistente filtroExcluyente;
   @Mock
   private Serializador<Hecho> serializadorMock;
 
