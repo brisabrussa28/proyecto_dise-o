@@ -6,23 +6,20 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.algoritmosconsenso.Absoluta;
-import ar.edu.utn.frba.dds.domain.algoritmosconsenso.AlgoritmoDeConsenso;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroPersistente;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
+import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,37 +34,27 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class ColeccionTest {
-  PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD;
   LocalDateTime horaAux = LocalDateTime.now().minusDays(1);
-  List<String> etiquetasAux = List.of(
-      "#ancianita",
-      "#robo_a_mano_armada",
-      "#violencia",
-      "#leyDeProtecciónALasAncianitas",
-      "#NOalaVIOLENCIAcontraABUELITAS"
-  );
   private RepositorioDeSolicitudes repositorio;
-  private DetectorSpam detectorSpam;
-  private AlgoritmoDeConsenso absoluta;
   private Path tempJsonFile;
 
   @Mock
   private Serializador<Hecho> serializadorMock;
+  @Mock
+  private DetectorSpam detectorSpam;
 
   @BeforeEach
-  void initFileSystem() throws IOException {
+  void init() throws IOException {
     MockitoAnnotations.openMocks(this);
-    detectorSpam = mock(DetectorSpam.class);
     repositorio = new RepositorioDeSolicitudes(detectorSpam);
-    absoluta = new Absoluta();
     tempJsonFile = Files.createTempFile("test_fuente_dinamica_", ".json");
     when(serializadorMock.importar(anyString())).thenReturn(new ArrayList<>());
     fuenteAuxD = new FuenteDinamica("Julio Cesar", tempJsonFile.toString(), serializadorMock);
   }
 
   @AfterEach
-  void cleanupFileSystem() throws IOException {
+  void cleanup() throws IOException {
     Files.deleteIfExists(tempJsonFile);
   }
 
@@ -90,15 +77,7 @@ public class ColeccionTest {
     Coleccion coleccion = new Coleccion("Robos", fuenteAuxD, "Descripcion", "Robos");
     Hecho hecho = new HechoBuilder()
         .conTitulo("titulo")
-        .conDescripcion("desc")
-        .conCategoria("Robos")
-        .conDireccion("direccion")
-        .conProvincia("Provincia")
-        .conUbicacion(null)
         .conFechaSuceso(horaAux)
-        .conFechaCarga(LocalDateTime.now())
-        .conFuenteOrigen(Origen.DATASET)
-        .conEtiquetas(etiquetasAux)
         .build();
     fuenteAuxD.agregarHecho(hecho);
     assertTrue(coleccion.contieneA(hecho, repositorio));
@@ -137,15 +116,7 @@ public class ColeccionTest {
     Coleccion coleccion = new Coleccion("Robos", fuenteAuxD, "Descripcion", "Robos");
     Hecho hecho = new HechoBuilder()
         .conTitulo("titulo")
-        .conDescripcion("desc")
-        .conCategoria("Robos")
-        .conDireccion("direccion")
-        .conProvincia("Provincia")
-        .conUbicacion(pgAux)
         .conFechaSuceso(horaAux)
-        .conFechaCarga(LocalDateTime.now())
-        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conEtiquetas(etiquetasAux)
         .build();
     fuenteAuxD.agregarHecho(hecho);
     when(detectorSpam.esSpam(anyString())).thenReturn(false);
@@ -161,28 +132,36 @@ public class ColeccionTest {
 
   @Test
   public void testFiltradoYSpamDetectadoCorrectamente() {
+    // Arrange: Preparamos los datos y mocks
     Fuente fuente = mock(Fuente.class);
-    Hecho valido = mock(Hecho.class);
-    Hecho spam = mock(Hecho.class);
-    when(fuente.obtenerHechos()).thenReturn(List.of(valido, spam));
+    Hecho valido = new HechoBuilder().conTitulo("valido").build();
+    Hecho spam = new HechoBuilder().conTitulo("spam").build();
+    Hecho filtradoPorColeccion = new HechoBuilder().conTitulo("filtrado").build();
+
+    when(fuente.obtenerHechos()).thenReturn(List.of(valido, spam, filtradoPorColeccion));
 
     Coleccion coleccion = new Coleccion("Test", fuente, "Descripcion", "Categoria");
 
-    Filtro filtroMock = mock(Filtro.class);
-    when(filtroMock.filtrar(anyList())).thenReturn(List.of(valido));
-    coleccion.setFiltro(filtroMock);
+    // 1. Configurar el filtro propio de la colección para que excluya a "filtradoPorColeccion"
+    Condicion condicionColeccion = new CondicionGenerica("titulo", "DISTINTO", "filtrado");
+    coleccion.setCondicion(condicionColeccion);
 
-    RepositorioDeSolicitudes localRepositorioMock = mock(RepositorioDeSolicitudes.class);
-    Filtro filtroExcluyente = mock(Filtro.class);
+    // 2. Configurar el mock del repositorio para que su filtro excluyente elimine a "spam"
+    RepositorioDeSolicitudes repoMock = mock(RepositorioDeSolicitudes.class);
+    Condicion condicionSpam = new CondicionGenerica("titulo", "DISTINTO", "spam");
+    FiltroPersistente filtroExcluyente = new FiltroPersistente(condicionSpam);
+    when(repoMock.filtroExcluyente()).thenReturn(filtroExcluyente);
 
-    when(localRepositorioMock.filtroExcluyente()).thenReturn(filtroExcluyente);
-    when(filtroExcluyente.filtrar(anyList())).thenReturn(List.of(valido));
+    // Act: Ejecutamos el método a probar
+    List<Hecho> hechosFinales = coleccion.getHechos(repoMock);
 
-    List<Hecho> hechosFinales = coleccion.getHechos(localRepositorioMock);
-
+    // Assert: Verificamos que el resultado sea el esperado
     assertEquals(1, hechosFinales.size());
     assertTrue(hechosFinales.contains(valido));
+    assertFalse(hechosFinales.contains(spam));
+    assertFalse(hechosFinales.contains(filtradoPorColeccion));
   }
+
 
   @Test
   public void testHechosCambianConFuente() {
@@ -198,11 +177,12 @@ public class ColeccionTest {
     assertEquals(1, hechosIniciales.size());
     assertTrue(hechosIniciales.contains(hecho1));
 
+    // La fuente ahora devuelve más hechos
     when(fuente.obtenerHechos()).thenReturn(List.of(hecho1, hecho2));
 
     List<Hecho> hechosActualizados = coleccion.getHechos(repositorio);
     assertEquals(2, hechosActualizados.size());
-    assertTrue(hechosActualizados.contains(hecho1));
-    assertTrue(hechosActualizados.contains(hecho2));
+    assertTrue(hechosActualizados.containsAll(List.of(hecho1, hecho2)));
   }
 }
+

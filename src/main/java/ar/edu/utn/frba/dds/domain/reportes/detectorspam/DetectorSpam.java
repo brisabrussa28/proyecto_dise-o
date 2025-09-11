@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.detectorspam;
+package ar.edu.utn.frba.dds.domain.reportes.detectorspam;
 
 /**
  * Interfaz de nuestro componente para detectar si una solicitud es spam.

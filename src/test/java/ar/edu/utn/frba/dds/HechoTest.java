@@ -7,11 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ar.edu.utn.frba.dds.domain.filtro.FiltroPredicado;
+import ar.edu.utn.frba.dds.domain.filtro.FiltroPersistente;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -20,9 +22,7 @@ public class HechoTest {
 
   @Test
   public void seCreaHechoCorrectamente() {
-    // FuenteDinamica fuente = new FuenteDinamica("Fuente X", null); // Ya no es necesaria para crear el hecho
     PuntoGeografico ubicacion = new PuntoGeografico(33.0, 44.0);
-    List<String> etiquetas = List.of("#robo", "#violencia");
     LocalDateTime fechaSuceso = LocalDateTime.now().minusDays(5);
     LocalDateTime fechaCarga = LocalDateTime.now();
 
@@ -31,12 +31,10 @@ public class HechoTest {
         .conDescripcion("Robo a mano armada")
         .conCategoria("DELITO")
         .conDireccion("Calle falsa 123")
-        // provincia se omite para probar el constructor
         .conUbicacion(ubicacion)
         .conFechaSuceso(fechaSuceso)
         .conFechaCarga(fechaCarga)
         .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conEtiquetas(etiquetas)
         .build();
 
     assertEquals("Robo", hecho.getTitulo());
@@ -44,18 +42,18 @@ public class HechoTest {
     assertEquals("DELITO", hecho.getCategoria());
     assertEquals("Calle falsa 123", hecho.getDireccion());
     assertEquals(ubicacion, hecho.getUbicacion());
-    assertEquals(fechaSuceso, hecho.getFechaSuceso());
+    assertEquals(fechaSuceso, hecho.getFechasuceso());
     assertEquals(Origen.PROVISTO_CONTRIBUYENTE, hecho.getOrigen());
-    assertNotNull(hecho.getFechaCarga());
+    assertNotNull(hecho.getFechacarga());
   }
 
   @Test
-  public void filtroDetectaHechoIdentico() {
+  public void filtroDetectaHechoPorTitulo() {
     LocalDateTime fecha = LocalDateTime.now().minusDays(2);
     PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
 
-    Hecho original = new HechoBuilder()
-        .conTitulo("titulo")
+    Hecho hecho = new HechoBuilder()
+        .conTitulo("titulo_unico")
         .conDescripcion("desc")
         .conCategoria("categoria")
         .conDireccion("direccion")
@@ -64,33 +62,14 @@ public class HechoTest {
         .conFechaSuceso(fecha)
         .conFechaCarga(fecha)
         .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conEtiquetas(List.of("#etiqueta"))
         .build();
 
-    Hecho copia = new HechoBuilder()
-        .conTitulo("titulo")
-        .conDescripcion("desc")
-        .conCategoria("categoria")
-        .conDireccion("direccion")
-        .conProvincia("prov")
-        .conUbicacion(ubicacion)
-        .conFechaSuceso(fecha)
-        .conFechaCarga(fecha)
-        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conEtiquetas(List.of("#otra"))
-        .build();
+    Condicion condicion = new CondicionGenerica("titulo", "IGUAL", "titulo_unico");
+    FiltroPersistente filtro = new FiltroPersistente(condicion);
+    List<Hecho> filtrados = filtro.filtrar(List.of(hecho));
 
-
-    FiltroPredicado filtro = new FiltroPredicado(h -> h.equals(original));
-    List<Hecho> filtrados = filtro.filtrar(List.of(copia));
-
-    // La lógica de equals de Hecho solo considera titulo, descripcion, categoria, direccion, ubicacion y fechaSuceso.
-    // Aunque la descripción y las etiquetas son diferentes, el filtro podría considerarlos "idénticos"
-    // si la implementación de FiltroIgualHecho solo compara los campos que se usan en el equals de Hecho.
-    // Si la intención es que sean idénticos en todos los aspectos para el filtro, se debería ajustar el mock o la lógica del filtro.
-    // Para este test, asumo que el filtro se basa en el método equals de Hecho.
     assertEquals(1, filtrados.size());
-    assertEquals(copia, filtrados.get(0));
+    assertEquals(hecho, filtrados.get(0));
   }
 
   @Test
@@ -123,10 +102,12 @@ public class HechoTest {
         .build();
 
 
-    FiltroPredicado filtro = new FiltroPredicado(h -> h.equals(original));
-    List<Hecho> resultado = filtro.filtrar(List.of(distinto));
+    Condicion condicion = new CondicionGenerica("titulo", "IGUAL", "Robo");
+    FiltroPersistente filtro = new FiltroPersistente(condicion);
+    List<Hecho> resultado = filtro.filtrar(List.of(distinto, original));
 
-    assertTrue(resultado.isEmpty());
+    assertEquals(1, resultado.size());
+    assertEquals(original, resultado.get(0));
   }
 
   @Test
@@ -213,7 +194,6 @@ public class HechoTest {
         .conFechaSuceso(hace3Dias)
         .conFechaCarga(hace3Dias)
         .conFuenteOrigen(Origen.DATASET)
-        .conEtiquetas(List.of("etiqueta"))
         .build();
 
     assertTrue(hecho.esEditable(), "El hecho debería ser editable antes de una semana");
@@ -232,9 +212,9 @@ public class HechoTest {
         .conFechaSuceso(hace10Dias)
         .conFechaCarga(hace10Dias)
         .conFuenteOrigen(Origen.DATASET)
-        .conEtiquetas(List.of("etiqueta"))
         .build();
 
     assertFalse(hecho.esEditable(), "El hecho NO debería ser editable después de una semana");
   }
 }
+

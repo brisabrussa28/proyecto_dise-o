@@ -1,12 +1,17 @@
 package ar.edu.utn.frba.dds.domain.filtro;
 
-import ar.edu.utn.frba.dds.domain.filtro.condicion.Condicion;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class FiltroPersistente {
   private Condicion condicionRaiz;
+
+  public FiltroPersistente(Condicion condicionRaiz) {
+    this.condicionRaiz = condicionRaiz;
+  }
+
 
   /**
    * Implementación del método de la interfaz Filtro.

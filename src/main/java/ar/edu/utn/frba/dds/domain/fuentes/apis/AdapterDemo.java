@@ -1,12 +1,12 @@
 package ar.edu.utn.frba.dds.domain.fuentes.apis;
 
-import ar.edu.utn.frba.dds.domain.etiqueta.Etiqueta;
+import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.Conexion.Conexion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
+import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;

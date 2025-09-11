@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.filtro.condicion;
+package ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 

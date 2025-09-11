@@ -1,8 +1,7 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
-import ar.edu.utn.frba.dds.domain.etiqueta.Etiqueta;
+import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,8 +16,6 @@ import javax.persistence.OneToMany;
 /**
  * Hecho.
  */
-
-//todo: creo que teniamos que eliminar a la mierda el UUID
 
 @Entity
 public class Hecho {
@@ -139,7 +136,7 @@ public class Hecho {
    *
    * @return Date fecha del suceso
    */
-  public LocalDateTime getFechaSuceso() {
+  public LocalDateTime getFechasuceso() {
     return fechaSuceso;
   }
 
@@ -148,7 +145,7 @@ public class Hecho {
    *
    * @return Date fecha de carga del hecho
    */
-  public LocalDateTime getFechaCarga() {
+  public LocalDateTime getFechacarga() {
     return fechaCarga;
   }
 
@@ -203,7 +200,7 @@ public class Hecho {
     this.ubicacion = ubicacion;
   }
 
-  public void setFechaSuceso(LocalDateTime fechaSuceso) {
+  public void setFechasuceso(LocalDateTime fechaSuceso) {
     this.fechaSuceso = fechaSuceso;
   }
 
@@ -215,7 +212,7 @@ public class Hecho {
     this.estado = estado;
   }
 
-  public void setFechaCarga(LocalDateTime fechaCarga) {
+  public void setFechacarga(LocalDateTime fechaCarga) {
     this.fechaCarga = fechaCarga;
   }
 
@@ -224,7 +221,7 @@ public class Hecho {
   }
 
   @JsonProperty("origen")
-  public void setFuenteOrigen(Origen fuenteOrigen) {
+  public void setOrigen(Origen fuenteOrigen) {
     this.fuenteOrigen = fuenteOrigen;
   }
 
