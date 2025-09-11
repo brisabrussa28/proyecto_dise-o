@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.filtro.FiltroPersistente;
+import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionAnd;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
@@ -66,7 +66,7 @@ public class FiltroTest {
   public void filtraPorCategoriaCorrectamente() {
     List<Hecho> hechos = List.of(hechoDePrueba);
     Condicion condicionCategoria = new CondicionGenerica("categoria", "IGUAL", "Robos");
-    FiltroPersistente filtro = new FiltroPersistente(condicionCategoria);
+    Filtro filtro = new Filtro(condicionCategoria);
 
     List<Hecho> resultado = filtro.filtrar(hechos);
     assertEquals(1, resultado.size());
@@ -77,7 +77,7 @@ public class FiltroTest {
   public void filtraPorDireccionCorrectamente() {
     List<Hecho> hechos = List.of(hechoDePrueba);
     Condicion condicionDireccion = new CondicionGenerica("direccion", "IGUAL", "dire");
-    FiltroPersistente filtro = new FiltroPersistente(condicionDireccion);
+    Filtro filtro = new Filtro(condicionDireccion);
 
     List<Hecho> resultado = filtro.filtrar(hechos);
     assertEquals(1, resultado.size());
@@ -88,7 +88,7 @@ public class FiltroTest {
   public void filtraPorFechaSucesoCorrectamente() {
     List<Hecho> hechos = List.of(hechoDePrueba);
     Condicion condicionFecha = new CondicionGenerica("fechaSuceso", "IGUAL", horaAux);
-    FiltroPersistente filtro = new FiltroPersistente(condicionFecha);
+    Filtro filtro = new Filtro(condicionFecha);
     assertEquals(1, filtro.filtrar(hechos).size());
   }
 
@@ -101,7 +101,7 @@ public class FiltroTest {
     condicionAnd.agregarCondicion(new CondicionGenerica("categoria", "IGUAL", "Robos"));
     condicionAnd.agregarCondicion(new CondicionGenerica("direccion", "IGUAL", "dire"));
 
-    FiltroPersistente filtro = new FiltroPersistente(condicionAnd);
+    Filtro filtro = new Filtro(condicionAnd);
     assertEquals(1, filtro.filtrar(hechos).size());
   }
 
@@ -113,7 +113,7 @@ public class FiltroTest {
     condicionAnd.agregarCondicion(new CondicionGenerica("categoria", "IGUAL", "Robos"));
     condicionAnd.agregarCondicion(new CondicionGenerica("direccion", "IGUAL", "direccion_incorrecta"));
 
-    FiltroPersistente filtro = new FiltroPersistente(condicionAnd);
+    Filtro filtro = new Filtro(condicionAnd);
     assertTrue(filtro.filtrar(hechos).isEmpty());
   }
 }

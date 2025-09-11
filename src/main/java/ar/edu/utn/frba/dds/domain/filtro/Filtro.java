@@ -5,10 +5,10 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FiltroPersistente {
+public class Filtro {
   private Condicion condicionRaiz;
 
-  public FiltroPersistente(Condicion condicionRaiz) {
+  public Filtro(Condicion condicionRaiz) {
     this.condicionRaiz = condicionRaiz;
   }
 

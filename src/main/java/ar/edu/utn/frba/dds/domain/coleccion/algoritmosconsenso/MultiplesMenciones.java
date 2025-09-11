@@ -15,31 +15,24 @@ public class MultiplesMenciones extends AlgoritmoDeConsenso {
       List<Fuente> fuentesNodo
   ) {
 
-    return listaDeHechos.stream()
-                        .filter(hecho -> !hechoConVersionDistinta(
-                            hecho,
-                            fuentesNodo
-                        ) && hechoEnDosOMasFuentes(hecho, fuentesNodo))
-                        .toList();
+    return listaDeHechos.stream().distinct()
+        .filter(hecho -> !hechoConVersionDistinta(
+            hecho,
+            fuentesNodo
+        ) && hechoEnDosOMasFuentes(hecho, fuentesNodo))
+        .toList();
   }
 
   boolean hechoEnDosOMasFuentes(Hecho hecho, List<Fuente> fuentes) {
     return 2 <= fuentes.stream()
-                       .filter(fuente -> fuente.obtenerHechos()
-                                               .contains(hecho))
-                       .toList()
-                       .size();
+        .filter(fuente -> fuente.obtenerHechos().contains(hecho))
+        .toList()
+        .size();
   }
 
   boolean hechoConVersionDistinta(Hecho hecho, List<Fuente> fuentes) {
     return fuentes.stream()
-                  .map(Fuente::obtenerHechos)
-                  .filter(hechos -> hechos.stream()
-                                          .anyMatch(hecho1 -> hecho1.getTitulo()
-                                                                    .equals(hecho.getTitulo())))
-
-                  .anyMatch(hechos -> hechos.stream()
-                                            .anyMatch(hecho1 -> !hecho1.getTitulo()
-                                                                       .equals(hecho.getTitulo())));
+        .flatMap(f -> f.obtenerHechos().stream())
+        .anyMatch(h -> h.getTitulo().equals(hecho.getTitulo()) && !h.equals(hecho));
   }
 }

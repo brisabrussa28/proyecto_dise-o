@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds.domain.coleccion;
 
 import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.AlgoritmoDeConsenso;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroPersistente;
+import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionFactory;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
@@ -141,11 +141,11 @@ public class Coleccion {
   /**
    * Construye y devuelve el filtro persistente basado en la condición JSON almacenada.
    *
-   * @return Un objeto {@link FiltroPersistente} listo para ser usado.
+   * @return Un objeto {@link Filtro} listo para ser usado.
    */
-  public FiltroPersistente getFiltro() {
+  public Filtro getFiltro() {
     Condicion condicion = new CondicionFactory().crearCondicionDesdeJson(condicionJson);
-    return new FiltroPersistente(condicion);
+    return new Filtro(condicion);
   }
 
   /**

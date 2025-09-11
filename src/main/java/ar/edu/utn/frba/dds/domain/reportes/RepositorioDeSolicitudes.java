@@ -1,7 +1,6 @@
 package ar.edu.utn.frba.dds.domain.reportes;
 
-import ar.edu.utn.frba.dds.domain.filtro.FiltroPersistente;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
+import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionPredicado;
 import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
@@ -113,7 +112,7 @@ public class RepositorioDeSolicitudes {
    *
    * @return Filtro que excluye los hechos eliminados
    */
-  public FiltroPersistente filtroExcluyente() {
-    return new FiltroPersistente(new CondicionPredicado(h -> !hechosEliminados.contains(h)));
+  public Filtro filtroExcluyente() {
+    return new Filtro(new CondicionPredicado(h -> !hechosEliminados.contains(h)));
   }
 }

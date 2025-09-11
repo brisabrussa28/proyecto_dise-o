@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import ar.edu.utn.frba.dds.domain.filtro.FiltroPersistente;
+import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
@@ -47,7 +47,7 @@ public class LectorCsvTest {
     List<Hecho> csv = lector.importar(dir + "ejemplo.csv");
 
     Condicion condicion = new CondicionGenerica("direccion", "IGUAL", "EL NESTORNAUTA");
-    FiltroPersistente filtroDireccion = new FiltroPersistente(condicion);
+    Filtro filtroDireccion = new Filtro(condicion);
 
     List<Hecho> hechosFiltrados = filtroDireccion.filtrar(csv);
     Hecho hecho = hechosFiltrados.get(0);

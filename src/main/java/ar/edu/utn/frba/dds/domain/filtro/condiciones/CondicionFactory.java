@@ -48,7 +48,10 @@ public class CondicionFactory {
    * @return Una instancia de Condicion.
    */
   private Condicion crearCondicion(Map<String, Object> metadata) {
-    if (metadata.containsKey("compuesta")) { //and or
+
+    if (metadata == null || metadata.isEmpty()) {
+      return crearCondicionTrue();
+    } else if (metadata.containsKey("compuesta")) { //and or
       return crearCondicionCompuesta(metadata);
     } else if (metadata.containsKey("logica")) { // solo not de momento
       return crearCondicionLogica(metadata);
@@ -58,6 +61,12 @@ public class CondicionFactory {
       throw new IllegalArgumentException("La metadata del filtro es inválida. Debe contener 'logica' o 'campo'.");
     }
   }
+
+  private Condicion crearCondicionTrue() {
+    return new Condicion();
+  }
+
+
 
   private CondicionCompuesta crearCondicionCompuesta(Map<String, Object> metadata) {
     String logica = (String) metadata.get("logica");

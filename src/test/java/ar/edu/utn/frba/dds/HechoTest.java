@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ar.edu.utn.frba.dds.domain.filtro.FiltroPersistente;
+import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
@@ -65,7 +65,7 @@ public class HechoTest {
         .build();
 
     Condicion condicion = new CondicionGenerica("titulo", "IGUAL", "titulo_unico");
-    FiltroPersistente filtro = new FiltroPersistente(condicion);
+    Filtro filtro = new Filtro(condicion);
     List<Hecho> filtrados = filtro.filtrar(List.of(hecho));
 
     assertEquals(1, filtrados.size());
@@ -103,7 +103,7 @@ public class HechoTest {
 
 
     Condicion condicion = new CondicionGenerica("titulo", "IGUAL", "Robo");
-    FiltroPersistente filtro = new FiltroPersistente(condicion);
+    Filtro filtro = new Filtro(condicion);
     List<Hecho> resultado = filtro.filtrar(List.of(distinto, original));
 
     assertEquals(1, resultado.size());

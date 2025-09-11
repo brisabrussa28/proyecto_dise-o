@@ -11,7 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.filtro.FiltroPersistente;
+import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
@@ -134,9 +134,9 @@ public class ColeccionTest {
   public void testFiltradoYSpamDetectadoCorrectamente() {
     // Arrange: Preparamos los datos y mocks
     Fuente fuente = mock(Fuente.class);
-    Hecho valido = new HechoBuilder().conTitulo("valido").build();
-    Hecho spam = new HechoBuilder().conTitulo("spam").build();
-    Hecho filtradoPorColeccion = new HechoBuilder().conTitulo("filtrado").build();
+    Hecho valido = new HechoBuilder().conTitulo("valido").conFechaSuceso(LocalDateTime.now().minusDays(1)).build();
+    Hecho spam = new HechoBuilder().conTitulo("spam").conFechaSuceso(LocalDateTime.now().minusDays(1)).build();
+    Hecho filtradoPorColeccion = new HechoBuilder().conTitulo("filtrado").conFechaSuceso(LocalDateTime.now().minusDays(1)).build();
 
     when(fuente.obtenerHechos()).thenReturn(List.of(valido, spam, filtradoPorColeccion));
 
@@ -149,7 +149,7 @@ public class ColeccionTest {
     // 2. Configurar el mock del repositorio para que su filtro excluyente elimine a "spam"
     RepositorioDeSolicitudes repoMock = mock(RepositorioDeSolicitudes.class);
     Condicion condicionSpam = new CondicionGenerica("titulo", "DISTINTO", "spam");
-    FiltroPersistente filtroExcluyente = new FiltroPersistente(condicionSpam);
+    Filtro filtroExcluyente = new Filtro(condicionSpam);
     when(repoMock.filtroExcluyente()).thenReturn(filtroExcluyente);
 
     // Act: Ejecutamos el método a probar
