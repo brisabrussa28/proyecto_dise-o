@@ -43,7 +43,8 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
 
   private void validarConfiguracion() {
     for (CampoHecho campoRequerido : CAMPOS_REQUERIDOS) {
-      if (!this.mapeoColumnas.containsKey(campoRequerido) || this.mapeoColumnas.get(campoRequerido).isEmpty()) {
+      if (!this.mapeoColumnas.containsKey(campoRequerido) || this.mapeoColumnas.get(campoRequerido)
+                                                                               .isEmpty()) {
         throw new IllegalArgumentException(
             "Configuración inválida. El mapeo de columnas debe contener una entrada para el campo requerido: " + campoRequerido
         );
@@ -66,8 +67,8 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
     Double latitud = parseDouble(latStr);
     Double longitud = parseDouble(lonStr);
     PuntoGeografico ubicacion = (latitud != null && longitud != null)
-        ? new PuntoGeografico(latitud, longitud)
-        : null;
+                                ? new PuntoGeografico(latitud, longitud)
+                                : null;
 
     try {
       return new HechoBuilder()
@@ -91,10 +92,10 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
       return null;
     }
     return columnas.stream()
-        .map(fila::get)
-        .filter(s -> s != null && !s.isBlank())
-        .reduce((a, b) -> a + separador + b)
-        .orElse(null);
+                   .map(fila::get)
+                   .filter(s -> s != null && !s.isBlank())
+                   .reduce((a, b) -> a + separador + b)
+                   .orElse(null);
   }
 
   private String extraerCampo(Map<String, String> fila, List<String> columnas) {
@@ -102,7 +103,9 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
   }
 
   private Double parseDouble(String valor) {
-    if (valor == null || valor.isBlank()) return null;
+    if (valor == null || valor.isBlank()) {
+      return null;
+    }
     try {
       return Double.parseDouble(valor);
     } catch (NumberFormatException e) {
@@ -112,9 +115,14 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
   }
 
   private LocalDateTime parseFecha(String valor) {
-    if (valor == null || valor.isBlank()) return null;
+    if (valor == null || valor.isBlank()) {
+      return null;
+    }
     try {
-      return dateFormat.parse(valor).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+      return dateFormat.parse(valor)
+                       .toInstant()
+                       .atZone(ZoneId.systemDefault())
+                       .toLocalDateTime();
     } catch (ParseException e) {
       logger.warning("Error al parsear fecha: '" + valor + "' con formato '" + this.dateFormatStr + "'");
       return null;

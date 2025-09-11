@@ -17,8 +17,8 @@ public class FuenteDeAgregacion extends FuenteDeCopiaLocal {
   /**
    * Constructor de la fuente de agregación.
    *
-   * @param nombre      Nombre de la fuente.
-   * @param rutaCopia   Ruta del archivo para la copia local (caché).
+   * @param nombre       Nombre de la fuente.
+   * @param rutaCopia    Ruta del archivo para la copia local (caché).
    * @param serializador Serializador para manejar la persistencia de la caché.
    */
   public FuenteDeAgregacion(String nombre, String rutaCopia, Serializador<Hecho> serializador) {
@@ -53,8 +53,9 @@ public class FuenteDeAgregacion extends FuenteDeCopiaLocal {
   @Override
   protected List<Hecho> consultarNuevosHechos() {
     return this.fuentesCargadas.stream()
-        .flatMap(fuente -> fuente.obtenerHechos().stream())
-        .distinct()
-        .collect(Collectors.toList());
+                               .flatMap(fuente -> fuente.obtenerHechos()
+                                                        .stream())
+                               .distinct()
+                               .collect(Collectors.toList());
   }
 }

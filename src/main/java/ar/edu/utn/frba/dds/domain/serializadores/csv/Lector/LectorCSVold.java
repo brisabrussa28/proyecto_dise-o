@@ -56,7 +56,8 @@ public class LectorCSVold {
 
   private void validarConfiguracion() {
     for (CampoHecho campoRequerido : CAMPOS_REQUERIDOS) {
-      if (!this.mapeoColumnas.containsKey(campoRequerido) || this.mapeoColumnas.get(campoRequerido).isEmpty()) {
+      if (!this.mapeoColumnas.containsKey(campoRequerido) || this.mapeoColumnas.get(campoRequerido)
+                                                                               .isEmpty()) {
         throw new IllegalArgumentException(
             "Configuración inválida. El mapeo de columnas debe contener una entrada para el campo requerido: " + campoRequerido
         );
@@ -78,7 +79,9 @@ public class LectorCSVold {
     try (
         CSVReader reader = new CSVReaderBuilder(
             new InputStreamReader(new java.io.FileInputStream(path), StandardCharsets.UTF_8)
-        ).withCSVParser(new CSVParserBuilder().withSeparator(separator).build()).build()
+        ).withCSVParser(new CSVParserBuilder().withSeparator(separator)
+                                              .build())
+         .build()
     ) {
       String[] headers = reader.readNext();
       if (headers == null || headers.length == 0) {
@@ -158,8 +161,8 @@ public class LectorCSVold {
     Double latitud = parseDouble(latStr);
     Double longitud = parseDouble(lonStr);
     PuntoGeografico ubicacion = (latitud != null && longitud != null)
-        ? new PuntoGeografico(latitud, longitud)
-        : null;
+                                ? new PuntoGeografico(latitud, longitud)
+                                : null;
     try {
       //Agregando el builder
       return new HechoBuilder()
@@ -197,15 +200,15 @@ public class LectorCSVold {
       return null;
     }
     return columnas.stream()
-        .peek(col -> {
-          if (!columnasPresentes.contains(col)) {
-            logger.warning("Advertencia: columna " + col + " no encontrada en CSV");
-          }
-        })
-        .map(fila::get)
-        .filter(s -> s != null && !s.isBlank()) // <<-- CAMBIO CLAVE AQUÍ
-        .reduce((a, b) -> a + separador + b)
-        .orElse(null);
+                   .peek(col -> {
+                     if (!columnasPresentes.contains(col)) {
+                       logger.warning("Advertencia: columna " + col + " no encontrada en CSV");
+                     }
+                   })
+                   .map(fila::get)
+                   .filter(s -> s != null && !s.isBlank()) // <<-- CAMBIO CLAVE AQUÍ
+                   .reduce((a, b) -> a + separador + b)
+                   .orElse(null);
   }
 
   /**
@@ -215,7 +218,9 @@ public class LectorCSVold {
    * @return Double parseado o null si ocurre un error.
    */
   private Double parseDouble(String valor) {
-    if (valor == null) return null;
+    if (valor == null) {
+      return null;
+    }
     try {
       return Double.parseDouble(valor.trim());
     } catch (NumberFormatException e) {
@@ -232,9 +237,14 @@ public class LectorCSVold {
    * @return Date parseada o null si ocurre un error.
    */
   private LocalDateTime parseFecha(String valor, SimpleDateFormat dateFormat) {
-    if (valor == null) return null;
+    if (valor == null) {
+      return null;
+    }
     try {
-      return dateFormat.parse(valor.trim()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+      return dateFormat.parse(valor.trim())
+                       .toInstant()
+                       .atZone(ZoneId.systemDefault())
+                       .toLocalDateTime();
     } catch (ParseException e) {
       logger.warning("Error al parsear fecha: '" + valor + "' con formato '" + dateFormat.toPattern() + "'");
       return null;

@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 /**
  * Lector de archivos CSV genérico
  * Delega la responsabilidad de convertir una fila en un objeto a un 'FilaConverter'.
+ *
  * @param <T> El tipo de objeto a crear desde cada fila del CSV.
  */
 public class LectorCSV<T> {
@@ -48,7 +49,9 @@ public class LectorCSV<T> {
     try (
         CSVReader reader = new CSVReaderBuilder(
             new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8)
-        ).withCSVParser(new CSVParserBuilder().withSeparator(separator).build()).build()
+        ).withCSVParser(new CSVParserBuilder().withSeparator(separator)
+                                              .build())
+         .build()
     ) {
       String[] headers = reader.readNext();
       if (headers == null || headers.length == 0) {

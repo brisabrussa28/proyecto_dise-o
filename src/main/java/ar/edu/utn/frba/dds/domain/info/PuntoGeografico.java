@@ -20,7 +20,8 @@ public class PuntoGeografico {
   @JsonCreator
   public PuntoGeografico(
       @JsonProperty("latitud") double latitud,
-      @JsonProperty("longitud") double longitud) {
+      @JsonProperty("longitud") double longitud
+  ) {
     this.latitud = latitud;
     this.longitud = longitud;
   }

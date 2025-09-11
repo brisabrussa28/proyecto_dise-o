@@ -25,8 +25,8 @@ public class Filtro {
       return hechos; // Si no hay condición, no se filtra nada.
     }
     return hechos.stream()
-        .filter(condicionRaiz::evaluar) // Llama al método evaluar de la condición raíz para cada hecho
-        .collect(Collectors.toList());
+                 .filter(condicionRaiz::evaluar) // Llama al método evaluar de la condición raíz para cada hecho
+                 .collect(Collectors.toList());
   }
 
 }

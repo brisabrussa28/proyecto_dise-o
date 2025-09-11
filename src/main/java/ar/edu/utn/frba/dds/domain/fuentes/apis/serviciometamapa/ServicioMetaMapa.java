@@ -35,7 +35,8 @@ public class ServicioMetaMapa {
     MetaMapaService metaMapaService = this.retrofit.create(MetaMapaService.class);
     Call<List<Hecho>> requestListadoDeHechos = metaMapaService.hechos(
         querys.getCategoria(),
-        querys.getUbicacion().toString(),
+        querys.getUbicacion()
+              .toString(),
         querys.getFechaReporteDesde(),
         querys.getFechaReporteHasta(),
         querys.getFechaAcontecimientoDesde(),
@@ -57,7 +58,8 @@ public class ServicioMetaMapa {
     Call<List<Hecho>> requestListadoDeHechos = metaMapaService.hechos(
         id,
         querys.getCategoria(),
-        querys.getUbicacion().toString(),
+        querys.getUbicacion()
+              .toString(),
         querys.getFechaReporteDesde(),
         querys.getFechaReporteHasta(),
         querys.getFechaAcontecimientoDesde(),

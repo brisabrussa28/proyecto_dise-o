@@ -17,6 +17,7 @@ public class FuenteDinamica extends FuenteDeCopiaLocal {
   @Id
   @GeneratedValue
   private Long id;
+
   /**
    * Constructor de la clase FuenteDinamica.
    *

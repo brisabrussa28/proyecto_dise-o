@@ -25,13 +25,19 @@ public class CondicionFactory {
 
   public CondicionFactory() {
     this.gson = new GsonBuilder()
-        .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, type, jsonDeserializationContext) ->
-            LocalDateTime.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+        .registerTypeAdapter(
+            LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, type, jsonDeserializationContext) ->
+                LocalDateTime.parse(
+                    json.getAsJsonPrimitive()
+                        .getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME
+                )
+        )
         .create();
   }
 
   /**
    * Recibe un String JSON y lo convierte en una Condicion.
+   *
    * @param jsonString El JSON del tipo de condicion.
    * @return Una instancia de Condicion.
    */
@@ -44,6 +50,7 @@ public class CondicionFactory {
 
   /**
    * Mét0do recursivo que interpreta los metadatos y construye los flujos segun corresponda.
+   *
    * @param metadata Un mapa que representa a la condición.
    * @return Una instancia de Condicion.
    */
@@ -65,7 +72,6 @@ public class CondicionFactory {
   private Condicion crearCondicionTrue() {
     return new Condicion();
   }
-
 
 
   private CondicionCompuesta crearCondicionCompuesta(Map<String, Object> metadata) {
@@ -133,15 +139,17 @@ public class CondicionFactory {
       case "ubicacion" -> {
         if (valorJson instanceof Map) {
           Map<String, Object> ubicacionMap = (Map<String, Object>) valorJson;
-          double latitud = Double.parseDouble(ubicacionMap.get("latitud").toString());
-          double longitud = Double.parseDouble(ubicacionMap.get("longitud").toString());
+          double latitud = Double.parseDouble(ubicacionMap.get("latitud")
+                                                          .toString());
+          double longitud = Double.parseDouble(ubicacionMap.get("longitud")
+                                                           .toString());
           yield new PuntoGeografico(latitud, longitud);
         }
         throw new IllegalArgumentException("El valor de 'ubicacion' debe ser un objeto con 'latitud' y 'longitud'");
       }
       case "etiquetas" -> throw new IllegalArgumentException("no implementado todavia jijo");
       default ->
-          // Si el campo no tiene un parseo especial, se trata como String.
+        // Si el campo no tiene un parseo especial, se trata como String.
           valorStr;
     };
   }

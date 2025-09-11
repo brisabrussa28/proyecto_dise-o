@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 /**
  * Lee un archivo JSON y lo deserializa en una lista de objetos genéricos.
+ *
  * @param <T> El tipo de objeto a deserializar.
  */
 public class LectorJson<T> {
@@ -24,6 +25,7 @@ public class LectorJson<T> {
 
   /**
    * Constructor que requiere un TypeReference para manejar la deserialización de listas genéricas.
+   *
    * @param typeReference El TypeReference que describe el tipo de la lista, por ejemplo, new TypeReference<List<Hecho>>() {}.
    */
   public LectorJson(TypeReference<List<T>> typeReference) {
@@ -35,6 +37,7 @@ public class LectorJson<T> {
 
   /**
    * Carga una lista de objetos desde un archivo JSON.
+   *
    * @param jsonFilePath La ruta al archivo JSON.
    * @return Una lista de objetos de tipo T. Retorna una lista vacía si el archivo no existe o está vacío.
    */

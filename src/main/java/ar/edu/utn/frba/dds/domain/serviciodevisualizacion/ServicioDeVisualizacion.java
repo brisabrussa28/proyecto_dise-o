@@ -17,7 +17,11 @@ public class ServicioDeVisualizacion {
   }
 
   //Obtener los hechos de una coleccion segun un criterio
-  public List<Hecho> filtrarHechosColeccion(Coleccion coleccion, Filtro filtro, RepositorioDeSolicitudes gestorDeReportes) {
+  public List<Hecho> filtrarHechosColeccion(
+      Coleccion coleccion,
+      Filtro filtro,
+      RepositorioDeSolicitudes gestorDeReportes
+  ) {
     return filtro.filtrar(coleccion.getHechos(gestorDeReportes));
   }
 }

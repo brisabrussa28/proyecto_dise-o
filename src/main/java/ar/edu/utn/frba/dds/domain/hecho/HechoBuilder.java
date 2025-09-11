@@ -91,9 +91,9 @@ public class HechoBuilder {
   public HechoBuilder conEtiquetas(List<String> etiquetas) {
     if (etiquetas != null) {
       etiquetas.stream()
-          .filter(nombre -> nombre != null && !nombre.isBlank())
-          .map(Etiqueta::new)
-          .forEach(this.etiquetas::add);
+               .filter(nombre -> nombre != null && !nombre.isBlank())
+               .map(Etiqueta::new)
+               .forEach(this.etiquetas::add);
     }
     return this;
   }

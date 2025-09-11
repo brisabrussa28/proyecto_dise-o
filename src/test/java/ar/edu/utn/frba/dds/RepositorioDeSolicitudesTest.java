@@ -86,7 +86,8 @@ public class RepositorioDeSolicitudesTest {
   public void gestionarSolicitudInexistenteLanzaExcepcion() {
     Solicitud solicitudFalsa = mock(Solicitud.class);
     assertThrows(
-        SolicitudInexistenteException.class, () -> repositorio.gestionarSolicitud(solicitudFalsa, AceptarSolicitud.ACEPTAR)
+        SolicitudInexistenteException.class,
+        () -> repositorio.gestionarSolicitud(solicitudFalsa, AceptarSolicitud.ACEPTAR)
     );
   }
 
@@ -107,14 +108,34 @@ public class RepositorioDeSolicitudesTest {
 
   @Test
   public void filtroExcluyenteNoIncluyeHechosEliminados() {
-    Hecho hecho1 = new HechoBuilder().conTitulo("t1").conDescripcion("d1").conCategoria("c1").conDireccion("dir1").conProvincia("p1").conUbicacion(pg).conFechaSuceso(hora).conFechaCarga(hora).conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE).conEtiquetas(etiquetas).build();
-    Hecho hecho2 = new HechoBuilder().conTitulo("t2").conDescripcion("d2").conCategoria("c2").conDireccion("dir2").conProvincia("p2").conUbicacion(pg).conFechaSuceso(hora).conFechaCarga(hora).conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE).conEtiquetas(etiquetas).build();
+    Hecho hecho1 = new HechoBuilder().conTitulo("t1")
+                                     .conDescripcion("d1")
+                                     .conCategoria("c1")
+                                     .conDireccion("dir1")
+                                     .conProvincia("p1")
+                                     .conUbicacion(pg)
+                                     .conFechaSuceso(hora)
+                                     .conFechaCarga(hora)
+                                     .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+                                     .conEtiquetas(etiquetas)
+                                     .build();
+    Hecho hecho2 = new HechoBuilder().conTitulo("t2")
+                                     .conDescripcion("d2")
+                                     .conCategoria("c2")
+                                     .conDireccion("dir2")
+                                     .conProvincia("p2")
+                                     .conUbicacion(pg)
+                                     .conFechaSuceso(hora)
+                                     .conFechaCarga(hora)
+                                     .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+                                     .conEtiquetas(etiquetas)
+                                     .build();
 
     repositorio.marcarComoEliminado(hecho1);
 
     List<Hecho> hechos = List.of(hecho1, hecho2);
     List<Hecho> filtrados = repositorio.filtroExcluyente()
-        .filtrar(hechos);
+                                       .filtrar(hechos);
 
     assertFalse(filtrados.contains(hecho1));
     assertTrue(filtrados.contains(hecho2));

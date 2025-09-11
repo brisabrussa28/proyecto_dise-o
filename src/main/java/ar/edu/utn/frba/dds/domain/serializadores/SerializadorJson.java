@@ -18,7 +18,8 @@ public class SerializadorJson<T> implements Serializador<T> {
 
   /**
    * Constructor que recibe las dependencias para leer y escribir JSON.
-   * @param lector La instancia de LectorJson ya configurada para el tipo T.
+   *
+   * @param lector     La instancia de LectorJson ya configurada para el tipo T.
    * @param exportador La instancia del ExportadorJson.
    */
   public SerializadorJson(LectorJson<T> lector, ExportadorJson exportador) {

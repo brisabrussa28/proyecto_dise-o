@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.domain.serializadores.csv.Exportador.ModoExportacion
 public interface ModoExportacion {
   /**
    * Obtiene la ruta final del archivo.
+   *
    * @param pathOriginal La ruta del archivo original.
    * @return La ruta final para el archivo.
    */
@@ -10,6 +11,7 @@ public interface ModoExportacion {
 
   /**
    * Determina si debe anexar o sobreescribir segun el modo.
+   *
    * @return true si debe anexar, false si debe sobrescribir.
    */
   boolean debeAnexar();

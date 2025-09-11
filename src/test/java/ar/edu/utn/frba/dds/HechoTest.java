@@ -23,7 +23,8 @@ public class HechoTest {
   @Test
   public void seCreaHechoCorrectamente() {
     PuntoGeografico ubicacion = new PuntoGeografico(33.0, 44.0);
-    LocalDateTime fechaSuceso = LocalDateTime.now().minusDays(5);
+    LocalDateTime fechaSuceso = LocalDateTime.now()
+                                             .minusDays(5);
     LocalDateTime fechaCarga = LocalDateTime.now();
 
     Hecho hecho = new HechoBuilder()
@@ -49,7 +50,8 @@ public class HechoTest {
 
   @Test
   public void filtroDetectaHechoPorTitulo() {
-    LocalDateTime fecha = LocalDateTime.now().minusDays(2);
+    LocalDateTime fecha = LocalDateTime.now()
+                                       .minusDays(2);
     PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
 
     Hecho hecho = new HechoBuilder()
@@ -74,7 +76,8 @@ public class HechoTest {
 
   @Test
   public void filtroNoDetectaHechoDistinto() {
-    LocalDateTime fecha = LocalDateTime.now().minusDays(2);
+    LocalDateTime fecha = LocalDateTime.now()
+                                       .minusDays(2);
     PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
 
     Hecho original = new HechoBuilder()
@@ -115,53 +118,58 @@ public class HechoTest {
     LocalDateTime fechaSuceso = LocalDateTime.now();
     LocalDateTime fechaCarga = fechaSuceso.minusDays(1); // incorrecto
 
-    assertThrows(RuntimeException.class, () -> new HechoBuilder()
-        .conTitulo("t")
-        .conDescripcion("d")
-        .conCategoria("c")
-        .conDireccion("dir")
-        .conProvincia("p")
-        .conUbicacion(new PuntoGeografico(1.0, 1.0))
-        .conFechaSuceso(fechaSuceso)
-        .conFechaCarga(fechaCarga)
-        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .build()
+    assertThrows(
+        RuntimeException.class, () -> new HechoBuilder()
+            .conTitulo("t")
+            .conDescripcion("d")
+            .conCategoria("c")
+            .conDireccion("dir")
+            .conProvincia("p")
+            .conUbicacion(new PuntoGeografico(1.0, 1.0))
+            .conFechaSuceso(fechaSuceso)
+            .conFechaCarga(fechaCarga)
+            .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+            .build()
     );
   }
 
   @Test
   public void lanzaExcepcionSiFechaSucesoEsFutura() {
-    LocalDateTime fechaFutura = LocalDateTime.now().plusDays(1);
+    LocalDateTime fechaFutura = LocalDateTime.now()
+                                             .plusDays(1);
 
-    assertThrows(RuntimeException.class, () -> new HechoBuilder()
-        .conTitulo("t")
-        .conDescripcion("d")
-        .conCategoria("c")
-        .conDireccion("dir")
-        .conProvincia("p")
-        .conUbicacion(new PuntoGeografico(1.0, 1.0))
-        .conFechaSuceso(fechaFutura)
-        .conFechaCarga(LocalDateTime.now())
-        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .build()
+    assertThrows(
+        RuntimeException.class, () -> new HechoBuilder()
+            .conTitulo("t")
+            .conDescripcion("d")
+            .conCategoria("c")
+            .conDireccion("dir")
+            .conProvincia("p")
+            .conUbicacion(new PuntoGeografico(1.0, 1.0))
+            .conFechaSuceso(fechaFutura)
+            .conFechaCarga(LocalDateTime.now())
+            .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+            .build()
     );
   }
 
   @Test
   public void lanzaExcepcionSiFechaCargaEsFutura() {
-    LocalDateTime fechaFutura = LocalDateTime.now().plusDays(1);
+    LocalDateTime fechaFutura = LocalDateTime.now()
+                                             .plusDays(1);
 
-    assertThrows(RuntimeException.class, () -> new HechoBuilder()
-        .conTitulo("t")
-        .conDescripcion("d")
-        .conCategoria("c")
-        .conDireccion("dir")
-        .conProvincia("p")
-        .conUbicacion(new PuntoGeografico(1.0, 1.0))
-        .conFechaSuceso(LocalDateTime.now())
-        .conFechaCarga(fechaFutura)
-        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .build()
+    assertThrows(
+        RuntimeException.class, () -> new HechoBuilder()
+            .conTitulo("t")
+            .conDescripcion("d")
+            .conCategoria("c")
+            .conDireccion("dir")
+            .conProvincia("p")
+            .conUbicacion(new PuntoGeografico(1.0, 1.0))
+            .conFechaSuceso(LocalDateTime.now())
+            .conFechaCarga(fechaFutura)
+            .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+            .build()
     );
   }
 
@@ -174,8 +182,10 @@ public class HechoTest {
         .conDireccion("dir")
         .conProvincia("p")
         .conUbicacion(new PuntoGeografico(1.0, 1.0))
-        .conFechaSuceso(LocalDateTime.now().minusDays(2))
-        .conFechaCarga(LocalDateTime.now().minusDays(1))
+        .conFechaSuceso(LocalDateTime.now()
+                                     .minusDays(2))
+        .conFechaCarga(LocalDateTime.now()
+                                    .minusDays(1))
         .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .build()
     );
@@ -183,7 +193,8 @@ public class HechoTest {
 
   @Test
   public void esEditableAntesDeUnaSemana() {
-    LocalDateTime hace3Dias = LocalDateTime.now().minusDays(3);
+    LocalDateTime hace3Dias = LocalDateTime.now()
+                                           .minusDays(3);
     Hecho hecho = new HechoBuilder()
         .conTitulo("titulo")
         .conDescripcion("desc")
@@ -201,7 +212,8 @@ public class HechoTest {
 
   @Test
   public void noEsEditablePasadaUnaSemana() {
-    LocalDateTime hace10Dias = LocalDateTime.now().minusDays(10);
+    LocalDateTime hace10Dias = LocalDateTime.now()
+                                            .minusDays(10);
     Hecho hecho = new HechoBuilder()
         .conTitulo("titulo")
         .conDescripcion("desc")

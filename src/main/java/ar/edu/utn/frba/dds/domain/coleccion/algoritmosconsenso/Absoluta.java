@@ -12,19 +12,21 @@ import javax.persistence.Entity;
 @DiscriminatorValue("Absoluta")
 public class Absoluta extends AlgoritmoDeConsenso {
   @Override
-  public List<Hecho> listaDeHechosConsensuados(List<Hecho> listaDeHechos,List<Fuente> fuentesNodo) {
+  public List<Hecho> listaDeHechosConsensuados(List<Hecho> listaDeHechos, List<Fuente> fuentesNodo) {
     if (fuentesNodo.isEmpty()) {
       return List.of();
     }
 
     return listaDeHechos.stream()
-        .distinct()
-        .filter(hecho -> hechoEnTodasLasFuentes(hecho, fuentesNodo))
-        .toList();
+                        .distinct()
+                        .filter(hecho -> hechoEnTodasLasFuentes(hecho, fuentesNodo))
+                        .toList();
   }
 
   boolean hechoEnTodasLasFuentes(Hecho hecho, List<Fuente> fuentes) {
-    return fuentes.stream().allMatch(fuente -> fuente.obtenerHechos().contains(hecho));
+    return fuentes.stream()
+                  .allMatch(fuente -> fuente.obtenerHechos()
+                                            .contains(hecho));
   }
 }
 

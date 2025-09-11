@@ -96,8 +96,8 @@ public class AlgoritmoDeConsensoTest {
     agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion("AbsolutaOk", agregador, "Desc", "Categoria", absoluta);
-
-    List<Hecho> result = coleccion.getHechos(repo);
+    coleccion.recalcularHechosConsensuados(repo);
+    List<Hecho> result = coleccion.getHechosConsensuados();
     assertEquals(2, result.size());
     assertTrue(result.contains(h1));
     assertTrue(result.contains(h2));
@@ -114,8 +114,8 @@ public class AlgoritmoDeConsensoTest {
     agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion("AbsolutaNoOk", agregador, "Desc", "Categoria", absoluta);
-    List<Hecho> result = coleccion.getHechos(repo);
-
+    coleccion.recalcularHechosConsensuados(repo);
+    List<Hecho> result = coleccion.getHechosConsensuados();
     assertEquals(1, result.size());
     assertTrue(result.contains(h1));
     assertFalse(result.contains(h2));
@@ -132,8 +132,8 @@ public class AlgoritmoDeConsensoTest {
     agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion("MayoriaOk", agregador, "Desc", "Categoria", mayoriaSimple);
-
-    List<Hecho> result = coleccion.getHechos(repo);
+    coleccion.recalcularHechosConsensuados(repo);
+    List<Hecho> result = coleccion.getHechosConsensuados();
     assertEquals(1, result.size());
     assertTrue(result.contains(h1));
   }
@@ -155,8 +155,8 @@ public class AlgoritmoDeConsensoTest {
         "Categoria",
         mayoriaSimple
     );
-    List<Hecho> result = coleccion.getHechos(repo);
-
+    coleccion.recalcularHechosConsensuados(repo);
+    List<Hecho> result = coleccion.getHechosConsensuados();
     assertEquals(0, result.size());
   }
 
@@ -177,8 +177,8 @@ public class AlgoritmoDeConsensoTest {
         "Categoria",
         multiplesMenciones
     );
-
-    List<Hecho> result = coleccion.getHechos(repo);
+    coleccion.recalcularHechosConsensuados(repo);
+    List<Hecho> result = coleccion.getHechosConsensuados();
     assertEquals(1, result.size());
     assertTrue(result.contains(h1));
   }
@@ -199,8 +199,8 @@ public class AlgoritmoDeConsensoTest {
         "Categoria",
         multiplesMenciones
     );
-
-    List<Hecho> result = coleccion.getHechos(repo);
+    coleccion.recalcularHechosConsensuados(repo);
+    List<Hecho> result = coleccion.getHechosConsensuados();
 
     // El hecho está en solo una fuente -> no hay consenso de "múltiples menciones"
     assertEquals(0, result.size());

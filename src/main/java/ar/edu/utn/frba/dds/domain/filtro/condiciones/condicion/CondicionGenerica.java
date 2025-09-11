@@ -27,7 +27,8 @@ public class CondicionGenerica extends Condicion {
     try {
       // Construye el nombre del mét0do getter (ej: "estado" -> "getEstado")
       // Solo usa camel case en la primera letra. No considera casos especiales. Cuidadini bananini.
-      String nombreMetodoGetter = "get" + campo.substring(0, 1).toUpperCase() + campo.substring(1);
+      String nombreMetodoGetter = "get" + campo.substring(0, 1)
+                                               .toUpperCase() + campo.substring(1);
       Method getter = Hecho.class.getMethod(nombreMetodoGetter);
       Object valorHecho = getter.invoke(hecho);
 
@@ -58,7 +59,7 @@ public class CondicionGenerica extends Condicion {
       // Manejo de errores si el campo no existe o hay problemas de invocación.
       e.printStackTrace();
       return false;
-  }
+    }
   }
 
   @Override

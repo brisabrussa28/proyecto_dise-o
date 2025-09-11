@@ -82,7 +82,8 @@ public class App {
     // --- Bloque de Configuración de Fuentes ---
 
     Serializador<Hecho> serializadorJsonHechos = new SerializadorJson<>(
-        new LectorJson<>(new TypeReference<List<Hecho>>() {}),
+        new LectorJson<>(new TypeReference<List<Hecho>>() {
+        }),
         new ExportadorJson()
     );
 
@@ -137,6 +138,7 @@ public class App {
       aplicacion.ejecutarActualizacion(args[0]);
     }
   }
+
   public Map<String, FuenteDeCopiaLocal> getFuentesRegistradas() {
     // Retorna una copia para evitar modificaciones externas
     return new HashMap<>(fuentesRegistradas);

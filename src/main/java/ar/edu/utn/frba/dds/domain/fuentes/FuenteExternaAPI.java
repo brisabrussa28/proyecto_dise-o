@@ -21,9 +21,9 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
   /**
    * Constructor de la fuente externa.
    *
-   * @param nombre      Nombre de la fuente.
-   * @param adaptador   Adaptador específico para la API que se va a consumir.
-   * @param rutaCopia   Ruta del archivo para la copia local (caché).
+   * @param nombre       Nombre de la fuente.
+   * @param adaptador    Adaptador específico para la API que se va a consumir.
+   * @param rutaCopia    Ruta del archivo para la copia local (caché).
    * @param serializador Serializador para cargar y guardar la caché.
    */
   public FuenteExternaAPI(String nombre, FuenteAdapter adaptador, String rutaCopia, Serializador<Hecho> serializador) {

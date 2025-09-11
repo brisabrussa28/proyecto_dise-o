@@ -33,6 +33,7 @@ public abstract class FuenteDeCopiaLocal implements Fuente {
 
   /**
    * Lógica para consultar los nuevos hechos desde el origen real (API, etc.).
+   *
    * @return La lista de hechos actualizada.
    */
   protected abstract List<Hecho> consultarNuevosHechos();

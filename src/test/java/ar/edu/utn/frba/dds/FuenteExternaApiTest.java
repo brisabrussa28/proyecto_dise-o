@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -46,7 +47,10 @@ public class FuenteExternaApiTest {
   @Test
   @DisplayName("Obtiene y cachea una lista de hechos cuando el adaptador funciona")
   void obtieneYCacheaHechosExitosamente() throws IOException {
-    Hecho hecho = new HechoBuilder().conTitulo("Test").conFechaSuceso(LocalDateTime.now().minusDays(1)).build();
+    Hecho hecho = new HechoBuilder().conTitulo("Test")
+                                    .conFechaSuceso(LocalDateTime.now()
+                                                                 .minusDays(1))
+                                    .build();
     List<Hecho> hechosEsperados = List.of(hecho);
     when(adaptadorMock.consultarHechos()).thenReturn(hechosEsperados);
 

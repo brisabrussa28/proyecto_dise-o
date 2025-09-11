@@ -41,8 +41,16 @@ public class AdapterMetaMapaTest {
   @Test
   @DisplayName("Devuelve correctamente la lista de hechos del ServicioMetaMapa")
   void devuelveHechosDelServicio() throws IOException {
-    Hecho hecho1 = new HechoBuilder().conTitulo("Hecho 1").conCategoria("Cat1").conFechaSuceso(LocalDateTime.now().minusDays(1)).build();
-    Hecho hecho2 = new HechoBuilder().conTitulo("Hecho 2").conCategoria("Cat2").conFechaSuceso(LocalDateTime.now().minusDays(1)).build();
+    Hecho hecho1 = new HechoBuilder().conTitulo("Hecho 1")
+                                     .conCategoria("Cat1")
+                                     .conFechaSuceso(LocalDateTime.now()
+                                                                  .minusDays(1))
+                                     .build();
+    Hecho hecho2 = new HechoBuilder().conTitulo("Hecho 2")
+                                     .conCategoria("Cat2")
+                                     .conFechaSuceso(LocalDateTime.now()
+                                                                  .minusDays(1))
+                                     .build();
     List<Hecho> listaEsperada = List.of(hecho1, hecho2);
 
     when(servicioMetaMapaMock.listadoDeHechos(queryMock)).thenReturn(listaEsperada);
@@ -79,8 +87,10 @@ public class AdapterMetaMapaTest {
 
     // Act & Assert
     // Verificamos que el adaptador lanza la misma excepción que recibió del servicio
-    assertThrows(IOException.class, () -> {
-      adapter.consultarHechos();
-    });
+    assertThrows(
+        IOException.class, () -> {
+          adapter.consultarHechos();
+        }
+    );
   }
 }

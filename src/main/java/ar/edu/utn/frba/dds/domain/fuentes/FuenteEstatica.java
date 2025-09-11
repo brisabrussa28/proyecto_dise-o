@@ -16,8 +16,8 @@ public class FuenteEstatica implements Fuente {
   /**
    * Constructor de la fuente estática.
    *
-   * @param nombre      Nombre de la fuente.
-   * @param rutaArchivo Ruta del archivo que contiene los datos (e.g., "datos.csv").
+   * @param nombre       Nombre de la fuente.
+   * @param rutaArchivo  Ruta del archivo que contiene los datos (e.g., "datos.csv").
    * @param serializador Implementación de Serializador para leer los datos.
    */
   public FuenteEstatica(String nombre, String rutaArchivo, Serializador<Hecho> serializador) {

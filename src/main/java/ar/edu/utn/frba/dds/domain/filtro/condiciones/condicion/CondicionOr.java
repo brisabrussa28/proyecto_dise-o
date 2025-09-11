@@ -6,9 +6,12 @@ public class CondicionOr extends CondicionCompuesta {
 
   @Override
   public boolean evaluar(Hecho hecho) {
-    if (this.getCondiciones().isEmpty()) {
+    if (this.getCondiciones()
+            .isEmpty()) {
       return true;
     }
-    return this.getCondiciones().stream().anyMatch(c -> c.evaluar(hecho));
+    return this.getCondiciones()
+               .stream()
+               .anyMatch(c -> c.evaluar(hecho));
   }
 }

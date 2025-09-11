@@ -29,6 +29,7 @@ import java.util.List;
 
 /**
  * Exporta cualquier lista de objetos a el path que se le asigne en formato CSV
+ *
  * @param <T> El tipo de objeto a exportar.
  */
 public class ExportadorCSV<T> {
@@ -38,8 +39,9 @@ public class ExportadorCSV<T> {
 
   /**
    * Constructor completo
-   * @param separador Caracter que se va a utilizar para separar las columnas
-   * @param quote Caracter que se va a utilizar para poner el texto (permite, por ej, poner comas dentro de columnas)
+   *
+   * @param separador       Caracter que se va a utilizar para separar las columnas
+   * @param quote           Caracter que se va a utilizar para poner el texto (permite, por ej, poner comas dentro de columnas)
    * @param modoExportacion Modo de exportacion para el archivo csv
    */
   public ExportadorCSV(char separador, char quote, ModoExportacion modoExportacion) {
@@ -47,8 +49,10 @@ public class ExportadorCSV<T> {
     this.quote = quote;
     this.modoExportacion = modoExportacion;
   }
+
   /**
    * Constructor estandar. (con el separador coma y el quote \" que son los estandar para csv
+   *
    * @param modoExportacion Modo de exportacion para el archivo csv
    */
   public ExportadorCSV(ModoExportacion modoExportacion) {
@@ -57,8 +61,9 @@ public class ExportadorCSV<T> {
 
   /**
    * Exporta la lista de objetos en un archivo csv ubicadop en el path segun el modo elegido
+   *
    * @param objetos Lista de objetos a exportar en el csv
-   * @param path Path del archivo
+   * @param path    Path del archivo
    */
   public void exportar(List<T> objetos, String path) {
     if (objetos == null || objetos.isEmpty()) {
@@ -75,7 +80,8 @@ public class ExportadorCSV<T> {
 
         HeaderColumnNameMappingStrategy<T> strategy =
             this.crearEstrategiaDeMapeo(
-                (Class<? extends T>) objetos.get(0).getClass(),
+                (Class<? extends T>) objetos.get(0)
+                                            .getClass(),
                 escribirCabecera
             );
 
@@ -94,7 +100,8 @@ public class ExportadorCSV<T> {
 
   /**
    * Controla si la cabecera del CSV se escribe o no.
-   * @param tipoObjeto La clase del objeto que se está exportando.
+   *
+   * @param tipoObjeto       La clase del objeto que se está exportando.
    * @param escribirCabecera Un booleano que indica si se debe escribir la cabecera.
    * @return Una estrategia de mapeo para OpenCSV.
    */
@@ -115,6 +122,7 @@ public class ExportadorCSV<T> {
 
   /**
    * Crea los directorios padre del  archivo si es que no existen
+   *
    * @param path el path donde se va a crear el archivo
    */
   private void crearDirectoriosSiNoExisten(String path) throws IOException {

@@ -35,7 +35,8 @@ import org.mockito.MockitoAnnotations;
 
 public class ColeccionTest {
   FuenteDinamica fuenteAuxD;
-  LocalDateTime horaAux = LocalDateTime.now().minusDays(1);
+  LocalDateTime horaAux = LocalDateTime.now()
+                                       .minusDays(1);
   private RepositorioDeSolicitudes repositorio;
   private Path tempJsonFile;
 
@@ -134,9 +135,18 @@ public class ColeccionTest {
   public void testFiltradoYSpamDetectadoCorrectamente() {
     // Arrange: Preparamos los datos y mocks
     Fuente fuente = mock(Fuente.class);
-    Hecho valido = new HechoBuilder().conTitulo("valido").conFechaSuceso(LocalDateTime.now().minusDays(1)).build();
-    Hecho spam = new HechoBuilder().conTitulo("spam").conFechaSuceso(LocalDateTime.now().minusDays(1)).build();
-    Hecho filtradoPorColeccion = new HechoBuilder().conTitulo("filtrado").conFechaSuceso(LocalDateTime.now().minusDays(1)).build();
+    Hecho valido = new HechoBuilder().conTitulo("valido")
+                                     .conFechaSuceso(LocalDateTime.now()
+                                                                  .minusDays(1))
+                                     .build();
+    Hecho spam = new HechoBuilder().conTitulo("spam")
+                                   .conFechaSuceso(LocalDateTime.now()
+                                                                .minusDays(1))
+                                   .build();
+    Hecho filtradoPorColeccion = new HechoBuilder().conTitulo("filtrado")
+                                                   .conFechaSuceso(LocalDateTime.now()
+                                                                                .minusDays(1))
+                                                   .build();
 
     when(fuente.obtenerHechos()).thenReturn(List.of(valido, spam, filtradoPorColeccion));
 

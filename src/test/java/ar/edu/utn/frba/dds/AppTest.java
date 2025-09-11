@@ -94,7 +94,9 @@ public class AppTest {
   @Test
   @DisplayName("El método main se ejecuta sin lanzar excepciones (Test de Integración)")
   void mainSeEjecutaSinErrores() {
-    assertDoesNotThrow(() -> App.main(new String[]{}),
-        "El método main no debería lanzar una excepción al ejecutarse.");
+    assertDoesNotThrow(
+        () -> App.main(new String[]{}),
+        "El método main no debería lanzar una excepción al ejecutarse."
+    );
   }
 }

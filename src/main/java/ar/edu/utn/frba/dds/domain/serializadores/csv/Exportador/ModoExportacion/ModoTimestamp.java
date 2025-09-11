@@ -27,7 +27,8 @@ public class ModoTimestamp implements ModoExportacion {
     }
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss-SSS");
-    String timestamp = LocalDateTime.now().format(formatter);
+    String timestamp = LocalDateTime.now()
+                                    .format(formatter);
     String newFileName = String.format("%s_%s%s", baseName, timestamp, extension);
 
     return (parentDir == null) ? newFileName : new File(parentDir, newFileName).getPath();

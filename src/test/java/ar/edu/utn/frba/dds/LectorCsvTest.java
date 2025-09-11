@@ -59,14 +59,22 @@ public class LectorCsvTest {
   @Test
   public void importarCSVformatoExtraño() {
     Map<CampoHecho, List<String>> mapeoColumnas = Map.of(
-        CampoHecho.TITULO, List.of("tipo_persona_id"),
-        CampoHecho.DESCRIPCION, List.of("tipo_persona", "modo_produccion_hecho_ampliada", "modo_produccion_hecho_otro"),
-        CampoHecho.LATITUD, List.of("latitud"),
-        CampoHecho.LONGITUD, List.of("longitud"),
-        CampoHecho.FECHA_SUCESO, List.of("fecha_hecho"),
-        CampoHecho.CATEGORIA, List.of("semaforo_estado"),
-        CampoHecho.DIRECCION, List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura"),
-        CampoHecho.PROVINCIA, List.of("provincia_nombre")
+        CampoHecho.TITULO,
+        List.of("tipo_persona_id"),
+        CampoHecho.DESCRIPCION,
+        List.of("tipo_persona", "modo_produccion_hecho_ampliada", "modo_produccion_hecho_otro"),
+        CampoHecho.LATITUD,
+        List.of("latitud"),
+        CampoHecho.LONGITUD,
+        List.of("longitud"),
+        CampoHecho.FECHA_SUCESO,
+        List.of("fecha_hecho"),
+        CampoHecho.CATEGORIA,
+        List.of("semaforo_estado"),
+        CampoHecho.DIRECCION,
+        List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura"),
+        CampoHecho.PROVINCIA,
+        List.of("provincia_nombre")
     );
 
     LectorCSV<Hecho> lector = crearLector("dd-MM-yy", mapeoColumnas);
@@ -93,7 +101,8 @@ public class LectorCsvTest {
     LectorCSV<Hecho> lector = crearLector("dd/MM/yyyy", mapeo);
     List<Hecho> hechos = lector.importar(tempFile.toString());
     assertEquals(1, hechos.size());
-    assertNull(hechos.get(0).getDescripcion());
+    assertNull(hechos.get(0)
+                     .getDescripcion());
   }
 
   @Test
@@ -114,7 +123,8 @@ public class LectorCsvTest {
     LectorCSV<Hecho> lector = crearLector("dd/MM/yyyy", mapeo);
     List<Hecho> hechos = lector.importar(tempFile.toString());
     assertEquals(1, hechos.size());
-    assertNull(hechos.get(0).getUbicacion());
+    assertNull(hechos.get(0)
+                     .getUbicacion());
   }
 
   @Test

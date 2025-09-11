@@ -20,7 +20,8 @@ public class Condicion {
 
   public String aJsonString() {
     // Se usa la librería Gson para convertir el mapa a un String JSON.
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    Gson gson = new GsonBuilder().setPrettyPrinting()
+                                 .create();
     return gson.toJson(this.aMapa());
   }
 

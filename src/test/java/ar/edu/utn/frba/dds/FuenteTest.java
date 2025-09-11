@@ -54,7 +54,8 @@ public class FuenteTest {
 
     @Test
     public void iniciaConListaVaciaSiNoHayCache() {
-      assertTrue(fuente.obtenerHechos().isEmpty());
+      assertTrue(fuente.obtenerHechos()
+                       .isEmpty());
       verify(serializadorMock).importar(tempFile.toString());
     }
 
@@ -63,8 +64,14 @@ public class FuenteTest {
       Hecho hechoMock = mock(Hecho.class);
       fuente.agregarHecho(hechoMock);
 
-      assertEquals(1, fuente.obtenerHechos().size());
-      assertEquals(hechoMock, fuente.obtenerHechos().get(0));
+      assertEquals(1,
+                   fuente.obtenerHechos()
+                         .size()
+      );
+      assertEquals(hechoMock,
+                   fuente.obtenerHechos()
+                         .get(0)
+      );
       verify(serializadorMock).exportar(anyList(), eq(tempFile.toString()));
     }
 
@@ -127,7 +134,8 @@ public class FuenteTest {
     @Test
     @DisplayName("Debe iniciar con una lista vacía y intentar cargar la caché")
     public void iniciaVaciaSiNoHayCache() {
-      assertTrue(agregadora.obtenerHechos().isEmpty());
+      assertTrue(agregadora.obtenerHechos()
+                           .isEmpty());
       verify(serializadorMock).importar(tempFile.toString());
     }
 

@@ -65,7 +65,10 @@ public class AdapterDemoTest {
     Hecho primerHecho = resultado.get(0);
     assertEquals("Incendio Forestal", primerHecho.getTitulo());
     assertEquals("Incendios", primerHecho.getCategoria());
-    assertEquals(-34.0, primerHecho.getUbicacion().getLatitud());
+    assertEquals(-34.0,
+                 primerHecho.getUbicacion()
+                            .getLatitud()
+    );
 
     Hecho segundoHecho = resultado.get(1);
     assertEquals("Corte de Luz", segundoHecho.getTitulo());
@@ -93,7 +96,10 @@ public class AdapterDemoTest {
     List<Hecho> resultado = adapter.consultarHechos();
 
     assertEquals(1, resultado.size(), "Solo el hecho válido debe ser procesado");
-    assertEquals("Hecho Válido", resultado.get(0).getTitulo());
+    assertEquals("Hecho Válido",
+                 resultado.get(0)
+                          .getTitulo()
+    );
   }
 
   @Test

@@ -30,7 +30,8 @@ import org.mockito.MockitoAnnotations;
 public class FiltroTest {
   PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
   FuenteDinamica fuenteAuxD;
-  LocalDateTime horaAux = LocalDateTime.now().minusDays(1);
+  LocalDateTime horaAux = LocalDateTime.now()
+                                       .minusDays(1);
 
   @Mock
   private Serializador<Hecho> serializadorMock;
@@ -70,7 +71,10 @@ public class FiltroTest {
 
     List<Hecho> resultado = filtro.filtrar(hechos);
     assertEquals(1, resultado.size());
-    assertEquals("Robos", resultado.get(0).getCategoria());
+    assertEquals("Robos",
+                 resultado.get(0)
+                          .getCategoria()
+    );
   }
 
   @Test
@@ -81,15 +85,21 @@ public class FiltroTest {
 
     List<Hecho> resultado = filtro.filtrar(hechos);
     assertEquals(1, resultado.size());
-    assertEquals("dire", resultado.get(0).getDireccion());
+    assertEquals("dire",
+                 resultado.get(0)
+                          .getDireccion()
+    );
   }
 
   @Test
   public void filtraPorFechaSucesoCorrectamente() {
     List<Hecho> hechos = List.of(hechoDePrueba);
-    Condicion condicionFecha = new CondicionGenerica("fechaSuceso", "IGUAL", horaAux);
+    Condicion condicionFecha = new CondicionGenerica("fechasuceso", "IGUAL", horaAux);
     Filtro filtro = new Filtro(condicionFecha);
-    assertEquals(1, filtro.filtrar(hechos).size());
+    assertEquals(1,
+                 filtro.filtrar(hechos)
+                       .size()
+    );
   }
 
 
@@ -102,7 +112,10 @@ public class FiltroTest {
     condicionAnd.agregarCondicion(new CondicionGenerica("direccion", "IGUAL", "dire"));
 
     Filtro filtro = new Filtro(condicionAnd);
-    assertEquals(1, filtro.filtrar(hechos).size());
+    assertEquals(1,
+                 filtro.filtrar(hechos)
+                       .size()
+    );
   }
 
   @Test
@@ -114,7 +127,8 @@ public class FiltroTest {
     condicionAnd.agregarCondicion(new CondicionGenerica("direccion", "IGUAL", "direccion_incorrecta"));
 
     Filtro filtro = new Filtro(condicionAnd);
-    assertTrue(filtro.filtrar(hechos).isEmpty());
+    assertTrue(filtro.filtrar(hechos)
+                     .isEmpty());
   }
 }
 
