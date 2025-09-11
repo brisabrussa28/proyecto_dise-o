@@ -2,7 +2,9 @@ package ar.edu.utn.frba.dds.domain.algoritmosconsenso;
 
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Absoluta implements AlgoritmoDeConsenso {
   @Override
@@ -10,8 +12,16 @@ public class Absoluta implements AlgoritmoDeConsenso {
       List<Hecho> listaDeHechos,
       List<Fuente> fuentesNodo
   ) {
-    return listaDeHechos.stream()
-        .filter(hecho -> hechoEnTodasLasFuentes(hecho, fuentesNodo)).toList();
+    if (fuentesNodo.isEmpty()) {
+      return List.of();
+    }
+
+    Set<Hecho> consensuados = new HashSet<>(fuentesNodo.get(0).obtenerHechos());
+    for (Fuente fuente : fuentesNodo) {
+      consensuados.retainAll(fuente.obtenerHechos());
+    }
+
+    return consensuados.stream().filter(listaDeHechos::contains).toList();
   }
 
   boolean hechoEnTodasLasFuentes(Hecho hecho, List<Fuente> fuentes) {

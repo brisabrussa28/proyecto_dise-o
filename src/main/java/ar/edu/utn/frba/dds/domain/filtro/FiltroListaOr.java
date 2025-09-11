@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.filtro;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ public class FiltroListaOr implements Filtro {
   private final List<Filtro> filtros;
 
   public FiltroListaOr(List<Filtro> filtros) {
-    this.filtros = List.copyOf(filtros);
+    this.filtros = Collections.unmodifiableList(filtros);
   }
 
   @Override
