@@ -1,7 +1,8 @@
 package ar.edu.utn.frba.dds.domain.calendarizacion;
 
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeCopiaLocal;
+import ar.edu.utn.frba.dds.domain.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
@@ -41,7 +42,7 @@ public class App {
 
     if (fuenteAActualizar != null) {
       fuenteAActualizar.forzarActualizacionSincrona();
-      }
+    }
     //agregar log
     else {
       throw new IllegalStateException("Error al actualizar...");
@@ -50,16 +51,16 @@ public class App {
 
   /**
    * Ejecuta la actualización para una todas las fuentes.
-   *
    */
   public void ejecutarActualizacionTodasLasFuentes() {
-    fuentesRegistradas.values().forEach(fuente -> {
-      try {
-        fuente.forzarActualizacionSincrona();
-      } catch (Exception e) {
-        System.err.println("Error al actualizar la fuente '" + fuente.getNombre());
-      }
-    });
+    fuentesRegistradas.values()
+                      .forEach(fuente -> {
+                        try {
+                          fuente.forzarActualizacionSincrona();
+                        } catch (Exception e) {
+                          System.err.println("Error al actualizar la fuente '" + fuente.getNombre());
+                        }
+                      });
   }
 
   // TODO: Aca dice que podriamos poner un try catch, ustds lo pondrian dentro del forEach o afuera?
@@ -84,6 +85,8 @@ public class App {
     FuenteDinamica dinamica = new FuenteDinamica("dinamica_principal", "dinamica.json");
     aplicacion.registrarFuente(dinamica);
 
+    var etiqueta1 = new Etiqueta("#PRUEBA");
+    var etiqueta2 = new Etiqueta("#ESTOESUNAPRUEBA");
     Hecho hecho = new Hecho(
         "Un hecho",
         "Descripcion",
@@ -91,10 +94,11 @@ public class App {
         "Direccion de prueba 123",
         "aaa",
         new PuntoGeografico(-123123, 123123),
-        LocalDateTime.now().minusWeeks(2),
+        LocalDateTime.now()
+                     .minusWeeks(2),
         LocalDateTime.now(),
         Origen.PROVISTO_CONTRIBUYENTE,
-        List.of("#PRUEBA", "#ESTOESUNAPRUEBA")
+        List.of(etiqueta1, etiqueta2)
     );
 
     dinamica.agregarHecho(hecho);

@@ -4,19 +4,25 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 /**
  * Clase fuente dinámica.
  * Ahora extiende FuenteCacheable para soportar copias de seguridad en JSON.
  */
+@Entity
 public class FuenteDinamica extends FuenteDeCopiaLocal { // Cambiado para extender FuenteCacheable
-
+  @Id
+  @GeneratedValue
+  private Long id;
   // Los hechos ahora se gestionan a través de cacheDeHechos en FuenteCacheable
 
   /**
    * Constructor de la clase FuenteDinamica.
    *
-   * @param nombre Nombre de la fuente dinámica.
+   * @param nombre                 Nombre de la fuente dinámica.
    * @param jsonFilePathParaCopias Ruta al archivo JSON para copias de seguridad.
    */
   public FuenteDinamica(String nombre, String jsonFilePathParaCopias) {

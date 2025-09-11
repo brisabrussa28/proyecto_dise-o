@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
+import ar.edu.utn.frba.dds.domain.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,7 +8,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 /**
  * Hecho.
@@ -15,15 +20,21 @@ import java.util.UUID;
 
 //todo: creo que teniamos que eliminar a la mierda el UUID
 
+@Entity
 public class Hecho {
   // Los campos que eran 'final' ahora son no-final para permitir la deserialización de Jackson
-  private List<String> etiquetas;
+  @Id
+  @GeneratedValue
+  Long id;
+  @OneToMany
+  private List<Etiqueta> etiquetas;
   private LocalDateTime fechaCarga;
   private Origen fuenteOrigen; // Ya no es final
   private String titulo;
   private String descripcion;
   private String categoria;
   private String direccion;
+  @Embedded
   private PuntoGeografico ubicacion;
   private LocalDateTime fechaSuceso;
   private Estado estado;
@@ -42,16 +53,16 @@ public class Hecho {
   /**
    * Constructor completo.
    *
-   * @param titulo           string
-   * @param descripcion      string
-   * @param categoria        string
-   * @param direccion        string
-   * @param provincia        string
-   * @param ubicacion        PuntoGeografico
-   * @param fechaSuceso      LocalDateTime
-   * @param fechaCarga       LocalDateTime
-   * @param fuenteOrigen     Origen
-   * @param etiquetas        List
+   * @param titulo       string
+   * @param descripcion  string
+   * @param categoria    string
+   * @param direccion    string
+   * @param provincia    string
+   * @param ubicacion    PuntoGeografico
+   * @param fechaSuceso  LocalDateTime
+   * @param fechaCarga   LocalDateTime
+   * @param fuenteOrigen Origen
+   * @param etiquetas    List
    */
   public Hecho(
       String titulo,
@@ -63,7 +74,7 @@ public class Hecho {
       LocalDateTime fechaSuceso,
       LocalDateTime fechaCarga,
       Origen fuenteOrigen,
-      List<String> etiquetas
+      List<Etiqueta> etiquetas
   ) {
     this.titulo = titulo;
     this.descripcion = descripcion;
@@ -73,7 +84,7 @@ public class Hecho {
     this.fechaSuceso = fechaSuceso;
     this.fechaCarga = fechaCarga;
     this.fuenteOrigen = fuenteOrigen;
-    this.etiquetas = new ArrayList<>(etiquetas);
+    this.etiquetas = new ArrayList<>();
     this.provincia = provincia;
     this.estado = Estado.ORIGINAL;
   }
@@ -155,7 +166,7 @@ public class Hecho {
    *
    * @return UUID del usuario creador
    */
-  public List<String> getEtiquetas() {
+  public List<Etiqueta> getEtiquetas() {
     return new ArrayList<>(this.etiquetas);
   }
 
@@ -169,8 +180,8 @@ public class Hecho {
   }
 
   public String getProvincia() {
-  return provincia;
-}
+    return provincia;
+  }
 
   public void setTitulo(String titulo) {
     this.titulo = titulo;
@@ -195,8 +206,8 @@ public class Hecho {
   public void setFechaSuceso(LocalDateTime fechaSuceso) {
     this.fechaSuceso = fechaSuceso;
   }
-  
-  public void setEtiquetas(List<String> etiquetas) {
+
+  public void setEtiquetas(List<Etiqueta> etiquetas) {
     this.etiquetas = new ArrayList<>(etiquetas);
   }
 
@@ -217,8 +228,7 @@ public class Hecho {
     this.fuenteOrigen = fuenteOrigen;
   }
 
-  
-  
+
   /**
    * Verifica si el hecho es editable por un usuario específico.
    * Un hecho es editable por su creador durante una semana desde su fecha de carga.
@@ -226,7 +236,8 @@ public class Hecho {
    * @return true si el hecho es editable por el usuario, false en caso contrario
    */
   public boolean esEditable() {
-    return LocalDateTime.now().isBefore(fechaCarga.plusWeeks(1));
+    return LocalDateTime.now()
+                        .isBefore(fechaCarga.plusWeeks(1));
   }
 
   @Override

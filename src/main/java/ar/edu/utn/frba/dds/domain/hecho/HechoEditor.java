@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
+import ar.edu.utn.frba.dds.domain.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,17 +21,19 @@ public class HechoEditor {
   private Optional<String> categoria = Optional.empty();
   private Optional<String> direccion = Optional.empty();
   private Optional<PuntoGeografico> ubicacion = Optional.empty();
-  private Optional<List<String>> etiquetas = Optional.empty();
+  private Optional<List<Etiqueta>> etiquetas = Optional.empty();
   private Optional<LocalDateTime> fechaSuceso = Optional.empty();
 
   /**
    * Crea un editor para un Hecho específico.
+   *
    * @param hechoAEditar La instancia de Hecho que se va a modificar.
    * @throws IllegalStateException si el Hecho ya no es editable.
    */
   public HechoEditor(Hecho hechoAEditar) {
     if (!hechoAEditar.esEditable()) {
-      throw new IllegalStateException("El hecho ya no puede ser editado. Pasó más de una semana desde su carga.");
+      throw new IllegalStateException(
+          "El hecho ya no puede ser editado. Pasó más de una semana desde su carga.");
     }
     this.hecho = hechoAEditar;
   }
@@ -61,7 +64,7 @@ public class HechoEditor {
     return this;
   }
 
-  public HechoEditor conEtiquetas(List<String> etiquetas) {
+  public HechoEditor conEtiquetas(List<Etiqueta> etiquetas) {
     this.etiquetas = Optional.ofNullable(etiquetas);
     return this;
   }
@@ -73,6 +76,7 @@ public class HechoEditor {
 
   /**
    * Finaliza el proceso de edición, aplicando todos los cambios sobre el Hecho original.
+   *
    * @return El Hecho modificado.
    */
   public Hecho finalizar() {

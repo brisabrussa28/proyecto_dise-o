@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
+import ar.edu.utn.frba.dds.domain.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.time.LocalDateTime;
@@ -19,7 +20,7 @@ public class HechoBuilder {
   private LocalDateTime fechaSuceso;
   private LocalDateTime fechaCarga = LocalDateTime.now(); // Valor por defecto
   private Origen fuenteOrigen;
-  private List<String> etiquetas = new ArrayList<>();
+  private List<Etiqueta> etiquetas = new ArrayList<>();
 
   public HechoBuilder copiar(Hecho original) {
     this.titulo = original.getTitulo();
@@ -80,7 +81,7 @@ public class HechoBuilder {
     return this;
   }
 
-  public HechoBuilder conEtiquetas(List<String> etiquetas) {
+  public HechoBuilder conEtiquetas(List<Etiqueta> etiquetas) {
     if (etiquetas != null) {
       this.etiquetas = etiquetas;
     }
@@ -89,6 +90,7 @@ public class HechoBuilder {
 
   /**
    * Construye y devuelve un objeto Hecho a partir de los datos proporcionados.
+   *
    * @return una nueva instancia de Hecho.
    * @throws IllegalStateException si los datos obligatorios no se proporcionan o son inválidos.
    */
@@ -102,7 +104,8 @@ public class HechoBuilder {
     }
 
     if (fechaSuceso.isAfter(fechaCarga)) {
-      throw new IllegalStateException("La fecha del suceso no puede ser posterior a la fecha de carga.");
+      throw new IllegalStateException(
+          "La fecha del suceso no puede ser posterior a la fecha de carga.");
     }
     if (fechaSuceso.isAfter(LocalDateTime.now())) {
       throw new IllegalStateException("La fecha del suceso no puede ser una fecha futura.");
@@ -112,6 +115,17 @@ public class HechoBuilder {
       throw new IllegalStateException("La fecha de carga no puede ser una fecha futura.");
     }
 
-    return new Hecho(titulo, descripcion, categoria, direccion, provincia, ubicacion, fechaSuceso, fechaCarga, fuenteOrigen, etiquetas);
+    return new Hecho(
+        titulo,
+        descripcion,
+        categoria,
+        direccion,
+        provincia,
+        ubicacion,
+        fechaSuceso,
+        fechaCarga,
+        fuenteOrigen,
+        etiquetas
+    );
   }
 }

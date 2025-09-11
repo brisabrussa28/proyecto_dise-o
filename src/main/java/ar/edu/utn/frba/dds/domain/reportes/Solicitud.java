@@ -62,7 +62,7 @@ public class Solicitud {
 
 
   /**
-   * Si no modifico equals y hassCode no puede comparar solicitudes
+   * Si no modifico equals y hassCode no puede comparar solicitudes.
    *
    * @param o
    * @return

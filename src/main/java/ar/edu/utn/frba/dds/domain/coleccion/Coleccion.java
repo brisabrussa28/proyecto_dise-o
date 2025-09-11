@@ -10,20 +10,30 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Transient;
 
 /**
  * Clase Coleccion.
  * Representa una colección de hechos obtenidos de una fuente específica.
  */
-
+@Entity
 public class Coleccion {
-
+  @Id
+  @GeneratedValue
+  Long id;
+  @Transient
   private final Fuente fuente;
   private final String titulo;
   private final String descripcion;
   private final String categoria;
+  @Transient
   private Filtro filtro;
+  @Transient
   private AlgoritmoDeConsenso algoritmo;
+  @Transient
   private List<Hecho> hechosConsensuados = new ArrayList<>();
 
   /**
@@ -130,7 +140,8 @@ public class Coleccion {
    */
 
   public void setFiltro(Filtro filtro) {
-    this.filtro = filtro != null ? filtro : new FiltroPredicado(h -> true);;
+    this.filtro = filtro != null ? filtro : new FiltroPredicado(h -> true);
+    ;
   }
 
   /**
@@ -140,18 +151,18 @@ public class Coleccion {
    * @return Lista de hechos filtrados.
    */
   public List<Hecho> getHechos(RepositorioDeSolicitudes repo) {
-      return repo.filtroExcluyente().filtrar(fuente.obtenerHechos());
+    return repo.filtroExcluyente()
+               .filtrar(fuente.obtenerHechos());
   }
 
   public void recalcularHechosConsensuados(RepositorioDeSolicitudes repo) {
     List<Fuente> fuentesNodo = this.obtenerFuentesDelNodo();
     List<Hecho> hechos = getHechos(repo);
 
-    if(algoritmo == null) {
+    if (algoritmo == null) {
       this.hechosConsensuados = hechos;
-    }
-    else{
-      this.hechosConsensuados = algoritmo.listaDeHechosConsensuados(hechos,fuentesNodo);
+    } else {
+      this.hechosConsensuados = algoritmo.listaDeHechosConsensuados(hechos, fuentesNodo);
     }
   }
 
@@ -192,7 +203,8 @@ public class Coleccion {
    */
 
   public boolean contieneA(Hecho unHecho, RepositorioDeSolicitudes repositorioDeReportes) {
-    return this.getHechos(repositorioDeReportes).contains(unHecho);
+    return this.getHechos(repositorioDeReportes)
+               .contains(unHecho);
   }
 
 

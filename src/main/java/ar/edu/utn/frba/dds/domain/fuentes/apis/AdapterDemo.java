@@ -1,4 +1,6 @@
 package ar.edu.utn.frba.dds.domain.fuentes.apis;
+
+import ar.edu.utn.frba.dds.domain.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.Conexion.Conexion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
@@ -42,7 +44,8 @@ public class AdapterDemo implements FuenteAdapter {
           nuevosHechos.add(hecho);
         } catch (ConexionFuenteDemoException e) {
           logger.warning("Se omitió un hecho de la fuente por datos inválidos. Causa: "
-              + e.getCause().getMessage());
+                             + e.getCause()
+                                .getMessage());
         }
       }
       this.ultimaActualizacion = LocalDateTime.now();
@@ -63,22 +66,29 @@ public class AdapterDemo implements FuenteAdapter {
       PuntoGeografico ubicacion = null;
       if (datos.get("ubicacion") instanceof Map) {
         Map<?, ?> ubicacionMap = (Map<?, ?>) datos.get("ubicacion");
-        if (ubicacionMap != null && ubicacionMap.get("latitud") != null && ubicacionMap.get("longitud") != null) {
+        if (ubicacionMap != null && ubicacionMap.get("latitud") != null && ubicacionMap.get(
+            "longitud") != null) {
           double latitud = ((Number) ubicacionMap.get("latitud")).doubleValue();
           double longitud = ((Number) ubicacionMap.get("longitud")).doubleValue();
           ubicacion = new PuntoGeografico(latitud, longitud);
         }
       }
 
-      LocalDateTime fechaSuceso = datos.get("fechaSuceso") != null ? LocalDateTime.parse((String) datos.get("fechaSuceso")) : null;
-      LocalDateTime fechaCarga = datos.get("fechaCarga") != null ? LocalDateTime.parse((String) datos.get("fechaCarga")) : null;
-      Origen fuenteOrigen = datos.get("fuenteOrigen") != null ? Origen.valueOf((String) datos.get("fuenteOrigen")) : null;
+      LocalDateTime fechaSuceso = datos.get("fechaSuceso") != null ?
+                                  LocalDateTime.parse((String) datos.get("fechaSuceso")) :
+                                  null;
+      LocalDateTime fechaCarga = datos.get("fechaCarga") != null ?
+                                 LocalDateTime.parse((String) datos.get("fechaCarga")) :
+                                 null;
+      Origen fuenteOrigen = datos.get("fuenteOrigen") != null ?
+                            Origen.valueOf((String) datos.get("fuenteOrigen")) :
+                            null;
 
-      List<String> etiquetas = new ArrayList<>();
+      List<Etiqueta> etiquetas = new ArrayList<>();
       if (datos.get("etiquetas") instanceof List<?>) {
         for (Object o : (List<?>) datos.get("etiquetas")) {
           if (o instanceof String) {
-            etiquetas.add((String) o);
+            etiquetas.add(new Etiqueta((String) o));
           }
         }
       }
@@ -101,7 +111,10 @@ public class AdapterDemo implements FuenteAdapter {
       return builder.build();
 
     } catch (Exception e) {
-      throw new ConexionFuenteDemoException("Error al parsear un hecho individual desde la fuente Demo", e);
+      throw new ConexionFuenteDemoException(
+          "Error al parsear un hecho individual desde la fuente Demo",
+          e
+      );
     }
   }
 }
