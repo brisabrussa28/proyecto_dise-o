@@ -3,8 +3,10 @@ package ar.edu.utn.frba.dds.domain.hecho;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Embedded;
@@ -12,12 +14,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 /**
  * Hecho.
  */
 
 @Entity
+@Indexed
 public class Hecho {
   // Los campos que eran 'final' ahora son no-final para permitir la deserialización de Jackson
   @Id
@@ -27,7 +32,9 @@ public class Hecho {
   private List<Etiqueta> etiquetas;
   private LocalDateTime fechaCarga;
   private Origen fuenteOrigen; // Ya no es final
+  @FullTextField
   private String titulo;
+  @FullTextField
   private String descripcion;
   private String categoria;
   private String direccion;
@@ -258,4 +265,6 @@ public class Hecho {
   public int hashCode() {
     return Objects.hash(titulo, descripcion, categoria, direccion, ubicacion, fechaSuceso);
   }
+
+
 }

@@ -16,9 +16,5 @@
 
         <property name="hbm2ddl.auto">update</property>
 
-
-        <!-- Agregar clases (entidades) aca -->
-        <mapping class="ar.edu.utn.frba.dds.domain.hibernate.Producto"/>
-
     </session-factory>
 </hibernate-configuration>

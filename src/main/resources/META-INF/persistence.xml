@@ -18,17 +18,16 @@
         <class>ar.edu.utn.frba.dds.domain.hecho.Hecho</class>
         <properties>
             <property name="hibernate.archive.autodetection" value="class"/>
-
-            <!-- <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
-            <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/prueba" />
-            <property name="hibernate.connection.username" value="root" />ñ
-            <property name="hibernate.connection.password" value="mysql" /> -->
-
+            <!-- Activar Hibernate con HSQLDB -->
             <property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver"/>
             <property name="hibernate.connection.url" value="jdbc:hsqldb:mem:app-db"/>
             <property name="hibernate.connection.username" value="sa"/>
             <property name="hibernate.connection.password" value=""/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
+            <!-- Activar Hibernate Search con Lucene -->
+            <property name="hibernate.search.backend.type" value="lucene"/>
+            <property name="hibernate.search.backend.directory.type" value="local-heap"/>
+            <property name="hibernate.search.enabled" value="true"/>
 
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
