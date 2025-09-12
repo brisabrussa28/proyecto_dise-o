@@ -5,14 +5,21 @@ import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 /**
  * Clase fuente dinámica que permite agregar hechos en tiempo de ejecución.
- * Extiende FuenteDeCopiaLocal para soportar copias de seguridad a través de un Serializador.
+ * Extiende FuenteDeCopiaLocal para soportar copias de seguridad y persistencia de configuración.
  */
 @Entity
+@DiscriminatorValue("DINAMICA")
 public class FuenteDinamica extends FuenteDeCopiaLocal {
+
+  // Constructor para JPA.
+  protected FuenteDinamica() {
+    super();
+  }
 
   /**
    * Constructor de la clase FuenteDinamica.
@@ -23,7 +30,6 @@ public class FuenteDinamica extends FuenteDeCopiaLocal {
    * @param exportador     Exportador para guardar la caché.
    */
   public FuenteDinamica(String nombre, String rutaCopiaLocal, Lector<Hecho> lector, Exportador<Hecho> exportador) {
-    // Llama al constructor de la clase padre (FuenteDeCopiaLocal)
     super(nombre, rutaCopiaLocal, lector, exportador);
     // La lista cargada por el serializador puede ser inmutable,
     // así que la envolvemos en un ArrayList para asegurar que podamos agregarle hechos.
@@ -36,13 +42,19 @@ public class FuenteDinamica extends FuenteDeCopiaLocal {
    * @param hecho Hecho a agregar a la fuente dinámica.
    */
   public void agregarHecho(Hecho hecho) {
+    if (this.cacheDeHechos == null) {
+      this.cacheDeHechos = new ArrayList<>();
+    }
     this.cacheDeHechos.add(hecho);
-    // Guarda inmediatamente la copia local usando el serializador
-    this.exportador.exportar(this.cacheDeHechos, this.rutaCopiaLocal);
+
+    // Guarda inmediatamente la copia local usando el exportador
+    if (this.exportador != null) {
+      this.exportador.exportar(this.cacheDeHechos, this.rutaCopiaLocal);
+    }
   }
 
   /**
-   * Implementación del método abstracto para consultar nuevos hechos.
+   * Implementación del mét0do abstracto para consultar nuevos hechos.
    * Para FuenteDinamica, los "nuevos hechos" son simplemente los que ya tiene en caché,
    * ya que no consulta una fuente externa.
    *
@@ -50,9 +62,11 @@ public class FuenteDinamica extends FuenteDeCopiaLocal {
    */
   @Override
   protected List<Hecho> consultarNuevosHechos() {
-    // Este método es llamado por forzarActualizacionSincrona, que no es típicamente
-    // usado por FuenteDinamica, pero se implementa por la herencia.
+    // Este mét0do es llamado por forzarActualizacionSincrona.
     // Simplemente devuelve el estado actual.
+    if (this.cacheDeHechos == null) {
+      return new ArrayList<>();
+    }
     return new ArrayList<>(this.cacheDeHechos);
   }
 }

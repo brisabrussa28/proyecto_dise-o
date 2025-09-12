@@ -19,16 +19,23 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServicioMetaMapa {
   private final Retrofit retrofit;
+  private final String urlApi; // Guardamos la URL para poder recuperarla.
 
   public ServicioMetaMapa(String urlApi) {
+    this.urlApi = urlApi; // Se guarda la URL al construir el objeto.
     Gson gson = new GsonBuilder()
         .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
         .create();
 
     this.retrofit = new Retrofit.Builder()
-        .baseUrl(urlApi)
+        .baseUrl(this.urlApi)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build();
+  }
+
+  // Getter para que el Adapter pueda obtener la URL.
+  public String getUrlApi() {
+    return urlApi;
   }
 
   public List<Hecho> listadoDeHechos(HechoQuerys querys) throws IOException {
@@ -68,7 +75,6 @@ public class ServicioMetaMapa {
     Response<List<Hecho>> listadoDeHechosResponse = requestListadoDeHechos.execute();
     List<Hecho> listadoDeHechos = listadoDeHechosResponse.body();
 
-    // Ensure the returned object is not null
     if (listadoDeHechos == null) {
       listadoDeHechos = new ArrayList<>();
     }

@@ -4,6 +4,7 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -11,20 +12,26 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 
 /**
- * Clase fuente.
+ * Clase base para todas las fuentes de datos. Preparada para persistencia con JPA.
  */
-
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_fuente", discriminatorType = DiscriminatorType.STRING)
-public class Fuente {
+@DiscriminatorValue("BASE") // Valor por defecto para la clase base.
+public abstract class Fuente {
+
   @Id
   @GeneratedValue
   private Long id;
-  protected final String nombre;
+
+  protected String nombre;
+
+  // Constructor requerido por JPA.
+  protected Fuente() {
+  }
 
   /**
-   * Constructor de la clase fuente.
+   * Constructor principal de la clase fuente.
    *
    * @param nombre Nombre de la fuente.
    */
@@ -40,13 +47,14 @@ public class Fuente {
   }
 
   /**
-   * Obtiene los hechos de la fuente.
+   * Trae los hechos de la fuente.
    *
    * @return Lista de hechos de la fuente.
    */
-  public List<Hecho> obtenerHechos() {
-    return List.of();
+  public abstract List<Hecho> obtenerHechos();
+
+  public String getNombre() {
+    return this.nombre;
   }
-
-
 }
+

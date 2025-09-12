@@ -1,12 +1,14 @@
 package ar.edu.utn.frba.dds.domain.fuentes.apis;
 
-import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.Conexion.Conexion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
+import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -17,9 +19,7 @@ import java.util.logging.Logger;
 
 /**
  * Implementación del Adapter que sabe cómo comunicarse con la fuente Demo.
- * Contiene toda la lógica que antes estaba en FuenteDemo.
  */
-
 public class AdapterDemo implements FuenteAdapter {
   private static final Logger logger = Logger.getLogger(AdapterDemo.class.getName());
   private final Conexion conexion;
@@ -43,7 +43,7 @@ public class AdapterDemo implements FuenteAdapter {
           Hecho hecho = construirHechoIndividual(datos);
           nuevosHechos.add(hecho);
         } catch (ConexionFuenteDemoException e) {
-          logger.warning("Se omitió un hecho de la fuente por datos inválidos. Causa: "
+          logger.warning("Se omitió este hecho de la fuente por datos inválidos. Causa: "
                              + e.getCause()
                                 .getMessage());
         }
@@ -53,6 +53,20 @@ public class AdapterDemo implements FuenteAdapter {
     } catch (Exception e) {
       throw new ConexionFuenteDemoException("Error al consultar la fuente externa de Demo", e);
     }
+  }
+
+  /**
+   * Genera una configuración JSON que incluye el tipo de adaptador y la URL del servicio.
+   *
+   * @return Un String con la configuración en formato JSON.
+   */
+  @Override
+  public String getConfiguracionJson() {
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectNode config = mapper.createObjectNode();
+    config.put("tipo", "DEMO");
+    config.put("url", url.toString());
+    return config.toString();
   }
 
   private Hecho construirHechoIndividual(Map<String, Object> datos) {
@@ -118,3 +132,4 @@ public class AdapterDemo implements FuenteAdapter {
     }
   }
 }
+

@@ -6,21 +6,36 @@ import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToMany;
+
 
 /**
  * Fuente que combina los hechos de múltiples otras fuentes en una sola lista.
  * También hereda de FuenteDeCopiaLocal para cachear el resultado agregado.
  */
+@Entity
+@DiscriminatorValue("AGREGACION")
 public class FuenteDeAgregacion extends FuenteDeCopiaLocal {
 
-  private final List<Fuente> fuentesCargadas;
+  // Se anota la relación para que JPA la persista.
+  // EAGER para que las fuentes se carguen al traer la FuenteDeAgregacion.
+  @ManyToMany(fetch = FetchType.EAGER)
+  private List<Fuente> fuentesCargadas; // No puede ser 'final'.
+
+  // Constructor requerido por JPA.
+  protected FuenteDeAgregacion() {
+    super();
+  }
 
   /**
    * Constructor de la fuente de agregación.
    *
-   * @param nombre       Nombre de la fuente.
-   * @param rutaCopia    Ruta del archivo para la copia local (caché).
-   * @param lector Serializador para manejar la persistencia de la caché.
+   * @param nombre     Nombre de la fuente.
+   * @param rutaCopia  Ruta del archivo para la copia local (caché).
+   * @param lector     Lector para manejar la persistencia de la caché.
    * @param exportador Exportador para guardar la caché.
    */
   public FuenteDeAgregacion(String nombre, String rutaCopia, Lector<Hecho> lector, Exportador<Hecho> exportador) {
@@ -34,6 +49,9 @@ public class FuenteDeAgregacion extends FuenteDeCopiaLocal {
    * @param fuente La fuente a agregar.
    */
   public void agregarFuente(Fuente fuente) {
+    if (this.fuentesCargadas == null) {
+      this.fuentesCargadas = new ArrayList<>();
+    }
     this.fuentesCargadas.add(fuente);
   }
 
@@ -54,6 +72,9 @@ public class FuenteDeAgregacion extends FuenteDeCopiaLocal {
    */
   @Override
   protected List<Hecho> consultarNuevosHechos() {
+    if (this.fuentesCargadas == null || this.fuentesCargadas.isEmpty()) {
+      return new ArrayList<>();
+    }
     return this.fuentesCargadas.stream()
                                .flatMap(fuente -> fuente.obtenerHechos()
                                                         .stream())
