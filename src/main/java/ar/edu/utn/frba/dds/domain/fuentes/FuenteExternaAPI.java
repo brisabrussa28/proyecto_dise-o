@@ -107,7 +107,8 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
         );
         return Collections.emptyList();
       }
-      return adaptador.consultarHechos();
+      List<Hecho> hechos = this.adaptador.consultarHechos();
+      return hechos;
     } catch (Exception e) {
       logger.log(Level.SEVERE, "Error al consultar la fuente externa '" + this.getNombre() + "'", e);
       return Collections.emptyList(); // Devolver vacío para no afectar la caché en caso de error

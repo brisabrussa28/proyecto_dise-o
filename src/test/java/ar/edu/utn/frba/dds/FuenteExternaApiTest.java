@@ -21,8 +21,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+
 
 /**
  * Pruebas del comportamiento de FuenteExternaAPI con la nueva arquitectura de serializadores.
@@ -66,19 +70,18 @@ public class FuenteExternaApiTest {
   }
 
   @Test
-  @DisplayName("Persiste una lista vacía si el adaptador lanza una excepción")
+  @DisplayName("Nunca persiste una lista vacía cuando el adaptador falla")
   void persisteListaVaciaCuandoAdaptadorFalla() throws IOException {
     when(adaptadorMock.consultarHechos()).thenThrow(new IOException("Simulando error de red"));
 
     fuenteExterna.forzarActualizacionSincrona();
     List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
-
     assertTrue(hechosObtenidos.isEmpty(), "La lista de hechos debería estar vacía.");
-    verify(exportadorMock).exportar(eq(Collections.emptyList()), eq(RUTA_COPIA_LOCAL));
+    verify(exportadorMock, never()).exportar(anyList(), anyString());
   }
 
   @Test
-  @DisplayName("Maneja y persiste una respuesta vacía del adaptador")
+  @DisplayName("No persiste una respuesta vacía del adaptador")
   void manejaRespuestaVaciaDelAdaptador() throws IOException {
     when(adaptadorMock.consultarHechos()).thenReturn(Collections.emptyList());
 
@@ -86,6 +89,6 @@ public class FuenteExternaApiTest {
     List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
 
     assertTrue(hechosObtenidos.isEmpty());
-    verify(exportadorMock).exportar(Collections.emptyList(), RUTA_COPIA_LOCAL);
+    verify(exportadorMock, never()).exportar(anyList(), anyString());
   }
 }

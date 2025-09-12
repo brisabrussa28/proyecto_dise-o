@@ -108,6 +108,8 @@ public abstract class FuenteDeCopiaLocal extends Fuente {
    * Actualiza la fuente de forma síncrona: consulta nuevos hechos,
    * actualiza la caché en memoria y persiste la caché en disco usando el exportador.
    */
+
+
   public void forzarActualizacionSincrona() {
     List<Hecho> nuevosHechos = this.consultarNuevosHechos();
     if (nuevosHechos != null && !nuevosHechos.isEmpty()) {
@@ -115,5 +117,7 @@ public abstract class FuenteDeCopiaLocal extends Fuente {
       this.exportador.exportar(this.cacheDeHechos, this.rutaCopiaLocal);
     }
   }
+
+
 }
 
