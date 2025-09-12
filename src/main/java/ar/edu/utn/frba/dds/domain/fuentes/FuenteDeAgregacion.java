@@ -1,7 +1,8 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,10 +20,11 @@ public class FuenteDeAgregacion extends FuenteDeCopiaLocal {
    *
    * @param nombre       Nombre de la fuente.
    * @param rutaCopia    Ruta del archivo para la copia local (caché).
-   * @param serializador Serializador para manejar la persistencia de la caché.
+   * @param lector Serializador para manejar la persistencia de la caché.
+   * @param exportador Exportador para guardar la caché.
    */
-  public FuenteDeAgregacion(String nombre, String rutaCopia, Serializador<Hecho> serializador) {
-    super(nombre, rutaCopia, serializador);
+  public FuenteDeAgregacion(String nombre, String rutaCopia, Lector<Hecho> lector, Exportador<Hecho> exportador) {
+    super(nombre, rutaCopia, lector, exportador);
     this.fuentesCargadas = new ArrayList<>();
   }
 

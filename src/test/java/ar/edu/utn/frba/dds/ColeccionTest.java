@@ -20,7 +20,8 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
-import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,7 +42,9 @@ public class ColeccionTest {
   private Path tempJsonFile;
 
   @Mock
-  private Serializador<Hecho> serializadorMock;
+  private Lector<Hecho> lectorMock;
+  @Mock
+  private Exportador<Hecho> exportadorMock;
   @Mock
   private DetectorSpam detectorSpam;
 
@@ -50,8 +53,8 @@ public class ColeccionTest {
     MockitoAnnotations.openMocks(this);
     repositorio = new RepositorioDeSolicitudes(detectorSpam);
     tempJsonFile = Files.createTempFile("test_fuente_dinamica_", ".json");
-    when(serializadorMock.importar(anyString())).thenReturn(new ArrayList<>());
-    fuenteAuxD = new FuenteDinamica("Julio Cesar", tempJsonFile.toString(), serializadorMock);
+    when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
+    fuenteAuxD = new FuenteDinamica("Julio Cesar", tempJsonFile.toString(), lectorMock, exportadorMock);
   }
 
   @AfterEach
@@ -195,4 +198,3 @@ public class ColeccionTest {
     assertTrue(hechosActualizados.containsAll(List.of(hecho1, hecho2)));
   }
 }
-

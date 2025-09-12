@@ -1,5 +1,6 @@
-package ar.edu.utn.frba.dds.domain.serializadores.csv.Lector.FilaConverter;
+package ar.edu.utn.frba.dds.domain.serializadores.Lector.csv.FilaConverter;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -8,9 +9,8 @@ import java.util.Map;
  *
  * @param <T> El tipo de objeto a crear.
  */
-@FunctionalInterface
-public interface FilaConverter<T> {
 
+public interface FilaConverter<T> {
   /**
    * Convierte una fila de CSV en un objeto.
    *
@@ -18,4 +18,8 @@ public interface FilaConverter<T> {
    * @return Un objeto de tipo T, o null si la fila no se puede convertir.
    */
   T convert(Map<String, String> row);
+
+  String getFormatoFecha();
+
+  Map<String, List<String>> getMapeoColumnasParaJson();
 }

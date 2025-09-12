@@ -15,7 +15,8 @@ import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,14 +38,16 @@ public class FuenteTest {
     private FuenteDinamica fuente;
     private Path tempFile;
     @Mock
-    private Serializador<Hecho> serializadorMock;
+    private Lector<Hecho> lectorMock;
+    @Mock
+    private Exportador<Hecho> exportadorMock;
 
     @BeforeEach
     void setUp() throws IOException {
       MockitoAnnotations.openMocks(this);
       tempFile = Files.createTempFile("test_fuente_dinamica_", ".json");
-      when(serializadorMock.importar(anyString())).thenReturn(new ArrayList<>());
-      fuente = new FuenteDinamica("MiFuente", tempFile.toString(), serializadorMock);
+      when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
+      fuente = new FuenteDinamica("MiFuente", tempFile.toString(), lectorMock, exportadorMock);
     }
 
     @AfterEach
@@ -56,7 +59,7 @@ public class FuenteTest {
     public void iniciaConListaVaciaSiNoHayCache() {
       assertTrue(fuente.obtenerHechos()
                        .isEmpty());
-      verify(serializadorMock).importar(tempFile.toString());
+      verify(lectorMock).importar(tempFile.toString());
     }
 
     @Test
@@ -72,7 +75,7 @@ public class FuenteTest {
                    fuente.obtenerHechos()
                          .get(0)
       );
-      verify(serializadorMock).exportar(anyList(), eq(tempFile.toString()));
+      verify(exportadorMock).exportar(anyList(), eq(tempFile.toString()));
     }
 
     @Test
@@ -90,15 +93,15 @@ public class FuenteTest {
     @SuppressWarnings("unchecked")
     public void usaSerializadorParaCargar() {
       Hecho hechoMock = mock(Hecho.class);
-      Serializador<Hecho> serializadorMock = mock(Serializador.class);
-      when(serializadorMock.importar("ruta.csv")).thenReturn(List.of(hechoMock));
-      FuenteEstatica fuente = new FuenteEstatica("MiFuente", "ruta.csv", serializadorMock);
+      Lector<Hecho> lectorMock = mock(Lector.class);
+      when(lectorMock.importar("ruta.csv")).thenReturn(List.of(hechoMock));
+      FuenteEstatica fuente = new FuenteEstatica("MiFuente", "ruta.csv", lectorMock);
 
       List<Hecho> hechos = fuente.obtenerHechos();
 
       assertEquals(1, hechos.size());
       assertEquals(hechoMock, hechos.get(0));
-      verify(serializadorMock).importar("ruta.csv");
+      verify(lectorMock).importar("ruta.csv");
     }
   }
 
@@ -108,7 +111,9 @@ public class FuenteTest {
     private FuenteDeAgregacion agregadora;
     private Path tempFile;
     @Mock
-    private Serializador<Hecho> serializadorMock;
+    private Lector<Hecho> lectorMock;
+    @Mock
+    private Exportador<Hecho> exportadorMock;
     @Mock
     private Fuente fuenteMock1;
     @Mock
@@ -122,8 +127,8 @@ public class FuenteTest {
     void setUp() throws IOException {
       MockitoAnnotations.openMocks(this);
       tempFile = Files.createTempFile("test_agregacion_", ".json");
-      when(serializadorMock.importar(anyString())).thenReturn(new ArrayList<>());
-      agregadora = new FuenteDeAgregacion("TestAgregadora", tempFile.toString(), serializadorMock);
+      when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
+      agregadora = new FuenteDeAgregacion("TestAgregadora", tempFile.toString(), lectorMock, exportadorMock);
     }
 
     @AfterEach
@@ -136,7 +141,7 @@ public class FuenteTest {
     public void iniciaVaciaSiNoHayCache() {
       assertTrue(agregadora.obtenerHechos()
                            .isEmpty());
-      verify(serializadorMock).importar(tempFile.toString());
+      verify(lectorMock).importar(tempFile.toString());
     }
 
     @Test
@@ -152,8 +157,7 @@ public class FuenteTest {
 
       assertEquals(2, todos.size());
       assertTrue(todos.containsAll(List.of(hechoMock1, hechoMock2)));
-      verify(serializadorMock).exportar(todos, tempFile.toString());
+      verify(exportadorMock).exportar(todos, tempFile.toString());
     }
   }
 }
-

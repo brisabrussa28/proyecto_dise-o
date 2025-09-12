@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serializadores.csv.Exportador.ModoExportacion;
+package ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.ModoExportacion;
 
 import java.io.File;
 import java.time.LocalDateTime;

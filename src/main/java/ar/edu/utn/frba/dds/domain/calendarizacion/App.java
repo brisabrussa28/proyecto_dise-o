@@ -7,10 +7,10 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
-import ar.edu.utn.frba.dds.domain.serializadores.SerializadorJson;
-import ar.edu.utn.frba.dds.domain.serializadores.json.Exportador.ExportadorJson;
-import ar.edu.utn.frba.dds.domain.serializadores.json.Lector.LectorJson;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.json.LectorJson;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.json.ExportadorJson;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -41,34 +41,33 @@ public class App {
    *
    * @param nombreFuente El nombre de la fuente a actualizar.
    */
-// no se si dejarlo pero creo que debriamos borrarlo
   public void ejecutarActualizacion(String nombreFuente) {
     FuenteDeCopiaLocal fuenteAActualizar = fuentesRegistradas.get(nombreFuente);
 
     if (fuenteAActualizar != null) {
       fuenteAActualizar.forzarActualizacionSincrona();
-    }
-    //agregar log
-    else {
-      throw new IllegalStateException("Error al actualizar...");
+    } else {
+      // Se lanza una excepción más descriptiva si la fuente no se encuentra.
+      throw new IllegalArgumentException(
+          "Error al actualizar: No se encontró la fuente con el nombre '" + nombreFuente + "'");
     }
   }
 
   /**
-   * Ejecuta la actualización para una todas las fuentes.
+   * Ejecuta la actualización para todas las fuentes registradas.
    */
   public void ejecutarActualizacionTodasLasFuentes() {
     fuentesRegistradas.values()
                       .forEach(fuente -> {
                         try {
                           fuente.forzarActualizacionSincrona();
+                          System.out.println("Fuente '" + fuente.getNombre() + "' actualizada correctamente.");
                         } catch (Exception e) {
-                          System.err.println("Error al actualizar la fuente '" + fuente.getNombre());
+                          // Se maneja el error por cada fuente para no detener el proceso completo.
+                          System.err.println("Error al actualizar la fuente '" + fuente.getNombre() + "': " + e.getMessage());
                         }
                       });
   }
-
-  // TODO: Aca dice que podriamos poner un try catch, ustds lo pondrian dentro del forEach o afuera?
 
 
   /**
@@ -81,25 +80,28 @@ public class App {
     App aplicacion = new App();
     // --- Bloque de Configuración de Fuentes ---
 
-    Serializador<Hecho> serializadorJsonHechos = new SerializadorJson<>(
-        new LectorJson<>(new TypeReference<List<Hecho>>() {
-        }),
-        new ExportadorJson()
-    );
+    // Se eliminó la clase Serializador. Ahora creamos Lector y Exportador por separado.
+    Lector<Hecho> lectorJsonHechos = new LectorJson<>(new TypeReference<List<Hecho>>() {
+    });
+    Exportador<Hecho> exportadorJsonHechos = new ExportadorJson<>(); // Asumiendo constructor por defecto
 
     // --- Configuración Fuente de Agregación ---
+    // Se actualiza el constructor para que reciba Lector y Exportador por separado.
     FuenteDeAgregacion agregadora = new FuenteDeAgregacion(
         "agregadora_principal",
         "agregados.json",
-        serializadorJsonHechos
+        lectorJsonHechos,
+        exportadorJsonHechos
     );
     aplicacion.registrarFuente(agregadora);
 
     // --- Configuración Fuente Dinámica ---
+    // Se actualiza el constructor para que reciba Lector y Exportador por separado.
     FuenteDinamica dinamica = new FuenteDinamica(
         "dinamica_principal",
         "dinamica.json",
-        serializadorJsonHechos
+        lectorJsonHechos,
+        exportadorJsonHechos
     );
     aplicacion.registrarFuente(dinamica);
 
@@ -125,17 +127,27 @@ public class App {
   }
 
   /**
-   * Esto ejecuta el crontab periodicamente.
+   * Ejecuta el crontab periodicamente.
    *
-   * @param args Argumentos de la línea de comandos. Se espera el nombre de la fuente a actualizar.
+   * @param args Argumentos de la línea de comandos. Si no se proveen, se actualizan todas las fuentes.
+   * Si se provee un argumento, se usa como el nombre de la fuente a actualizar.
    */
   public static void main(String[] args) {
     App aplicacion = configurarAplicacion();
 
     if (args.length == 0) {
+      System.out.println("Iniciando actualización de todas las fuentes...");
       aplicacion.ejecutarActualizacionTodasLasFuentes();
+      System.out.println("Actualización de todas las fuentes completada.");
     } else {
-      aplicacion.ejecutarActualizacion(args[0]);
+      String nombreFuente = args[0];
+      System.out.println("Iniciando actualización de la fuente: " + nombreFuente + "...");
+      try {
+        aplicacion.ejecutarActualizacion(nombreFuente);
+        System.out.println("Actualización de la fuente '" + nombreFuente + "' completada.");
+      } catch (Exception e) {
+        System.err.println(e.getMessage());
+      }
     }
   }
 

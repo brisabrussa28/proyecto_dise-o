@@ -1,6 +1,11 @@
-package ar.edu.utn.frba.dds.domain.serializadores.csv.Lector;
+package ar.edu.utn.frba.dds.domain.serializadores.Lector.csv;
 
-import ar.edu.utn.frba.dds.domain.serializadores.csv.Lector.FilaConverter.FilaConverter;
+
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.csv.FilaConverter.FilaConverter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
@@ -15,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -23,7 +29,7 @@ import java.util.logging.Logger;
  *
  * @param <T> El tipo de objeto a crear desde cada fila del CSV.
  */
-public class LectorCSV<T> {
+public class LectorCSV<T> implements Lector<T> {
 
   private static final Logger logger = Logger.getLogger(LectorCSV.class.getName());
 
@@ -44,6 +50,7 @@ public class LectorCSV<T> {
    * @param path Ruta del archivo CSV a leer.
    * @return Lista de objetos de tipo T importados desde el CSV.
    */
+  @Override
   public List<T> importar(String path) {
     List<T> resultados = new ArrayList<>();
     try (
@@ -104,4 +111,33 @@ public class LectorCSV<T> {
     }
     return fila;
   }
+
+  /**
+   * Devuelve la configuración del lector en formato JSON.
+   * Obtiene la configuración directamente del conversor, sin acoplarse a un tipo específico.
+   * @return Un string con la configuración en JSON.
+   */
+  @Override
+  public String getConfiguracionJson(){
+    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectNode configNode = objectMapper.createObjectNode();
+
+    configNode.put("formato", "CSV");
+    configNode.put("separador", String.valueOf(this.separator));
+
+    // Obtenemos la configuración directamente del converter, sin verificar el tipo.
+    configNode.put("formatoFecha", converter.getFormatoFecha());
+    Map<String, List<String>> mapeoParaJson = converter.getMapeoColumnasParaJson();
+    if (mapeoParaJson != null && !mapeoParaJson.isEmpty()) {
+      configNode.set("mapeoColumnas", objectMapper.valueToTree(mapeoParaJson));
+    }
+
+    try {
+      return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(configNode);
+    } catch (JsonProcessingException e) {
+      logger.log(Level.SEVERE, "Error al generar la configuración JSON para LectorCSV", e);
+      return "{\"error\":\"No se pudo generar la configuración\"}";
+    }
+  }
 }
+

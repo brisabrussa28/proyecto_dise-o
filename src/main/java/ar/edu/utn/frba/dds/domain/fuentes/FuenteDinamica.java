@@ -1,12 +1,11 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 
 /**
  * Clase fuente dinámica que permite agregar hechos en tiempo de ejecución.
@@ -14,20 +13,18 @@ import javax.persistence.Id;
  */
 @Entity
 public class FuenteDinamica extends FuenteDeCopiaLocal {
-  @Id
-  @GeneratedValue
-  private Long id;
 
   /**
    * Constructor de la clase FuenteDinamica.
    *
    * @param nombre         Nombre de la fuente dinámica.
    * @param rutaCopiaLocal Ruta al archivo para las copias de seguridad.
-   * @param serializador   Serializador para manejar la persistencia.
+   * @param lector         Lector para manejar la persistencia de la caché.
+   * @param exportador     Exportador para guardar la caché.
    */
-  public FuenteDinamica(String nombre, String rutaCopiaLocal, Serializador<Hecho> serializador) {
+  public FuenteDinamica(String nombre, String rutaCopiaLocal, Lector<Hecho> lector, Exportador<Hecho> exportador) {
     // Llama al constructor de la clase padre (FuenteDeCopiaLocal)
-    super(nombre, rutaCopiaLocal, serializador);
+    super(nombre, rutaCopiaLocal, lector, exportador);
     // La lista cargada por el serializador puede ser inmutable,
     // así que la envolvemos en un ArrayList para asegurar que podamos agregarle hechos.
     this.cacheDeHechos = new ArrayList<>(this.cacheDeHechos);
@@ -41,7 +38,7 @@ public class FuenteDinamica extends FuenteDeCopiaLocal {
   public void agregarHecho(Hecho hecho) {
     this.cacheDeHechos.add(hecho);
     // Guarda inmediatamente la copia local usando el serializador
-    this.serializador.exportar(this.cacheDeHechos, this.rutaCopiaLocal);
+    this.exportador.exportar(this.cacheDeHechos, this.rutaCopiaLocal);
   }
 
   /**

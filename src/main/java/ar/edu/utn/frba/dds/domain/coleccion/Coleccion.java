@@ -10,11 +10,13 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 /**
@@ -27,7 +29,7 @@ public class Coleccion {
   @Id
   @GeneratedValue
   Long id;
-  @Transient
+  @OneToOne(cascade = CascadeType.PERSIST)
   private final Fuente fuente;
   private final String titulo;
   private final String descripcion;

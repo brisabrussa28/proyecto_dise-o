@@ -4,7 +4,8 @@ import ar.edu.utn.frba.dds.domain.fuentes.FuenteExternaAPI;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,16 +33,18 @@ public class FuenteExternaApiTest {
   @Mock
   private FuenteAdapter adaptadorMock;
   @Mock
-  private Serializador<Hecho> serializadorMock;
+  private Lector<Hecho> lectorMock;
+  @Mock
+  private Exportador<Hecho> exportadorMock;
 
   private FuenteExternaAPI fuenteExterna;
   private final String RUTA_COPIA_LOCAL = "copia_api_test.json";
 
   @BeforeEach
   void setUp() {
-    when(serializadorMock.importar(RUTA_COPIA_LOCAL)).thenReturn(new ArrayList<>());
+    when(lectorMock.importar(RUTA_COPIA_LOCAL)).thenReturn(new ArrayList<>());
 
-    fuenteExterna = new FuenteExternaAPI("FuenteAPITest", adaptadorMock, RUTA_COPIA_LOCAL, serializadorMock);
+    fuenteExterna = new FuenteExternaAPI("FuenteAPITest", adaptadorMock, RUTA_COPIA_LOCAL, lectorMock, exportadorMock);
   }
 
   @Test
@@ -59,7 +62,7 @@ public class FuenteExternaApiTest {
 
     assertEquals(1, hechosObtenidos.size());
     assertTrue(hechosObtenidos.contains(hecho));
-    verify(serializadorMock).exportar(hechosEsperados, RUTA_COPIA_LOCAL);
+    verify(exportadorMock).exportar(hechosEsperados, RUTA_COPIA_LOCAL);
   }
 
   @Test
@@ -71,7 +74,7 @@ public class FuenteExternaApiTest {
     List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
 
     assertTrue(hechosObtenidos.isEmpty(), "La lista de hechos debería estar vacía.");
-    verify(serializadorMock).exportar(eq(Collections.emptyList()), eq(RUTA_COPIA_LOCAL));
+    verify(exportadorMock).exportar(eq(Collections.emptyList()), eq(RUTA_COPIA_LOCAL));
   }
 
   @Test
@@ -83,7 +86,6 @@ public class FuenteExternaApiTest {
     List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
 
     assertTrue(hechosObtenidos.isEmpty());
-    verify(serializadorMock).exportar(Collections.emptyList(), RUTA_COPIA_LOCAL);
+    verify(exportadorMock).exportar(Collections.emptyList(), RUTA_COPIA_LOCAL);
   }
 }
-

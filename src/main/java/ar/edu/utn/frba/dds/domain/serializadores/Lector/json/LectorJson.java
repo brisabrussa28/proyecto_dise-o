@@ -1,9 +1,12 @@
-package ar.edu.utn.frba.dds.domain.serializadores.json.Lector;
+package ar.edu.utn.frba.dds.domain.serializadores.Lector.json;
 
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +20,7 @@ import java.util.logging.Logger;
  *
  * @param <T> El tipo de objeto a deserializar.
  */
-public class LectorJson<T> {
+public class LectorJson<T> implements Lector<T> {
 
   private static final Logger LOGGER = Logger.getLogger(LectorJson.class.getName());
   private final ObjectMapper objectMapper;
@@ -41,7 +44,8 @@ public class LectorJson<T> {
    * @param jsonFilePath La ruta al archivo JSON.
    * @return Una lista de objetos de tipo T. Retorna una lista vacía si el archivo no existe o está vacío.
    */
-  public List<T> cargarCopiaLocalJson(String jsonFilePath) {
+  @Override
+  public List<T> importar(String jsonFilePath) {
     File jsonFile = new File(jsonFilePath);
 
     if (!jsonFile.exists() || jsonFile.length() == 0) {
@@ -50,7 +54,7 @@ public class LectorJson<T> {
     }
 
     try {
-      // El método readValue utiliza el typeReference del objeto para deserializar correctamente
+      // El mét0do readValue utiliza el typeReference del objeto para deserializar correctamente
       // la lista con el tipo genérico T de la clase.
       List<T> objetosLeidos = objectMapper.readValue(jsonFile, typeReference);
       LOGGER.info("Copia local de objetos cargada desde: " + jsonFilePath);
@@ -62,6 +66,22 @@ public class LectorJson<T> {
       LOGGER.log(Level.SEVERE, "Error de I/O al cargar la copia JSON " + jsonFilePath, e);
       // En un caso real, se podría relanzar una excepción personalizada.
       return new ArrayList<>();
+    }
+  }
+
+  /**
+   * Devuelve la configuración del lector en formato JSON.
+   * @return Un string con la configuración en JSON.
+   */
+  @Override
+  public String getConfiguracionJson() {
+    ObjectNode configNode = objectMapper.createObjectNode();
+    configNode.put("formato", "JSON");
+    try {
+      return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(configNode);
+    } catch (JsonProcessingException e) {
+      LOGGER.log(Level.SEVERE, "Error al generar la configuración JSON para LectorJson", e);
+      return "{\"error\":\"No se pudo generar la configuración\"}";
     }
   }
 }

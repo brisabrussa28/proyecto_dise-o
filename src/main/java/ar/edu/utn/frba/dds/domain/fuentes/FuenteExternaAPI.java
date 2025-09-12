@@ -2,7 +2,8 @@ package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -24,10 +25,11 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
    * @param nombre       Nombre de la fuente.
    * @param adaptador    Adaptador específico para la API que se va a consumir.
    * @param rutaCopia    Ruta del archivo para la copia local (caché).
-   * @param serializador Serializador para cargar y guardar la caché.
+   * @param lector      Lector para manejar la persistencia de la caché.
+   *                    @param exportador  Exportador para guardar la caché.
    */
-  public FuenteExternaAPI(String nombre, FuenteAdapter adaptador, String rutaCopia, Serializador<Hecho> serializador) {
-    super(nombre, rutaCopia, serializador);
+  public FuenteExternaAPI(String nombre, FuenteAdapter adaptador, String rutaCopia, Lector<Hecho> lector, Exportador<Hecho> exportador) {
+    super(nombre, rutaCopia, lector, exportador);
     if (adaptador == null) {
       throw new IllegalArgumentException("El adaptador no puede ser nulo.");
     }

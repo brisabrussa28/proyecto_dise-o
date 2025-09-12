@@ -1,17 +1,16 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
 import java.util.List;
 
 /**
  * Fuente de datos estática que lee desde un archivo utilizando un Serializador.
  */
-public class FuenteEstatica implements Fuente {
+public class FuenteEstatica extends Fuente {
 
   private final String rutaArchivo;
-  private final Serializador<Hecho> serializador;
-  private final String nombre;
+  private final Lector<Hecho> serializador;
 
   /**
    * Constructor de la fuente estática.
@@ -20,9 +19,8 @@ public class FuenteEstatica implements Fuente {
    * @param rutaArchivo  Ruta del archivo que contiene los datos (e.g., "datos.csv").
    * @param serializador Implementación de Serializador para leer los datos.
    */
-  public FuenteEstatica(String nombre, String rutaArchivo, Serializador<Hecho> serializador) {
-    this.validarFuente(nombre);
-    this.nombre = nombre;
+  public FuenteEstatica(String nombre, String rutaArchivo, Lector<Hecho> serializador) {
+    super(nombre);
     if (rutaArchivo == null || serializador == null) {
       throw new IllegalArgumentException("La ruta del archivo y el serializador deben estar definidos.");
     }

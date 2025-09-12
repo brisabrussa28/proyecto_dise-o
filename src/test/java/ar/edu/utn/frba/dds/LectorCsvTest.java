@@ -4,13 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.csv.Lector.FilaConverter.HechoFilaConverter;
-import ar.edu.utn.frba.dds.domain.serializadores.csv.Lector.LectorCSV;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.csv.FilaConverter.HechoFilaConverter;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.csv.LectorCSV;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -45,14 +42,9 @@ public class LectorCsvTest {
 
     LectorCSV<Hecho> lector = crearLector("dd/MM/yyyy", mapeoColumnas);
     List<Hecho> csv = lector.importar(dir + "ejemplo.csv");
+    Hecho primerHecho = csv.get(0);
 
-    Condicion condicion = new CondicionGenerica("direccion", "IGUAL", "EL NESTORNAUTA");
-    Filtro filtroDireccion = new Filtro(condicion);
-
-    List<Hecho> hechosFiltrados = filtroDireccion.filtrar(csv);
-    Hecho hecho = hechosFiltrados.get(0);
-
-    assertEquals("buenardo", hecho.getCategoria());
+    assertEquals("auto", primerHecho.getCategoria());
     assertEquals(5, csv.size());
   }
 
@@ -162,4 +154,3 @@ public class LectorCsvTest {
     assertEquals(0, hechos.size()); // no debería crear el hecho
   }
 }
-

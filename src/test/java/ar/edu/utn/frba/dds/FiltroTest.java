@@ -14,7 +14,8 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.serializadores.Serializador;
+import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +35,9 @@ public class FiltroTest {
                                        .minusDays(1);
 
   @Mock
-  private Serializador<Hecho> serializadorMock;
+  private Lector<Hecho> lectorMock;
+  @Mock
+  private Exportador<Hecho> exportadorMock;
   private Path tempJsonFile;
   private Hecho hechoDePrueba;
 
@@ -42,8 +45,8 @@ public class FiltroTest {
   void setUp() throws IOException {
     MockitoAnnotations.openMocks(this);
     tempJsonFile = Files.createTempFile("test_fuente_dinamica_", ".json");
-    when(serializadorMock.importar(anyString())).thenReturn(new ArrayList<>());
-    fuenteAuxD = new FuenteDinamica("Julio Cesar", tempJsonFile.toString(), serializadorMock);
+    when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
+    fuenteAuxD = new FuenteDinamica("Julio Cesar", tempJsonFile.toString(), lectorMock, exportadorMock);
 
     hechoDePrueba = new HechoBuilder()
         .conTitulo("titulo")
@@ -131,4 +134,3 @@ public class FiltroTest {
                      .isEmpty());
   }
 }
-
