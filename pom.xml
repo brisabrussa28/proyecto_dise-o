@@ -32,6 +32,19 @@
             <version>42.7.3</version>
         </dependency>
 
+        <!-- === Full Text Seach === -->
+        <dependency>
+            <groupId>org.hibernate.search</groupId>
+            <artifactId>hibernate-search-mapper-orm</artifactId>
+            <version>6.2.0.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate.search</groupId>
+            <artifactId>hibernate-search-backend-lucene</artifactId>
+            <version>6.2.0.Final</version>
+        </dependency>
+
         <!-- Base de datos H2 para los tests -->
         <dependency>
             <groupId>com.h2database</groupId>
