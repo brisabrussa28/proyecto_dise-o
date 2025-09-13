@@ -100,7 +100,7 @@ public class AlgoritmoDeConsensoTest {
         List.of(h1, h2),
         List.of(h1, h2)
     );
-    agregador.actualizarHechos();
+    agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion("AbsolutaOk", agregador, "Desc", "Categoria", absoluta);
     coleccion.recalcularHechosConsensuados(repo);
@@ -118,7 +118,7 @@ public class AlgoritmoDeConsensoTest {
         List.of(h1, h2),
         List.of(h1) // h2 falta en esta fuente
     );
-    agregador.actualizarHechos();
+    agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion("AbsolutaNoOk", agregador, "Desc", "Categoria", absoluta);
     coleccion.recalcularHechosConsensuados(repo);
@@ -136,7 +136,7 @@ public class AlgoritmoDeConsensoTest {
         List.of(h1),
         List.of()
     );
-    agregador.actualizarHechos();
+    agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion("MayoriaOk", agregador, "Desc", "Categoria", mayoriaSimple);
     coleccion.recalcularHechosConsensuados(repo);
@@ -175,7 +175,7 @@ public class AlgoritmoDeConsensoTest {
         List.of(h1),
         List.of()
     );
-    agregador.actualizarHechos();
+    agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion(
         "MultiplesOk",
