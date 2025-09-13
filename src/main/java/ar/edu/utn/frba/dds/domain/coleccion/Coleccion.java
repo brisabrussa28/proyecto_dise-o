@@ -223,7 +223,7 @@ public class Coleccion {
    * Verifica si un hecho está presente en la colección después de aplicar todos los filtros.
    *
    * @param unHecho               El hecho a verificar.
-   * @param repositorioDeReportes El repositorio necesario para obtener la lista de hechos filtrados.
+   * @param repositorioDeReportes El repositorio necesario para obtener la lista de hechos filtrados
    * @return {@code true} si el hecho está en la colección, {@code false} en caso contrario.
    */
   public boolean contieneA(Hecho unHecho, RepositorioDeSolicitudes repositorioDeReportes) {

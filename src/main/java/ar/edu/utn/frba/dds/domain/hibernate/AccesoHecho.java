@@ -9,14 +9,23 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
+
+/**
+ * AccesoHecho.
+ */
 public class AccesoHecho {
-  private EntityManager em;
+  public final EntityManager em;
   private static final String[] campos = obtenerCamposIndexados(Hecho.class);
 
   public AccesoHecho(EntityManager em) {
     this.em = em;
   }
 
+  /**
+  * Guarda un hecho
+  *
+  * @param hecho Hecho a guardar
+  */
   public void guardar(Hecho hecho) {
     em.getTransaction().begin();
     em.persist(hecho);

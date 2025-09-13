@@ -86,7 +86,7 @@ public class App {
     // --- Bloque de Configuración de Fuentes ---
 
     // Se eliminó la clase Serializador. Ahora creamos Lector y Exportador por separado.
-    Lector<Hecho> lectorJsonHechos = new LectorJson<>(new TypeReference<List<Hecho>>() {
+    Lector<Hecho> lectorJsonHechos = new LectorJson<>(new TypeReference<>() {
     });
     // Asumiendo constructor por defecto
     Exportador<Hecho> exportadorJsonHechos = new ExportadorJson<>();

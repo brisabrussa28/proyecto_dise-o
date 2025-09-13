@@ -33,8 +33,7 @@ public class ModoNumerar implements ModoExportacion {
       nuevoPath = (parentDir == null) ? nuevoNombre : new File(parentDir, nuevoNombre).getPath();
       nuevoArchivo = new File(nuevoPath);
       contador++;
-    }
-    while (nuevoArchivo.exists());
+    } while (nuevoArchivo.exists());
 
     return nuevoPath;
   }

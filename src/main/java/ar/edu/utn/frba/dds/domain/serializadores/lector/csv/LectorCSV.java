@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -57,8 +58,7 @@ public class LectorCSV<T> implements Lector<T> {
         CSVReader reader = new CSVReaderBuilder(
             new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8)
         ).withCSVParser(new CSVParserBuilder().withSeparator(separator)
-                                              .build())
-         .build()
+                                              .build()).build()
     ) {
       String[] headers = reader.readNext();
       if (headers == null || headers.length == 0) {
@@ -71,7 +71,7 @@ public class LectorCSV<T> implements Lector<T> {
       while ((row = reader.readNext()) != null) {
         linea++;
         Map<String, String> filaMapeada = mapearFila(row, headers);
-        T objeto = converter.convert(filaMapeada);
+        T objeto = converter.convert(Collections.unmodifiableMap(filaMapeada));
 
         if (objeto != null) {
           resultados.add(objeto);

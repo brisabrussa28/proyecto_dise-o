@@ -22,12 +22,13 @@ public class MayoriaSimple extends AlgoritmoDeConsenso {
   }
 
   boolean hechoEnMayoriaDeFuentes(Hecho hecho, List<Fuente> fuentes) {
-    return ((int) Math.ceil((double) fuentes.size() / 2)) <= fuentes.stream()
-                                                                    .distinct()
-                                                                    .filter(fuente -> fuente.obtenerHechos()
-                                                                                            .contains(hecho))
-                                                                    .toList()
-                                                                    .size();
+    return ((int) Math.ceil((double) fuentes.size() / 2))
+       <= fuentes.stream()
+               .distinct()
+               .filter(fuente -> fuente.obtenerHechos()
+                                       .contains(hecho))
+               .toList()
+               .size();
   }
 }
 

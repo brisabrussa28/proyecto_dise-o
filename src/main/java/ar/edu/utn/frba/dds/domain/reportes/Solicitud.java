@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds.domain.reportes;
 
 import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -21,7 +22,13 @@ public class Solicitud {
    * @param hechoSolicitado Hecho solicitado para eliminar
    * @param motivo          Razón de la eliminación
    */
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "El objeto Hecho debe ser mutable y compartido intencionalmente")
   public Solicitud(UUID solicitante, Hecho hechoSolicitado, String motivo) {
+    /*
+      todo: Deberia o ser un observer o consultarlo via bdd/hibernate, guardarlo asi esta mal
+      pero de momento no hay otra
+    */
+
     if (solicitante == null) {
       throw new NullPointerException("El solicitante no puede ser null");
     }
@@ -33,6 +40,7 @@ public class Solicitud {
     }
     this.validarMotivo(motivo);
     this.solicitante = solicitante;
+
     this.hechoSolicitado = hechoSolicitado;
     this.razonEliminacion = motivo;
   }

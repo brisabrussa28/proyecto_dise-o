@@ -10,6 +10,7 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -55,7 +56,9 @@ public class ExportadorCSV<T> implements Exportador<T> {
       boolean anexar = this.modoExportacion.debeAnexar();
       this.crearDirectoriosSiNoExisten(finalPath);
 
-      try (Writer writer = new FileWriter(finalPath, anexar)) {
+      try (Writer writer = new BufferedWriter(
+          new OutputStreamWriter(
+              new FileOutputStream(finalPath, anexar), StandardCharsets.UTF_8))) {
         final boolean escribirCabecera = !anexar || new File(finalPath).length() == 0;
 
         HeaderColumnNameMappingStrategy<T> strategy =
