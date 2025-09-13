@@ -12,12 +12,19 @@ import java.util.List;
 public class ServicioDeVisualizacion {
 
   //Obtener los hechos de una colección en especifico
-  public List<Hecho> obtenerHechosColeccion(Coleccion coleccion, RepositorioDeSolicitudes gestorDeReportes) {
+  public List<Hecho> obtenerHechosColeccion(
+      Coleccion coleccion,
+      RepositorioDeSolicitudes gestorDeReportes
+  ) {
     return coleccion.getHechos(gestorDeReportes);
   }
 
   //Obtener los hechos de una coleccion segun un criterio
-  public List<Hecho> filtrarHechosColeccion(Coleccion coleccion, Filtro filtro, RepositorioDeSolicitudes gestorDeReportes) {
+  public List<Hecho> filtrarHechosColeccion(
+      Coleccion coleccion,
+      Filtro filtro,
+      RepositorioDeSolicitudes gestorDeReportes
+  ) {
     return filtro.filtrar(coleccion.getHechos(gestorDeReportes));
   }
 }

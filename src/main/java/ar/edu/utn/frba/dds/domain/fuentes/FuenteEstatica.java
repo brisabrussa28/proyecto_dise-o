@@ -1,46 +1,90 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-import ar.edu.utn.frba.dds.domain.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.serializadores.LectorFactory;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.Lob;
+import javax.persistence.PostLoad;
+import javax.persistence.Transient;
 
 /**
- * Fuente de datos estática basada en archivo CSV.
+ * Fuente de datos estática que lee desde un archivo utilizando un lector.
+ * Persiste la configuración de su Lector como JSON.
  */
-public class FuenteEstatica implements Fuente {
+@Entity
+@DiscriminatorValue("ESTATICA")
+public class FuenteEstatica extends Fuente {
 
-  private final String rutaCsv;
-  private final LectorCSV lectorCSV;
-  private final String nombre;
+  private String rutaArchivo;
+
+  @Transient // El lector no es persistible.
+  private Lector<Hecho> lector;
+
+  @Lob
+  @Column(name = "json_lector")
+  protected String jsonLector; // Campo para persistir la configuración del Lector.
+
+  // Constructor para JPA.
+  protected FuenteEstatica() {
+    super();
+  }
 
   /**
    * Constructor de la fuente estática.
    *
-   * @param nombre    Nombre de la fuente estática.
-   * @param rutaCsv   Ruta del archivo CSV que contiene los datos.
-   * @param lectorCSV Carácter separador utilizado en el CSV.
+   * @param nombre      Nombre de la fuente.
+   * @param rutaArchivo Ruta del archivo que contiene los datos (e.g., "datos.csv").
+   * @param lector      Implementación de lector para leer los datos.
    */
-  public FuenteEstatica(String nombre, String rutaCsv, LectorCSV lectorCSV) {
-    this.validarFuente(nombre);
-    this.nombre = nombre; // no carga los hechos en el constructor
-    if (rutaCsv == null || lectorCSV == null) {
-      throw new IllegalArgumentException("Ruta y lector deben estar definidos");
+  public FuenteEstatica(String nombre, String rutaArchivo, Lector<Hecho> lector) {
+    super(nombre);
+    if (rutaArchivo == null || lector == null) {
+      throw new IllegalArgumentException("La ruta del archivo y el lector deben estar definidos.");
     }
-    this.rutaCsv = rutaCsv;
-    this.lectorCSV = lectorCSV;
+    this.rutaArchivo = rutaArchivo;
+    this.lector = lector;
+    this.jsonLector = lector.getConfiguracionJson();
   }
 
   /**
-   * Obtiene los hechos de la fuente estática.
+   * Reconstruye el Lector al cargar la entidad desde la base de datos.
+   */
+  @PostLoad
+  protected void reconstruirDependencias() {
+    if (this.jsonLector != null && !this.jsonLector.isEmpty()) {
+      ObjectMapper mapper = new ObjectMapper();
+      LectorFactory lectorFactory = new LectorFactory();
+      try {
+        JsonNode lectorNode = mapper.readTree(this.jsonLector);
+        this.lector = lectorFactory.create(lectorNode, Hecho.class);
+      } catch (IOException e) {
+        throw new RuntimeException(
+            "Error al reconstruir el lector desde JSON para FuenteEstatica",
+            e
+        );
+      }
+    }
+  }
+
+  /**
+   * Trae los hechos de la fuente estática utilizando el lector.
    *
-   * @return Lista de hechos importados desde el archivo CSV.
+   * @return Lista de hechos importados desde el archivo.
    */
   @Override
   public List<Hecho> obtenerHechos() {
-    return lectorCSV.importar(rutaCsv);
-  }
-
-  public String getNombre() {
-    return nombre;
+    if (this.lector == null) {
+      throw new IllegalStateException(
+          "El lector no fue inicializado. La reconstrucción post-carga podría haber fallado.");
+    }
+    return lector.importar(rutaArchivo);
   }
 }
+

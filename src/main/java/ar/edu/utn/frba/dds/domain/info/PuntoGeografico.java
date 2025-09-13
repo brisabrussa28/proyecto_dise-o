@@ -3,13 +3,15 @@ package ar.edu.utn.frba.dds.domain.info;
 import com.fasterxml.jackson.annotation.JsonCreator; // Import para @JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty; // Import para @JsonProperty
 import java.util.Objects;
+import javax.persistence.Embeddable;
 
 /**
  * Punto Geografico.
  */
+@Embeddable
 public class PuntoGeografico {
-  private final double latitud;
-  private final double longitud;
+  private double latitud;
+  private double longitud;
 
   /**
    * Constructor de PuntoGeografico.
@@ -20,10 +22,13 @@ public class PuntoGeografico {
   @JsonCreator
   public PuntoGeografico(
       @JsonProperty("latitud") double latitud,
-      @JsonProperty("longitud") double longitud) {
+      @JsonProperty("longitud") double longitud
+  ) {
     this.latitud = latitud;
     this.longitud = longitud;
   }
+
+  public PuntoGeografico() { }
 
   public double getLatitud() {
     return latitud;

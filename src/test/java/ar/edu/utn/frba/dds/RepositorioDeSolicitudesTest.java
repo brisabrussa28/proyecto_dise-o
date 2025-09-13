@@ -8,11 +8,12 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
+import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
+import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.reportes.AceptarSolicitud;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
@@ -27,17 +28,18 @@ public class RepositorioDeSolicitudesTest {
   PuntoGeografico pg = new PuntoGeografico(33.0, 44.0);
   LocalDateTime hora = LocalDateTime.now();
   List<String> etiquetas = List.of("#robo");
-  Hecho hecho = new Hecho(
-      "titulo",
-      "desc",
-      "Robos",
-      "direccion",
-      pg,
-      hora,
-      hora,
-      Origen.PROVISTO_CONTRIBUYENTE,
-      etiquetas
-  );
+  Hecho hecho = new HechoBuilder()
+      .conTitulo("titulo")
+      .conDescripcion("desc")
+      .conCategoria("Robos")
+      .conDireccion("direccion")
+      .conProvincia("Provincia")
+      .conUbicacion(pg)
+      .conFechaSuceso(hora)
+      .conFechaCarga(hora)
+      .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+      .conEtiquetas(etiquetas)
+      .build();
   private RepositorioDeSolicitudes repositorio;
   private UUID solicitante;
 
@@ -90,6 +92,13 @@ public class RepositorioDeSolicitudesTest {
   }
 
   @Test
+  public void marcarComoEliminadoNullLanzaExcepcion() {
+    assertThrows(
+        NullPointerException.class, () -> repositorio.marcarComoEliminado(null)
+    );
+  }
+
+  @Test
   public void hechoMarcadoComoEliminadoApareceEnListaDeEliminados() {
     repositorio.marcarComoEliminado(hecho);
     List<Hecho> eliminados = repositorio.hechosEliminados();
@@ -99,34 +108,34 @@ public class RepositorioDeSolicitudesTest {
 
   @Test
   public void filtroExcluyenteNoIncluyeHechosEliminados() {
-    Hecho hecho1 = new Hecho(
-        "t1",
-        "d1",
-        "c1",
-        "dir1",
-        pg,
-        hora,
-        hora,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetas
-    );
-    Hecho hecho2 = new Hecho(
-        "t2",
-        "d2",
-        "c2",
-        "dir2",
-        pg,
-        hora,
-        hora,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetas
-    );
+    Hecho hecho1 = new HechoBuilder().conTitulo("t1")
+                                     .conDescripcion("d1")
+                                     .conCategoria("c1")
+                                     .conDireccion("dir1")
+                                     .conProvincia("p1")
+                                     .conUbicacion(pg)
+                                     .conFechaSuceso(hora)
+                                     .conFechaCarga(hora)
+                                     .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+                                     .conEtiquetas(etiquetas)
+                                     .build();
+    Hecho hecho2 = new HechoBuilder().conTitulo("t2")
+                                     .conDescripcion("d2")
+                                     .conCategoria("c2")
+                                     .conDireccion("dir2")
+                                     .conProvincia("p2")
+                                     .conUbicacion(pg)
+                                     .conFechaSuceso(hora)
+                                     .conFechaCarga(hora)
+                                     .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+                                     .conEtiquetas(etiquetas)
+                                     .build();
 
     repositorio.marcarComoEliminado(hecho1);
 
     List<Hecho> hechos = List.of(hecho1, hecho2);
     List<Hecho> filtrados = repositorio.filtroExcluyente()
-        .filtrar(hechos);
+                                       .filtrar(hechos);
 
     assertFalse(filtrados.contains(hecho1));
     assertTrue(filtrados.contains(hecho2));

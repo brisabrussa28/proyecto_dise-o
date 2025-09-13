@@ -2,15 +2,18 @@ package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ar.edu.utn.frba.dds.domain.filtro.FiltroIgualHecho;
-import ar.edu.utn.frba.dds.domain.hecho.Estado;
+import ar.edu.utn.frba.dds.domain.filtro.Filtro;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.origen.Origen;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -19,265 +22,211 @@ public class HechoTest {
 
   @Test
   public void seCreaHechoCorrectamente() {
-    // FuenteDinamica fuente = new FuenteDinamica("Fuente X", null); // Ya no es necesaria para crear el hecho
     PuntoGeografico ubicacion = new PuntoGeografico(33.0, 44.0);
-    List<String> etiquetas = List.of("#robo", "#violencia");
     LocalDateTime fechaSuceso = LocalDateTime.now()
-        .minusDays(5);
-    LocalDateTime fechaCarga = LocalDateTime.now(); // Se añade fechaCarga para el constructor de Hecho
+                                             .minusDays(5);
+    LocalDateTime fechaCarga = LocalDateTime.now();
 
-    Hecho hecho = new Hecho( // Se crea el Hecho directamente con el constructor
-                             "Robo",
-                             "Robo a mano armada",
-                             "DELITO",
-                             "Calle falsa 123",
-                             ubicacion,
-                             fechaSuceso,
-                             fechaCarga, // Se pasa la fecha de carga
-                             Origen.PROVISTO_CONTRIBUYENTE,
-                             etiquetas
-    );
+    Hecho hecho = new HechoBuilder()
+        .conTitulo("Robo")
+        .conDescripcion("Robo a mano armada")
+        .conCategoria("DELITO")
+        .conDireccion("Calle falsa 123")
+        .conUbicacion(ubicacion)
+        .conFechaSuceso(fechaSuceso)
+        .conFechaCarga(fechaCarga)
+        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .build();
 
     assertEquals("Robo", hecho.getTitulo());
     assertEquals("Robo a mano armada", hecho.getDescripcion());
     assertEquals("DELITO", hecho.getCategoria());
     assertEquals("Calle falsa 123", hecho.getDireccion());
     assertEquals(ubicacion, hecho.getUbicacion());
-    assertEquals(fechaSuceso, hecho.getFechaSuceso());
-    assertEquals(etiquetas, hecho.getEtiquetas());
+    assertEquals(fechaSuceso, hecho.getFechasuceso());
     assertEquals(Origen.PROVISTO_CONTRIBUYENTE, hecho.getOrigen());
-    assertNotNull(hecho.getFechaCarga());
+    assertNotNull(hecho.getFechacarga());
   }
 
   @Test
-  public void filtroDetectaHechoIdentico() {
+  public void filtroDetectaHechoPorTitulo() {
     LocalDateTime fecha = LocalDateTime.now()
-        .minusDays(2);
+                                       .minusDays(2);
     PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
-    List<String> etiquetas = List.of("#etiqueta");
 
-    Hecho original = new Hecho(
-        "titulo",
-        "desc",
-        "categoria",
-        "direccion",
-        ubicacion,
-        fecha,
-        fecha,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        etiquetas
-    );
-    Hecho copia = new Hecho(
-        "titulo",
-        "descX",
-        "categoria",
-        "direccion",
-        ubicacion,
-        fecha,
-        fecha,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        List.of("#otra")
-    );
+    Hecho hecho = new HechoBuilder()
+        .conTitulo("titulo_unico")
+        .conDescripcion("desc")
+        .conCategoria("categoria")
+        .conDireccion("direccion")
+        .conProvincia("prov")
+        .conUbicacion(ubicacion)
+        .conFechaSuceso(fecha)
+        .conFechaCarga(fecha)
+        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .build();
 
-    FiltroIgualHecho filtro = new FiltroIgualHecho(original);
+    Condicion condicion = new CondicionGenerica("titulo", "IGUAL", "titulo_unico");
+    Filtro filtro = new Filtro(condicion);
+    List<Hecho> filtrados = filtro.filtrar(List.of(hecho));
 
-    List<Hecho> filtrados = filtro.filtrar(List.of(copia));
-
-    // La lógica de equals de Hecho solo considera titulo, descripcion, categoria, direccion, ubicacion y fechaSuceso.
-    // Aunque la descripción y las etiquetas son diferentes, el filtro podría considerarlos "idénticos"
-    // si la implementación de FiltroIgualHecho solo compara los campos que se usan en el equals de Hecho.
-    // Si la intención es que sean idénticos en todos los aspectos para el filtro, se debería ajustar el mock o la lógica del filtro.
-    // Para este test, asumo que el filtro se basa en el método equals de Hecho.
     assertEquals(1, filtrados.size());
-    assertEquals(copia, filtrados.get(0));
+    assertEquals(hecho, filtrados.get(0));
   }
 
   @Test
   public void filtroNoDetectaHechoDistinto() {
     LocalDateTime fecha = LocalDateTime.now()
-        .minusDays(2);
+                                       .minusDays(2);
     PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
 
-    Hecho original = new Hecho(
-        "Robo",
-        "desc",
-        "DELITO",
-        "Calle X",
-        ubicacion,
-        fecha,
-        fecha,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        List.of()
-    );
-    Hecho distinto = new Hecho(
-        "Incendio",
-        "otra",
-        "ACCIDENTE",
-        "Calle Y",
-        ubicacion,
-        fecha,
-        fecha,
-        Origen.PROVISTO_CONTRIBUYENTE,
-        List.of()
-    );
+    Hecho original = new HechoBuilder()
+        .conTitulo("Robo")
+        .conDescripcion("desc")
+        .conCategoria("DELITO")
+        .conDireccion("Calle X")
+        .conProvincia("prov")
+        .conUbicacion(ubicacion)
+        .conFechaSuceso(fecha)
+        .conFechaCarga(fecha)
+        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .build();
 
-    FiltroIgualHecho filtro = new FiltroIgualHecho(original);
+    Hecho distinto = new HechoBuilder()
+        .conTitulo("Incendio")
+        .conDescripcion("otra")
+        .conCategoria("ACCIDENTE")
+        .conDireccion("Calle Y")
+        .conProvincia("prov")
+        .conUbicacion(ubicacion)
+        .conFechaSuceso(fecha)
+        .conFechaCarga(fecha)
+        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .build();
 
-    List<Hecho> resultado = filtro.filtrar(List.of(distinto));
 
-    assertTrue(resultado.isEmpty());
+    Condicion condicion = new CondicionGenerica("titulo", "IGUAL", "Robo");
+    Filtro filtro = new Filtro(condicion);
+    List<Hecho> resultado = filtro.filtrar(List.of(distinto, original));
+
+    assertEquals(1, resultado.size());
+    assertEquals(original, resultado.get(0));
   }
 
   @Test
   public void lanzaExcepcionSiFechaSucesoEsPosteriorAFechaCarga() {
-    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
-    List<String> etiquetas = List.of("#test");
     LocalDateTime fechaSuceso = LocalDateTime.now();
     LocalDateTime fechaCarga = fechaSuceso.minusDays(1); // incorrecto
 
     assertThrows(
-        RuntimeException.class,
-        () -> new Hecho(
-            "t",
-            "d",
-            "c",
-            "dir",
-            ubicacion,
-            fechaSuceso,
-            fechaCarga,
-            Origen.PROVISTO_CONTRIBUYENTE,
-            etiquetas
-        )
+        RuntimeException.class, () -> new HechoBuilder()
+            .conTitulo("t")
+            .conDescripcion("d")
+            .conCategoria("c")
+            .conDireccion("dir")
+            .conProvincia("p")
+            .conUbicacion(new PuntoGeografico(1.0, 1.0))
+            .conFechaSuceso(fechaSuceso)
+            .conFechaCarga(fechaCarga)
+            .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+            .build()
     );
   }
 
   @Test
   public void lanzaExcepcionSiFechaSucesoEsFutura() {
-    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
-    List<String> etiquetas = List.of("#test");
     LocalDateTime fechaFutura = LocalDateTime.now()
-        .plusDays(1);
+                                             .plusDays(1);
 
     assertThrows(
-        RuntimeException.class,
-        () -> new Hecho(
-            "t",
-            "d",
-            "c",
-            "dir",
-            ubicacion,
-            fechaFutura,
-            LocalDateTime.now(),
-            Origen.PROVISTO_CONTRIBUYENTE,
-            etiquetas
-        )
+        RuntimeException.class, () -> new HechoBuilder()
+            .conTitulo("t")
+            .conDescripcion("d")
+            .conCategoria("c")
+            .conDireccion("dir")
+            .conProvincia("p")
+            .conUbicacion(new PuntoGeografico(1.0, 1.0))
+            .conFechaSuceso(fechaFutura)
+            .conFechaCarga(LocalDateTime.now())
+            .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+            .build()
     );
   }
 
   @Test
   public void lanzaExcepcionSiFechaCargaEsFutura() {
-    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
-    List<String> etiquetas = List.of("#test");
     LocalDateTime fechaFutura = LocalDateTime.now()
-        .plusDays(1);
+                                             .plusDays(1);
 
     assertThrows(
-        RuntimeException.class,
-        () -> new Hecho(
-            "t",
-            "d",
-            "c",
-            "dir",
-            ubicacion,
-            LocalDateTime.now(),
-            fechaFutura,
-            Origen.PROVISTO_CONTRIBUYENTE,
-            etiquetas
-        )
+        RuntimeException.class, () -> new HechoBuilder()
+            .conTitulo("t")
+            .conDescripcion("d")
+            .conCategoria("c")
+            .conDireccion("dir")
+            .conProvincia("p")
+            .conUbicacion(new PuntoGeografico(1.0, 1.0))
+            .conFechaSuceso(LocalDateTime.now())
+            .conFechaCarga(fechaFutura)
+            .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+            .build()
     );
   }
 
   @Test
   public void hechoValidoNoLanzaExcepcion() {
-    PuntoGeografico ubicacion = new PuntoGeografico(1.0, 1.0);
-    List<String> etiquetas = List.of("#test");
-    assertDoesNotThrow(() -> {
-      new Hecho(
-          "ok",
-          "desc",
-          "cat",
-          "dir",
-          ubicacion,
-          LocalDateTime.now()
-              .minusDays(2),
-          LocalDateTime.now()
-              .minusDays(1),
-          Origen.PROVISTO_CONTRIBUYENTE,
-          etiquetas
-      );
-    });
+    assertDoesNotThrow(() -> new HechoBuilder()
+        .conTitulo("ok")
+        .conDescripcion("desc")
+        .conCategoria("cat")
+        .conDireccion("dir")
+        .conProvincia("p")
+        .conUbicacion(new PuntoGeografico(1.0, 1.0))
+        .conFechaSuceso(LocalDateTime.now()
+                                     .minusDays(2))
+        .conFechaCarga(LocalDateTime.now()
+                                    .minusDays(1))
+        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .build()
+    );
   }
-
 
   @Test
   public void esEditableAntesDeUnaSemana() {
-    LocalDateTime hace3Dias = LocalDateTime.now().minusDays(3);
-    Hecho hecho = new Hecho(
-        "titulo",
-        "desc",
-        "cat",
-        "dir",
-        new PuntoGeografico(1, 1),
-        hace3Dias,
-        hace3Dias,
-        Origen.DATASET,
-        List.of("etiqueta")
-    );
+    LocalDateTime hace3Dias = LocalDateTime.now()
+                                           .minusDays(3);
+    Hecho hecho = new HechoBuilder()
+        .conTitulo("titulo")
+        .conDescripcion("desc")
+        .conCategoria("cat")
+        .conDireccion("dir")
+        .conProvincia("p")
+        .conUbicacion(new PuntoGeografico(1, 1))
+        .conFechaSuceso(hace3Dias)
+        .conFechaCarga(hace3Dias)
+        .conFuenteOrigen(Origen.DATASET)
+        .build();
 
     assertTrue(hecho.esEditable(), "El hecho debería ser editable antes de una semana");
   }
 
   @Test
   public void noEsEditablePasadaUnaSemana() {
-    LocalDateTime hace10Dias = LocalDateTime.now().minusDays(10);
-    Hecho hecho = new Hecho(
-        "titulo",
-        "desc",
-        "cat",
-        "dir",
-        new PuntoGeografico(1, 1),
-        hace10Dias,
-        hace10Dias,
-        Origen.DATASET,
-        List.of("etiqueta")
-    );
+    LocalDateTime hace10Dias = LocalDateTime.now()
+                                            .minusDays(10);
+    Hecho hecho = new HechoBuilder()
+        .conTitulo("titulo")
+        .conDescripcion("desc")
+        .conCategoria("cat")
+        .conDireccion("dir")
+        .conProvincia("p")
+        .conUbicacion(new PuntoGeografico(1, 1))
+        .conFechaSuceso(hace10Dias)
+        .conFechaCarga(hace10Dias)
+        .conFuenteOrigen(Origen.DATASET)
+        .build();
 
-    assertThrows(
-        RuntimeException.class,
-        () -> hecho.editarHecho("Hola", null, null, null, null, null, null)
-    );
-    assertEquals(Estado.ORIGINAL, hecho.getEstado());
+    assertFalse(hecho.esEditable(), "El hecho NO debería ser editable después de una semana");
   }
-
-  @Test
-  public void ahoraSiPuedoEditarElHechoPorqueEstoyDentroDelPlazo() {
-    LocalDateTime hace2Dias = LocalDateTime.now().minusDays(2);
-    Hecho hecho = new Hecho(
-        "titulo",
-        "desc",
-        "cat",
-        "dir",
-        new PuntoGeografico(1, 1),
-        hace2Dias,
-        hace2Dias,
-        Origen.DATASET,
-        List.of("#ETIQUETA")
-    );
-
-    hecho.editarHecho("Hola", null, null, null, null, null, null);
-
-    assertEquals("Hola", hecho.getTitulo());
-    assertEquals(Estado.EDITADO, hecho.getEstado());
-  }
-
 }
+

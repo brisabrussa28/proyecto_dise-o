@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds.domain.reportes;
 
 import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 public class Solicitud {
 
   UUID solicitante;
-  Hecho hechoSolicitado;
+  public Hecho hechoSolicitado;
   String razonEliminacion;
 
   /**
@@ -21,15 +22,31 @@ public class Solicitud {
    * @param hechoSolicitado Hecho solicitado para eliminar
    * @param motivo          Razón de la eliminación
    */
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "El objeto Hecho debe ser mutable y compartido intencionalmente")
   public Solicitud(UUID solicitante, Hecho hechoSolicitado, String motivo) {
+    /*
+      todo: Deberia o ser un observer o consultarlo via bdd/hibernate, guardarlo asi esta mal
+      pero de momento no hay otra
+    */
+
+    if (solicitante == null) {
+      throw new NullPointerException("El solicitante no puede ser null");
+    }
+    if (hechoSolicitado == null) {
+      throw new NullPointerException("El hecho solicitado no puede ser null");
+    }
+    if (motivo == null) {
+      throw new RazonInvalidaException("El motivo no puede ser null");
+    }
     this.validarMotivo(motivo);
     this.solicitante = solicitante;
-    this.hechoSolicitado = hechoSolicitado.copiar();
+
+    this.hechoSolicitado = hechoSolicitado;
     this.razonEliminacion = motivo;
   }
 
   public Hecho getHechoSolicitado() {
-    return hechoSolicitado.copiar();
+    return this.hechoSolicitado;
   }
 
   public String getRazonEliminacion() {
@@ -53,10 +70,10 @@ public class Solicitud {
 
 
   /**
-   * Si no modifico equals y hassCode no puede comparar solicitudes
+   * Si no modifico equals y hassCode no puede comparar solicitudes.
    *
-   * @param o
-   * @return
+   * @param o Object.
+   * @return si son iguales.
    */
   @Override
   public boolean equals(Object o) {

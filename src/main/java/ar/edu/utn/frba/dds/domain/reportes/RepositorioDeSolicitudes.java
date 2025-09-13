@@ -1,9 +1,10 @@
 package ar.edu.utn.frba.dds.domain.reportes;
 
-import ar.edu.utn.frba.dds.domain.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionPredicado;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,9 +34,7 @@ public class RepositorioDeSolicitudes {
    * Si la razón de eliminación es spam, no se agrega.
    */
   public void agregarSolicitud(UUID id, Hecho hecho, String motivo) {
-    
-    //TODO: definir si conviene que desde el repositorio de solicitudes se cree una solicitud y se agregue o que simplemente reciba por parametro una solicitud y simplemente la agregue.
-    //Mas que nada porque se esta validando algo que ya se esta validando en el constructor de Solicitud.
+
     if (hecho == null || motivo == null || motivo.isBlank()) {
       throw new IllegalArgumentException("Hecho y motivo deben estar definidos");
     }
@@ -92,6 +91,9 @@ public class RepositorioDeSolicitudes {
    * @param hecho Hecho a marcar como eliminado
    */
   public void marcarComoEliminado(Hecho hecho) {
+    if (hecho == null) {
+      throw new NullPointerException("Hecho no puede ser null");
+    }
     hechosEliminados.add(hecho);
   }
 
@@ -111,13 +113,6 @@ public class RepositorioDeSolicitudes {
    * @return Filtro que excluye los hechos eliminados
    */
   public Filtro filtroExcluyente() {
-    return new Filtro() {
-      @Override
-      public List<Hecho> filtrar(List<Hecho> hechos) {
-        return hechos.stream()
-            .filter(h -> !hechosEliminados.contains(h))
-            .toList();
-      }
-    };
+    return new Filtro(new CondicionPredicado(h -> !hechosEliminados.contains(h)));
   }
 }

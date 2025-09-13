@@ -8,6 +8,7 @@ public enum CampoHecho {
   DESCRIPCION,
   CATEGORIA,
   DIRECCION,
+  PROVINCIA,
   FECHA_SUCESO,
   FECHA_CARGA,
   ORIGEN,
