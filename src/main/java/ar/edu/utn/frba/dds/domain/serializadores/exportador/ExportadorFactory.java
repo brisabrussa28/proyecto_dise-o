@@ -1,11 +1,11 @@
 package ar.edu.utn.frba.dds.domain.serializadores.exportador;
 
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.ExportadorCSV;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.ModoExportacion.ModoAnexar;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.ModoExportacion.ModoExportacion;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.ModoExportacion.ModoNumerar;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.ModoExportacion.ModoSobrescribir;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.ModoExportacion.ModoTimestamp;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion.ModoAnexar;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion.ModoExportacion;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion.ModoNumerar;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion.ModoSobrescribir;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion.ModoTimestamp;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.json.ExportadorJson;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -17,18 +17,27 @@ public class ExportadorFactory {
 
   /**
    * Crea un Exportador genérico a partir de su nodo de configuración JSON.
+   *
    * @param exportadorNode El nodo JSON con la configuración del exportador.
    * @return Una instancia de Exportador configurada.
    */
   public <T> Exportador<T> create(JsonNode exportadorNode) {
-    String formato = exportadorNode.path("formato").asText().toUpperCase();
+    String formato = exportadorNode.path("formato")
+                                   .asText()
+                                   .toUpperCase();
     switch (formato) {
       case "JSON":
         return new ExportadorJson<>();
       case "CSV":
-        char separador = exportadorNode.path("separador").asText(",").charAt(0);
-        char quote = exportadorNode.path("quote").asText("\"").charAt(0);
-        String modoStr = exportadorNode.path("modo").asText("SOBREESCRIBIR").toUpperCase();
+        char separador = exportadorNode.path("separador")
+                                       .asText(",")
+                                       .charAt(0);
+        char quote = exportadorNode.path("quote")
+                                   .asText("\"")
+                                   .charAt(0);
+        String modoStr = exportadorNode.path("modo")
+                                       .asText("SOBREESCRIBIR")
+                                       .toUpperCase();
 
         ModoExportacion modo;
         switch (modoStr) {

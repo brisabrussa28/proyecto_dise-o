@@ -18,14 +18,14 @@ public class Condicion {
     return true;
   }
 
-  public String aJsonString() {
+  public String unStringJson() {
     // Se usa la librería Gson para convertir el mapa a un String JSON.
     Gson gson = new GsonBuilder().setPrettyPrinting()
                                  .create();
-    return gson.toJson(this.aMapa());
+    return gson.toJson(this.unMap());
   }
 
-  public Map<String, Object> aMapa() {
+  public Map<String, Object> unMap() {
     return new LinkedHashMap<>();
   }
 }

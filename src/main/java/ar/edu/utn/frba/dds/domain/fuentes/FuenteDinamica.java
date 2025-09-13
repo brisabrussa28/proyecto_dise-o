@@ -1,8 +1,8 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.DiscriminatorValue;
@@ -29,7 +29,12 @@ public class FuenteDinamica extends FuenteDeCopiaLocal {
    * @param lector         Lector para manejar la persistencia de la caché.
    * @param exportador     Exportador para guardar la caché.
    */
-  public FuenteDinamica(String nombre, String rutaCopiaLocal, Lector<Hecho> lector, Exportador<Hecho> exportador) {
+  public FuenteDinamica(
+      String nombre,
+      String rutaCopiaLocal,
+      Lector<Hecho> lector,
+      Exportador<Hecho> exportador
+  ) {
     super(nombre, rutaCopiaLocal, lector, exportador);
     // La lista cargada por el serializador puede ser inmutable,
     // así que la envolvemos en un ArrayList para asegurar que podamos agregarle hechos.

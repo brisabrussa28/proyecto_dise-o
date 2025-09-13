@@ -63,7 +63,7 @@ public class CondicionGenerica extends Condicion {
   }
 
   @Override
-  public Map<String, Object> aMapa() {
+  public Map<String, Object> unMap() {
     Map<String, Object> mapa = new LinkedHashMap<>();
     mapa.put("campo", this.campo);
     mapa.put("operador", this.operador);

@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.csv.FilaConverter.HechoFilaConverter;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.csv.LectorCSV;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.csv.LectorCSV;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.csv.filaconverter.HechoFilaConverter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -64,7 +64,13 @@ public class LectorCsvTest {
         CampoHecho.CATEGORIA,
         List.of("semaforo_estado"),
         CampoHecho.DIRECCION,
-        List.of("provincia_nombre", "departamento_nombre", "localidad_nombre", "calle_nombre", "calle_altura"),
+        List.of(
+            "provincia_nombre",
+            "departamento_nombre",
+            "localidad_nombre",
+            "calle_nombre",
+            "calle_altura"
+        ),
         CampoHecho.PROVINCIA,
         List.of("provincia_nombre")
     );
@@ -80,7 +86,8 @@ public class LectorCsvTest {
   public void testCsvConColumnaInexistente() throws IOException {
     Path tempFile = tempDir.resolve("columnaInexistente.csv");
     try (FileWriter writer = new FileWriter(tempFile.toFile())) {
-      writer.write("nombre,apellido,titulo,fechaSuceso,provincia\nJuan,Perez,Mi Titulo,25/12/2024,BsAs\n");
+      writer.write(
+          "nombre,apellido,titulo,fechaSuceso,provincia\nJuan,Perez,Mi Titulo,25/12/2024,BsAs\n");
     }
 
     Map<CampoHecho, List<String>> mapeo = Map.of(
@@ -101,7 +108,8 @@ public class LectorCsvTest {
   public void testCsvConDoubleInvalido() throws IOException {
     Path tempFile = tempDir.resolve("latitudInvalida.csv");
     try (FileWriter writer = new FileWriter(tempFile.toFile())) {
-      writer.write("latitud,longitud,titulo,fechaSuceso,provincia\nnot_a_number,-58.3,Evento,25/12/2020,CABA\n");
+      writer.write(
+          "latitud,longitud,titulo,fechaSuceso,provincia\nnot_a_number,-58.3,Evento,25/12/2020,CABA\n");
     }
 
     Map<CampoHecho, List<String>> mapeo = Map.of(
@@ -123,7 +131,8 @@ public class LectorCsvTest {
   public void testCsvConEncabezadosDuplicados() throws IOException {
     Path tempFile = tempDir.resolve("encabezadosDuplicados.csv");
     try (FileWriter writer = new FileWriter(tempFile.toFile())) {
-      writer.write("titulo,titulo,fechaSuceso,provincia\nEvento duplicado,Repetido,01/01/2020,CABA\n");
+      writer.write(
+          "titulo,titulo,fechaSuceso,provincia\nEvento duplicado,Repetido,01/01/2020,CABA\n");
     }
 
     Map<CampoHecho, List<String>> mapeo = Map.of(

@@ -7,10 +7,10 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.json.LectorJson;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.json.ExportadorJson;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.json.LectorJson;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -41,6 +41,7 @@ public class App {
    *
    * @param nombreFuente El nombre de la fuente a actualizar.
    */
+  @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
   public void ejecutarActualizacion(String nombreFuente) {
     FuenteDeCopiaLocal fuenteAActualizar = fuentesRegistradas.get(nombreFuente);
 
@@ -61,10 +62,14 @@ public class App {
                       .forEach(fuente -> {
                         try {
                           fuente.forzarActualizacionSincrona();
-                          System.out.println("Fuente '" + fuente.getNombre() + "' actualizada correctamente.");
+                          System.out.println(
+                              "Fuente '" + fuente.getNombre() + "' actualizada correctamente.");
                         } catch (Exception e) {
                           // Se maneja el error por cada fuente para no detener el proceso completo.
-                          System.err.println("Error al actualizar la fuente '" + fuente.getNombre() + "': " + e.getMessage());
+                          System.err.println(
+                              "Error al actualizar la fuente '"
+                                  + fuente.getNombre() + "': " + e.getMessage()
+                          );
                         }
                       });
   }
@@ -83,7 +88,8 @@ public class App {
     // Se eliminó la clase Serializador. Ahora creamos Lector y Exportador por separado.
     Lector<Hecho> lectorJsonHechos = new LectorJson<>(new TypeReference<List<Hecho>>() {
     });
-    Exportador<Hecho> exportadorJsonHechos = new ExportadorJson<>(); // Asumiendo constructor por defecto
+    // Asumiendo constructor por defecto
+    Exportador<Hecho> exportadorJsonHechos = new ExportadorJson<>();
 
     // --- Configuración Fuente de Agregación ---
     // Se actualiza el constructor para que reciba Lector y Exportador por separado.
@@ -129,8 +135,9 @@ public class App {
   /**
    * Ejecuta el crontab periodicamente.
    *
-   * @param args Argumentos de la línea de comandos. Si no se proveen, se actualizan todas las fuentes.
-   * Si se provee un argumento, se usa como el nombre de la fuente a actualizar.
+   * @param args Argumentos de la línea de comandos. Si no se proveen, se actualizan todas
+   *             las fuentes. Si se provee un argumento, se usa como el nombre de la fuente a
+   *             actualizar.
    */
   public static void main(String[] args) {
     App aplicacion = configurarAplicacion();

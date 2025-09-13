@@ -1,31 +1,30 @@
 package ar.edu.utn.frba.dds;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteExternaAPI;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 
 
 /**
@@ -48,7 +47,13 @@ public class FuenteExternaApiTest {
   void setUp() {
     when(lectorMock.importar(RUTA_COPIA_LOCAL)).thenReturn(new ArrayList<>());
 
-    fuenteExterna = new FuenteExternaAPI("FuenteAPITest", adaptadorMock, RUTA_COPIA_LOCAL, lectorMock, exportadorMock);
+    fuenteExterna = new FuenteExternaAPI(
+        "FuenteAPITest",
+        adaptadorMock,
+        RUTA_COPIA_LOCAL,
+        lectorMock,
+        exportadorMock
+    );
   }
 
   @Test

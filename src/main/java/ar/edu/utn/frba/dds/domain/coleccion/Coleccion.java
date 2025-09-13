@@ -158,7 +158,7 @@ public class Coleccion {
    */
   public void setCondicion(Condicion condicion) {
     if (condicion != null) {
-      this.condicionJson = condicion.aJsonString();
+      this.condicionJson = condicion.unStringJson();
     } else {
       this.condicionJson = "{}";
     }

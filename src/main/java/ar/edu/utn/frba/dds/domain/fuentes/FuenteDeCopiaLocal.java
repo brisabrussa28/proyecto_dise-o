@@ -1,10 +1,10 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
 import ar.edu.utn.frba.dds.domain.serializadores.LectorFactory;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.ExportadorFactory;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -55,7 +55,12 @@ public abstract class FuenteDeCopiaLocal extends Fuente {
    * @param lector         Lector para manejar la persistencia de la caché.
    * @param exportador     Exportador para guardar la caché.
    */
-  public FuenteDeCopiaLocal(String nombre, String rutaCopiaLocal, Lector<Hecho> lector, Exportador<Hecho> exportador) {
+  public FuenteDeCopiaLocal(
+      String nombre,
+      String rutaCopiaLocal,
+      Lector<Hecho> lector,
+      Exportador<Hecho> exportador
+  ) {
     super(nombre);
     this.rutaCopiaLocal = rutaCopiaLocal;
     this.lector = lector;
@@ -87,7 +92,10 @@ public abstract class FuenteDeCopiaLocal extends Fuente {
         this.exportador = exportadorFactory.create(exportadorNode);
       }
     } catch (IOException e) {
-      throw new RuntimeException("Error al reconstruir dependencias (Lector/Exportador) desde JSON", e);
+      throw new RuntimeException(
+          "Error al reconstruir dependencias (Lector/Exportador) desde JSON",
+          e
+      );
     }
   }
 

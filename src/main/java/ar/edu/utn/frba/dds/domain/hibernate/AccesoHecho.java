@@ -29,10 +29,14 @@ public class AccesoHecho {
     // Define que se va a buscar en la entidad Texto
     return searchSession.search(Hecho.class)
                         // Realiza una búsqueda de coincidencia en los campos especificados
-                        .where(f -> f.match().fields(campos).matching(palabraClave).fuzzy(2 ))
+                        .where(f -> f.match()
+                                     .fields(campos)
+                                     .matching(palabraClave)
+                                     .fuzzy(2))
                         // Devuelve una lista de resultados que coinciden con la búsqueda
                         .fetchHits(cantidadResultados);
   }
+
   /**
    * Devuelve una cadena String con los nombres de las columnas indexadas
    */

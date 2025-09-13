@@ -16,7 +16,7 @@ public abstract class CondicionLogica extends Condicion {
   }
 
   @Override
-  public Map<String, Object> aMapa() {
+  public Map<String, Object> unMap() {
     Map<String, Object> mapa = new LinkedHashMap<>();
 
     // Determina la lógica ("AND" o "OR") basado en el nombre de la clase hija.
@@ -31,7 +31,7 @@ public abstract class CondicionLogica extends Condicion {
         "condiciones",
         this.getCondiciones()
             .stream()
-            .map(Condicion::aMapa) // Llama a aMapa() en cada sub-condición
+            .map(Condicion::unMap) // Llama a aMapa() en cada sub-condición
             .collect(Collectors.toList())
     );
 

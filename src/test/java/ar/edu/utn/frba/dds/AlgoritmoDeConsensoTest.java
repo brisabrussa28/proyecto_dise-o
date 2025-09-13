@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.Absoluta;
 import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.AlgoritmoDeConsenso;
@@ -22,8 +21,8 @@ import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -79,7 +78,12 @@ public class AlgoritmoDeConsensoTest {
     Exportador<Hecho> exportadorMock = mock(Exportador.class);
     when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
 
-    FuenteDeAgregacion agregador = new FuenteDeAgregacion("Agregador", tempFile.toString(), lectorMock, exportadorMock);
+    FuenteDeAgregacion agregador = new FuenteDeAgregacion(
+        "Agregador",
+        tempFile.toString(),
+        lectorMock,
+        exportadorMock
+    );
     for (List<Hecho> lista : listasDeHechos) {
       Fuente f = mock(Fuente.class);
       when(f.obtenerHechos()).thenReturn(lista);

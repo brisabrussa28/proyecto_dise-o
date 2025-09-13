@@ -18,7 +18,7 @@ public class CondicionPredicado extends Condicion {
   }
 
   @Override
-  public Map<String, Object> aMapa() {
+  public Map<String, Object> unMap() {
     Map<String, Object> mapa = new LinkedHashMap<>();
     mapa.put("type", "PREDICADO");
     mapa.put("descripcion", "Esta condición no puede ser serializada a JSON porque contiene código (un Predicate).");

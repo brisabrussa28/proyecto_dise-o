@@ -1,26 +1,25 @@
 package ar.edu.utn.frba.dds;
 
-import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterDemo;
-import ar.edu.utn.frba.dds.domain.fuentes.apis.Conexion.Conexion;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+
+import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterDemo;
+import ar.edu.utn.frba.dds.domain.fuentes.apis.conexion.Conexion;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class AdapterDemoTest {

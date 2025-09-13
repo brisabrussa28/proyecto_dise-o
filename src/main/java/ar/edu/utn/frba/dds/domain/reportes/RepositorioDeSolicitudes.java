@@ -1,10 +1,10 @@
 package ar.edu.utn.frba.dds.domain.reportes;
 
+import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionPredicado;
-import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
-import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

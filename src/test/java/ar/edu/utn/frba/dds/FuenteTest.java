@@ -15,8 +15,8 @@ import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,13 +67,15 @@ public class FuenteTest {
       Hecho hechoMock = mock(Hecho.class);
       fuente.agregarHecho(hechoMock);
 
-      assertEquals(1,
-                   fuente.obtenerHechos()
-                         .size()
+      assertEquals(
+          1,
+          fuente.obtenerHechos()
+                .size()
       );
-      assertEquals(hechoMock,
-                   fuente.obtenerHechos()
-                         .get(0)
+      assertEquals(
+          hechoMock,
+          fuente.obtenerHechos()
+                .get(0)
       );
       verify(exportadorMock).exportar(anyList(), eq(tempFile.toString()));
     }
@@ -128,7 +130,12 @@ public class FuenteTest {
       MockitoAnnotations.openMocks(this);
       tempFile = Files.createTempFile("test_agregacion_", ".json");
       when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
-      agregadora = new FuenteDeAgregacion("TestAgregadora", tempFile.toString(), lectorMock, exportadorMock);
+      agregadora = new FuenteDeAgregacion(
+          "TestAgregadora",
+          tempFile.toString(),
+          lectorMock,
+          exportadorMock
+      );
     }
 
     @AfterEach

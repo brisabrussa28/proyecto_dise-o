@@ -12,6 +12,7 @@ public interface FuenteAdapter {
 
   /**
    * Consulta la fuente externa y devuelve una lista de Hechos.
+   *
    * @return Lista de hechos obtenidos.
    * @throws IOException Si ocurre un error de comunicación.
    */
@@ -19,6 +20,7 @@ public interface FuenteAdapter {
 
   /**
    * Devuelve la configuración del adaptador en formato JSON para poder persistirla.
+   *
    * @return Un String con la configuración en formato JSON.
    */
   String getConfiguracionJson();

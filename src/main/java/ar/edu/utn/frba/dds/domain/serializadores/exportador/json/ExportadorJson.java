@@ -41,7 +41,8 @@ public class ExportadorJson<T> implements Exportador<T> {
     configNode.put("formato", "JSON");
 
     try {
-      return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(configNode);
+      return mapper.writerWithDefaultPrettyPrinter()
+                   .writeValueAsString(configNode);
     } catch (JsonProcessingException e) {
       LOGGER.log(Level.SEVERE, "Error al generar la configuración JSON para ExportadorJson", e);
       return "{\"error\":\"No se pudo generar la configuración\"}";

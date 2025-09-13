@@ -12,7 +12,10 @@ import java.util.List;
 public class ServicioDeVisualizacion {
 
   //Obtener los hechos de una colección en especifico
-  public List<Hecho> obtenerHechosColeccion(Coleccion coleccion, RepositorioDeSolicitudes gestorDeReportes) {
+  public List<Hecho> obtenerHechosColeccion(
+      Coleccion coleccion,
+      RepositorioDeSolicitudes gestorDeReportes
+  ) {
     return coleccion.getHechos(gestorDeReportes);
   }
 

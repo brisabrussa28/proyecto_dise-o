@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,15 +20,15 @@ public abstract class CondicionCompuesta extends Condicion {
   }
 
   public List<Condicion> getCondiciones() {
-    return condiciones;
+    return Collections.unmodifiableList(condiciones);
   }
 
   public void setCondiciones(List<Condicion> condiciones) {
-    this.condiciones = condiciones;
+    this.condiciones = new ArrayList<>(condiciones);
   }
 
   @Override
-  public Map<String, Object> aMapa() {
+  public Map<String, Object> unMap() {
     Map<String, Object> mapa = new LinkedHashMap<>();
 
     // Determina la lógica ("AND" o "OR") basado en el nombre de la clase hija.
@@ -42,7 +43,7 @@ public abstract class CondicionCompuesta extends Condicion {
         "condiciones",
         this.getCondiciones()
             .stream()
-            .map(Condicion::aMapa) // Llama a aMapa() en cada sub-condición
+            .map(Condicion::unMap) // Llama a aMapa() en cada sub-condición
             .collect(Collectors.toList())
     );
 

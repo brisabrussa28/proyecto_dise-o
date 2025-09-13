@@ -1,8 +1,8 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
 import ar.edu.utn.frba.dds.domain.serializadores.LectorFactory;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -65,7 +65,10 @@ public class FuenteEstatica extends Fuente {
         JsonNode lectorNode = mapper.readTree(this.jsonLector);
         this.lector = lectorFactory.create(lectorNode, Hecho.class);
       } catch (IOException e) {
-        throw new RuntimeException("Error al reconstruir el lector desde JSON para FuenteEstatica", e);
+        throw new RuntimeException(
+            "Error al reconstruir el lector desde JSON para FuenteEstatica",
+            e
+        );
       }
     }
   }
@@ -78,7 +81,8 @@ public class FuenteEstatica extends Fuente {
   @Override
   public List<Hecho> obtenerHechos() {
     if (this.lector == null) {
-      throw new IllegalStateException("El lector no fue inicializado. La reconstrucción post-carga podría haber fallado.");
+      throw new IllegalStateException(
+          "El lector no fue inicializado. La reconstrucción post-carga podría haber fallado.");
     }
     return lector.importar(rutaArchivo);
   }

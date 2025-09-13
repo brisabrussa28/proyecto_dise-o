@@ -14,8 +14,8 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,7 +46,12 @@ public class FiltroTest {
     MockitoAnnotations.openMocks(this);
     tempJsonFile = Files.createTempFile("test_fuente_dinamica_", ".json");
     when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
-    fuenteAuxD = new FuenteDinamica("Julio Cesar", tempJsonFile.toString(), lectorMock, exportadorMock);
+    fuenteAuxD = new FuenteDinamica(
+        "Julio Cesar",
+        tempJsonFile.toString(),
+        lectorMock,
+        exportadorMock
+    );
 
     hechoDePrueba = new HechoBuilder()
         .conTitulo("titulo")
@@ -74,9 +79,10 @@ public class FiltroTest {
 
     List<Hecho> resultado = filtro.filtrar(hechos);
     assertEquals(1, resultado.size());
-    assertEquals("Robos",
-                 resultado.get(0)
-                          .getCategoria()
+    assertEquals(
+        "Robos",
+        resultado.get(0)
+                 .getCategoria()
     );
   }
 
@@ -88,9 +94,10 @@ public class FiltroTest {
 
     List<Hecho> resultado = filtro.filtrar(hechos);
     assertEquals(1, resultado.size());
-    assertEquals("dire",
-                 resultado.get(0)
-                          .getDireccion()
+    assertEquals(
+        "dire",
+        resultado.get(0)
+                 .getDireccion()
     );
   }
 
@@ -99,9 +106,10 @@ public class FiltroTest {
     List<Hecho> hechos = List.of(hechoDePrueba);
     Condicion condicionFecha = new CondicionGenerica("fechasuceso", "IGUAL", horaAux);
     Filtro filtro = new Filtro(condicionFecha);
-    assertEquals(1,
-                 filtro.filtrar(hechos)
-                       .size()
+    assertEquals(
+        1,
+        filtro.filtrar(hechos)
+              .size()
     );
   }
 
@@ -115,9 +123,10 @@ public class FiltroTest {
     condicionAnd.agregarCondicion(new CondicionGenerica("direccion", "IGUAL", "dire"));
 
     Filtro filtro = new Filtro(condicionAnd);
-    assertEquals(1,
-                 filtro.filtrar(hechos)
-                       .size()
+    assertEquals(
+        1,
+        filtro.filtrar(hechos)
+              .size()
     );
   }
 
@@ -127,7 +136,11 @@ public class FiltroTest {
 
     CondicionAnd condicionAnd = new CondicionAnd();
     condicionAnd.agregarCondicion(new CondicionGenerica("categoria", "IGUAL", "Robos"));
-    condicionAnd.agregarCondicion(new CondicionGenerica("direccion", "IGUAL", "direccion_incorrecta"));
+    condicionAnd.agregarCondicion(new CondicionGenerica(
+        "direccion",
+        "IGUAL",
+        "direccion_incorrecta"
+    ));
 
     Filtro filtro = new Filtro(condicionAnd);
     assertTrue(filtro.filtrar(hechos)

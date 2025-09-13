@@ -11,7 +11,7 @@ import java.util.UUID;
 public class Solicitud {
 
   UUID solicitante;
-  Hecho hechoSolicitado;
+  public Hecho hechoSolicitado;
   String razonEliminacion;
 
   /**
@@ -38,7 +38,7 @@ public class Solicitud {
   }
 
   public Hecho getHechoSolicitado() {
-    return hechoSolicitado;
+    return this.hechoSolicitado;
   }
 
   public String getRazonEliminacion() {
@@ -64,8 +64,8 @@ public class Solicitud {
   /**
    * Si no modifico equals y hassCode no puede comparar solicitudes.
    *
-   * @param o
-   * @return
+   * @param o Object.
+   * @return si son iguales.
    */
   @Override
   public boolean equals(Object o) {

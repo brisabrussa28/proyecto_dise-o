@@ -12,7 +12,7 @@ import java.util.Optional;
  * Se asegura de que el objeto Hecho no quede en un estado inconsistente.
  */
 public class HechoEditor {
-  private final Hecho hecho;
+  public final Hecho hecho;
 
   // Campos para almacenar los cambios pendientes. Se usan Optionals para representar
   // de forma explícita que un cambio puede estar presente o no.

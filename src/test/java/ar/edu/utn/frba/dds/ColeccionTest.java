@@ -20,8 +20,8 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,7 +54,12 @@ public class ColeccionTest {
     repositorio = new RepositorioDeSolicitudes(detectorSpam);
     tempJsonFile = Files.createTempFile("test_fuente_dinamica_", ".json");
     when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
-    fuenteAuxD = new FuenteDinamica("Julio Cesar", tempJsonFile.toString(), lectorMock, exportadorMock);
+    fuenteAuxD = new FuenteDinamica(
+        "Julio Cesar",
+        tempJsonFile.toString(),
+        lectorMock,
+        exportadorMock
+    );
   }
 
   @AfterEach

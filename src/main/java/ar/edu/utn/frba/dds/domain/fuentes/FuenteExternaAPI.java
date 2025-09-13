@@ -3,8 +3,8 @@ package ar.edu.utn.frba.dds.domain.fuentes;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterFactory;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -110,7 +110,11 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
       List<Hecho> hechos = this.adaptador.consultarHechos();
       return hechos;
     } catch (Exception e) {
-      logger.log(Level.SEVERE, "Error al consultar la fuente externa '" + this.getNombre() + "'", e);
+      logger.log(
+          Level.SEVERE,
+          "Error al consultar la fuente externa '" + this.getNombre() + "'",
+          e
+      );
       return Collections.emptyList(); // Devolver vacío para no afectar la caché en caso de error
     }
   }

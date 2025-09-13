@@ -1,6 +1,6 @@
-package ar.edu.utn.frba.dds.domain.serializadores.Lector.json;
+package ar.edu.utn.frba.dds.domain.serializadores.lector.json;
 
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +29,7 @@ public class LectorJson<T> implements Lector<T> {
   /**
    * Constructor que requiere un TypeReference para manejar la deserialización de listas genéricas.
    *
-   * @param typeReference El TypeReference que describe el tipo de la lista, por ejemplo, new TypeReference<List<Hecho>>() {}.
+   * @param typeReference El TypeReference que describe el tipo de la lista.
    */
   public LectorJson(TypeReference<List<T>> typeReference) {
     this.objectMapper = new ObjectMapper();
@@ -40,9 +40,10 @@ public class LectorJson<T> implements Lector<T> {
 
   /**
    * Carga una lista de objetos desde un archivo JSON.
+   * Retorna una lista vacía si el archivo no existe o está vacío.
    *
    * @param jsonFilePath La ruta al archivo JSON.
-   * @return Una lista de objetos de tipo T. Retorna una lista vacía si el archivo no existe o está vacío.
+   * @return Una lista de objetos de tipo T.
    */
   @Override
   public List<T> importar(String jsonFilePath) {
@@ -60,7 +61,11 @@ public class LectorJson<T> implements Lector<T> {
       LOGGER.info("Copia local de objetos cargada desde: " + jsonFilePath);
       return objetosLeidos != null ? objetosLeidos : new ArrayList<>();
     } catch (MismatchedInputException e) {
-      LOGGER.log(Level.WARNING, "Error de sintaxis JSON o de tipo al cargar la copia " + jsonFilePath, e);
+      LOGGER.log(
+          Level.WARNING,
+          "Error de sintaxis JSON o de tipo al cargar la copia " + jsonFilePath,
+          e
+      );
       return new ArrayList<>();
     } catch (IOException e) {
       LOGGER.log(Level.SEVERE, "Error de I/O al cargar la copia JSON " + jsonFilePath, e);
@@ -71,6 +76,7 @@ public class LectorJson<T> implements Lector<T> {
 
   /**
    * Devuelve la configuración del lector en formato JSON.
+   *
    * @return Un string con la configuración en JSON.
    */
   @Override
@@ -78,7 +84,8 @@ public class LectorJson<T> implements Lector<T> {
     ObjectNode configNode = objectMapper.createObjectNode();
     configNode.put("formato", "JSON");
     try {
-      return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(configNode);
+      return objectMapper.writerWithDefaultPrettyPrinter()
+                         .writeValueAsString(configNode);
     } catch (JsonProcessingException e) {
       LOGGER.log(Level.SEVERE, "Error al generar la configuración JSON para LectorJson", e);
       return "{\"error\":\"No se pudo generar la configuración\"}";

@@ -26,10 +26,10 @@ public class CondicionNot extends Condicion {
   }
 
   @Override
-  public Map<String, Object> aMapa() {
+  public Map<String, Object> unMap() {
     Map<String, Object> mapa = new LinkedHashMap<>();
     mapa.put("logica", "NOT");
-    mapa.put("condicion", this.condicion.aMapa());
+    mapa.put("condicion", this.condicion.unMap());
     return mapa;
   }
 

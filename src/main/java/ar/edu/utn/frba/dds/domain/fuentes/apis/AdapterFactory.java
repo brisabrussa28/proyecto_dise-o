@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.fuentes.apis;
 
-import ar.edu.utn.frba.dds.domain.fuentes.apis.Conexion.Conexion;
+import ar.edu.utn.frba.dds.domain.fuentes.apis.conexion.Conexion;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.serviciometamapa.HechoQuerys;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.serviciometamapa.ServicioMetaMapa;
 import com.fasterxml.jackson.databind.JsonNode;

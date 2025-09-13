@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.ModoExportacion;
+package ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion;
 
 /**
  * Anexa los items al final del archivo.

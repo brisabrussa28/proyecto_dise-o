@@ -1,8 +1,8 @@
-package ar.edu.utn.frba.dds.domain.serializadores.Lector.csv;
+package ar.edu.utn.frba.dds.domain.serializadores.lector.csv;
 
 
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.Lector;
-import ar.edu.utn.frba.dds.domain.serializadores.Lector.csv.FilaConverter.FilaConverter;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
+import ar.edu.utn.frba.dds.domain.serializadores.lector.csv.filaconverter.FilaConverter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -10,9 +10,9 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -115,10 +115,11 @@ public class LectorCSV<T> implements Lector<T> {
   /**
    * Devuelve la configuración del lector en formato JSON.
    * Obtiene la configuración directamente del conversor, sin acoplarse a un tipo específico.
+   *
    * @return Un string con la configuración en JSON.
    */
   @Override
-  public String getConfiguracionJson(){
+  public String getConfiguracionJson() {
     ObjectMapper objectMapper = new ObjectMapper();
     ObjectNode configNode = objectMapper.createObjectNode();
 
@@ -133,7 +134,8 @@ public class LectorCSV<T> implements Lector<T> {
     }
 
     try {
-      return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(configNode);
+      return objectMapper.writerWithDefaultPrettyPrinter()
+                         .writeValueAsString(configNode);
     } catch (JsonProcessingException e) {
       logger.log(Level.SEVERE, "Error al generar la configuración JSON para LectorCSV", e);
       return "{\"error\":\"No se pudo generar la configuración\"}";

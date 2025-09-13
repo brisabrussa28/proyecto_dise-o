@@ -1,16 +1,15 @@
-package ar.edu.utn.frba.dds.domain.serializadores.Lector.csv.FilaConverter;
+package ar.edu.utn.frba.dds.domain.serializadores.lector.csv.filaconverter;
 
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
-
-
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,11 +36,12 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
 
   public HechoFilaConverter(String formatoFecha, Map<CampoHecho, List<String>> mapeoColumnas) {
     if (formatoFecha == null || formatoFecha.isBlank() || mapeoColumnas == null || mapeoColumnas.isEmpty()) {
-      throw new IllegalArgumentException("El formato de fecha y el mapeo de columnas son obligatorios.");
+      throw new IllegalArgumentException(
+          "El formato de fecha y el mapeo de columnas son obligatorios.");
     }
     this.dateFormatStr = formatoFecha;
     this.dateFormat = new SimpleDateFormat(formatoFecha);
-    this.mapeoColumnas = mapeoColumnas;
+    this.mapeoColumnas = new HashMap<>(mapeoColumnas);
   }
 
   @Override
@@ -52,8 +52,6 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
 
     String latitudStr = obtenerValor(fila, CampoHecho.LATITUD);
     String longitudStr = obtenerValor(fila, CampoHecho.LONGITUD);
-    Double latitud = parseDouble(latitudStr);
-    Double longitud = parseDouble(longitudStr);
 
     HechoBuilder builder = new HechoBuilder();
 
@@ -65,6 +63,9 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
     builder.conFechaSuceso(parseFecha(obtenerValor(fila, CampoHecho.FECHA_SUCESO)));
     builder.conFuenteOrigen(Origen.DATASET); // Origen por defecto para CSV
     builder.conFechaCarga(LocalDateTime.now()); // Fecha de carga es ahora
+
+    Double latitud = parseDouble(latitudStr);
+    Double longitud = parseDouble(longitudStr);
 
     if (latitud != null && longitud != null) {
       builder.conUbicacion(new PuntoGeografico(latitud, longitud));
@@ -110,7 +111,8 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
     }
     try {
       // Reemplazar coma por punto para soportar varios formatos de número.
-      String valorNormalizado = valor.trim().replace(',', '.');
+      String valorNormalizado = valor.trim()
+                                     .replace(',', '.');
       return Double.parseDouble(valorNormalizado);
     } catch (NumberFormatException e) {
       logger.warning("Error al parsear double: '" + valor + "' no es un número válido.");
@@ -142,9 +144,11 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
   public Map<String, List<String>> getMapeoColumnasParaJson() {
     // Convierte el mapa interno (con claves Enum) a un mapa con claves String
     // para que pueda ser serializado a JSON correctamente.
-    return this.mapeoColumnas.entrySet().stream()
+    return this.mapeoColumnas.entrySet()
+                             .stream()
                              .collect(Collectors.toMap(
-                                 entry -> entry.getKey().name(), // Convierte el Enum a String
+                                 entry -> entry.getKey()
+                                               .name(), // Convierte el Enum a String
                                  Map.Entry::getValue
                              ));
   }

@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.fuentes.apis.Conexion;
+package ar.edu.utn.frba.dds.domain.fuentes.apis.conexion;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

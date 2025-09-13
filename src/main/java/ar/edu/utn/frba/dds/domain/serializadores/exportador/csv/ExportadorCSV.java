@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds.domain.serializadores.exportador.csv;
 
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.ModoExportacion.ModoExportacion;
+import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion.ModoExportacion;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -11,9 +11,11 @@ import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -99,6 +101,7 @@ public class ExportadorCSV<T> implements Exportador<T> {
 
   /**
    * Devuelve la configuración del exportador en formato JSON.
+   *
    * @return Un string con la configuración en JSON.
    */
   @Override
@@ -110,14 +113,16 @@ public class ExportadorCSV<T> implements Exportador<T> {
     configNode.put("separador", String.valueOf(this.separador));
     configNode.put("quote", String.valueOf(this.quote));
 
-    String modoStr = this.modoExportacion.getClass().getSimpleName();
+    String modoStr = this.modoExportacion.getClass()
+                                         .getSimpleName();
     if (modoStr.startsWith("Modo")) {
       modoStr = modoStr.substring(4);
     }
     configNode.put("modo", modoStr.toUpperCase());
 
     try {
-      return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(configNode);
+      return objectMapper.writerWithDefaultPrettyPrinter()
+                         .writeValueAsString(configNode);
     } catch (JsonProcessingException e) {
       logger.log(Level.SEVERE, "Error al generar la configuración JSON para ExportadorCSV", e);
       return "{\"error\":\"No se pudo generar la configuración\"}";

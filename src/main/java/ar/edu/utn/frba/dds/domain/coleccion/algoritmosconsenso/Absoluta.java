@@ -2,9 +2,7 @@ package ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso;
 
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
@@ -12,7 +10,10 @@ import javax.persistence.Entity;
 @DiscriminatorValue("Absoluta")
 public class Absoluta extends AlgoritmoDeConsenso {
   @Override
-  public List<Hecho> listaDeHechosConsensuados(List<Hecho> listaDeHechos, List<Fuente> fuentesNodo) {
+  public List<Hecho> listaDeHechosConsensuados(
+      List<Hecho> listaDeHechos,
+      List<Fuente> fuentesNodo
+  ) {
     if (fuentesNodo.isEmpty()) {
       return List.of();
     }

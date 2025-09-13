@@ -26,7 +26,8 @@ public class CondicionFactory {
   public CondicionFactory() {
     this.gson = new GsonBuilder()
         .registerTypeAdapter(
-            LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, type, jsonDeserializationContext) ->
+            LocalDateTime.class,
+            (JsonDeserializer<LocalDateTime>) (json, type, jsonDeserializationContext) ->
                 LocalDateTime.parse(
                     json.getAsJsonPrimitive()
                         .getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME
@@ -65,7 +66,8 @@ public class CondicionFactory {
     } else if (metadata.containsKey("campo")) {
       return crearCondicionSimple(metadata); // condicion normal igual mayor menor etc
     } else {
-      throw new IllegalArgumentException("La metadata del filtro es inválida. Debe contener 'logica' o 'campo'.");
+      throw new IllegalArgumentException(
+          "La metadata del filtro es inválida. Debe contener 'logica' o 'campo'.");
     }
   }
 
@@ -76,7 +78,8 @@ public class CondicionFactory {
 
   private CondicionCompuesta crearCondicionCompuesta(Map<String, Object> metadata) {
     String logica = (String) metadata.get("logica");
-    List<Map<String, Object>> subCondicionesMeta = (List<Map<String, Object>>) metadata.get("condiciones");
+    List<Map<String, Object>> subCondicionesMeta = (List<Map<String, Object>>) metadata.get(
+        "condiciones");
 
     CondicionCompuesta compuesta;
     switch (logica.toUpperCase()) {
@@ -145,11 +148,12 @@ public class CondicionFactory {
                                                            .toString());
           yield new PuntoGeografico(latitud, longitud);
         }
-        throw new IllegalArgumentException("El valor de 'ubicacion' debe ser un objeto con 'latitud' y 'longitud'");
+        throw new IllegalArgumentException(
+            "El valor de 'ubicacion' debe ser un objeto con 'latitud' y 'longitud'");
       }
       case "etiquetas" -> throw new IllegalArgumentException("no implementado todavia jijo");
       default ->
-        // Si el campo no tiene un parseo especial, se trata como String.
+          // Si el campo no tiene un parseo especial, se trata como String.
           valorStr;
     };
   }

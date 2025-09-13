@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds.domain.fuentes.apis;
 
 import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
-import ar.edu.utn.frba.dds.domain.fuentes.apis.Conexion.Conexion;
+import ar.edu.utn.frba.dds.domain.fuentes.apis.conexion.Conexion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
@@ -88,14 +88,14 @@ public class AdapterDemo implements FuenteAdapter {
         }
       }
 
-      LocalDateTime fechaSuceso = datos.get("fechaSuceso") != null ?
-                                  LocalDateTime.parse((String) datos.get("fechaSuceso")) :
+      LocalDateTime fechaSuceso = datos.get("fechaSuceso") != null
+                                  ? LocalDateTime.parse((String) datos.get("fechaSuceso")) :
                                   null;
-      LocalDateTime fechaCarga = datos.get("fechaCarga") != null ?
-                                 LocalDateTime.parse((String) datos.get("fechaCarga")) :
+      LocalDateTime fechaCarga = datos.get("fechaCarga") != null
+                                 ? LocalDateTime.parse((String) datos.get("fechaCarga")) :
                                  null;
-      Origen fuenteOrigen = datos.get("fuenteOrigen") != null ?
-                            Origen.valueOf((String) datos.get("fuenteOrigen")) :
+      Origen fuenteOrigen = datos.get("fuenteOrigen") != null
+                            ? Origen.valueOf((String) datos.get("fuenteOrigen")) :
                             null;
 
       List<Etiqueta> etiquetas = new ArrayList<>();
