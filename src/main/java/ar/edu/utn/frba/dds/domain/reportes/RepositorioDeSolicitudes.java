@@ -121,4 +121,9 @@ public class RepositorioDeSolicitudes {
       }
     };
   }
+
+  public int cantidadDeSpamDetectado(){
+    return detectorSpam.cantidadDetectada();
+  }
+
 }
