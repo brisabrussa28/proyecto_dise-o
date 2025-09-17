@@ -56,9 +56,11 @@ public class ExportadorCSV<T> implements Exportador<T> {
       boolean anexar = this.modoExportacion.debeAnexar();
       this.crearDirectoriosSiNoExisten(finalPath);
 
-      try (Writer writer = new BufferedWriter(
-          new OutputStreamWriter(
-              new FileOutputStream(finalPath, anexar), StandardCharsets.UTF_8))) {
+      try (
+          Writer writer = new BufferedWriter(
+              new OutputStreamWriter(
+                  new FileOutputStream(finalPath, anexar), StandardCharsets.UTF_8))
+      ) {
         final boolean escribirCabecera = !anexar || new File(finalPath).length() == 0;
 
         HeaderColumnNameMappingStrategy<T> strategy =
