@@ -10,12 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import com.opencsv.CSVWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Map;
 
-public class centralDeEstadisticas {
+public class CentralDeEstadisticas {
 
   private RepositorioDeSolicitudes repo;
 
@@ -35,13 +31,13 @@ public class centralDeEstadisticas {
   }
 
 
-  public Map<String, Long> hechosPorProvinciaSegunCategoria(List<Coleccion> colecciones, Coleccion coleccion, String categoria){
+  public Map<String, Long> hechosPorProvinciaSegunCategoria(List<Coleccion> colecciones, String categoria){
     return getAllHechos(colecciones).stream().filter(hecho -> Objects.equals(hecho.getCategoria(), categoria))
-                    .collect(Collectors.groupingBy(Hecho::getCategoria, Collectors.counting()));
+                    .collect(Collectors.groupingBy(Hecho::getProvincia, Collectors.counting()));
   }
 
 
-  public Map<String, Long> hechosPorHora(List<Coleccion> colecciones, Coleccion coleccion, String categoria){
+  public Map<String, Long> hechosPorHora(List<Coleccion> colecciones, String categoria){
     return getAllHechos(colecciones).stream().filter(hecho -> Objects.equals(hecho.getCategoria(), categoria))
                     .collect(Collectors.groupingBy(hecho -> String.format("%02d", hecho.getFechaSuceso().getHour()), Collectors.counting()));
   }
