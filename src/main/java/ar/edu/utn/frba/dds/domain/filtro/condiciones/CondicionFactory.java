@@ -77,7 +77,7 @@ public class CondicionFactory {
 
 
   private CondicionCompuesta crearCondicionCompuesta(Map<String, Object> metadata) {
-    String logica = (String) metadata.get("logica");
+    String logica = (String) metadata.get("compuesta");
     List<Map<String, Object>> subCondicionesMeta = (List<Map<String, Object>>) metadata.get(
         "condiciones");
 

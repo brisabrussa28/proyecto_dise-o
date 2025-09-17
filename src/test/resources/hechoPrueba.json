@@ -1,0 +1,15 @@
+[{
+  "titulo": "Prueba",
+  "descripcion": "Esto es una prueba para ver si importa bien los json",
+  "categoria": "Prueba",
+  "direccion": "Prueba 123",
+  "provincia": "CABA",
+  "ubicacion": {
+    "latitud": 123456,
+    "longitud": -123456
+  },
+  "fechasuceso": "2025-09-17T14:36:31.228431996",
+  "fechacarga": "2025-09-17T14:36:31.228431996",
+  "origen": "PROVISTO_CONTRIBUYENTE",
+  "etiquetas": []
+}]

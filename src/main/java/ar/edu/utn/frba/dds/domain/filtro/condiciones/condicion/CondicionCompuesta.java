@@ -46,7 +46,6 @@ public abstract class CondicionCompuesta extends Condicion {
             .map(Condicion::unMap) // Llama a aMapa() en cada sub-condición
             .collect(Collectors.toList())
     );
-
     return mapa;
   }
 

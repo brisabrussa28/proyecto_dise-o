@@ -2,16 +2,25 @@ package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterDemo;
+import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterFactory;
+import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterMetaMapa;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.conexion.Conexion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,9 +73,10 @@ public class AdapterDemoTest {
     Hecho primerHecho = resultado.get(0);
     assertEquals("Incendio Forestal", primerHecho.getTitulo());
     assertEquals("Incendios", primerHecho.getCategoria());
-    assertEquals(-34.0,
-                 primerHecho.getUbicacion()
-                            .getLatitud()
+    assertEquals(
+        -34.0,
+        primerHecho.getUbicacion()
+                   .getLatitud()
     );
 
     Hecho segundoHecho = resultado.get(1);
@@ -95,9 +105,10 @@ public class AdapterDemoTest {
     List<Hecho> resultado = adapter.consultarHechos();
 
     assertEquals(1, resultado.size(), "Solo el hecho válido debe ser procesado");
-    assertEquals("Hecho Válido",
-                 resultado.get(0)
-                          .getTitulo()
+    assertEquals(
+        "Hecho Válido",
+        resultado.get(0)
+                 .getTitulo()
     );
   }
 
@@ -110,4 +121,48 @@ public class AdapterDemoTest {
 
     assertTrue(resultado.isEmpty());
   }
+
+  @Test
+  void SiEstaMalFormadaLaUrlLanzaExcepcion() throws MalformedURLException {
+    when(conexionMock.siguienteHecho(any(URL.class), any(LocalDateTime.class))).thenThrow(RuntimeException.class);
+    assertThrows(
+        RuntimeException.class,
+        () -> conexionMock.siguienteHecho(new URL("http://urlDePrueba.com"), LocalDateTime.now())
+    );
+    verify(conexionMock).siguienteHecho(any(URL.class), any(LocalDateTime.class));
+  }
+
+  @Test
+  void creoUnAdapterDeDemo() throws JsonProcessingException {
+    String json = "{ \"tipo\": \"DEMO\", \"url\": \"https://demo.com\" }";
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode node = mapper.readTree(json);
+
+    AdapterFactory factory = new AdapterFactory();
+    Object adapter = factory.create(node);
+
+    assertTrue(adapter instanceof AdapterDemo);
+  }
+
+  @Test
+  void creoUnAdapterDeMetamapa() throws JsonProcessingException {
+    String json = "{ \"tipo\": \"METAMAPA\", \"url\": \"https://demo.com\" }";
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode node = mapper.readTree(json);
+
+    AdapterFactory factory = new AdapterFactory();
+    Object adapter = factory.create(node);
+
+    assertTrue(adapter instanceof AdapterMetaMapa);
+  }
+
+  @Test
+  void siIntentoCrearUnAdapterConUnJsonMalHechoLanzaExcepcion() throws JsonProcessingException {
+    String json = "{ \"tipo\": \"ERROR\", \"url\": \"https://demo.com\" }";
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode nodo = mapper.readTree(json);
+    AdapterFactory factory = new AdapterFactory();
+    assertThrows(IllegalArgumentException.class, () -> factory.create(nodo));
+  }
+
 }

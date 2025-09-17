@@ -112,12 +112,12 @@ public class ExportadorCsvTest {
 
     exportador.exportar(
         List.of(hecho2),
-        "C:\\Users\\Jere\\Desktop\\csvs de prueba\\csvDePruebaSobrescribir.csv"
+        "src/test/resources/csvDePruebaSobrescribir.csv"
     );
     contenido = null;
     try {
       contenido = java.nio.file.Files.readString(java.nio.file.Path.of(
-          "C:\\Users\\Jere\\Desktop\\csvs de prueba\\csvDePruebaSobrescribir.csv"));
+          "src/test/resources/csvDePruebaSobrescribir.csv"));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
