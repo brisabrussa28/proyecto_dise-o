@@ -9,23 +9,58 @@ import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion.
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion.ModoSobrescribir;
 import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion.ModoTimestamp;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 @DisplayName("Tests sobre el exportador de CSVs")
 public class ExportadorCsvTest {
+
+  private Hecho hechoSimple;
+  private Hecho hechoCompleto1;
+  private Hecho hechoCompleto2;
+
+  // Crea una carpeta temporal para cada prueba y la elimina al final.
+  @TempDir
+  Path tempDir;
+
+  @BeforeEach
+  void setUp() {
+    hechoSimple = new Hecho();
+
+    LocalDateTime fechaSuceso = LocalDateTime.now().minusDays(1);
+    LocalDateTime fechaCarga = LocalDateTime.now();
+
+    hechoCompleto1 = new Hecho(
+        "Prueba hecho 1", "este test es una prueba", "Prueba",
+        "direcciondeprueba", "Buenos Aires", new PuntoGeografico(1234456, -1234456),
+        fechaSuceso, fechaCarga, Origen.PROVISTO_CONTRIBUYENTE, Collections.emptyList()
+    );
+
+    hechoCompleto2 = new Hecho(
+        "Prueba hecho 2", "este test es otra prueba", "Prueba",
+        "direcciondeprueba", "Ciudad Autonoma de Buenos Aires", new PuntoGeografico(1234456, -1234456),
+        fechaSuceso, fechaCarga, Origen.PROVISTO_CONTRIBUYENTE, Collections.emptyList()
+    );
+  }
+
   @Test
   void exportadorExportaConModoAnexar() {
     var exportador = new ExportadorCSV<>(new ModoAnexar());
-    var hechoDePrueba = new Hecho();
+    Path outputPath = tempDir.resolve("csvDePrueba.csv");
     Assertions.assertDoesNotThrow(
         () -> exportador.exportar(
-            List.of(hechoDePrueba),
-            "src/test/resources/csvDePrueba.csv"
+            new ArrayList<>(List.of(hechoSimple)),
+            outputPath.toString()
         )
     );
   }
@@ -33,12 +68,11 @@ public class ExportadorCsvTest {
   @Test
   void siNoPuedeExportarLanzaExcepcion() {
     var exportador = new ExportadorCSV<>(new ModoAnexar());
-    var hechoDePrueba = new Hecho();
     //Pruebo con un path no válido.
     Assertions.assertThrows(
         RuntimeException.class,
         () -> exportador.exportar(
-            List.of(hechoDePrueba),
+            new ArrayList<>(List.of(hechoSimple)),
             ""
         )
     );
@@ -47,11 +81,11 @@ public class ExportadorCsvTest {
   @Test
   void exportoUsandoElModoNumerar() {
     var exportador = new ExportadorCSV<>(new ModoNumerar());
-    var hechoDePrueba = new Hecho();
+    Path outputPath = tempDir.resolve("csvDePruebaNumerar.csv");
     Assertions.assertDoesNotThrow(
         () -> exportador.exportar(
-            List.of(hechoDePrueba),
-            "src/test/resources/csvDePruebaNumerar.csv"
+            new ArrayList<>(List.of(hechoSimple)),
+            outputPath.toString()
         )
     );
   }
@@ -68,40 +102,15 @@ public class ExportadorCsvTest {
   @Test
   void exportoUsandoModoSobrescribir() {
     var exportador = new ExportadorCSV<>(new ModoSobrescribir());
-    var hecho1 = new Hecho(
-        "Prueba hecho 1",
-        "este test es una prueba",
-        "Prueba",
-        "direcciondeprueba",
-        "Buenos Aires",
-        new PuntoGeografico(1234456, -1234456),
-        LocalDateTime.now(),
-        LocalDateTime.now(),
-        Origen.PROVISTO_CONTRIBUYENTE,
-        List.of()
-    );
-
-    var hecho2 = new Hecho(
-        "Prueba hecho 2",
-        "este test es otra prueba",
-        "Prueba",
-        "direcciondeprueba",
-        "Ciudad Autonoma de Buenos Aires",
-        new PuntoGeografico(1234456, -1234456),
-        LocalDateTime.now(),
-        LocalDateTime.now(),
-        Origen.PROVISTO_CONTRIBUYENTE,
-        List.of()
-    );
+    Path outputPath = tempDir.resolve("csvDePruebaSobrescribir.csv");
 
     exportador.exportar(
-        List.of(hecho1),
-        "src/test/resources/csvDePruebaSobrescribir.csv"
+        new ArrayList<>(List.of(hechoCompleto1)),
+        outputPath.toString()
     );
     String contenido = null;
     try {
-      contenido = java.nio.file.Files.readString(java.nio.file.Path.of(
-          "src/test/resources/csvDePruebaSobrescribir.csv"));
+      contenido = Files.readString(outputPath);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -111,13 +120,12 @@ public class ExportadorCsvTest {
 
 
     exportador.exportar(
-        List.of(hecho2),
-        "src/test/resources/csvDePruebaSobrescribir.csv"
+        new ArrayList<>(List.of(hechoCompleto2)),
+        outputPath.toString()
     );
     contenido = null;
     try {
-      contenido = java.nio.file.Files.readString(java.nio.file.Path.of(
-          "src/test/resources/csvDePruebaSobrescribir.csv"));
+      contenido = Files.readString(outputPath);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -125,15 +133,17 @@ public class ExportadorCsvTest {
     Logger.getLogger(ExportadorCSV.class.getName())
           .info(contenido);
     Assertions.assertTrue(contenido.contains("Prueba hecho 2"));
+    Assertions.assertFalse(contenido.contains("Prueba hecho 1"));
   }
 
   @Test
   void exportoEnModoTimestamp() {
     var exportador = new ExportadorCSV<>(new ModoTimestamp());
-    var hechoDePrueba = new Hecho();
+    Path outputPath = tempDir.resolve("csvDePruebaTimestamp.csv");
     Assertions.assertDoesNotThrow(() -> exportador.exportar(
-        List.of(hechoDePrueba),
-        "src/test/resources/csvDePruebaTimestamp.csv"
+        new ArrayList<>(List.of(hechoSimple)),
+        outputPath.toString()
     ));
   }
 }
+

@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.domain.fuentes.apis.conexion;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -15,12 +16,17 @@ public class Conexion {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
+
+  protected HttpURLConnection createConnection(URL url) throws IOException {
+    return (HttpURLConnection) url.openConnection();
+  }
+
   public Map<String, Object> siguienteHecho(URL url, LocalDateTime fechaUltimaConsulta) {
     try {
       String fechaParam = fechaUltimaConsulta != null ? fechaUltimaConsulta.toString() : "";
-      String urlConParams = url.toString() + "?fechaUltimaConsulta=" + fechaParam;
+      URL urlConParams = new URL(url.toString() + "?fechaUltimaConsulta=" + fechaParam);
 
-      HttpURLConnection conn = (HttpURLConnection) new URL(urlConParams).openConnection();
+      HttpURLConnection conn = createConnection(urlConParams);
       conn.setRequestMethod("GET");
 
       if (conn.getResponseCode() == 204) {
@@ -34,14 +40,10 @@ public class Conexion {
       BufferedReader in = new BufferedReader(
           new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8)
       );
-      String json = in.lines()
-                      .collect(Collectors.joining());
+      String json = in.lines().collect(Collectors.joining());
       in.close();
 
-      return objectMapper.readValue(
-          json, new TypeReference<>() {
-          }
-      );
+      return objectMapper.readValue(json, new TypeReference<>() {});
     } catch (Exception e) {
       throw new RuntimeException("Fallo la conexión: " + e.getMessage(), e);
     }

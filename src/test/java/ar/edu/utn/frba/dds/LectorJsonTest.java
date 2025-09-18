@@ -52,8 +52,8 @@ public class LectorJsonTest {
     Assertions.assertEquals("CABA", hecho.getProvincia());
     Assertions.assertEquals(123456, hecho.getUbicacion().getLatitud());
     Assertions.assertEquals(-123456, hecho.getUbicacion().getLongitud());
-    Assertions.assertEquals(LocalDate.now(), hecho.getFechasuceso().toLocalDate());
-    Assertions.assertEquals(LocalDate.now(), hecho.getFechacarga().toLocalDate());
+    Assertions.assertEquals(LocalDate.parse("2025-09-17"), hecho.getFechasuceso().toLocalDate());
+    Assertions.assertEquals(LocalDate.parse("2025-09-17"), hecho.getFechacarga().toLocalDate());
     Assertions.assertEquals(Origen.PROVISTO_CONTRIBUYENTE, hecho.getOrigen());
     Assertions.assertEquals(new ArrayList<>(), hecho.getEtiquetas());
   }
