@@ -6,6 +6,7 @@ import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionFactory;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import java.util.ArrayList;
@@ -251,5 +252,6 @@ public class Coleccion {
       return List.of(this.fuente);
     }
   }
+
 }
 

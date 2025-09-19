@@ -1,18 +1,28 @@
 package ar.edu.utn.frba.dds.domain.calendarizacion;
 
+import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.estadisicas.CentralDeEstadisticas;
+import ar.edu.utn.frba.dds.domain.estadisicas.Estadistica;
 import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.exportador.json.ExportadorJson;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 import ar.edu.utn.frba.dds.domain.lector.json.LectorJson;
+import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
+import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import com.fasterxml.jackson.core.type.TypeReference;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +32,22 @@ import java.util.logging.Logger;
  * Punto de entrada para nuestro crontab.
  */
 public class App {
-
+  static DetectorSpam detector = new DetectorSpam() {
+    @Override
+    public boolean esSpam(String texto) {
+      return false;
+    }
+  };
+  static RepositorioDeSolicitudes repo = new RepositorioDeSolicitudes(detector);
+  static CentralDeEstadisticas estadisticas = new CentralDeEstadisticas();
+  static List<Coleccion> colecciones;
   // El registro de fuentes ahora es una variable de instancia, no estática.
   private final Map<String, FuenteDeCopiaLocal> fuentesRegistradas = new HashMap<>();
-
   Logger logger = Logger.getLogger(App.class.getName());
+
+  public static void setColecciones(List<Coleccion> colecciones) {
+    App.colecciones = new ArrayList<>(colecciones);
+  }
 
   /**
    * Registra una nueva fuente cacheable para que pueda ser actualizada por esta aplicación.
@@ -130,7 +151,24 @@ public class App {
 
     dinamica.agregarHecho(hecho);
 
+    estadisticas.setRepo(repo);
+
+    // -- Agrego Colecciones por ahora
+    Coleccion pruebas = new Coleccion(
+        "Pruebas",
+        dinamica,
+        "Un día más haciendo pruebas",
+        "Pruebas"
+    );
+    List<Coleccion> colecciones = List.of(pruebas);
+    setColecciones(colecciones);
+
     return aplicacion;
+  }
+
+  public Map<String, FuenteDeCopiaLocal> getFuentesRegistradas() {
+    // Retorna una copia para evitar modificaciones externas
+    return new HashMap<>(fuentesRegistradas);
   }
 
   /**
@@ -141,27 +179,43 @@ public class App {
    *             actualizar.
    */
   public static void main(String[] args) {
-    App aplicacion = configurarAplicacion();
     Logger logger = Logger.getLogger(App.class.getName());
+    try {
+      App aplicacion = configurarAplicacion();
 
-    if (args.length == 0) {
-      logger.info("Iniciando actualización de todas las fuentes...");
-      aplicacion.ejecutarActualizacionTodasLasFuentes();
-      logger.info("Actualización de todas las fuentes completada.");
-    } else {
-      String nombreFuente = args[0];
-      logger.info("Iniciando actualización de la fuente: " + nombreFuente + "...");
-      try {
-        aplicacion.ejecutarActualizacion(nombreFuente);
-        logger.info("Actualización de la fuente '" + nombreFuente + "' completada.");
-      } catch (Exception e) {
-        logger.severe(e.getMessage());
+
+      if (args.length == 0) {
+        logger.info("Iniciando actualización de todas las fuentes...");
+        aplicacion.ejecutarActualizacionTodasLasFuentes();
+        logger.info("Actualización de todas las fuentes completada.");
+      } else {
+        String nombreFuente = args[0];
+        logger.info("Iniciando actualización de la fuente: " + nombreFuente + "...");
+        try {
+          aplicacion.ejecutarActualizacion(nombreFuente);
+          logger.info("Actualización de la fuente '" + nombreFuente + "' completada.");
+        } catch (Exception e) {
+          logger.severe("Error al actualizar fuente: " + e.getMessage());
+        }
       }
-    }
-  }
 
-  public Map<String, FuenteDeCopiaLocal> getFuentesRegistradas() {
-    // Retorna una copia para evitar modificaciones externas
-    return new HashMap<>(fuentesRegistradas);
+      if (colecciones != null && !colecciones.isEmpty()) {
+        Estadistica provinciaMax = estadisticas.provinciaConMasHechos(colecciones.get(0));
+        Estadistica categoriaMax = estadisticas.categoriaConMasHechos(colecciones);
+        Estadistica provinciaPorCategoria = estadisticas.provinciaConMasHechosDeCiertaCategoria(colecciones, "Robo");
+        Estadistica horaPico = estadisticas.horaConMasHechosDeCiertaCategoria(colecciones, "Robo");
+        Estadistica porcentajeSpam = new Estadistica("Porcentaje de solicitudes spam", Math.round(estadisticas.porcentajeDeSolicitudesSpam()));
+
+        estadisticas.export(List.of(provinciaMax), "provincia_max.csv");
+        estadisticas.export(List.of(categoriaMax), "categoria_max.csv");
+        estadisticas.export(List.of(provinciaPorCategoria), "provincia_por_categoria.csv");
+        estadisticas.export(List.of(horaPico), "hora_pico.csv");
+        estadisticas.export(List.of(porcentajeSpam), "porcentaje_spam.csv");
+      } else {
+        logger.warning("No hay colecciones disponibles para calcular estadísticas.");
+      }
+    } catch (Exception e) {
+      logger.severe("Error inesperado en App.main: " + e.getMessage());
+    }
   }
 }

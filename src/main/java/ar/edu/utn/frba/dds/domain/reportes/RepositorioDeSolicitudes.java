@@ -17,6 +17,7 @@ import java.util.UUID;
 public class RepositorioDeSolicitudes {
 
   private final Set<Solicitud> solicitudes = new HashSet<>();
+  private final Set<Solicitud> solicitudesSpam = new HashSet<>(); // Responsabilidad movida aquí
   private final Set<Hecho> hechosEliminados = new HashSet<>(); // Usamos Set para evitar duplicados
   private final DetectorSpam detectorSpam;
 
@@ -31,7 +32,7 @@ public class RepositorioDeSolicitudes {
 
   /**
    * Agrega una solicitud al gestor de reportes.
-   * Si la razón de eliminación es spam, no se agrega.
+   * Si la razón de eliminación es spam, se agrega a la lista de spam.
    */
   public void agregarSolicitud(UUID id, Hecho hecho, String motivo) {
 
@@ -41,6 +42,8 @@ public class RepositorioDeSolicitudes {
     Solicitud solicitud = new Solicitud(id, hecho, motivo);
     if (!detectorSpam.esSpam(solicitud.getRazonEliminacion())) {
       solicitudes.add(solicitud);
+    } else {
+      solicitudesSpam.add(solicitud); // Se agrega a la lista interna del repositorio
     }
   }
 
@@ -115,4 +118,9 @@ public class RepositorioDeSolicitudes {
   public Filtro filtroExcluyente() {
     return new Filtro(new CondicionPredicado(h -> !hechosEliminados.contains(h)));
   }
+
+  public int cantidadDeSpamDetectado() {
+    return this.solicitudesSpam.size(); // Devuelve el tamaño de su propia lista
+  }
+
 }
