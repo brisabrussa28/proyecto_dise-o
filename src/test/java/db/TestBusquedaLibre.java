@@ -10,6 +10,7 @@ import ar.edu.utn.frba.dds.domain.hibernate.AccesoHecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -126,11 +127,12 @@ public class TestBusquedaLibre {
   }
 
   private void mostrarResultados(List<Hecho> resultados){
-    System.out.println("Resultados encontrados:");
+    Logger logger = Logger.getLogger(TestBusquedaLibre.class.getName());
+    logger.info("Resultados encontrados:");
     for (Hecho hecho : resultados) {
-      System.out.println("Título: " + hecho.getTitulo());
-      System.out.println("  Descripción: " + hecho.getDescripcion());
-      System.out.println("--------------------------------------------------");
+      logger.info("Título: " + hecho.getTitulo());
+      logger.info("  Descripción: " + hecho.getDescripcion());
+      logger.info("--------------------------------------------------");
     }
   }
 }

@@ -3,10 +3,8 @@ package ar.edu.utn.frba.dds.domain.hecho;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Embedded;
@@ -265,7 +263,6 @@ public class Hecho {
   public int hashCode() {
     return Objects.hash(titulo, descripcion, categoria, direccion, ubicacion, fechaSuceso);
   }
-
 
 
 }

@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.Column;
-import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
@@ -23,7 +23,8 @@ import javax.persistence.Transient;
 @MappedSuperclass
 public abstract class FuenteDeCopiaLocal extends Fuente {
 
-  @Transient // La caché en sí no se persiste directamente, se carga desde el archivo.
+  // La caché en sí no se persiste directamente, se carga desde el archivo.
+  @OneToMany
   protected List<Hecho> cacheDeHechos;
 
   @Transient // El lector no es persistible.
@@ -32,11 +33,9 @@ public abstract class FuenteDeCopiaLocal extends Fuente {
   @Transient // El exportador no es persistible.
   protected Exportador<Hecho> exportador;
 
-  @Lob
   @Column(name = "json_lector")
   protected String jsonLector; // Campo para persistir la configuración del Lector.
 
-  @Lob
   @Column(name = "json_exportador")
   protected String jsonExportador; // Campo para persistir la configuración del Exportador.
 

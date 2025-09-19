@@ -10,14 +10,12 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
-import javax.persistence.Transient;
 
 /**
  * Clase Coleccion.
@@ -29,12 +27,11 @@ public class Coleccion {
   @Id
   @GeneratedValue
   Long id;
-  @OneToOne(cascade = CascadeType.PERSIST)
+  @OneToOne
   private final Fuente fuente;
   private final String titulo;
   private final String descripcion;
   private final String categoria;
-  @Transient
   private String condicionJson;
   @ManyToOne
   private AlgoritmoDeConsenso algoritmo;

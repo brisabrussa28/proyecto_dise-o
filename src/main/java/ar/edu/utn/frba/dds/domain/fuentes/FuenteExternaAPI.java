@@ -14,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
@@ -32,7 +31,6 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
   private FuenteAdapter adaptador;
 
   // Nuevo campo para persistir la configuración del Adapter.
-  @Lob
   private String jsonAdapter;
 
   // Constructor para JPA.
