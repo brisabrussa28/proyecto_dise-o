@@ -183,7 +183,6 @@ public class App {
     try {
       App aplicacion = configurarAplicacion();
 
-      FuenteDeCopiaLocal fuente = aplicacion.getFuentesRegistradas().get("dinamica_principal");
 
       if (args.length == 0) {
         logger.info("Iniciando actualización de todas las fuentes...");
