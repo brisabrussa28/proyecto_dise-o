@@ -41,6 +41,8 @@ public class RepositorioDeSolicitudes {
     Solicitud solicitud = new Solicitud(id, hecho, motivo);
     if (!detectorSpam.esSpam(solicitud.getRazonEliminacion())) {
       solicitudes.add(solicitud);
+    } else {
+      detectorSpam.agregarSpam(solicitud);
     }
   }
 
@@ -115,4 +117,9 @@ public class RepositorioDeSolicitudes {
   public Filtro filtroExcluyente() {
     return new Filtro(new CondicionPredicado(h -> !hechosEliminados.contains(h)));
   }
+
+  public int cantidadDeSpamDetectado(){
+    return detectorSpam.cantidadDetectada();
+  }
+
 }
