@@ -133,10 +133,11 @@ public class App {
     return aplicacion;
   }
 
-/*  public static App configurarStats() {
+  /*  public static App configurarStats() {
 
-  }
-*/
+    }
+  */
+
   /**
    * Ejecuta el crontab periodicamente.
    *

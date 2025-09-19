@@ -8,15 +8,6 @@ import java.util.Set;
  * Interfaz de nuestro componente para detectar si una solicitud es spam.
  */
 public interface DetectorSpam {
-  final Set<Solicitud> solicitudesSpam = new HashSet<>();
-
-  public default int cantidadDetectada(){
-    return solicitudesSpam.size();
-  }
-
-  public default void agregarSpam(Solicitud solicitud) {
-    solicitudesSpam.add(solicitud);
-  }
   /**
    * Mét0do para detectar si un texto es spam.
    *
