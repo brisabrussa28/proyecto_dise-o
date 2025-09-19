@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.csv.LectorCSV;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.csv.filaconverter.HechoFilaConverter;
+import ar.edu.utn.frba.dds.domain.lector.csv.LectorCSV;
+import ar.edu.utn.frba.dds.domain.lector.csv.filaconverter.HechoFilaConverter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;

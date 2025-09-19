@@ -1,10 +1,10 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
+import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterFactory;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
+import ar.edu.utn.frba.dds.domain.lector.Lector;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -14,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
@@ -32,7 +31,6 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
   private FuenteAdapter adaptador;
 
   // Nuevo campo para persistir la configuración del Adapter.
-  @Lob
   private String jsonAdapter;
 
   // Constructor para JPA.

@@ -1,8 +1,8 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
+import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
+import ar.edu.utn.frba.dds.domain.lector.Lector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

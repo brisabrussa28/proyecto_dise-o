@@ -5,6 +5,7 @@ import ar.edu.utn.frba.dds.domain.fuentes.apis.serviciometamapa.ServicioMetaMapa
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.util.List;
 
@@ -33,7 +34,11 @@ public class AdapterMetaMapa implements FuenteAdapter {
    */
   @Override
   public String getConfiguracionJson() {
+    // CORREGIDO: Se registra el módulo JavaTimeModule para que Jackson sepa
+    // cómo serializar objetos LocalDateTime a formato JSON estándar.
     ObjectMapper mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule());
+
     ObjectNode config = mapper.createObjectNode();
     config.put("tipo", "METAMAPA");
     config.put("url", servicio.getUrlApi());
@@ -41,4 +46,3 @@ public class AdapterMetaMapa implements FuenteAdapter {
     return config.toString();
   }
 }
-

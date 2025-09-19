@@ -1,8 +1,8 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.LectorFactory;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
+import ar.edu.utn.frba.dds.domain.lector.Lector;
+import ar.edu.utn.frba.dds.domain.lector.LectorFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -10,8 +10,6 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
 /**
@@ -27,7 +25,6 @@ public class FuenteEstatica extends Fuente {
   @Transient // El lector no es persistible.
   private Lector<Hecho> lector;
 
-  @Lob
   @Column(name = "json_lector")
   protected String jsonLector; // Campo para persistir la configuración del Lector.
 
@@ -56,7 +53,6 @@ public class FuenteEstatica extends Fuente {
   /**
    * Reconstruye el Lector al cargar la entidad desde la base de datos.
    */
-  @PostLoad
   protected void reconstruirDependencias() {
     if (this.jsonLector != null && !this.jsonLector.isEmpty()) {
       ObjectMapper mapper = new ObjectMapper();

@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serializadores.lector.csv.filaconverter;
+package ar.edu.utn.frba.dds.domain.lector.csv.filaconverter;
 
 import java.util.List;
 import java.util.Map;

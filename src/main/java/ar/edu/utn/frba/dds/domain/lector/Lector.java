@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serializadores.lector;
+package ar.edu.utn.frba.dds.domain.lector;
 
 import java.util.List;
 

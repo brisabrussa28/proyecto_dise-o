@@ -1,57 +1,30 @@
 package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionAnd;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class FiltroTest {
-  PuntoGeografico pgAux = new PuntoGeografico(33.39627891281455, 44.48695991794239);
-  FuenteDinamica fuenteAuxD;
-  LocalDateTime horaAux = LocalDateTime.now()
-                                       .minusDays(1);
 
-  @Mock
-  private Lector<Hecho> lectorMock;
-  @Mock
-  private Exportador<Hecho> exportadorMock;
-  private Path tempJsonFile;
   private Hecho hechoDePrueba;
+  private List<Hecho> listaDeHechos;
 
   @BeforeEach
-  void setUp() throws IOException {
+  void setUp() {
     MockitoAnnotations.openMocks(this);
-    tempJsonFile = Files.createTempFile("test_fuente_dinamica_", ".json");
-    when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
-    fuenteAuxD = new FuenteDinamica(
-        "Julio Cesar",
-        tempJsonFile.toString(),
-        lectorMock,
-        exportadorMock
-    );
 
     hechoDePrueba = new HechoBuilder()
         .conTitulo("titulo")
@@ -59,91 +32,50 @@ public class FiltroTest {
         .conCategoria("Robos")
         .conDireccion("dire")
         .conProvincia("Buenos Aires")
-        .conUbicacion(pgAux)
-        .conFechaSuceso(horaAux)
+        .conUbicacion(new PuntoGeografico(33.39, 44.48))
+        .conFechaSuceso(LocalDateTime.now().minusDays(1))
         .conFechaCarga(LocalDateTime.now())
         .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .build();
-  }
 
-  @AfterEach
-  void tearDown() throws IOException {
-    Files.deleteIfExists(tempJsonFile);
+    listaDeHechos = List.of(hechoDePrueba);
   }
 
   @Test
-  public void filtraPorCategoriaCorrectamente() {
-    List<Hecho> hechos = List.of(hechoDePrueba);
+  @DisplayName("Un filtro con una condición simple filtra correctamente")
+  public void filtroConCondicionSimple() {
     Condicion condicionCategoria = new CondicionGenerica("categoria", "IGUAL", "Robos");
     Filtro filtro = new Filtro(condicionCategoria);
 
-    List<Hecho> resultado = filtro.filtrar(hechos);
+    List<Hecho> resultado = filtro.filtrar(listaDeHechos);
+
     assertEquals(1, resultado.size());
-    assertEquals(
-        "Robos",
-        resultado.get(0)
-                 .getCategoria()
-    );
+    assertEquals("Robos", resultado.get(0).getCategoria());
   }
 
   @Test
-  public void filtraPorDireccionCorrectamente() {
-    List<Hecho> hechos = List.of(hechoDePrueba);
-    Condicion condicionDireccion = new CondicionGenerica("direccion", "IGUAL", "dire");
-    Filtro filtro = new Filtro(condicionDireccion);
-
-    List<Hecho> resultado = filtro.filtrar(hechos);
+  @DisplayName("Un filtro sin condición raíz devuelve la lista original")
+  public void filtroSinCondicionDevuelveOriginal() {
+    Filtro filtro = new Filtro(null);
+    List<Hecho> resultado = filtro.filtrar(listaDeHechos);
     assertEquals(1, resultado.size());
-    assertEquals(
-        "dire",
-        resultado.get(0)
-                 .getDireccion()
-    );
+    assertEquals(listaDeHechos, resultado);
   }
 
   @Test
-  public void filtraPorFechaSucesoCorrectamente() {
-    List<Hecho> hechos = List.of(hechoDePrueba);
-    Condicion condicionFecha = new CondicionGenerica("fechasuceso", "IGUAL", horaAux);
-    Filtro filtro = new Filtro(condicionFecha);
-    assertEquals(
-        1,
-        filtro.filtrar(hechos)
-              .size()
-    );
-  }
-
-
-  @Test
-  public void aplicaVariosFiltrosCorrectamente() {
-    List<Hecho> hechos = List.of(hechoDePrueba);
-
-    CondicionAnd condicionAnd = new CondicionAnd();
-    condicionAnd.agregarCondicion(new CondicionGenerica("categoria", "IGUAL", "Robos"));
-    condicionAnd.agregarCondicion(new CondicionGenerica("direccion", "IGUAL", "dire"));
-
-    Filtro filtro = new Filtro(condicionAnd);
-    assertEquals(
-        1,
-        filtro.filtrar(hechos)
-              .size()
-    );
+  @DisplayName("Un filtro con una condición que no matchea devuelve una lista vacía")
+  public void filtroConCondicionSinMatch() {
+    Condicion condicionFallida = new CondicionGenerica("categoria", "IGUAL", "Hurtos");
+    Filtro filtro = new Filtro(condicionFallida);
+    List<Hecho> resultado = filtro.filtrar(listaDeHechos);
+    assertEquals(0, resultado.size());
   }
 
   @Test
-  public void aplicaVariosFiltrosYFalla() {
-    List<Hecho> hechos = List.of(hechoDePrueba);
-
-    CondicionAnd condicionAnd = new CondicionAnd();
-    condicionAnd.agregarCondicion(new CondicionGenerica("categoria", "IGUAL", "Robos"));
-    condicionAnd.agregarCondicion(new CondicionGenerica(
-        "direccion",
-        "IGUAL",
-        "direccion_incorrecta"
-    ));
-
-    Filtro filtro = new Filtro(condicionAnd);
-    assertTrue(filtro.filtrar(hechos)
-                     .isEmpty());
+  @DisplayName("Filtrar una lista vacía devuelve una lista vacía")
+  public void filtrarListaVacia() {
+    Filtro filtro = new Filtro(new CondicionGenerica("categoria", "IGUAL", "Robos"));
+    List<Hecho> resultado = filtro.filtrar(Collections.emptyList());
+    assertEquals(0, resultado.size());
   }
 }

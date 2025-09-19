@@ -1,5 +1,7 @@
 package ar.edu.utn.frba.dds.domain.calendarizacion;
 
+import ar.edu.utn.frba.dds.domain.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.exportador.json.ExportadorJson;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
@@ -7,15 +9,14 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.json.ExportadorJson;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.json.LectorJson;
+import ar.edu.utn.frba.dds.domain.lector.Lector;
+import ar.edu.utn.frba.dds.domain.lector.json.LectorJson;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Punto de entrada para nuestro crontab.
@@ -25,11 +26,14 @@ public class App {
   // El registro de fuentes ahora es una variable de instancia, no estática.
   private final Map<String, FuenteDeCopiaLocal> fuentesRegistradas = new HashMap<>();
 
+  Logger logger = Logger.getLogger(App.class.getName());
+
   /**
    * Registra una nueva fuente cacheable para que pueda ser actualizada por esta aplicación.
    *
    * @param fuente La instancia de la fuente a registrar.
    */
+
   public void registrarFuente(FuenteDeCopiaLocal fuente) {
     if (fuente != null) {
       this.fuentesRegistradas.put(fuente.getNombre(), fuente);
@@ -62,14 +66,11 @@ public class App {
                       .forEach(fuente -> {
                         try {
                           fuente.forzarActualizacionSincrona();
-                          System.out.println(
-                              "Fuente '" + fuente.getNombre() + "' actualizada correctamente.");
+                          logger.info("Fuente '" + fuente.getNombre() + "' actualizada correctamente.");
                         } catch (Exception e) {
                           // Se maneja el error por cada fuente para no detener el proceso completo.
-                          System.err.println(
-                              "Error al actualizar la fuente '"
-                                  + fuente.getNombre() + "': " + e.getMessage()
-                          );
+                          logger.warning("Error al actualizar la fuente '"
+                                             + fuente.getNombre() + "': " + e.getMessage());
                         }
                       });
   }
@@ -141,19 +142,20 @@ public class App {
    */
   public static void main(String[] args) {
     App aplicacion = configurarAplicacion();
+    Logger logger = Logger.getLogger(App.class.getName());
 
     if (args.length == 0) {
-      System.out.println("Iniciando actualización de todas las fuentes...");
+      logger.info("Iniciando actualización de todas las fuentes...");
       aplicacion.ejecutarActualizacionTodasLasFuentes();
-      System.out.println("Actualización de todas las fuentes completada.");
+      logger.info("Actualización de todas las fuentes completada.");
     } else {
       String nombreFuente = args[0];
-      System.out.println("Iniciando actualización de la fuente: " + nombreFuente + "...");
+      logger.info("Iniciando actualización de la fuente: " + nombreFuente + "...");
       try {
         aplicacion.ejecutarActualizacion(nombreFuente);
-        System.out.println("Actualización de la fuente '" + nombreFuente + "' completada.");
+        logger.info("Actualización de la fuente '" + nombreFuente + "' completada.");
       } catch (Exception e) {
-        System.err.println(e.getMessage());
+        logger.severe(e.getMessage());
       }
     }
   }

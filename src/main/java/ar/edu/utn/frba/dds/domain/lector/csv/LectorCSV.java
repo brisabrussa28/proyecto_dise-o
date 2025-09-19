@@ -1,8 +1,8 @@
-package ar.edu.utn.frba.dds.domain.serializadores.lector.csv;
+package ar.edu.utn.frba.dds.domain.lector.csv;
 
 
-import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.csv.filaconverter.FilaConverter;
+import ar.edu.utn.frba.dds.domain.lector.Lector;
+import ar.edu.utn.frba.dds.domain.lector.csv.filaconverter.FilaConverter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -42,7 +42,7 @@ public class LectorCSV<T> implements Lector<T> {
       throw new IllegalArgumentException("El conversor no puede ser nulo.");
     }
     this.separator = separator;
-    this.converter = converter;
+    this.converter = (FilaConverter<T>) converter;
   }
 
   /**

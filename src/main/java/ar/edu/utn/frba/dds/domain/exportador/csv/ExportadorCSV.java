@@ -1,7 +1,7 @@
-package ar.edu.utn.frba.dds.domain.serializadores.exportador.csv;
+package ar.edu.utn.frba.dds.domain.exportador.csv;
 
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion.ModoExportacion;
+import ar.edu.utn.frba.dds.domain.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoExportacion;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -56,9 +56,11 @@ public class ExportadorCSV<T> implements Exportador<T> {
       boolean anexar = this.modoExportacion.debeAnexar();
       this.crearDirectoriosSiNoExisten(finalPath);
 
-      try (Writer writer = new BufferedWriter(
-          new OutputStreamWriter(
-              new FileOutputStream(finalPath, anexar), StandardCharsets.UTF_8))) {
+      try (
+          Writer writer = new BufferedWriter(
+              new OutputStreamWriter(
+                  new FileOutputStream(finalPath, anexar), StandardCharsets.UTF_8))
+      ) {
         final boolean escribirCabecera = !anexar || new File(finalPath).length() == 0;
 
         HeaderColumnNameMappingStrategy<T> strategy =

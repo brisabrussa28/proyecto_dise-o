@@ -1,12 +1,11 @@
-package ar.edu.utn.frba.dds.domain.serializadores;
+package ar.edu.utn.frba.dds.domain.lector;
 
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.csv.LectorCSV;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.csv.filaconverter.FilaConverter;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.csv.filaconverter.HechoFilaConverter;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.json.LectorJson;
+import ar.edu.utn.frba.dds.domain.lector.csv.LectorCSV;
+import ar.edu.utn.frba.dds.domain.lector.csv.filaconverter.FilaConverter;
+import ar.edu.utn.frba.dds.domain.lector.csv.filaconverter.HechoFilaConverter;
+import ar.edu.utn.frba.dds.domain.lector.json.LectorJson;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -106,7 +105,8 @@ public class LectorFactory {
         }
         mapeo.put(campo, columnas);
       } catch (IllegalArgumentException e) {
-        System.err.println("ADVERTENCIA: Clave desconocida en mapeoColumnas: " + field.getKey());
+        throw new IllegalArgumentException(
+            "La clave '" + field.getKey() + "' en 'mapeoColumnas' no corresponde a un CampoHecho válido.", e);
       }
     }
     return mapeo;

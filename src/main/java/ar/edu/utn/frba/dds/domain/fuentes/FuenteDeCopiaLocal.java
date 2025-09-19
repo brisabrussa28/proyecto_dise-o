@@ -1,18 +1,18 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
+import ar.edu.utn.frba.dds.domain.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.exportador.ExportadorFactory;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.serializadores.LectorFactory;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.ExportadorFactory;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
+import ar.edu.utn.frba.dds.domain.lector.Lector;
+import ar.edu.utn.frba.dds.domain.lector.LectorFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.Column;
-import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
@@ -23,7 +23,8 @@ import javax.persistence.Transient;
 @MappedSuperclass
 public abstract class FuenteDeCopiaLocal extends Fuente {
 
-  @Transient // La caché en sí no se persiste directamente, se carga desde el archivo.
+  // La caché en sí no se persiste directamente, se carga desde el archivo.
+  @OneToMany
   protected List<Hecho> cacheDeHechos;
 
   @Transient // El lector no es persistible.
@@ -32,11 +33,9 @@ public abstract class FuenteDeCopiaLocal extends Fuente {
   @Transient // El exportador no es persistible.
   protected Exportador<Hecho> exportador;
 
-  @Lob
   @Column(name = "json_lector")
   protected String jsonLector; // Campo para persistir la configuración del Lector.
 
-  @Lob
   @Column(name = "json_exportador")
   protected String jsonExportador; // Campo para persistir la configuración del Exportador.
 

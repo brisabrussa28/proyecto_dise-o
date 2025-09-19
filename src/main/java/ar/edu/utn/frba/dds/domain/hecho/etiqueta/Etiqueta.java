@@ -13,6 +13,13 @@ public class Etiqueta {
   @GeneratedValue
   Long id;
 
-  public Etiqueta(String nombre) {
+  String etiqueta;
+
+  public Etiqueta(String nombreEtiqueta) {
+    this.etiqueta = nombreEtiqueta;
+  }
+
+  public String getEtiqueta() {
+    return this.etiqueta;
   }
 }
