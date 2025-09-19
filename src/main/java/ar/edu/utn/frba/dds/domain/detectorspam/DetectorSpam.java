@@ -13,6 +13,10 @@ public interface DetectorSpam {
   public default int cantidadDetectada(){
     return solicitudesSpam.size();
   }
+
+  public default void agregarSpam(Solicitud solicitud) {
+    solicitudesSpam.add(solicitud);
+  }
   /**
    * Mét0do para detectar si un texto es spam.
    *

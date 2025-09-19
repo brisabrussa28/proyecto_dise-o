@@ -13,6 +13,10 @@ import java.util.stream.Collectors;
 
 public class CentralDeEstadisticas {
 
+  public void setRepo(RepositorioDeSolicitudes repo) {
+    this.repo = repo;
+  }
+
   private RepositorioDeSolicitudes repo;
 
   public List<Hecho> getAllHechos(List<Coleccion> colecciones) {
@@ -25,10 +29,24 @@ public class CentralDeEstadisticas {
                     .collect(Collectors.groupingBy(Hecho::getProvincia, Collectors.counting()));
   }
 
+  public Map.Entry<String, Long> provinciaConMasHechos(Coleccion coleccion){
+    return hechosPorProvinciaDeUnaColeccion(coleccion).entrySet().stream()
+                                               .max(Map.Entry.comparingByValue())
+                                               .orElse(null);
+  }
+
+
 
   public Map<String, Long> hechosPorCategoria(List<Coleccion> colecciones){
     return getAllHechos(colecciones).stream().collect(Collectors.groupingBy(Hecho::getCategoria, Collectors.counting()));
   }
+
+  public Map.Entry<String, Long> categoriaConMasHechos(List<Coleccion> colecciones){
+    return hechosPorCategoria(colecciones).entrySet().stream()
+                                                      .max(Map.Entry.comparingByValue())
+                                                      .orElse(null);
+  }
+
 
 
   public Map<String, Long> hechosPorProvinciaSegunCategoria(List<Coleccion> colecciones, String categoria){
@@ -36,14 +54,28 @@ public class CentralDeEstadisticas {
                     .collect(Collectors.groupingBy(Hecho::getProvincia, Collectors.counting()));
   }
 
+  public Map.Entry<String, Long> provinciaConMasHechosDeCiertaCategoria(List<Coleccion> colecciones, String categoria){
+    return hechosPorProvinciaSegunCategoria(colecciones, categoria).entrySet().stream()
+                                          .max(Map.Entry.comparingByValue())
+                                          .orElse(null);
+  }
+
+
 
   public Map<String, Long> hechosPorHora(List<Coleccion> colecciones, String categoria){
     return getAllHechos(colecciones).stream().filter(hecho -> Objects.equals(hecho.getCategoria(), categoria))
                     .collect(Collectors.groupingBy(hecho -> String.format("%02d", hecho.getFechaSuceso().getHour()), Collectors.counting()));
   }
 
-  public int porcentajeDeSolicitudesSpam(){
-    return repo.cantidadDeSpamDetectado() / (repo.cantidadDeSpamDetectado() + repo.cantidadSolicitudes()) * 100;
+  public Map.Entry<String, Long> horaConMasHechosDeCiertaCategoria(List<Coleccion> colecciones, String categoria){
+    return hechosPorHora(colecciones, categoria).entrySet().stream()
+                                                                   .max(Map.Entry.comparingByValue())
+                                                                   .orElse(null);
+  }
+
+
+  public double porcentajeDeSolicitudesSpam(){
+    return (double) repo.cantidadDeSpamDetectado() / (repo.cantidadDeSpamDetectado() + repo.cantidadSolicitudes()) * 100;
   }
 
   public void export(Map<String, Long> datos, String rutaArchivo, String[] encabezado) {

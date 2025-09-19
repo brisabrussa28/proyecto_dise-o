@@ -102,6 +102,10 @@ public class App {
     return aplicacion;
   }
 
+/*  public static App configurarStats() {
+
+  }
+*/
   /**
    * Esto ejecuta el crontab periodicamente.
    *
