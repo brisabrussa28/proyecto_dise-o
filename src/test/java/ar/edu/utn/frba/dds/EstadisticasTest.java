@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.estadisicas.CentralDeEstadisticas;
 import ar.edu.utn.frba.dds.domain.estadisicas.Estadistica;
@@ -41,7 +40,8 @@ public class EstadisticasTest {
   private UUID solicitante;
   private final DetectorSpam detector = texto -> texto.contains("Troll");
   FuenteDinamica fuenteAuxD;
-  LocalDateTime horaAux = LocalDateTime.now().minusDays(1);
+  LocalDateTime horaAux = LocalDateTime.now()
+                                       .minusDays(1);
   List<String> etiquetasAux = List.of(
       "#ancianita",
       "#robo_a_mano_armada",
@@ -50,6 +50,7 @@ public class EstadisticasTest {
   Coleccion coleccion;
   List<Coleccion> colecciones = new ArrayList<>();
   Hecho hecho2;
+  Hecho hecho3;
   Lector<Hecho> lectorMock;
   Exportador<Hecho> exportadorMock;
 
@@ -67,7 +68,7 @@ public class EstadisticasTest {
         .conDescripcion("desc")
         .conCategoria("Robos")
         .conDireccion("direccion")
-        .conProvincia("Provincia")
+        .conProvincia("CABA")
         .conUbicacion(pg)
         .conFechaSuceso(hora)
         .conFechaCarga(hora)
@@ -80,7 +81,7 @@ public class EstadisticasTest {
         .conDescripcion("desc")
         .conCategoria("Robos")
         .conDireccion("direccion")
-        .conProvincia("Provincia")
+        .conProvincia("CABA")
         .conUbicacion(null)
         .conFechaSuceso(horaAux)
         .conFechaCarga(LocalDateTime.now())
@@ -88,13 +89,25 @@ public class EstadisticasTest {
         .conEtiquetas(etiquetasAux)
         .build();
 
-
+    hecho3 = new HechoBuilder().conTitulo("Prueba")
+                               .conDescripcion("desc")
+                               .conCategoria("Choreo")
+                               .conDireccion("aaa")
+                               .conProvincia("PBA")
+                               .conUbicacion(null)
+                               .conFechaSuceso(horaAux)
+                               .conFechaCarga(LocalDateTime.now())
+                               .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+                               .conEtiquetas(etiquetasAux)
+                               .build();
     repo = new RepositorioDeSolicitudes(detector);
     calculadora.setRepo(repo); // Asegurarse que la calculadora usa el repo
     solicitante = UUID.randomUUID();
     Path tempJsonFile = tempDir.resolve("test_fuente_dinamica.json");
     fuenteAuxD = new FuenteDinamica("Julio Cesar", tempJsonFile.toString(), lectorMock, exportadorMock);
     fuenteAuxD.agregarHecho(hecho2);
+    fuenteAuxD.agregarHecho(hecho3);
+    fuenteAuxD.agregarHecho(hecho);
 
     coleccion = new Coleccion("Robos", fuenteAuxD, "Descripcion", "Robos");
     colecciones.add(coleccion);
@@ -115,8 +128,8 @@ public class EstadisticasTest {
   public void estadisticasDeProvinciaConMasHechos() {
     Estadistica resultado = calculadora.provinciaConMasHechos(coleccion);
     assertNotNull(resultado);
-    assertEquals("Provincia", resultado.getDimension());
-    assertEquals(1L, resultado.getValor());
+    assertEquals("CABA", resultado.getDimension());
+    assertEquals(2, resultado.getValor());
   }
 
   @Test
@@ -124,15 +137,15 @@ public class EstadisticasTest {
     Estadistica resultado = calculadora.categoriaConMasHechos(colecciones);
     assertNotNull(resultado);
     assertEquals("Robos", resultado.getDimension());
-    assertEquals(1L, resultado.getValor());
+    assertEquals(2, resultado.getValor());
   }
 
   @Test
   public void estadisticasHechosDeCiertaCategoria() {
     Estadistica resultado = calculadora.provinciaConMasHechosDeCiertaCategoria(colecciones, "Robos");
     assertNotNull(resultado);
-    assertEquals("Provincia", resultado.getDimension());
-    assertEquals(1L, resultado.getValor());
+    assertEquals("CABA", resultado.getDimension());
+    assertEquals(2, resultado.getValor());
   }
 
   @Test
@@ -141,7 +154,7 @@ public class EstadisticasTest {
     String horaEsperada = String.format("%02d", horaAux.getHour());
     assertNotNull(resultado);
     assertEquals(horaEsperada, resultado.getDimension());
-    assertEquals(1L, resultado.getValor());
+    assertEquals(2, resultado.getValor());
   }
 
   @Test
@@ -154,16 +167,18 @@ public class EstadisticasTest {
     calculadora.export(datos, outputPath.toString());
 
     // Assert: Verificar que el archivo fue creado y tiene el contenido correcto
-    File[] files = tempDir.toFile().listFiles((dir, name) -> name.startsWith("export_test") && name.endsWith(".csv"));
+    File[] files = tempDir.toFile()
+                          .listFiles((dir, name) -> name.startsWith("export_test") && name.endsWith(".csv"));
     assertNotNull(files);
     assertEquals(1, files.length);
     File exportedFile = files[0];
     assertTrue(exportedFile.exists());
 
     List<String> lines = Files.readAllLines(exportedFile.toPath());
-    assertEquals(2, lines.size()); // Cabecera + 1 fila de datos
+    assertEquals(3, lines.size()); // Cabecera + 1 fila de datos
     assertEquals("\"DIMENSION\",\"VALOR\"", lines.get(0));
-    assertEquals("\"Robos\",\"1\"", lines.get(1));
+    assertEquals("\"Choreo\",\"1\"", lines.get(1));
+    assertEquals("\"Robos\",\"2\"", lines.get(2));
   }
 }
 
