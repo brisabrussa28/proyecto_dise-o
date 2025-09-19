@@ -80,7 +80,7 @@ public class AppTest {
 
   @Test
   @DisplayName("La configuración de la aplicación registra las fuentes por defecto")
-  void configurarAplicacionRegistraFuentes() {
+  void configurarAplicacionRegistraFuentes() throws IOException {
     App configuredApp = App.configurarAplicacion();
     assertNotNull(configuredApp);
 
