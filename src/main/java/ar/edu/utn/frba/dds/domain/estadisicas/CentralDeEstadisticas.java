@@ -8,10 +8,13 @@ import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 
 public class CentralDeEstadisticas {
 
+  private static final Logger logger = Logger.getLogger(CentralDeEstadisticas.class.getName());
   private RepositorioDeSolicitudes repo;
 
   public void setRepo(RepositorioDeSolicitudes repo) {
@@ -38,7 +41,7 @@ public class CentralDeEstadisticas {
   public Estadistica provinciaConMasHechos(Coleccion coleccion) {
     return hechosPorProvinciaDeUnaColeccion(coleccion).stream()
                                                       .max(Comparator.comparing(Estadistica::getValor))
-                                                      .orElse(null);
+                                                      .orElse(new Estadistica("Sin Datos", 0L));
   }
 
   public List<Estadistica> hechosPorCategoria(List<Coleccion> colecciones) {
@@ -69,7 +72,7 @@ public class CentralDeEstadisticas {
   public Estadistica provinciaConMasHechosDeCiertaCategoria(List<Coleccion> colecciones, String categoria) {
     return hechosPorProvinciaSegunCategoria(colecciones, categoria).stream()
                                                                    .max(Comparator.comparing(Estadistica::getValor))
-                                                                   .orElse(null);
+                                                                   .orElse(new Estadistica("Sin Datos", 0L));
   }
 
   public List<Estadistica> hechosPorHora(List<Coleccion> colecciones, String categoria) {
@@ -91,7 +94,7 @@ public class CentralDeEstadisticas {
   public Estadistica horaConMasHechosDeCiertaCategoria(List<Coleccion> colecciones, String categoria) {
     return hechosPorHora(colecciones, categoria).stream()
                                                 .max(Comparator.comparing(Estadistica::getValor))
-                                                .orElse(null);
+                                                .orElse(new Estadistica("Sin Datos", 0L));
   }
 
   public double porcentajeDeSolicitudesSpam() {
@@ -109,15 +112,21 @@ public class CentralDeEstadisticas {
    * @param rutaArchivo La ruta base para el archivo de salida.
    */
   public void export(List<Estadistica> datos, String rutaArchivo) {
-    if (datos == null || datos.isEmpty()) {
+    if (datos == null) {
+      logger.warning("No se exportó a '" + rutaArchivo + "' porque la lista de datos es nula.");
       return;
     }
 
+    List<Estadistica> datosValidos = datos.stream()
+                                          .filter(Objects::nonNull)
+                                          .collect(Collectors.toList());
+
+
     ExportadorCSV<Estadistica> exportador = new ExportadorCSV<>(new ModoTimestamp());
-    exportador.exportar(datos, rutaArchivo);
+    exportador.exportar(datosValidos, rutaArchivo);
+
   }
 }
-
 /*
 Específicamente, se piden obtener datos que permitan responder las siguientes preguntas:
 De una colección, ¿en qué provincia se agrupan la mayor cantidad de hechos reportados?
