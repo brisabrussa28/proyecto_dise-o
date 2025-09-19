@@ -12,11 +12,11 @@ import java.util.stream.Collectors;
 
 public class CentralDeEstadisticas {
 
+  private RepositorioDeSolicitudes repo;
+
   public void setRepo(RepositorioDeSolicitudes repo) {
     this.repo = repo;
   }
-
-  private RepositorioDeSolicitudes repo;
 
   public List<Hecho> getAllHechos(List<Coleccion> colecciones) {
     return colecciones.stream()
