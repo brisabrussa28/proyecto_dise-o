@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serializadores.exportador;
+package ar.edu.utn.frba.dds.domain.exportador;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion;
+package ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion;
 
 /**
  * Sobrescribe el archivo viejo con el nuevo o lo crea si no existe.

@@ -1,7 +1,7 @@
-package ar.edu.utn.frba.dds.domain.serializadores.exportador.csv;
+package ar.edu.utn.frba.dds.domain.exportador.csv;
 
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.csv.modoexportacion.ModoExportacion;
+import ar.edu.utn.frba.dds.domain.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoExportacion;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;

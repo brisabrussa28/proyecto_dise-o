@@ -1,5 +1,7 @@
 package ar.edu.utn.frba.dds.domain.calendarizacion;
 
+import ar.edu.utn.frba.dds.domain.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.exportador.json.ExportadorJson;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
@@ -7,10 +9,8 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.Exportador;
-import ar.edu.utn.frba.dds.domain.serializadores.exportador.json.ExportadorJson;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.Lector;
-import ar.edu.utn.frba.dds.domain.serializadores.lector.json.LectorJson;
+import ar.edu.utn.frba.dds.domain.lector.Lector;
+import ar.edu.utn.frba.dds.domain.lector.json.LectorJson;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDateTime;
 import java.util.HashMap;
