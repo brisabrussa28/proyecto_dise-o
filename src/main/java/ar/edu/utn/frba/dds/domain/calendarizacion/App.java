@@ -1,5 +1,8 @@
 package ar.edu.utn.frba.dds.domain.calendarizacion;
 
+import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.estadisicas.CentralDeEstadisticas;
+import ar.edu.utn.frba.dds.domain.estadisicas.Estadistica;
 import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.exportador.json.ExportadorJson;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
@@ -11,6 +14,8 @@ import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 import ar.edu.utn.frba.dds.domain.lector.json.LectorJson;
+import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
+import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -22,6 +27,18 @@ import java.util.logging.Logger;
  * Punto de entrada para nuestro crontab.
  */
 public class App {
+  static DetectorSpam detector = new DetectorSpam() {
+    @Override
+    public boolean esSpam(String texto) {
+      return false;
+    }
+  };
+
+  static RepositorioDeSolicitudes repo = new RepositorioDeSolicitudes(detector);
+
+  static CentralDeEstadisticas estadisticas = new CentralDeEstadisticas();
+
+  static List<Coleccion> colecciones;
 
   // El registro de fuentes ahora es una variable de instancia, no estática.
   private final Map<String, FuenteDeCopiaLocal> fuentesRegistradas = new HashMap<>();
@@ -130,13 +147,15 @@ public class App {
 
     dinamica.agregarHecho(hecho);
 
+    estadisticas.setRepo(repo);
+
     return aplicacion;
   }
 
-  /*  public static App configurarStats() {
-
-    }
-  */
+  public Map<String, FuenteDeCopiaLocal> getFuentesRegistradas() {
+    // Retorna una copia para evitar modificaciones externas
+    return new HashMap<>(fuentesRegistradas);
+  }
 
   /**
    * Ejecuta el crontab periodicamente.
@@ -163,10 +182,19 @@ public class App {
         logger.severe(e.getMessage());
       }
     }
-  }
 
-  public Map<String, FuenteDeCopiaLocal> getFuentesRegistradas() {
-    // Retorna una copia para evitar modificaciones externas
-    return new HashMap<>(fuentesRegistradas);
+    Estadistica provinciaMax = estadisticas.provinciaConMasHechos(colecciones.get(0));
+    Estadistica categoriaMax = estadisticas.categoriaConMasHechos(colecciones);
+    Estadistica provinciaPorCategoria = estadisticas.provinciaConMasHechosDeCiertaCategoria(colecciones, "Robo");
+    Estadistica horaPico = estadisticas.horaConMasHechosDeCiertaCategoria(colecciones, "Robo");
+    Estadistica porcentajeSpam = new Estadistica("Porcentaje de solicitudes spam", Math.round(estadisticas.porcentajeDeSolicitudesSpam()));
+
+    // Exportar
+
+    estadisticas.export(List.of(provinciaMax), "provincia_max.csv");
+    estadisticas.export(List.of(categoriaMax), "categoria_max.csv");
+    estadisticas.export(List.of(provinciaPorCategoria), "provincia_por_categoria.csv");
+    estadisticas.export(List.of(horaPico), "hora_pico.csv");
+    estadisticas.export(List.of(porcentajeSpam), "porcentaje_spam.csv");
   }
 }
