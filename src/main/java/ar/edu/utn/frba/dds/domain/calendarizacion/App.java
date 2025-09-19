@@ -113,7 +113,7 @@ public class App {
     // Se actualiza el constructor para que reciba Lector y Exportador por separado.
     FuenteDeAgregacion agregadora = new FuenteDeAgregacion(
         "agregadora_principal",
-        "agregados.json",
+        "/home/jeremias/Desktop/TpDDSi/agregados.json",
         lectorJsonHechos,
         exportadorJsonHechos
     );
@@ -123,7 +123,7 @@ public class App {
     // Se actualiza el constructor para que reciba Lector y Exportador por separado.
     FuenteDinamica dinamica = new FuenteDinamica(
         "dinamica_principal",
-        "dinamica.json",
+        "/home/jeremias/Desktop/TpDDSi/dinamica.json",
         lectorJsonHechos,
         exportadorJsonHechos
     );
@@ -144,7 +144,7 @@ public class App {
         Origen.PROVISTO_CONTRIBUYENTE,
         List.of(etiqueta1, etiqueta2)
     );
-
+    agregadora.agregarFuente(dinamica);
     dinamica.agregarHecho(hecho);
 
     estadisticas.setRepo(repo);
@@ -200,13 +200,19 @@ public class App {
         Estadistica categoriaMax = estadisticas.categoriaConMasHechos(colecciones);
         Estadistica provinciaPorCategoria = estadisticas.provinciaConMasHechosDeCiertaCategoria(colecciones, "Robo");
         Estadistica horaPico = estadisticas.horaConMasHechosDeCiertaCategoria(colecciones, "Robo");
-        Estadistica porcentajeSpam = new Estadistica("Porcentaje de solicitudes spam", Math.round(estadisticas.porcentajeDeSolicitudesSpam()));
+        Estadistica porcentajeSpam = new Estadistica(
+            "Porcentaje de solicitudes spam",
+            Math.round(estadisticas.porcentajeDeSolicitudesSpam())
+        );
 
-        estadisticas.export(List.of(provinciaMax), "provincia_max.csv");
-        estadisticas.export(List.of(categoriaMax), "categoria_max.csv");
-        estadisticas.export(List.of(provinciaPorCategoria), "provincia_por_categoria.csv");
-        estadisticas.export(List.of(horaPico), "hora_pico.csv");
-        estadisticas.export(List.of(porcentajeSpam), "porcentaje_spam.csv");
+        estadisticas.export(List.of(provinciaMax), "/home/jeremias/Desktop/TpDDSi/provincia_max.csv");
+        estadisticas.export(List.of(categoriaMax), "/home/jeremias/Desktop/TpDDSi/categoria_max.csv");
+        estadisticas.export(
+            List.of(provinciaPorCategoria),
+            "/home/jeremias/Desktop/TpDDSi/provincia_por_categoria.csv"
+        );
+        estadisticas.export(List.of(horaPico), "/home/jeremias/Desktop/TpDDSi/hora_pico.csv");
+        estadisticas.export(List.of(porcentajeSpam), "/home/jeremias/Desktop/TpDDSi/porcentaje_spam.csv");
       } else {
         logger.warning("No hay colecciones disponibles para calcular estadísticas.");
       }
