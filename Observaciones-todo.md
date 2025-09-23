@@ -41,12 +41,37 @@
 - Nodo -> Computadora ejecutando.
 
 ## COSAS PT4
-- [ ] Agregar componente de estadisticas (Con el tipo de estadisticas incluido)
+- [x] Agregar componente de estadisticas (Con el tipo de estadisticas incluido)
 - [x] Agregar provincia al hecho
 - [x] Agregar modulo de exportacion de csvs (seria mejor directamente que sea capaz de exportar cualquier obj)
-- [ ] Sumar busqueda por full text search (al menos del titulo y descripcion del hecho pero extensible a todos los demas campos) -> Definir idioma ->
-- [ ] Se deberán persistir las entidades del modelo planteado. Para ello se debe utilizar un ORM.
-- [ ] TESTS DE TODO 
-- [ ] Diagrama de clases actualizado
-- [ ] Justificacion de disenio (no tengo enie)
-- [ ] Diagrama der fisico
+- [X] Sumar busqueda por full text search (al menos del titulo y descripcion del hecho pero extensible a todos los demas campos) -> Definir idioma ->
+- [X] Se deberán persistir las entidades del modelo planteado. Para ello se debe utilizar un ORM.
+- [X] TESTS DE TODO 
+- [X] Diagrama de clases actualizado
+- [X] Justificacion de disenio (no tengo enie)
+- [X] Diagrama der fisico
+
+
+## OBSERVACIONES PT4
+- [ ] Agregar test de hecho editable
+- [ ] Colección debería ser clase abstracta
+- [ ] Al serializar no cambiar el modelo -> ver si se puede no serializar
+- [ ] getFiltro --> this.condicion
+- [ ] Befor load y after load --> combinar con transient --> preferiblemente @convert
+- [ ] Persistir filtros
+- [ ] En un parcial hacer mapeo de herencia
+- [ ] Geolocalizar via api --> Para los csv que no tengan provincia --> Podemos utilizar APIS, bibliotecas, etc, lo decimos nosotros
+- [ ] Agregar PostreSQL
+- [ ] Realizar Querys para las estadisticas --> SQL
+- [ ] Persistir hechos eliminados, solicitudes SPAM
+- [ ] fletar backups, no tienen proposito con la bd
+- [ ] No persistir hechos de csv, de fuentes externas, cache, hechos de fuentes estaticas. --> Persistir la informacion de las fuentes, NO SUS HECHOS
+- [ ] Para las estadisticas privilegiar la informacion acumulativa
+- [ ] Averiguar donde tiene los datos Lucene, si en memoria o en la bd.
+- [ ] Mandar nuestra estrategia respecto el almacenamiento de datos a bulgarelli --> ¿Qué datos vamos a guardar? ¿Cuánto tiempo? ¿Por qué? 
+- [ ] Refactorizar colecciones y hacerlo mas expresivo
+- [ ] Hacer mas expresivo algoritmos de concenso -> ver si se puede aplicar SQL
+- [ ] Hacer mas expresivo a los exportadores
+- [ ] Quiza no refactorizar CSV (pq funcionar funciona), pero por ahi hacerle un facade o algo que encapsule su comportamiento
+- [ ] Revisar que las provincias esten bien incluidas en todos lados
+- [ ] Refactizar y repensar todo lo relacionado a gestion de solicitudes
