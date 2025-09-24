@@ -50,3 +50,10 @@
 - [ ] Diagrama de clases actualizado
 - [ ] Justificacion de disenio (no tengo enie)
 - [ ] Diagrama der fisico
+
+## COSAS PT5
+- [ ] Implementar PrePersist/PreUpdate/PostLoad para las condiciones de los filtros para mantener el uso de las clases Filtro/Condicion ya que serialización tiene más contras que pros.
+- [ ] Implementar alguna api o algún método para geolocalizar las provincias de un Hecho en caso que no se especifique.
+- [ ] Las hechos eliminados, estadísticas, colecciones, solicitudes de eliminación y la info asignada a los hechos eliminados deberían ser persistidos.
+- [ ] No tiene sentido persistir las fuentes caché, tampoco los hechos que vienen de fuentes estáticas como las CSV.
+- [ ] No manejar porcentajes para las estadísticas ya que es dificultoso para actualizar.
