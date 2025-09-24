@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds;
 
+import static ar.edu.utn.frba.dds.domain.filtro.condiciones.Operador.DISTINTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -12,8 +13,8 @@ import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.Condicion;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionGenerica;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
@@ -161,12 +162,12 @@ public class ColeccionTest {
     Coleccion coleccion = new Coleccion("Test", fuente, "Descripcion", "Categoria");
 
     // 1. Configurar el filtro propio de la colección para que excluya a "filtradoPorColeccion"
-    Condicion condicionColeccion = new CondicionGenerica("titulo", "DISTINTO", "filtrado");
+    Condicion condicionColeccion = new CondicionGenerica("titulo", DISTINTO, "filtrado");
     coleccion.setCondicion(condicionColeccion);
 
     // 2. Configurar el mock del repositorio para que su filtro excluyente elimine a "spam"
     RepositorioDeSolicitudes repoMock = mock(RepositorioDeSolicitudes.class);
-    Condicion condicionSpam = new CondicionGenerica("titulo", "DISTINTO", "spam");
+    Condicion condicionSpam = new CondicionGenerica("titulo", DISTINTO, "spam");
     Filtro filtroExcluyente = new Filtro(condicionSpam);
     when(repoMock.filtroExcluyente()).thenReturn(filtroExcluyente);
 

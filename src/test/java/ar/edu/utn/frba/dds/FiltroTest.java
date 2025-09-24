@@ -1,10 +1,11 @@
 package ar.edu.utn.frba.dds;
 
+import static ar.edu.utn.frba.dds.domain.filtro.condiciones.Operador.IGUAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.Condicion;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionGenerica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
@@ -44,7 +45,7 @@ public class FiltroTest {
   @Test
   @DisplayName("Un filtro con una condición simple filtra correctamente")
   public void filtroConCondicionSimple() {
-    Condicion condicionCategoria = new CondicionGenerica("categoria", "IGUAL", "Robos");
+    Condicion condicionCategoria = new CondicionGenerica("categoria", IGUAL, "Robos");
     Filtro filtro = new Filtro(condicionCategoria);
 
     List<Hecho> resultado = filtro.filtrar(listaDeHechos);
@@ -65,7 +66,7 @@ public class FiltroTest {
   @Test
   @DisplayName("Un filtro con una condición que no matchea devuelve una lista vacía")
   public void filtroConCondicionSinMatch() {
-    Condicion condicionFallida = new CondicionGenerica("categoria", "IGUAL", "Hurtos");
+    Condicion condicionFallida = new CondicionGenerica("categoria", IGUAL, "Hurtos");
     Filtro filtro = new Filtro(condicionFallida);
     List<Hecho> resultado = filtro.filtrar(listaDeHechos);
     assertEquals(0, resultado.size());
@@ -74,7 +75,7 @@ public class FiltroTest {
   @Test
   @DisplayName("Filtrar una lista vacía devuelve una lista vacía")
   public void filtrarListaVacia() {
-    Filtro filtro = new Filtro(new CondicionGenerica("categoria", "IGUAL", "Robos"));
+    Filtro filtro = new Filtro(new CondicionGenerica("categoria", IGUAL, "Robos"));
     List<Hecho> resultado = filtro.filtrar(Collections.emptyList());
     assertEquals(0, resultado.size());
   }

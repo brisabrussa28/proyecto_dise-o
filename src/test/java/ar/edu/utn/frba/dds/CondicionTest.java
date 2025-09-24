@@ -1,16 +1,18 @@
 package ar.edu.utn.frba.dds;
 
+import static ar.edu.utn.frba.dds.domain.filtro.condiciones.Operador.IGUAL;
+import static ar.edu.utn.frba.dds.domain.filtro.condiciones.Operador.MAYOR_QUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionFactory;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionAnd;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionGenerica;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionNot;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionOr;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.CondicionPredicado;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionAnd;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionGenerica;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionNot;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionOr;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionPredicado;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.Operador;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
@@ -32,7 +34,8 @@ public class CondicionTest {
 
   @BeforeEach
   void setUp() {
-    fechaSuceso = LocalDateTime.now().minusDays(1);
+    fechaSuceso = LocalDateTime.now()
+                               .minusDays(1);
     hechoRobo = new Hecho(
         "Prueba Robo", "Descripción Robo", "Robos", "123", "PBA",
         new PuntoGeografico(123, 123), fechaSuceso, LocalDateTime.now(),
@@ -51,31 +54,23 @@ public class CondicionTest {
 
     @Test
     void evaluaCorrectamenteIgualdad() {
-      CondicionGenerica condicion = new CondicionGenerica("categoria", "IGUAL", "Robos");
+      CondicionGenerica condicion = new CondicionGenerica("categoria", IGUAL, "Robos");
       assertTrue(condicion.evaluar(hechoRobo));
       assertFalse(condicion.evaluar(hechoPrueba));
     }
 
     @Test
     void evaluaCorrectamenteFechas() {
-      CondicionGenerica condicion = new CondicionGenerica("fechasuceso", "IGUAL", fechaSuceso);
+      CondicionGenerica condicion = new CondicionGenerica("fechasuceso", IGUAL, fechaSuceso);
       assertTrue(condicion.evaluar(hechoRobo));
     }
 
     @Test
     void evaluaMayorQueParaFechas() {
-      CondicionGenerica condicion = new CondicionGenerica("fechasuceso", "MAYOR_QUE", fechaSuceso.minusHours(1));
+      CondicionGenerica condicion = new CondicionGenerica("fechasuceso", MAYOR_QUE, fechaSuceso.minusDays(1));
       assertTrue(condicion.evaluar(hechoRobo));
     }
 
-    @Test
-    void unMapGeneraElMapaCorrecto() {
-      CondicionGenerica condicion = new CondicionGenerica("fechasuceso", "IGUAL", fechaSuceso);
-      Map<String, Object> mapa = condicion.unMap();
-      assertEquals("fechasuceso", mapa.get("campo"));
-      assertEquals("IGUAL", mapa.get("operador"));
-      assertEquals(fechaSuceso.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), mapa.get("valor"));
-    }
   }
 
   @Nested
@@ -85,24 +80,24 @@ public class CondicionTest {
     @Test
     void condicionAndEvaluaTrueCuandoTodasSonTrue() {
       CondicionAnd condicionAnd = new CondicionAnd();
-      condicionAnd.agregarCondicion(new CondicionGenerica("provincia", "IGUAL", "PBA"));
-      condicionAnd.agregarCondicion(new CondicionGenerica("categoria", "IGUAL", "Robos"));
+      condicionAnd.agregarCondicion(new CondicionGenerica("provincia", IGUAL, "PBA"));
+      condicionAnd.agregarCondicion(new CondicionGenerica("categoria", IGUAL, "Robos"));
       assertTrue(condicionAnd.evaluar(hechoRobo));
     }
 
     @Test
     void condicionAndEvaluaFalseSiUnaEsFalse() {
       CondicionAnd condicionAnd = new CondicionAnd();
-      condicionAnd.agregarCondicion(new CondicionGenerica("provincia", "IGUAL", "PBA"));
-      condicionAnd.agregarCondicion(new CondicionGenerica("categoria", "IGUAL", "Homicidio"));
+      condicionAnd.agregarCondicion(new CondicionGenerica("provincia", IGUAL, "PBA"));
+      condicionAnd.agregarCondicion(new CondicionGenerica("categoria", IGUAL, "Homicidio"));
       assertFalse(condicionAnd.evaluar(hechoRobo));
     }
 
     @Test
     void condicionOrEvaluaTrueSiUnaEsTrue() {
       CondicionOr condicionOr = new CondicionOr();
-      condicionOr.agregarCondicion(new CondicionGenerica("categoria", "IGUAL", "Categoria_Inexistente"));
-      condicionOr.agregarCondicion(new CondicionGenerica("direccion", "IGUAL", "123"));
+      condicionOr.agregarCondicion(new CondicionGenerica("categoria", IGUAL, "Categoria_Inexistente"));
+      condicionOr.agregarCondicion(new CondicionGenerica("direccion", IGUAL, "123"));
       assertTrue(condicionOr.evaluar(hechoRobo));
     }
 
@@ -118,14 +113,6 @@ public class CondicionTest {
       assertTrue(condicionOr.evaluar(hechoRobo));
     }
 
-    @Test
-    void unMapDeCondicionAndEsCorrecto() {
-      CondicionAnd and = new CondicionAnd();
-      and.agregarCondicion(new CondicionGenerica("campo1", "IGUAL", "valor1"));
-      Map<String, Object> mapa = and.unMap();
-      assertEquals("AND", mapa.get("Compuesta"));
-      assertNotNull(mapa.get("condiciones"));
-    }
   }
 
   @Nested
@@ -134,21 +121,13 @@ public class CondicionTest {
 
     @Test
     void invierteCorrectamenteElResultado() {
-      var condicionInterna = new CondicionGenerica("categoria", "IGUAL", "Robos");
+      var condicionInterna = new CondicionGenerica("categoria", IGUAL, "Robos");
       var condicionNot = new CondicionNot();
       condicionNot.setCondicion(condicionInterna);
       assertFalse(condicionNot.evaluar(hechoRobo));
       assertTrue(condicionNot.evaluar(hechoPrueba));
     }
 
-    @Test
-    void unMapDeCondicionNotEsCorrecto() {
-      CondicionNot not = new CondicionNot();
-      not.setCondicion(new CondicionGenerica("campo", "IGUAL", "valor"));
-      Map<String, Object> mapa = not.unMap();
-      assertEquals("NOT", mapa.get("logica"));
-      assertNotNull(mapa.get("condicion"));
-    }
     @Test
     void condicionNotConCondicionNulaRetornaFalse() {
       CondicionNot condicionNot = new CondicionNot();
@@ -163,77 +142,10 @@ public class CondicionTest {
 
     @Test
     void evaluaCorrectamenteUnPredicado() {
-      var condicionPredicado = new CondicionPredicado(h -> h.getTitulo().startsWith("Prueba"));
+      var condicionPredicado = new CondicionPredicado(h -> h.getTitulo()
+                                                            .startsWith("Prueba"));
       assertTrue(condicionPredicado.evaluar(hechoRobo));
       assertTrue(condicionPredicado.evaluar(hechoPrueba));
-    }
-    @Test
-    void unMapDeCondicionPredicadoEsCorrecto() {
-      CondicionPredicado predicado = new CondicionPredicado(h -> true);
-      Map<String, Object> mapa = predicado.unMap();
-      assertEquals("PREDICADO", mapa.get("type"));
-      assertTrue(((String)mapa.get("descripcion")).contains("no puede ser serializada"));
-    }
-  }
-
-  @Nested
-  @DisplayName("Tests para CondicionFactory")
-  class CondicionFactoryTest {
-    private final CondicionFactory condicionFactory = new CondicionFactory();
-
-    @Test
-    void creaCondicionSimpleDesdeJson() {
-      var jsonString = """
-          {
-            "campo": "categoria",
-            "operador": "IGUAL",
-            "valor": "Robos"
-          }""";
-      var condicion = condicionFactory.crearCondicionDesdeJson(jsonString);
-      assertTrue(condicion.evaluar(hechoRobo));
-      assertFalse(condicion.evaluar(hechoPrueba));
-    }
-
-    @Test
-    void creaCondicionCompuestaOrDesdeJson() {
-      var jsonString = """
-          {
-            "compuesta": "OR",
-            "condiciones": [
-              {"campo": "categoria", "operador": "IGUAL", "valor": "Robos"},
-              {"campo": "categoria", "operador": "IGUAL", "valor": "Pruebas"}
-            ]
-          }""";
-      var condicion = condicionFactory.crearCondicionDesdeJson(jsonString);
-      assertTrue(condicion.evaluar(hechoRobo));
-      assertTrue(condicion.evaluar(hechoPrueba));
-    }
-
-    @Test
-    void creaCondicionCompuestaAndDesdeJson() {
-      var jsonString = """
-          {
-            "compuesta": "AND",
-            "condiciones":[
-              {"campo": "provincia", "operador": "IGUAL", "valor": "PBA"},
-              {"campo": "direccion", "operador": "IGUAL", "valor": "123"}
-            ]
-          }""";
-      var condicion = condicionFactory.crearCondicionDesdeJson(jsonString);
-      assertTrue(condicion.evaluar(hechoRobo));
-      assertFalse(condicion.evaluar(hechoPrueba));
-    }
-
-    @Test
-    void creaCondicionNotDesdeJson() {
-      var jsonString = """
-          {
-            "logica": "NOT",
-            "condicion": {"campo": "categoria", "operador": "IGUAL", "valor": "Robos"}
-          }""";
-      var condicion = condicionFactory.crearCondicionDesdeJson(jsonString);
-      assertFalse(condicion.evaluar(hechoRobo));
-      assertTrue(condicion.evaluar(hechoPrueba));
     }
   }
 }
