@@ -55,17 +55,18 @@
 ## OBSERVACIONES PT4
 - [ ] Agregar test de hecho editable
 - [ ] Colección debería ser clase abstracta
-- [ ] Al serializar no cambiar el modelo -> ver si se puede no serializar
+- [X] Al serializar no cambiar el modelo -> ver si se puede no serializar
 - [x] getFiltro --> this.condicion
-- [ ] Befor load y after load --> combinar con transient --> preferiblemente @convert
+- [X] Befor load y after load --> combinar con transient --> preferiblemente @convert
 - [x] Persistir filtros
-- [ ] En un parcial hacer mapeo de herencia
+- [X] En un parcial hacer mapeo de herencia
 - [ ] Geolocalizar via api --> Para los csv que no tengan provincia --> Podemos utilizar APIS, bibliotecas, etc, lo decimos nosotros
 - [ ] Agregar PostreSQL
 - [ ] Realizar Querys para las estadisticas --> SQL
 - [ ] Persistir hechos eliminados, solicitudes SPAM
 - [ ] fletar backups, no tienen proposito con la bd
-- [ ] No persistir hechos de csv, de fuentes externas, cache, hechos de fuentes estaticas. --> Persistir la informacion de las fuentes, NO SUS HECHOS
+- [X] No persistir hechos de csv, de fuentes externas, cache, hechos de fuentes estaticas. 
+- [ ] Persistir la informacion de las fuentes, NO SUS HECHOS
         Para lograr esto se me ocurrio esto -> Cada fuente tiene un Observer estadisticas que almacena datos estadisticos de la fuente y es este observer el que genera las estadisticas que se persisten
 - [ ] Para las estadisticas privilegiar la informacion acumulativa
 - [ ] Averiguar donde tiene los datos Lucene, si en memoria o en la bd.
@@ -78,8 +79,32 @@
 - [ ] Refactizar y repensar todo lo relacionado a gestion de solicitudes
 
 ## COSAS PT5
-- [ ] Implementar PrePersist/PreUpdate/PostLoad para las condiciones de los filtros para mantener el uso de las clases Filtro/Condicion ya que serialización tiene más contras que pros.
+- [X] Implementar PrePersist/PreUpdate/PostLoad para las condiciones de los filtros para mantener el uso de las clases Filtro/Condicion ya que serialización tiene más contras que pros.
 - [ ] Implementar alguna api o algún método para geolocalizar las provincias de un Hecho en caso que no se especifique.
 - [ ] Las hechos eliminados, estadísticas, colecciones, solicitudes de eliminación y la info asignada a los hechos eliminados deberían ser persistidos.
-- [ ] No tiene sentido persistir las fuentes caché, tampoco los hechos que vienen de fuentes estáticas como las CSV.
+- [X] No tiene sentido persistir las fuentes caché, tampoco los hechos que vienen de fuentes estáticas como las CSV.
 - [ ] No manejar porcentajes para las estadísticas ya que es dificultoso para actualizar.
+
+## Correcciones PT4
+- [X] Evitar la serialización directa de la lógica de filtros.
+- [X] Implementar la reconstrucción de filtros con callbacks de JPA (@PostLoad).
+- [X] Definir estrategia de mapeo de herencia para entidades.
+- [X] Los Hechos de fuentes externas (CSV, API, caché) no se persisten.
+- [ ] Migrar la configuración de la base de datos a PostgreSQL.
+- [ ] Persistir la configuración de las fuentes, pero no sus Hechos.
+        Idea de implementación: Utilizar un patrón Observer en cada fuente para acumular datos estadísticos y persistir solo esas estadísticas.
+- [ ] Persistir Colecciones, Estadísticas, Solicitudes de Eliminación (incluyendo SPAM) y Hechos Eliminados.
+- [ ] Hacer el cálculo de estadísticas utilizando consultas SQL nativas.
+- [ ] Investigar el método de almacenamiento de índices de Hibernate Search (Lucene).
+- [ ] Eliminar la lógica de backups por archivo a backup por DB.
+- [ ] Rediseñar y refactorizar por completo el módulo de gestión de solicitudes.
+- [ ] Refactorizar getFiltro para que devuelva this.condicion directamente.
+- [ ] Mejorar la expresividad y diseño del módulo de Colecciones (evaluar convertirla en clase abstracta).
+- [ ] Mejorar la expresividad de los Algoritmos de Consenso (evaluar uso de SQL).
+- [ ] Mejorar la expresividad y diseño de los Exportadores.
+- [ ] Mejorar la expresividad y diseño de los Lectores.
+- [ ] Implementar un servicio de geolocalización (vía API) para Hechos sin provincia.
+- [ ] Agregar los tests para Hecho Editable.
+- [ ] Revisar y asegurar la consistencia del campo provincia en todo el sistema.
+- [ ] Pensar y enviarle a Bulgarelli la estrategia de almacenamiento de datos (qué se guarda, por cuánto tiempo y por qué).
+- [ ] Para las estadísticas, priorizar el almacenamiento de valores absolutos en lugar de porcentajes.
