@@ -22,101 +22,107 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServicioMetaMapa {
-    private static final Logger logger = Logger.getLogger(ServicioMetaMapa.class.getName());
-    private final Retrofit retrofit;
-    private final String urlApi; // Guardamos la URL para poder recuperarla.
+  private static final Logger logger = Logger.getLogger(ServicioMetaMapa.class.getName());
+  private final Retrofit retrofit;
+  private final String urlApi; // Guardamos la URL para poder recuperarla.
 
-    public ServicioMetaMapa(String urlApi) {
-        this.urlApi = urlApi; // Se guarda la URL al construir el objeto.
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .create();
+  public ServicioMetaMapa(String urlApi) {
+    this.urlApi = urlApi; // Se guarda la URL al construir el objeto.
+    Gson gson = new GsonBuilder()
+        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+        .create();
 
-        this.retrofit = new Retrofit.Builder()
-                .baseUrl(this.urlApi)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
+    this.retrofit = new Retrofit.Builder()
+        .baseUrl(this.urlApi)
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .build();
+  }
+
+  // Getter para que el Adapter pueda obtener la URL.
+  public String getUrlApi() {
+    return urlApi;
+  }
+
+  public List<Hecho> listadoDeHechos(HechoQuerys querys) throws IOException {
+    MetaMapaService metaMapaService = this.retrofit.create(MetaMapaService.class);
+
+    String ubicacionStr = querys.getUbicacion() != null ?
+                          querys.getUbicacion()
+                                .toString() :
+                          null;
+
+    Call<List<Hecho>> requestListadoDeHechos = metaMapaService.hechos(
+        querys.getCategoria(),
+        ubicacionStr,
+        querys.getFechaCargaDesde(),
+        querys.getFechaCargaHasta(),
+        querys.getFechaAcontecimientoDesde(),
+        querys.getFechaAcontecimientoHasta()
+    );
+    Response<List<Hecho>> response = requestListadoDeHechos.execute();
+
+    if (!response.isSuccessful() || response.body() == null) {
+      logger.warning("La solicitud a MetaMapa no fue exitosa o no tuvo body");
+      return Collections.emptyList();
     }
 
-    // Getter para que el Adapter pueda obtener la URL.
-    public String getUrlApi() {
-        return urlApi;
+    return response.body();
+  }
+
+  public List<Hecho> listadoDeHechosPorColeccion(int id, HechoQuerys querys) throws IOException {
+    MetaMapaService metaMapaService = this.retrofit.create(MetaMapaService.class);
+
+    String ubicacionStr = querys.getUbicacion() != null ?
+                          querys.getUbicacion()
+                                .toString() :
+                          null;
+
+    Call<List<Hecho>> requestListadoDeHechos = metaMapaService.hechos(
+        id,
+        querys.getCategoria(),
+        ubicacionStr,
+        querys.getFechaCargaDesde(),
+        querys.getFechaCargaHasta(),
+        querys.getFechaAcontecimientoDesde(),
+        querys.getFechaAcontecimientoHasta()
+    );
+    Response<List<Hecho>> response = requestListadoDeHechos.execute();
+    if (!response.isSuccessful() || response.body() == null) {
+      logger.warning("La solicitud a MetaMapa no fue exitosa. Código");
+      return Collections.emptyList();
     }
 
-    public List<Hecho> listadoDeHechos(HechoQuerys querys) throws IOException {
-        MetaMapaService metaMapaService = this.retrofit.create(MetaMapaService.class);
+    return response.body();
+  }
 
-        String ubicacionStr = querys.getUbicacion() != null ? querys.getUbicacion().toString() : null;
+  public int enviarSolicitud(Solicitud solicitud) throws IOException {
+    MetaMapaService metaMapaService = this.retrofit.create(MetaMapaService.class);
+    Call<Void> request = metaMapaService.crearSolicitud(solicitud);
+    Response<Void> response = request.execute();
+    return response.code(); // ⬅ Devuelve el código HTTP
+  }
 
-        Call<List<Hecho>> requestListadoDeHechos = metaMapaService.hechos(
-                querys.getCategoria(),
-                ubicacionStr,
-                querys.getFechaCargaDesde(),
-                querys.getFechaCargaHasta(),
-                querys.getFechaAcontecimientoDesde(),
-                querys.getFechaAcontecimientoHasta()
-        );
-        Response<List<Hecho>> response = requestListadoDeHechos.execute();
 
-        if (!response.isSuccessful() || response.body() == null) {
-            logger.warning("La solicitud a MetaMapa no fue exitosa o no tuvo body");
-            return Collections.emptyList();
-        }
+  static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-        return response.body();
+    @Override
+    public void write(JsonWriter out, LocalDateTime value) throws IOException {
+      if (value != null) {
+        out.value(value.format(formatter));
+      } else {
+        out.nullValue();
+      }
     }
 
-    public List<Hecho> listadoDeHechosPorColeccion(int id, HechoQuerys querys) throws IOException {
-        MetaMapaService metaMapaService = this.retrofit.create(MetaMapaService.class);
-
-        String ubicacionStr = querys.getUbicacion() != null ? querys.getUbicacion().toString() : null;
-
-        Call<List<Hecho>> requestListadoDeHechos = metaMapaService.hechos(
-                id,
-                querys.getCategoria(),
-                ubicacionStr,
-                querys.getFechaCargaDesde(),
-                querys.getFechaCargaHasta(),
-                querys.getFechaAcontecimientoDesde(),
-                querys.getFechaAcontecimientoHasta()
-        );
-        Response<List<Hecho>> response = requestListadoDeHechos.execute();
-        if (!response.isSuccessful() || response.body() == null) {
-            logger.warning("La solicitud a MetaMapa no fue exitosa. Código");
-            return Collections.emptyList();
-        }
-
-        return response.body();
+    @Override
+    public LocalDateTime read(JsonReader in) throws IOException {
+      if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
+        in.nextNull();
+        return null;
+      }
+      String str = in.nextString();
+      return (str != null && !str.isEmpty()) ? LocalDateTime.parse(str, formatter) : null;
     }
-
-    public int enviarSolicitud(Solicitud solicitud) throws IOException {
-        MetaMapaService metaMapaService = this.retrofit.create(MetaMapaService.class);
-        Call<Void> request = metaMapaService.crearSolicitud(solicitud);
-        Response<Void> response = request.execute();
-        return response.code(); // ⬅ Devuelve el código HTTP
-    }
-
-
-    static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
-        private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-
-        @Override
-        public void write(JsonWriter out, LocalDateTime value) throws IOException {
-            if (value != null) {
-                out.value(value.format(formatter));
-            } else {
-                out.nullValue();
-            }
-        }
-
-        @Override
-        public LocalDateTime read(JsonReader in) throws IOException {
-            if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
-                in.nextNull();
-                return null;
-            }
-            String str = in.nextString();
-            return (str != null && !str.isEmpty()) ? LocalDateTime.parse(str, formatter) : null;
-        }
-    }
+  }
 }

@@ -10,58 +10,59 @@ import java.time.LocalDateTime;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL) // No incluirá campos nulos en el JSON
 public class HechoQuerys {
-    private final String categoria;
-    private final String provincia;
-    private final PuntoGeografico ubicacion;
-    private final LocalDateTime fechaAcontecimientoDesde;
-    private final LocalDateTime fechaAcontecimientoHasta;
-    private final LocalDateTime fechaCargaDesde;
-    private final LocalDateTime fechaCargaHasta;
+  private final String categoria;
+  private final String provincia;
+  private final PuntoGeografico ubicacion;
+  private final LocalDateTime fechaAcontecimientoDesde;
+  private final LocalDateTime fechaAcontecimientoHasta;
+  private final LocalDateTime fechaCargaDesde;
+  private final LocalDateTime fechaCargaHasta;
 
-    public HechoQuerys(
-            String categoria, String provincia, PuntoGeografico ubicacion,
-            LocalDateTime fechaAcontecimientoDesde, LocalDateTime fechaAcontecimientoHasta,
-            LocalDateTime fechaCargaDesde, LocalDateTime fechaCargaHasta) {
+  public HechoQuerys(
+      String categoria, String provincia, PuntoGeografico ubicacion,
+      LocalDateTime fechaAcontecimientoDesde, LocalDateTime fechaAcontecimientoHasta,
+      LocalDateTime fechaCargaDesde, LocalDateTime fechaCargaHasta
+  ) {
 
-        if (fechaAcontecimientoDesde == null || fechaCargaDesde == null) {
-            throw new RuntimeException(
-                    "Debe tener fecha de acontecimiento  y/o fecha de carga");
-        }
-
-        this.categoria = categoria;
-        this.provincia = provincia;
-        this.ubicacion = ubicacion;
-        this.fechaAcontecimientoDesde = fechaAcontecimientoDesde;
-        this.fechaAcontecimientoHasta = fechaAcontecimientoHasta;
-        this.fechaCargaDesde = fechaCargaDesde;
-        this.fechaCargaHasta = fechaCargaHasta;
+    if (fechaAcontecimientoDesde == null || fechaCargaDesde == null) {
+      throw new RuntimeException(
+          "Debe tener fecha de acontecimiento  y/o fecha de carga");
     }
 
-    public String getCategoria() {
-        return categoria;
-    }
+    this.categoria = categoria;
+    this.provincia = provincia;
+    this.ubicacion = ubicacion;
+    this.fechaAcontecimientoDesde = fechaAcontecimientoDesde;
+    this.fechaAcontecimientoHasta = fechaAcontecimientoHasta;
+    this.fechaCargaDesde = fechaCargaDesde;
+    this.fechaCargaHasta = fechaCargaHasta;
+  }
 
-    public String getProvincia() {
-        return provincia;
-    }
+  public String getCategoria() {
+    return categoria;
+  }
 
-    public PuntoGeografico getUbicacion() {
-        return ubicacion;
-    }
+  public String getProvincia() {
+    return provincia;
+  }
 
-    public LocalDateTime getFechaAcontecimientoDesde() {
-        return fechaAcontecimientoDesde;
-    }
+  public PuntoGeografico getUbicacion() {
+    return ubicacion;
+  }
 
-    public LocalDateTime getFechaAcontecimientoHasta() {
-        return fechaAcontecimientoHasta;
-    }
+  public LocalDateTime getFechaAcontecimientoDesde() {
+    return fechaAcontecimientoDesde;
+  }
 
-    public LocalDateTime getFechaCargaDesde() {
-        return fechaCargaDesde;
-    }
+  public LocalDateTime getFechaAcontecimientoHasta() {
+    return fechaAcontecimientoHasta;
+  }
 
-    public LocalDateTime getFechaCargaHasta() {
-        return fechaCargaHasta;
-    }
+  public LocalDateTime getFechaCargaDesde() {
+    return fechaCargaDesde;
+  }
+
+  public LocalDateTime getFechaCargaHasta() {
+    return fechaCargaHasta;
+  }
 }
