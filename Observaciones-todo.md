@@ -60,7 +60,7 @@
 - [ ] Befor load y after load --> combinar con transient --> preferiblemente @convert
 - [ ] Persistir filtros
 - [ ] En un parcial hacer mapeo de herencia
-- [ ] Geolocalizar via api --> Para los csv que no tengan provincia --> Podemos utilizar APIS, bibliotecas, etc, lo decimos nosotros
+- [x] Geolocalizar via api --> Para los csv que no tengan provincia --> Podemos utilizar APIS, bibliotecas, etc, lo decimos nosotros
 - [ ] Agregar PostreSQL
 - [ ] Realizar Querys para las estadisticas --> SQL
 - [ ] Persistir hechos eliminados, solicitudes SPAM

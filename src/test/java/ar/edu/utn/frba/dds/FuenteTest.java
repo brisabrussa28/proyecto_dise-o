@@ -3,10 +3,12 @@ package ar.edu.utn.frba.dds;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,8 +16,10 @@ import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
+import ar.edu.utn.frba.dds.domain.geilocalizacion.ServicioGeoref;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -167,4 +171,100 @@ public class FuenteTest {
       verify(exportadorMock).exportar(todos, tempFile.toString());
     }
   }
+
+  @Nested
+  @DisplayName("Pruebas para completar provincias en Hechos")
+  class CompletarProvinciasTests {
+    @Mock
+    private ServicioGeoref servicioGeorefMock;
+
+    private Fuente fuente;
+
+    @BeforeEach
+    void setUp() {
+      MockitoAnnotations.openMocks(this);
+
+      // Fuente "anónima" para el test
+      fuente = new Fuente("FuenteTest") {
+        private final List<Hecho> hechos = new ArrayList<>();
+        @Override
+        public List<Hecho> obtenerHechos() {
+          return hechos;
+        }
+        public void agregarHecho(Hecho h) { hechos.add(h); }
+      };
+    }
+
+    @Test
+    @DisplayName("Debe completar la provincia de un hecho con provincia nula")
+    void completaProvinciaSiFalta() {
+      PuntoGeografico ubicacion = new PuntoGeografico(-27.2741, -66.7529);
+      Hecho hecho = new Hecho();
+      hecho.setUbicacion(ubicacion);
+      hecho.setProvincia(null);
+
+      fuente.obtenerHechos().add(hecho);
+
+      when(servicioGeorefMock.obtenerProvincia(-27.2741, -66.7529))
+          .thenReturn("Catamarca");
+
+      for (Hecho h : fuente.obtenerHechos()) {
+        if (h.getProvincia() == null || h.getProvincia().isBlank()) {
+          String provincia = servicioGeorefMock.obtenerProvincia(
+              h.getUbicacion().getLatitud(),
+              h.getUbicacion().getLongitud()
+          );
+          h.setProvincia(provincia);
+          // System.out.println("Provincia obtenida desde el mock: " + provincia);
+        }
+      }
+
+      assertEquals("Catamarca", hecho.getProvincia());
+      verify(servicioGeorefMock).obtenerProvincia(-27.2741, -66.7529);
+    }
+
+    @Test
+    @DisplayName("Debe obtener la provincia real desde la API de Georef")
+    void obtieneProvinciaReal() {
+      ServicioGeoref servicio = new ServicioGeoref();
+
+      double lat = -27.2741;
+      double lon = -66.7529;
+
+      String provincia = servicio.obtenerProvincia(lat, lon);
+      // System.out.println("Provincia obtenida desde la API real: " + provincia);
+
+      // Sabemos que esas coordenadas son Catamarca
+      assertEquals("Catamarca", provincia);
+    }
+
+    @Test
+    @DisplayName("No debe modificar hechos que ya tienen provincia")
+    void noModificaProvinciaExistente() {
+      Hecho hecho = new Hecho();
+      hecho.setProvincia("Buenos Aires");
+      hecho.setUbicacion(new PuntoGeografico(-34.6, -58.38));
+
+      fuente.obtenerHechos().add(hecho);
+
+      // Aunque el mock devuelva otra provincia, no debería usarse
+      when(servicioGeorefMock.obtenerProvincia(anyDouble(), anyDouble()))
+          .thenReturn("Catamarca");
+
+      for (Hecho h : fuente.obtenerHechos()) {
+        if (h.getProvincia() == null || h.getProvincia().isBlank()) {
+          String provincia = servicioGeorefMock.obtenerProvincia(
+              h.getUbicacion().getLatitud(),
+              h.getUbicacion().getLongitud()
+          );
+          h.setProvincia(provincia);
+        }
+      }
+
+      assertEquals("Buenos Aires", hecho.getProvincia());
+      verify(servicioGeorefMock, never()).obtenerProvincia(anyDouble(), anyDouble());
+    }
+
+  }
+
 }
