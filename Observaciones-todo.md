@@ -51,40 +51,6 @@
 - [X] Justificacion de disenio (no tengo enie)
 - [X] Diagrama der fisico
 
-
-## OBSERVACIONES PT4
-- [ ] Agregar test de hecho editable
-- [ ] Colección debería ser clase abstracta
-- [X] Al serializar no cambiar el modelo -> ver si se puede no serializar
-- [x] getFiltro --> this.condicion
-- [X] Befor load y after load --> combinar con transient --> preferiblemente @convert
-- [x] Persistir filtros
-- [X] En un parcial hacer mapeo de herencia
-- [ ] Geolocalizar via api --> Para los csv que no tengan provincia --> Podemos utilizar APIS, bibliotecas, etc, lo decimos nosotros
-- [ ] Agregar PostreSQL
-- [ ] Realizar Querys para las estadisticas --> SQL
-- [ ] Persistir hechos eliminados, solicitudes SPAM
-- [ ] fletar backups, no tienen proposito con la bd
-- [X] No persistir hechos de csv, de fuentes externas, cache, hechos de fuentes estaticas. 
-- [ ] Persistir la informacion de las fuentes, NO SUS HECHOS
-        Para lograr esto se me ocurrio esto -> Cada fuente tiene un Observer estadisticas que almacena datos estadisticos de la fuente y es este observer el que genera las estadisticas que se persisten
-- [ ] Para las estadisticas privilegiar la informacion acumulativa
-- [ ] Averiguar donde tiene los datos Lucene, si en memoria o en la bd.
-- [ ] Mandar nuestra estrategia respecto el almacenamiento de datos a bulgarelli --> ¿Qué datos vamos a guardar? ¿Cuánto tiempo? ¿Por qué? 
-- [ ] Refactorizar colecciones y hacerlo mas expresivo
-- [ ] Hacer mas expresivo algoritmos de concenso -> ver si se puede aplicar SQL
-- [ ] Hacer mas expresivo a los exportadores
-- [ ] Quiza no refactorizar CSV (pq funcionar funciona), pero por ahi hacerle un facade o algo que encapsule su comportamiento
-- [ ] Revisar que las provincias esten bien incluidas en todos lados
-- [ ] Refactizar y repensar todo lo relacionado a gestion de solicitudes
-
-## COSAS PT5
-- [X] Implementar PrePersist/PreUpdate/PostLoad para las condiciones de los filtros para mantener el uso de las clases Filtro/Condicion ya que serialización tiene más contras que pros.
-- [ ] Implementar alguna api o algún método para geolocalizar las provincias de un Hecho en caso que no se especifique.
-- [ ] Las hechos eliminados, estadísticas, colecciones, solicitudes de eliminación y la info asignada a los hechos eliminados deberían ser persistidos.
-- [X] No tiene sentido persistir las fuentes caché, tampoco los hechos que vienen de fuentes estáticas como las CSV.
-- [X] No manejar porcentajes para las estadísticas ya que es dificultoso para actualizar.
-
 ## Correcciones PT4
 - [X] Evitar la serialización directa de la lógica de filtros.
 - [X] Implementar la reconstrucción de filtros con callbacks de JPA (@PostLoad).
@@ -98,7 +64,7 @@
 - [ ] Investigar el método de almacenamiento de índices de Hibernate Search (Lucene).
 - [ ] Eliminar la lógica de backups por archivo a backup por DB.
 - [ ] Rediseñar y refactorizar por completo el módulo de gestión de solicitudes.
-- [ ] Refactorizar getFiltro para que devuelva this.condicion directamente.
+- [ ] Refactorizar getFiltro para que devuelva this.condicion directamente. *~KUKOIDE*
 - [ ] Mejorar la expresividad y diseño del módulo de Colecciones (evaluar convertirla en clase abstracta).
 - [ ] Mejorar la expresividad de los Algoritmos de Consenso (evaluar uso de SQL).
 - [ ] Mejorar la expresividad y diseño de los Exportadores.

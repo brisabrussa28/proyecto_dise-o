@@ -1,8 +1,13 @@
 package ar.edu.utn.frba.dds;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.exportador.configuracion.ConfiguracionExportador;
@@ -16,7 +21,6 @@ import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,7 +63,7 @@ public class FuenteExternaApiTest {
   @Test
   @DisplayName("Obtiene y cachea una lista de hechos cuando el adaptador funciona")
   void obtieneYCacheaHechosExitosamente() throws IOException {
-    Hecho hecho = new HechoBuilder().conTitulo("Test").conFechaSuceso(LocalDateTime.now()).build();
+    Hecho hecho = new HechoBuilder().conTitulo("Test").conFechaSuceso(LocalDateTime.now().minusWeeks(3)).build();
     List<Hecho> hechosEsperados = List.of(hecho);
     when(adaptadorMock.consultarHechos()).thenReturn(hechosEsperados);
 
