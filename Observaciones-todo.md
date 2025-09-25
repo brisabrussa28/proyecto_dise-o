@@ -56,9 +56,9 @@
 - [ ] Agregar test de hecho editable
 - [ ] Colección debería ser clase abstracta
 - [ ] Al serializar no cambiar el modelo -> ver si se puede no serializar
-- [ ] getFiltro --> this.condicion
+- [x] getFiltro --> this.condicion
 - [ ] Befor load y after load --> combinar con transient --> preferiblemente @convert
-- [ ] Persistir filtros
+- [x] Persistir filtros
 - [ ] En un parcial hacer mapeo de herencia
 - [ ] Geolocalizar via api --> Para los csv que no tengan provincia --> Podemos utilizar APIS, bibliotecas, etc, lo decimos nosotros
 - [ ] Agregar PostreSQL
@@ -66,6 +66,7 @@
 - [ ] Persistir hechos eliminados, solicitudes SPAM
 - [ ] fletar backups, no tienen proposito con la bd
 - [ ] No persistir hechos de csv, de fuentes externas, cache, hechos de fuentes estaticas. --> Persistir la informacion de las fuentes, NO SUS HECHOS
+        Para lograr esto se me ocurrio esto -> Cada fuente tiene un Observer estadisticas que almacena datos estadisticos de la fuente y es este observer el que genera las estadisticas que se persisten
 - [ ] Para las estadisticas privilegiar la informacion acumulativa
 - [ ] Averiguar donde tiene los datos Lucene, si en memoria o en la bd.
 - [ ] Mandar nuestra estrategia respecto el almacenamiento de datos a bulgarelli --> ¿Qué datos vamos a guardar? ¿Cuánto tiempo? ¿Por qué? 

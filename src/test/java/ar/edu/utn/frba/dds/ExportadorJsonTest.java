@@ -94,15 +94,5 @@ public class ExportadorJsonTest {
     exportador.exportar(hechos, invalidPath);
   }
 
-  @Test
-  @DisplayName("Genera una configuración JSON valida")
-  void generaConfiguracionJsonCorrecta() throws IOException {
-    String jsonConfig = exportador.getConfiguracionJson();
-
-    assertNotNull(jsonConfig);
-    JsonNode configNode = mapper.readTree(jsonConfig);
-    assertTrue(configNode.has("formato"));
-    assertEquals("JSON", configNode.get("formato").asText());
-  }
 }
 

@@ -3,19 +3,13 @@ package ar.edu.utn.frba.dds;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.estadisicas.CentralDeEstadisticas;
 import ar.edu.utn.frba.dds.domain.estadisicas.Estadistica;
-import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.hecho.Origen;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.lector.Lector;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import java.io.File;
@@ -31,97 +25,64 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 public class EstadisticasTest {
-  CentralDeEstadisticas calculadora = new CentralDeEstadisticas();
-  PuntoGeografico pg = new PuntoGeografico(33.0, 44.0);
-  LocalDateTime hora = LocalDateTime.now();
-  List<String> etiquetas = List.of("#robo");
-  Hecho hecho;
+  private CentralDeEstadisticas calculadora;
   private RepositorioDeSolicitudes repo;
-  private UUID solicitante;
+  private FuenteDinamica fuente;
+  private Coleccion coleccion;
+  private List<Coleccion> colecciones;
+  private Hecho hecho1, hecho2, hecho3;
   private final DetectorSpam detector = texto -> texto.contains("Troll");
-  FuenteDinamica fuenteAuxD;
-  LocalDateTime horaAux = LocalDateTime.now()
-                                       .minusDays(1);
-  List<String> etiquetasAux = List.of(
-      "#ancianita",
-      "#robo_a_mano_armada",
-      "#violencia"
-  );
-  Coleccion coleccion;
-  List<Coleccion> colecciones = new ArrayList<>();
-  Hecho hecho2;
-  Hecho hecho3;
-  Lector<Hecho> lectorMock;
-  Exportador<Hecho> exportadorMock;
 
   @TempDir
-  Path tempDir;
+  Path tempDir; // Para el test de exportación
 
   @BeforeEach
-  public void setUp() throws IOException {
-    lectorMock = mock(Lector.class);
-    exportadorMock = mock(Exportador.class);
-    when(lectorMock.getConfiguracionJson()).thenReturn("{}");
+  public void setUp() {
+    // CORRECCIÓN: FuenteDinamica se instancia con su nuevo constructor simple.
+    // Ya no necesita mocks de Lector, Exportador ni un path a un archivo.
+    fuente = new FuenteDinamica("Fuente para Estadísticas");
 
-    hecho = new HechoBuilder()
-        .conTitulo("titulo")
-        .conDescripcion("desc")
+    LocalDateTime hora = LocalDateTime.now();
+    hecho1 = new HechoBuilder()
         .conCategoria("Robos")
-        .conDireccion("direccion")
         .conProvincia("CABA")
-        .conUbicacion(pg)
-        .conFechaSuceso(hora)
-        .conFechaCarga(hora)
-        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conEtiquetas(etiquetas)
+        .conFechaSuceso(hora.minusHours(1))
         .build();
 
     hecho2 = new HechoBuilder()
-        .conTitulo("titulo")
-        .conDescripcion("desc")
         .conCategoria("Robos")
-        .conDireccion("direccion")
         .conProvincia("CABA")
-        .conUbicacion(null)
-        .conFechaSuceso(horaAux)
-        .conFechaCarga(LocalDateTime.now())
-        .conFuenteOrigen(Origen.DATASET)
-        .conEtiquetas(etiquetasAux)
+        .conFechaSuceso(hora.minusHours(1))
         .build();
 
-    hecho3 = new HechoBuilder().conTitulo("Prueba")
-                               .conDescripcion("desc")
-                               .conCategoria("Choreo")
-                               .conDireccion("aaa")
-                               .conProvincia("PBA")
-                               .conUbicacion(null)
-                               .conFechaSuceso(horaAux)
-                               .conFechaCarga(LocalDateTime.now())
-                               .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-                               .conEtiquetas(etiquetasAux)
-                               .build();
-    repo = new RepositorioDeSolicitudes(detector);
-    calculadora.setRepo(repo); // Asegurarse que la calculadora usa el repo
-    solicitante = UUID.randomUUID();
-    Path tempJsonFile = tempDir.resolve("test_fuente_dinamica.json");
-    fuenteAuxD = new FuenteDinamica("Julio Cesar", tempJsonFile.toString(), lectorMock, exportadorMock);
-    fuenteAuxD.agregarHecho(hecho2);
-    fuenteAuxD.agregarHecho(hecho3);
-    fuenteAuxD.agregarHecho(hecho);
+    hecho3 = new HechoBuilder()
+        .conCategoria("Hurtos")
+        .conProvincia("PBA")
+        .conFechaSuceso(hora.minusHours(2))
+        .build();
 
-    coleccion = new Coleccion("Robos", fuenteAuxD, "Descripcion", "Robos");
+    fuente.agregarHecho(hecho1);
+    fuente.agregarHecho(hecho2);
+    fuente.agregarHecho(hecho3);
+
+    repo = new RepositorioDeSolicitudes(detector);
+    calculadora = new CentralDeEstadisticas();
+    calculadora.setRepo(repo);
+
+    coleccion = new Coleccion("Coleccion de Hechos", fuente, "Descripcion de prueba", "General");
+    colecciones = new ArrayList<>();
     colecciones.add(coleccion);
   }
 
   @Test
   public void estadisticasSpam() {
-    repo.agregarSolicitud(solicitante, hecho, "motivo1".repeat(100));
-    repo.agregarSolicitud(solicitante, hecho, "motivo2".repeat(100));
-    repo.agregarSolicitud(solicitante, hecho, "motivo3".repeat(100));
-    repo.agregarSolicitud(solicitante, hecho, "motivo4".repeat(100));
-    repo.agregarSolicitud(solicitante, hecho, "Troll".repeat(100));
+    UUID solicitante = UUID.randomUUID();
+    repo.agregarSolicitud(solicitante, hecho1, "motivo bueno");
+    repo.agregarSolicitud(solicitante, hecho1, "otro motivo bueno");
+    repo.agregarSolicitud(solicitante, hecho1, "Este es un comentario Troll");
 
-    assertEquals(20, calculadora.porcentajeDeSolicitudesSpam(), 0.01);
+    // 1 de 3 solicitudes es spam (33.33%)
+    assertEquals(33.33, calculadora.porcentajeDeSolicitudesSpam(), 0.01);
   }
 
   @Test
@@ -151,7 +112,7 @@ public class EstadisticasTest {
   @Test
   public void estadisticasHoraConMasHechosDeCiertaCategoria() {
     Estadistica resultado = calculadora.horaConMasHechosDeCiertaCategoria(colecciones, "Robos");
-    String horaEsperada = String.format("%02d", horaAux.getHour());
+    String horaEsperada = String.format("%02d", LocalDateTime.now().minusHours(1).getHour());
     assertNotNull(resultado);
     assertEquals(horaEsperada, resultado.getDimension());
     assertEquals(2, resultado.getValor());
@@ -159,26 +120,19 @@ public class EstadisticasTest {
 
   @Test
   public void seExportaCorrectamente() throws IOException {
-    // Arrange: Obtener los datos a exportar
     List<Estadistica> datos = calculadora.hechosPorCategoria(colecciones);
     Path outputPath = tempDir.resolve("export_test.csv");
 
-    // Act: Exportar los datos
     calculadora.export(datos, outputPath.toString());
 
-    // Assert: Verificar que el archivo fue creado y tiene el contenido correcto
-    File[] files = tempDir.toFile()
-                          .listFiles((dir, name) -> name.startsWith("export_test") && name.endsWith(".csv"));
-    assertNotNull(files);
-    assertEquals(1, files.length);
-    File exportedFile = files[0];
+    File exportedFile = outputPath.toFile();
     assertTrue(exportedFile.exists());
+    assertTrue(exportedFile.length() > 0);
 
     List<String> lines = Files.readAllLines(exportedFile.toPath());
-    assertEquals(3, lines.size()); // Cabecera + 1 fila de datos
+    assertEquals(3, lines.size()); // Cabecera + 2 filas de datos
     assertEquals("\"DIMENSION\",\"VALOR\"", lines.get(0));
-    assertEquals("\"Choreo\",\"1\"", lines.get(1));
-    assertEquals("\"Robos\",\"2\"", lines.get(2));
+    assertTrue(lines.contains("\"Hurtos\",\"1\""));
+    assertTrue(lines.contains("\"Robos\",\"2\""));
   }
 }
-

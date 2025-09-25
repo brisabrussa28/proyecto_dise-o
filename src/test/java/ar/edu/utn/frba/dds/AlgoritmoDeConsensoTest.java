@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,19 +14,15 @@ import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.Absoluta;
 import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.AlgoritmoDeConsenso;
 import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.MayoriaSimple;
 import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.MultiplesMenciones;
+import ar.edu.utn.frba.dds.domain.exportador.configuracion.ConfiguracionExportador;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.hecho.Origen;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
-import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.lector.Lector;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
+import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,33 +54,26 @@ public class AlgoritmoDeConsensoTest {
   private Hecho crearHecho(String titulo) {
     return new HechoBuilder()
         .conTitulo(titulo)
-        .conDescripcion("desc " + titulo)
-        .conCategoria("cat " + titulo)
-        .conDireccion("dir " + titulo)
-        .conProvincia("Provincia " + titulo)
-        .conUbicacion(new PuntoGeografico(1, 1))
         .conFechaSuceso(fecha)
-        .conFechaCarga(fecha)
-        .conFuenteOrigen(Origen.DATASET)
-        .conEtiquetas(List.of("etiqueta"))
         .build();
   }
 
-  private FuenteDeAgregacion crearAgregadorConFuentes(List<Hecho>... listasDeHechos) throws IOException {
-    Path tempFile = Files.createTempFile("fake-", ".json");
-
-    @SuppressWarnings("unchecked")
+  private FuenteDeAgregacion crearAgregadorConFuentes(List<Hecho>... listasDeHechos) {
+    // 1. Mockear las entidades de CONFIGURACIÓN
+    ConfiguracionLector configLectorMock = mock(ConfiguracionLector.class);
+    ConfiguracionExportador configExportadorMock = mock(ConfiguracionExportador.class);
     Lector<Hecho> lectorMock = mock(Lector.class);
-    @SuppressWarnings("unchecked")
-    Exportador<Hecho> exportadorMock = mock(Exportador.class);
+
+    // 2. Programar los mocks de configuración para que CONSTRUYAN los mocks de lógica
+    doReturn(lectorMock).when(configLectorMock).build(Hecho.class);
+
     when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
 
+    // 3. Usar el nuevo constructor con las entidades de configuración
     FuenteDeAgregacion agregador = new FuenteDeAgregacion(
-        "Agregador",
-        tempFile.toString(),
-        lectorMock,
-        exportadorMock
+        "AgregadorDeTest", "fake-path.json", configLectorMock, configExportadorMock
     );
+
     for (List<Hecho> lista : listasDeHechos) {
       Fuente f = mock(Fuente.class);
       when(f.obtenerHechos()).thenReturn(lista);
@@ -93,7 +83,7 @@ public class AlgoritmoDeConsensoTest {
   }
 
   @Test
-  public void AlgoritmoAbsolutaHechosConsensuados() throws IOException {
+  public void AlgoritmoAbsolutaHechosConsensuados() {
     Hecho h1 = crearHecho("H1");
     Hecho h2 = crearHecho("H2");
     FuenteDeAgregacion agregador = crearAgregadorConFuentes(
@@ -111,7 +101,7 @@ public class AlgoritmoDeConsensoTest {
   }
 
   @Test
-  public void AlgoritmoAbsolutaHechosNoConsensuados() throws IOException {
+  public void AlgoritmoAbsolutaHechosNoConsensuados() {
     Hecho h1 = crearHecho("H1");
     Hecho h2 = crearHecho("H2");
     FuenteDeAgregacion agregador = crearAgregadorConFuentes(
@@ -129,7 +119,7 @@ public class AlgoritmoDeConsensoTest {
   }
 
   @Test
-  public void AlgoritmoMayoriaSimpleConsensuado() throws IOException {
+  public void AlgoritmoMayoriaSimpleConsensuado() {
     Hecho h1 = crearHecho("H1");
     FuenteDeAgregacion agregador = crearAgregadorConFuentes(
         List.of(h1), // Aparece en 2 de 3 fuentes
@@ -146,7 +136,7 @@ public class AlgoritmoDeConsensoTest {
   }
 
   @Test
-  public void AlgoritmoMayoriaSimpleNoConsensuado() throws IOException {
+  public void AlgoritmoMayoriaSimpleNoConsensuado() {
     Hecho h1 = crearHecho("H1");
     FuenteDeAgregacion agregador = crearAgregadorConFuentes(
         List.of(h1), // Aparece en 1 de 3 fuentes, no es mayoría
@@ -168,7 +158,7 @@ public class AlgoritmoDeConsensoTest {
   }
 
   @Test
-  public void testMultiplesMencionesConsensuado() throws IOException {
+  public void testMultiplesMencionesConsensuado() {
     Hecho h1 = crearHecho("H1");
     FuenteDeAgregacion agregador = crearAgregadorConFuentes(
         List.of(h1), // Aparece en 2 de 3 fuentes
@@ -191,7 +181,7 @@ public class AlgoritmoDeConsensoTest {
   }
 
   @Test
-  public void testMultiplesMencionesNoConsensuado() throws IOException {
+  public void testMultiplesMencionesNoConsensuado() {
     Hecho h1 = crearHecho("H1");
     FuenteDeAgregacion agregador = crearAgregadorConFuentes(
         List.of(h1), // Aparece solo en 1 de 2 fuentes

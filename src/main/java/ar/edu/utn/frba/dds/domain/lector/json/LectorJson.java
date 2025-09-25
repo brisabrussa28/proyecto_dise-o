@@ -73,22 +73,4 @@ public class LectorJson<T> implements Lector<T> {
       return new ArrayList<>();
     }
   }
-
-  /**
-   * Devuelve la configuración del lector en formato JSON.
-   *
-   * @return Un string con la configuración en JSON.
-   */
-  @Override
-  public String getConfiguracionJson() {
-    ObjectNode configNode = objectMapper.createObjectNode();
-    configNode.put("formato", "JSON");
-    try {
-      return objectMapper.writerWithDefaultPrettyPrinter()
-                         .writeValueAsString(configNode);
-    } catch (JsonProcessingException e) {
-      LOGGER.log(Level.SEVERE, "Error al generar la configuración JSON para LectorJson", e);
-      return "{\"error\":\"No se pudo generar la configuración\"}";
-    }
-  }
 }

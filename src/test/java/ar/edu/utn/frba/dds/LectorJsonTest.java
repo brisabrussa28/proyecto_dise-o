@@ -16,25 +16,6 @@ import org.junit.jupiter.api.Test;
 public class LectorJsonTest {
   Logger logger = Logger.getLogger(LectorJson.class.getName());
 
-  @Test
-  void elLectorDeserializaBien() {
-    var lector = new LectorJson<>(new TypeReference<List<PuntoGeografico>>() {
-    });
-
-    var jsonImportado = lector.importar("src/test/resources/pruebajson.json");
-    var config = lector.getConfiguracionJson();
-    logger.info(config);
-    Assertions.assertEquals(
-        1234456,
-        jsonImportado.get(0)
-                     .getLatitud()
-    );
-    Assertions.assertEquals(
-        -12345456,
-        jsonImportado.get(0)
-                     .getLongitud()
-    );
-  }
 
   @Test
   void elLectorDeserializaUnHechoCorrectamente() {

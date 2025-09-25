@@ -13,8 +13,6 @@ import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterDemo;
-import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterFactory;
-import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterMetaMapa;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.conexion.Conexion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -90,14 +90,6 @@ public class ExportadorCsvTest {
     );
   }
 
-  @Test
-  void laConfiguracionDelExportadorSeGuardaBien() {
-    var exportador = new ExportadorCSV<>(',', '/', new ModoNumerar());
-    var config = exportador.getConfiguracionJson();
-    Assertions.assertNotNull(config);
-    Logger.getLogger(ExportadorCSV.class.getName())
-          .info(config);
-  }
 
   @Test
   void exportoUsandoModoSobrescribir() {

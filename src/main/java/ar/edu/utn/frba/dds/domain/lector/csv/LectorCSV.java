@@ -112,34 +112,6 @@ public class LectorCSV<T> implements Lector<T> {
     return fila;
   }
 
-  /**
-   * Devuelve la configuración del lector en formato JSON.
-   * Obtiene la configuración directamente del conversor, sin acoplarse a un tipo específico.
-   *
-   * @return Un string con la configuración en JSON.
-   */
-  @Override
-  public String getConfiguracionJson() {
-    ObjectMapper objectMapper = new ObjectMapper();
-    ObjectNode configNode = objectMapper.createObjectNode();
 
-    configNode.put("formato", "CSV");
-    configNode.put("separador", String.valueOf(this.separator));
-
-    // Obtenemos la configuración directamente del converter, sin verificar el tipo.
-    configNode.put("formatoFecha", converter.getFormatoFecha());
-    Map<String, List<String>> mapeoParaJson = converter.getMapeoColumnasParaJson();
-    if (mapeoParaJson != null && !mapeoParaJson.isEmpty()) {
-      configNode.set("mapeoColumnas", objectMapper.valueToTree(mapeoParaJson));
-    }
-
-    try {
-      return objectMapper.writerWithDefaultPrettyPrinter()
-                         .writeValueAsString(configNode);
-    } catch (JsonProcessingException e) {
-      logger.log(Level.SEVERE, "Error al generar la configuración JSON para LectorCSV", e);
-      return "{\"error\":\"No se pudo generar la configuración\"}";
-    }
-  }
 }
 

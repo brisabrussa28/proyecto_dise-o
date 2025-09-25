@@ -34,18 +34,4 @@ public class ExportadorJson<T> implements Exportador<T> {
     }
   }
 
-  @Override
-  public String getConfiguracionJson() {
-    ObjectMapper mapper = new ObjectMapper();
-    ObjectNode configNode = mapper.createObjectNode();
-    configNode.put("formato", "JSON");
-
-    try {
-      return mapper.writerWithDefaultPrettyPrinter()
-                   .writeValueAsString(configNode);
-    } catch (JsonProcessingException e) {
-      LOGGER.log(Level.SEVERE, "Error al generar la configuración JSON para ExportadorJson", e);
-      return "{\"error\":\"No se pudo generar la configuración\"}";
-    }
-  }
 }
