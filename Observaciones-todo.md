@@ -83,7 +83,7 @@
 - [ ] Implementar alguna api o algún método para geolocalizar las provincias de un Hecho en caso que no se especifique.
 - [ ] Las hechos eliminados, estadísticas, colecciones, solicitudes de eliminación y la info asignada a los hechos eliminados deberían ser persistidos.
 - [X] No tiene sentido persistir las fuentes caché, tampoco los hechos que vienen de fuentes estáticas como las CSV.
-- [ ] No manejar porcentajes para las estadísticas ya que es dificultoso para actualizar.
+- [X] No manejar porcentajes para las estadísticas ya que es dificultoso para actualizar.
 
 ## Correcciones PT4
 - [X] Evitar la serialización directa de la lógica de filtros.
