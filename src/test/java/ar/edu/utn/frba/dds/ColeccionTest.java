@@ -89,7 +89,7 @@ public class ColeccionTest {
         .conFechaSuceso(horaAux)
         .build();
     fuenteAuxD.agregarHecho(hecho);
-    assertTrue(coleccion.contieneA(hecho, repositorio));
+    assertTrue(coleccion.incluyeHecho(hecho, repositorio));
   }
 
   @Test
@@ -130,7 +130,7 @@ public class ColeccionTest {
     fuenteAuxD.agregarHecho(hecho);
     when(detectorSpam.esSpam(anyString())).thenReturn(false);
     repositorio.marcarComoEliminado(hecho);
-    assertFalse(coleccion.contieneA(hecho, repositorio));
+    assertFalse(coleccion.incluyeHecho(hecho, repositorio));
   }
 
   @Test

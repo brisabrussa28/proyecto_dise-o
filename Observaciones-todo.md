@@ -69,7 +69,7 @@
 - [ ] Para las estadisticas privilegiar la informacion acumulativa
 - [ ] Averiguar donde tiene los datos Lucene, si en memoria o en la bd.
 - [ ] Mandar nuestra estrategia respecto el almacenamiento de datos a bulgarelli --> ¿Qué datos vamos a guardar? ¿Cuánto tiempo? ¿Por qué? 
-- [ ] Refactorizar colecciones y hacerlo mas expresivo
+- [x] Refactorizar colecciones y hacerlo mas expresivo
 - [ ] Hacer mas expresivo algoritmos de concenso -> ver si se puede aplicar SQL
 - [ ] Hacer mas expresivo a los exportadores
 - [ ] Quiza no refactorizar CSV (pq funcionar funciona), pero por ahi hacerle un facade o algo que encapsule su comportamiento
