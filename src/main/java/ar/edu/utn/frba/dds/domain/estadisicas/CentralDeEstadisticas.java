@@ -4,7 +4,6 @@ import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -103,11 +102,8 @@ public class CentralDeEstadisticas {
         .orElse(new Estadistica("Sin Datos", 0L));
   }
 
-  public double porcentajeDeSolicitudesSpam() {
-    return (double) repo.cantidadDeSpamDetectado()
-        / (repo.cantidadDeSpamDetectado()
-        + repo.cantidadSolicitudes())
-        * 100;
+  public int cantidadDeSolicitudesSpam() {
+    return repo.cantidadDeSpamDetectado();
   }
 
   public void export(List<Estadistica> datos, String rutaArchivo) {

@@ -97,7 +97,7 @@ public class EstadisticasTest {
         repo.agregarSolicitud(solicitante, hecho1, motivoLargoSpam);
 
         // 1 de 3 solicitudes es spam (33.33%)
-        assertEquals(33.33, calculadora.porcentajeDeSolicitudesSpam(), 0.01);
+        assertEquals(1, calculadora.cantidadDeSolicitudesSpam());
     }
 
     @Test
