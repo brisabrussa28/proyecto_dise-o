@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,137 +21,170 @@ import java.util.stream.Collectors;
 /**
  * Implementación de 'FilaConverter' específica para crear objetos 'Hecho'.
  * Contiene toda la lógica de negocio para transformar una fila de CSV en un 'Hecho'.
+ * Utiliza Strings para las claves y ahora une valores de múltiples columnas para campos compuestos.
  */
 public class HechoFilaConverter implements FilaConverter<Hecho> {
 
-  private static final Logger logger = Logger.getLogger(HechoFilaConverter.class.getName());
+    private static final Logger logger = Logger.getLogger(HechoFilaConverter.class.getName());
 
-  private static final Set<CampoHecho> CAMPOS_REQUERIDOS = Set.of(
-      CampoHecho.TITULO,
-      CampoHecho.FECHA_SUCESO
-  );
+    // Define los campos que son obligatorios en el CSV para que una fila sea válida.
+    private static final Set<String> CAMPOS_REQUERIDOS = Set.of(
+            CampoHecho.TITULO.name(),
+            CampoHecho.FECHA_SUCESO.name()
+    );
 
-  private final String dateFormatStr;
-  private final Map<CampoHecho, List<String>> mapeoColumnas;
-  private final SimpleDateFormat dateFormat;
+    private final String dateFormatStr;
+    private final Map<String, List<String>> mapeoColumnas;
+    private final SimpleDateFormat dateFormat;
 
-  public HechoFilaConverter(String formatoFecha, Map<CampoHecho, List<String>> mapeoColumnas) {
-    if (formatoFecha == null || formatoFecha.isBlank() || mapeoColumnas == null || mapeoColumnas.isEmpty()) {
-      throw new IllegalArgumentException(
-          "El formato de fecha y el mapeo de columnas son obligatorios.");
-    }
-    this.dateFormatStr = formatoFecha;
-    this.dateFormat = new SimpleDateFormat(formatoFecha);
-    this.mapeoColumnas = new HashMap<>(mapeoColumnas);
-  }
-
-  @Override
-  public Hecho convert(Map<String, String> fila) {
-    if (!validadorDeFila(fila)) {
-      return null;
-    }
-
-    String latitudStr = obtenerValor(fila, CampoHecho.LATITUD);
-    String longitudStr = obtenerValor(fila, CampoHecho.LONGITUD);
-
-    HechoBuilder builder = new HechoBuilder();
-
-    builder.conTitulo(obtenerValor(fila, CampoHecho.TITULO));
-    builder.conDescripcion(obtenerValor(fila, CampoHecho.DESCRIPCION));
-    builder.conCategoria(obtenerValor(fila, CampoHecho.CATEGORIA));
-    builder.conDireccion(obtenerValor(fila, CampoHecho.DIRECCION));
-    builder.conProvincia(obtenerValor(fila, CampoHecho.PROVINCIA));
-    builder.conFechaSuceso(parseFecha(obtenerValor(fila, CampoHecho.FECHA_SUCESO)));
-    builder.conFuenteOrigen(Origen.DATASET); // Origen por defecto para CSV
-    builder.conFechaCarga(LocalDateTime.now()); // Fecha de carga es ahora
-
-    Double latitud = parseDouble(latitudStr);
-    Double longitud = parseDouble(longitudStr);
-
-    if (latitud != null && longitud != null) {
-      builder.conUbicacion(new PuntoGeografico(latitud, longitud));
+    /**
+     * Constructor que recibe la configuración necesaria para la conversión.
+     * @param formatoFecha Formato de fecha esperado en el CSV (ej. "dd/MM/yyyy HH:mm:ss").
+     * @param mapeoColumnas Mapa que asocia un campo de 'Hecho' con una o más columnas del CSV.
+     */
+    public HechoFilaConverter(String formatoFecha, Map<String, List<String>> mapeoColumnas) {
+        if (formatoFecha == null || formatoFecha.isBlank() || mapeoColumnas == null || mapeoColumnas.isEmpty()) {
+            throw new IllegalArgumentException("El formato de fecha y el mapeo de columnas son obligatorios.");
+        }
+        this.dateFormatStr = formatoFecha;
+        this.dateFormat = new SimpleDateFormat(formatoFecha);
+        this.mapeoColumnas = new HashMap<>(mapeoColumnas);
     }
 
-    return builder.build();
-  }
+    /**
+     * Convierte una fila de CSV, representada como un mapa, en un objeto Hecho.
+     * @param fila Un mapa donde la clave es el nombre de la columna y el valor es el dato de la celda.
+     * @return Un objeto Hecho, o null si la fila no es válida.
+     */
+    @Override
+    public Hecho convert(Map<String, String> fila) {
+        if (!validadorDeFila(fila)) {
+            logger.warning("Fila ignorada por no cumplir con los campos requeridos.");
+            return null;
+        }
 
-  private boolean validadorDeFila(Map<String, String> fila) {
-    return CAMPOS_REQUERIDOS.stream()
-                            .allMatch(campo -> {
-                              String valor = obtenerValor(fila, campo);
-                              boolean esValido = valor != null && !valor.isBlank();
-                              if (!esValido) {
-                                logger.warning("Fila ignorada: falta el campo requerido '" + campo + "' o está vacío.");
-                              }
-                              return esValido;
-                            });
-  }
+        HechoBuilder builder = new HechoBuilder();
 
-  private String obtenerValor(Map<String, String> fila, CampoHecho campo) {
-    List<String> posiblesColumnas = mapeoColumnas.get(campo);
-    if (posiblesColumnas == null) {
-      return null;
+        // Para campos que se espera que sean únicos (título, categoría), se busca el primer valor no vacío.
+        obtenerPrimerValor(fila, CampoHecho.TITULO.name()).ifPresent(builder::conTitulo);
+        obtenerPrimerValor(fila, CampoHecho.CATEGORIA.name()).ifPresent(builder::conCategoria);
+        obtenerPrimerValor(fila, CampoHecho.PROVINCIA.name()).ifPresent(builder::conProvincia);
+        obtenerPrimerValor(fila, CampoHecho.FECHA_SUCESO.name()).map(this::parseFecha).ifPresent(builder::conFechaSuceso);
+
+        // Para campos que pueden estar compuestos por varias columnas (ej. calle + altura), se unen todos los valores.
+        String direccionCompleta = unirValores(obtenerTodosLosValores(fila, CampoHecho.DIRECCION.name()), ", ");
+        builder.conDireccion(direccionCompleta);
+
+        String descripcionCompleta = unirValores(obtenerTodosLosValores(fila, CampoHecho.DESCRIPCION.name()), " ");
+        builder.conDescripcion(descripcionCompleta);
+
+        // Lógica para coordenadas geográficas
+        String latitudStr = obtenerPrimerValor(fila, CampoHecho.LATITUD.name()).orElse(null);
+        String longitudStr = obtenerPrimerValor(fila, CampoHecho.LONGITUD.name()).orElse(null);
+        Double latitud = parseDouble(latitudStr);
+        Double longitud = parseDouble(longitudStr);
+        if (latitud != null && longitud != null) {
+            builder.conUbicacion(new PuntoGeografico(latitud, longitud));
+        }
+
+        // Asigna valores por defecto o de sistema
+        builder.conFuenteOrigen(Origen.DATASET);
+        builder.conFechaCarga(LocalDateTime.now());
+
+        return builder.build();
     }
-    return posiblesColumnas.stream()
-                           .map(fila::get)
-                           .filter(Objects::nonNull)
-                           .findFirst()
-                           .orElse(null);
-  }
 
-  private String unirValores(List<String> valores, String separador) {
-    return valores.stream()
-                  .filter(s -> s != null && !s.isBlank())
-                  .reduce((a, b) -> a + separador + b)
-                  .orElse(null);
-  }
-
-  private Double parseDouble(String valor) {
-    if (valor == null || valor.isBlank()) {
-      return null;
+    /**
+     * Valida si una fila contiene todos los campos requeridos con valores no vacíos.
+     * @param fila La fila a validar.
+     * @return true si la fila es válida, false en caso contrario.
+     */
+    private boolean validadorDeFila(Map<String, String> fila) {
+        return CAMPOS_REQUERIDOS.stream()
+                .allMatch(campo -> obtenerPrimerValor(fila, campo).isPresent());
     }
-    try {
-      // Reemplazar coma por punto para soportar varios formatos de número.
-      String valorNormalizado = valor.trim()
-                                     .replace(',', '.');
-      return Double.parseDouble(valorNormalizado);
-    } catch (NumberFormatException e) {
-      logger.warning("Error al parsear double: '" + valor + "' no es un número válido.");
-      return null;
-    }
-  }
 
-  private LocalDateTime parseFecha(String valor) {
-    if (valor == null || valor.isBlank()) {
-      return null;
+    /**
+     * Obtiene todos los valores de las columnas mapeadas para un campo específico.
+     * @param fila El mapa que representa la fila del CSV.
+     * @param campo El nombre del campo (como String) a buscar.
+     * @return Una lista con todos los valores encontrados para ese campo.
+     */
+    private List<String> obtenerTodosLosValores(Map<String, String> fila, String campo) {
+        List<String> posiblesColumnas = mapeoColumnas.get(campo);
+        if (posiblesColumnas == null) {
+            return Collections.emptyList();
+        }
+        return posiblesColumnas.stream()
+                .map(fila::get)
+                .filter(s -> s != null && !s.isBlank())
+                .collect(Collectors.toList());
     }
-    try {
-      return dateFormat.parse(valor)
-                       .toInstant()
-                       .atZone(ZoneId.systemDefault())
-                       .toLocalDateTime();
-    } catch (ParseException e) {
-      logger.warning("Error al parsear fecha: '" + valor + "' con formato '" + this.dateFormatStr + "'");
-      return null;
+
+    /**
+     * Une una lista de strings con un separador, devolviendo null si la lista está vacía.
+     * @param valores La lista de strings a unir.
+     * @param separador El separador a usar entre elementos.
+     * @return El string resultante o null.
+     */
+    private String unirValores(List<String> valores, String separador) {
+        if(valores == null || valores.isEmpty()) {
+            return null;
+        }
+        return String.join(separador, valores);
     }
-  }
 
-  @Override
-  public String getFormatoFecha() {
-    return this.dateFormatStr;
-  }
+    /**
+     * Obtiene el primer valor no nulo de las columnas mapeadas para un campo.
+     * @param fila El mapa que representa la fila del CSV.
+     * @param campo El nombre del campo (como String) a buscar.
+     * @return Un Optional con el valor si se encuentra, o un Optional vacío.
+     */
+    private java.util.Optional<String> obtenerPrimerValor(Map<String, String> fila, String campo) {
+        List<String> posiblesColumnas = mapeoColumnas.get(campo);
+        if (posiblesColumnas == null) {
+            return java.util.Optional.empty();
+        }
+        return posiblesColumnas.stream()
+                .map(fila::get)
+                .filter(s -> s != null && !s.isBlank())
+                .findFirst();
+    }
 
-  @Override
-  public Map<String, List<String>> getMapeoColumnasParaJson() {
-    // Convierte el mapa interno (con claves Enum) a un mapa con claves String
-    // para que pueda ser serializado a JSON correctamente.
-    return this.mapeoColumnas.entrySet()
-                             .stream()
-                             .collect(Collectors.toMap(
-                                 entry -> entry.getKey()
-                                               .name(), // Convierte el Enum a String
-                                 Map.Entry::getValue
-                             ));
-  }
+    /**
+     * Convierte un String a Double, manejando comas y errores de formato.
+     */
+    private Double parseDouble(String valor) {
+        if (valor == null || valor.isBlank()) { return null; }
+        try {
+            return Double.parseDouble(valor.trim().replace(',', '.'));
+        } catch (NumberFormatException e) {
+            logger.warning("Error al parsear double: '" + valor + "' no es un número válido.");
+            return null;
+        }
+    }
+
+    /**
+     * Convierte un String a LocalDateTime usando el formato definido en el constructor.
+     */
+    private LocalDateTime parseFecha(String valor) {
+        if (valor == null || valor.isBlank()) { return null; }
+        try {
+            return dateFormat.parse(valor).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        } catch (ParseException e) {
+            logger.warning("Error al parsear fecha: '" + valor + "' con formato '" + this.dateFormatStr + "'");
+            return null;
+        }
+    }
+
+    @Override
+    public String getFormatoFecha() {
+        return this.dateFormatStr;
+    }
+
+    @Override
+    public Map<String, List<String>> getMapeoColumnasParaJson() {
+        return this.mapeoColumnas;
+    }
 }
 

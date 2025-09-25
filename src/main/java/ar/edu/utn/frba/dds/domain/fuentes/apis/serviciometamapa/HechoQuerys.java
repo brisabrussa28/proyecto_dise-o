@@ -1,53 +1,47 @@
 package ar.edu.utn.frba.dds.domain.fuentes.apis.serviciometamapa;
 
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
-import javax.persistence.Embeddable;
 
-@Embeddable
+/**
+ * Value Object que representa los parámetros de consulta para el ServicioMetaMapa.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL) // No incluirá campos nulos en el JSON
 public class HechoQuerys {
-  private String categoria;
-  private String provincia;
-  private PuntoGeografico ubicacion;
-  private LocalDateTime fechaReporteDesde;
-  private LocalDateTime fechaReporteHasta;
-  private LocalDateTime fechaAcontecimientoDesde;
-  private LocalDateTime fechaAcontecimientoHasta;
+    private final String categoria;
+    private final String provincia;
+    private final PuntoGeografico ubicacion;
+    private final LocalDateTime fechaAcontecimientoDesde;
+    private final LocalDateTime fechaAcontecimientoHasta;
+    private final LocalDateTime fechaCargaDesde;
+    private final LocalDateTime fechaCargaHasta;
 
-  public HechoQuerys() {
-  }
+    public HechoQuerys(
+            String categoria, String provincia, PuntoGeografico ubicacion,
+            LocalDateTime fechaAcontecimientoDesde, LocalDateTime fechaAcontecimientoHasta,
+            LocalDateTime fechaCargaDesde, LocalDateTime fechaCargaHasta) {
 
-  public HechoQuerys(
-      String categoria,
-      String provincia,
-      PuntoGeografico ubicacion,
-      LocalDateTime fechaAcontecimientoHasta,
-      LocalDateTime fechaReporteHasta,
-      LocalDateTime fechaAcontecimientoDesde,
-      LocalDateTime fechaReporteDesde
-  ) {
-    this.categoria = categoria;
-    this.provincia = provincia;
-    this.ubicacion = ubicacion;
-    this.fechaAcontecimientoHasta = fechaAcontecimientoHasta;
-    this.fechaReporteHasta = fechaReporteHasta;
-    this.fechaAcontecimientoDesde = fechaAcontecimientoDesde;
-    this.fechaReporteDesde = fechaReporteDesde;
-  }
+        if (fechaAcontecimientoDesde == null || fechaCargaDesde == null) {
+            throw new RuntimeException(
+                    "Se debe proveer al menos una fecha de inicio ('fechaAcontecimientoDesde' o 'fechaCargaDesde').");
+        }
 
-  public String getCategoria() { return categoria; }
-  public String getProvincia() { return provincia; }
-  public PuntoGeografico getUbicacion() { return ubicacion; }
-  public LocalDateTime getFechaReporteDesde() { return fechaReporteDesde; }
-  public LocalDateTime getFechaReporteHasta() { return fechaReporteHasta; }
-  public LocalDateTime getFechaAcontecimientoDesde() { return fechaAcontecimientoDesde; }
-  public LocalDateTime getFechaAcontecimientoHasta() { return fechaAcontecimientoHasta; }
+        this.categoria = categoria;
+        this.provincia = provincia;
+        this.ubicacion = ubicacion;
+        this.fechaAcontecimientoDesde = fechaAcontecimientoDesde;
+        this.fechaAcontecimientoHasta = fechaAcontecimientoHasta;
+        this.fechaCargaDesde = fechaCargaDesde;
+        this.fechaCargaHasta = fechaCargaHasta;
+    }
 
-  public void setCategoria(String categoria) { this.categoria = categoria; }
-  public void setProvincia(String provincia) { this.provincia = provincia; }
-  public void setUbicacion(PuntoGeografico ubicacion) { this.ubicacion = ubicacion; }
-  public void setFechaReporteDesde(LocalDateTime fechaReporteDesde) { this.fechaReporteDesde = fechaReporteDesde; }
-  public void setFechaReporteHasta(LocalDateTime fechaReporteHasta) { this.fechaReporteHasta = fechaReporteHasta; }
-  public void setFechaAcontecimientoDesde(LocalDateTime fechaAcontecimientoDesde) { this.fechaAcontecimientoDesde = fechaAcontecimientoDesde; }
-  public void setFechaAcontecimientoHasta(LocalDateTime fechaAcontecimientoHasta) { this.fechaAcontecimientoHasta = fechaAcontecimientoHasta; }
+    // Getters para que Jackson pueda serializar el objeto a JSON
+    public String getCategoria() { return categoria; }
+    public String getProvincia() { return provincia; }
+    public PuntoGeografico getUbicacion() { return ubicacion; }
+    public LocalDateTime getFechaAcontecimientoDesde() { return fechaAcontecimientoDesde; }
+    public LocalDateTime getFechaAcontecimientoHasta() { return fechaAcontecimientoHasta; }
+    public LocalDateTime getFechaCargaDesde() { return fechaCargaDesde; }
+    public LocalDateTime getFechaCargaHasta() { return fechaCargaHasta; }
 }

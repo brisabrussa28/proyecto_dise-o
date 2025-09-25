@@ -24,7 +24,7 @@ public class FuenteDeAgregacion extends FuenteDeCopiaLocal {
    * Relación con las fuentes que se van a agregar.
    * EAGER se usa para que las fuentes se carguen inmediatamente con esta entidad.
    */
-  @ManyToMany(fetch = FetchType.EAGER)
+  @ManyToMany(fetch = FetchType.LAZY)
   private List<Fuente> fuentesCargadas = new ArrayList<>();
 
   /**
