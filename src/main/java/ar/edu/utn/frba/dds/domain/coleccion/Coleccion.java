@@ -10,6 +10,7 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -77,46 +78,6 @@ public class Coleccion {
   }
 
   /**
-   * Constructor de la colección con un algoritmo de consenso.
-   *
-   * @param titulo      Título de la colección. No puede ser nulo o vacío.
-   * @param fuente      Fuente de datos de la colección. No puede ser nula.
-   * @param descripcion Descripción de la colección. No puede ser nula o vacía.
-   * @param categoria   Categoría de la colección. No puede ser nula o vacía.
-   * @param algoritmo   Algoritmo de consenso a aplicar sobre los hechos.
-   * @throws RuntimeException si alguno de los parámetros obligatorios es inválido.
-   */
-  public Coleccion(
-      String titulo,
-      Fuente fuente,
-      String descripcion,
-      String categoria,
-      AlgoritmoDeConsenso algoritmo
-  ) {
-    if (titulo == null || titulo.isBlank()) {
-      throw new RuntimeException("El titulo es campo obligatorio.");
-    }
-    if (fuente == null) {
-      throw new RuntimeException("La fuente es campo obligatorio.");
-    }
-    if (descripcion == null || descripcion.isBlank()) {
-      throw new RuntimeException("La descripcion es campo obligatorio.");
-    }
-    if (categoria == null || categoria.isBlank()) {
-      throw new RuntimeException("La categoria es campo obligatorio.");
-    }
-    this.titulo = titulo;
-    this.fuente = fuente;
-    this.descripcion = descripcion;
-    this.categoria = categoria;
-    this.condicion = new CondicionTrue();
-    this.algoritmo = algoritmo;
-  }
-
-  public Coleccion() {
-  }
-
-  /**
    * Obtiene el título de la colección.
    *
    * @return El título.
@@ -169,16 +130,14 @@ public class Coleccion {
    * @return Una lista de hechos filtrada y lista para su visualización o uso.
    */
   public List<Hecho> getHechos(RepositorioDeSolicitudes repo) {
-    // 1. Obtiene los hechos de la fuente
+    // Obtiene los hechos de la fuente
     List<Hecho> hechosFuente = fuente.obtenerHechos();
 
-    // 2. Aplica el filtro de exclusión del repositorio
-    List<Hecho> hechosSinExcluidos = repo.filtroExcluyente()
-        .filtrar(hechosFuente);
+    // Aplica el filtro de exclusión del repositorio
+    List<Hecho> hechosSinExcluidos = repo.filtroExcluyente().filtrar(hechosFuente);
 
-    // 3. Aplica el filtro propio de la colección
-    return this.getFiltro()
-        .filtrar(hechosSinExcluidos);
+    // Aplica el filtro propio de la colección
+    return this.getFiltro().filtrar(hechosSinExcluidos);
   }
 
   /**
@@ -188,14 +147,19 @@ public class Coleccion {
    * @param repo El repositorio de solicitudes necesario para obtener los hechos base.
    */
   public void recalcularHechosConsensuados(RepositorioDeSolicitudes repo) {
-    List<Fuente> fuentesNodo = this.obtenerFuentesDelNodo();
-    List<Hecho> hechos = getHechos(repo);
+    List<Hecho> hechosBase = getHechos(repo);
+    this.hechosConsensuados = aplicarConsenso(hechosBase);
+  }
 
-    if (algoritmo == null) {
-      this.hechosConsensuados = hechos;
-    } else {
-      this.hechosConsensuados = algoritmo.listaDeHechosConsensuados(hechos, fuentesNodo);
-    }
+  /**
+   * Aplica el algoritmo de consenso de la colección, si es que tiene uno.
+   *
+   * @param hechos Lista de hechos base de la colección.
+   */
+  private List<Hecho> aplicarConsenso(List<Hecho> hechos) {
+    return (algoritmo == null)
+        ? hechos
+        : algoritmo.listaDeHechosConsensuados(hechos, obtenerFuentesDelNodo());
   }
 
   /**
@@ -204,7 +168,7 @@ public class Coleccion {
    * @return Una copia de la lista de hechos consensuados.
    */
   public List<Hecho> getHechosConsensuados() {
-    return new ArrayList<>(hechosConsensuados);
+    return Collections.unmodifiableList(hechosConsensuados);
   }
 
   /**
@@ -226,7 +190,7 @@ public class Coleccion {
    */
   public boolean contieneA(Hecho unHecho, RepositorioDeSolicitudes repositorioDeReportes) {
     return this.getHechos(repositorioDeReportes)
-        .contains(unHecho);
+               .contains(unHecho);
   }
 
   /**
@@ -234,7 +198,7 @@ public class Coleccion {
    *
    * @param algoritmo El algoritmo de consenso a utilizar.
    */
-  public void setAlgoritmoDeConcenso(AlgoritmoDeConsenso algoritmo) {
+  public void setAlgoritmoDeCoscenso(AlgoritmoDeConsenso algoritmo) {
     this.algoritmo = algoritmo;
   }
 
@@ -252,6 +216,4 @@ public class Coleccion {
       return List.of(this.fuente);
     }
   }
-
 }
-

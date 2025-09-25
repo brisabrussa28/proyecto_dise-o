@@ -95,13 +95,18 @@ public class AlgoritmoDeConsensoTest {
         );
         agregador.forzarActualizacionSincrona();
 
-        Coleccion coleccion = new Coleccion("AbsolutaOk", agregador, "Desc", "Categoria", absoluta);
-        coleccion.recalcularHechosConsensuados(repo);
-        List<Hecho> result = coleccion.getHechosConsensuados();
-        assertEquals(2, result.size());
-        assertTrue(result.contains(h1));
-        assertTrue(result.contains(h2));
-    }
+    Coleccion coleccion = new Coleccion(
+        "AbsolutaOk",
+        agregador,
+        "Desc",
+        "Categoria");
+    coleccion.setAlgoritmoDeCoscenso(absoluta);
+    coleccion.recalcularHechosConsensuados(repo);
+    List<Hecho> result = coleccion.getHechosConsensuados();
+    assertEquals(2, result.size());
+    assertTrue(result.contains(h1));
+    assertTrue(result.contains(h2));
+  }
 
     @Test
     public void AlgoritmoAbsolutaHechosNoConsensuados() {
@@ -113,13 +118,18 @@ public class AlgoritmoDeConsensoTest {
         );
         agregador.forzarActualizacionSincrona();
 
-        Coleccion coleccion = new Coleccion("AbsolutaNoOk", agregador, "Desc", "Categoria", absoluta);
-        coleccion.recalcularHechosConsensuados(repo);
-        List<Hecho> result = coleccion.getHechosConsensuados();
-        assertEquals(1, result.size());
-        assertTrue(result.contains(h1));
-        assertFalse(result.contains(h2));
-    }
+    Coleccion coleccion = new Coleccion(
+        "AbsolutaNoOk",
+        agregador,
+        "Desc",
+        "Categoria");
+    coleccion.setAlgoritmoDeCoscenso(absoluta);
+    coleccion.recalcularHechosConsensuados(repo);
+    List<Hecho> result = coleccion.getHechosConsensuados();
+    assertEquals(1, result.size());
+    assertTrue(result.contains(h1));
+    assertFalse(result.contains(h2));
+  }
 
     @Test
     public void AlgoritmoMayoriaSimpleConsensuado() {
@@ -131,12 +141,17 @@ public class AlgoritmoDeConsensoTest {
         );
         agregador.forzarActualizacionSincrona();
 
-        Coleccion coleccion = new Coleccion("MayoriaOk", agregador, "Desc", "Categoria", mayoriaSimple);
-        coleccion.recalcularHechosConsensuados(repo);
-        List<Hecho> result = coleccion.getHechosConsensuados();
-        assertEquals(1, result.size());
-        assertTrue(result.contains(h1));
-    }
+    Coleccion coleccion = new Coleccion(
+        "MayoriaOk",
+        agregador,
+        "Desc",
+        "Categoria");
+    coleccion.setAlgoritmoDeCoscenso(mayoriaSimple);
+    coleccion.recalcularHechosConsensuados(repo);
+    List<Hecho> result = coleccion.getHechosConsensuados();
+    assertEquals(1, result.size());
+    assertTrue(result.contains(h1));
+  }
 
     @Test
     public void AlgoritmoMayoriaSimpleNoConsensuado() {
@@ -148,17 +163,16 @@ public class AlgoritmoDeConsensoTest {
         );
         agregador.forzarActualizacionSincrona();
 
-        Coleccion coleccion = new Coleccion(
-                "MayoriaNoOk",
-                agregador,
-                "Desc",
-                "Categoria",
-                mayoriaSimple
-        );
-        coleccion.recalcularHechosConsensuados(repo);
-        List<Hecho> result = coleccion.getHechosConsensuados();
-        assertEquals(0, result.size());
-    }
+    Coleccion coleccion = new Coleccion(
+        "MayoriaNoOk",
+        agregador,
+        "Desc",
+        "Categoria");
+    coleccion.setAlgoritmoDeCoscenso(mayoriaSimple);
+    coleccion.recalcularHechosConsensuados(repo);
+    List<Hecho> result = coleccion.getHechosConsensuados();
+    assertEquals(0, result.size());
+  }
 
     @Test
     public void testMultiplesMencionesConsensuado() {
@@ -170,18 +184,18 @@ public class AlgoritmoDeConsensoTest {
         );
         agregador.forzarActualizacionSincrona();
 
-        Coleccion coleccion = new Coleccion(
-                "MultiplesOk",
-                agregador,
-                "Desc",
-                "Categoria",
-                multiplesMenciones
-        );
-        coleccion.recalcularHechosConsensuados(repo);
-        List<Hecho> result = coleccion.getHechosConsensuados();
-        assertEquals(1, result.size());
-        assertTrue(result.contains(h1));
-    }
+    Coleccion coleccion = new Coleccion(
+        "MultiplesOk",
+        agregador,
+        "Desc",
+        "Categoria"
+    );
+    coleccion.setAlgoritmoDeCoscenso(multiplesMenciones);
+    coleccion.recalcularHechosConsensuados(repo);
+    List<Hecho> result = coleccion.getHechosConsensuados();
+    assertEquals(1, result.size());
+    assertTrue(result.contains(h1));
+  }
 
     @Test
     public void testMultiplesMencionesNoConsensuado() {
@@ -192,15 +206,15 @@ public class AlgoritmoDeConsensoTest {
         );
         agregador.forzarActualizacionSincrona();
 
-        Coleccion coleccion = new Coleccion(
-                "MultiplesNoOk",
-                agregador,
-                "Desc",
-                "Categoria",
-                multiplesMenciones
-        );
-        coleccion.recalcularHechosConsensuados(repo);
-        List<Hecho> result = coleccion.getHechosConsensuados();
+    Coleccion coleccion = new Coleccion(
+        "MultiplesNoOk",
+        agregador,
+        "Desc",
+        "Categoria"
+    );
+    coleccion.setAlgoritmoDeCoscenso(multiplesMenciones);
+    coleccion.recalcularHechosConsensuados(repo);
+    List<Hecho> result = coleccion.getHechosConsensuados();
 
         // El hecho está en solo una fuente -> no hay consenso de "múltiples menciones"
         assertEquals(0, result.size());
