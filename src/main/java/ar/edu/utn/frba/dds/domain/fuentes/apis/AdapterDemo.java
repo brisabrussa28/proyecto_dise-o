@@ -9,6 +9,7 @@ import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -43,9 +44,7 @@ public class AdapterDemo implements FuenteAdapter {
           Hecho hecho = construirHechoIndividual(datos);
           nuevosHechos.add(hecho);
         } catch (ConexionFuenteDemoException e) {
-          logger.warning("Se omitió este hecho de la fuente por datos inválidos. Causa: "
-                             + e.getCause()
-                                .getMessage());
+          logger.warning("Se omitió este hecho por datos inválidos");
         }
       }
       this.ultimaActualizacion = LocalDateTime.now();
@@ -55,19 +54,6 @@ public class AdapterDemo implements FuenteAdapter {
     }
   }
 
-  /**
-   * Genera una configuración JSON que incluye el tipo de adaptador y la URL del servicio.
-   *
-   * @return Un String con la configuración en formato JSON.
-   */
-  @Override
-  public String getConfiguracionJson() {
-    ObjectMapper mapper = new ObjectMapper();
-    ObjectNode config = mapper.createObjectNode();
-    config.put("tipo", "DEMO");
-    config.put("url", url.toString());
-    return config.toString();
-  }
 
   private Hecho construirHechoIndividual(Map<String, Object> datos) {
     try {
@@ -89,14 +75,14 @@ public class AdapterDemo implements FuenteAdapter {
       }
 
       LocalDateTime fechaSuceso = datos.get("fechaSuceso") != null
-                                  ? LocalDateTime.parse((String) datos.get("fechaSuceso")) :
-                                  null;
+          ? LocalDateTime.parse((String) datos.get("fechaSuceso")) :
+          null;
       LocalDateTime fechaCarga = datos.get("fechaCarga") != null
-                                 ? LocalDateTime.parse((String) datos.get("fechaCarga")) :
-                                 null;
+          ? LocalDateTime.parse((String) datos.get("fechaCarga")) :
+          null;
       Origen fuenteOrigen = datos.get("fuenteOrigen") != null
-                            ? Origen.valueOf((String) datos.get("fuenteOrigen")) :
-                            null;
+          ? Origen.valueOf((String) datos.get("fuenteOrigen")) :
+          null;
 
       List<Etiqueta> etiquetas = new ArrayList<>();
       if (datos.get("etiquetas") instanceof List<?>) {

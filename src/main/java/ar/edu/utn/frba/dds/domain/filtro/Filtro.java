@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.filtro;
 
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.Condicion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 import java.util.stream.Collectors;

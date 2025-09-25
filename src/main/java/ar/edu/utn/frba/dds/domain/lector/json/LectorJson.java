@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,26 +70,7 @@ public class LectorJson<T> implements Lector<T> {
       return new ArrayList<>();
     } catch (IOException e) {
       LOGGER.log(Level.SEVERE, "Error de I/O al cargar la copia JSON " + jsonFilePath, e);
-      // En un caso real, se podría relanzar una excepción personalizada.
       return new ArrayList<>();
-    }
-  }
-
-  /**
-   * Devuelve la configuración del lector en formato JSON.
-   *
-   * @return Un string con la configuración en JSON.
-   */
-  @Override
-  public String getConfiguracionJson() {
-    ObjectNode configNode = objectMapper.createObjectNode();
-    configNode.put("formato", "JSON");
-    try {
-      return objectMapper.writerWithDefaultPrettyPrinter()
-                         .writeValueAsString(configNode);
-    } catch (JsonProcessingException e) {
-      LOGGER.log(Level.SEVERE, "Error al generar la configuración JSON para LectorJson", e);
-      return "{\"error\":\"No se pudo generar la configuración\"}";
     }
   }
 }

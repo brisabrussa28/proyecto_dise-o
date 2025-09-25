@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds.domain.fuentes.apis.conexion;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -43,7 +44,8 @@ public class Conexion {
       String json = in.lines().collect(Collectors.joining());
       in.close();
 
-      return objectMapper.readValue(json, new TypeReference<>() {});
+      return objectMapper.readValue(json, new TypeReference<>() {
+      });
     } catch (Exception e) {
       throw new RuntimeException("Fallo la conexión: " + e.getMessage(), e);
     }

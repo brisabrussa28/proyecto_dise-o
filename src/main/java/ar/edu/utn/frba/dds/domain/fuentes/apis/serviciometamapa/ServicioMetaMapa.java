@@ -7,17 +7,22 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
+
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServicioMetaMapa {
+  private static final Logger logger = Logger.getLogger(ServicioMetaMapa.class.getName());
   private final Retrofit retrofit;
   private final String urlApi; // Guardamos la URL para poder recuperarla.
 
@@ -40,46 +45,54 @@ public class ServicioMetaMapa {
 
   public List<Hecho> listadoDeHechos(HechoQuerys querys) throws IOException {
     MetaMapaService metaMapaService = this.retrofit.create(MetaMapaService.class);
+
+    String ubicacionStr = querys.getUbicacion() != null ?
+                          querys.getUbicacion()
+                                .toString() :
+                          null;
+
     Call<List<Hecho>> requestListadoDeHechos = metaMapaService.hechos(
         querys.getCategoria(),
-        querys.getUbicacion()
-              .toString(),
-        querys.getFechaReporteDesde(),
-        querys.getFechaReporteHasta(),
+        ubicacionStr,
+        querys.getFechaCargaDesde(),
+        querys.getFechaCargaHasta(),
         querys.getFechaAcontecimientoDesde(),
         querys.getFechaAcontecimientoHasta()
     );
-    Response<List<Hecho>> listadoDeHechosResponse = requestListadoDeHechos.execute();
-    List<Hecho> listadoDeHechos = listadoDeHechosResponse.body();
+    Response<List<Hecho>> response = requestListadoDeHechos.execute();
 
-    // Ensure the returned object is not null
-    if (listadoDeHechos == null) {
-      listadoDeHechos = new ArrayList<>();
+    if (!response.isSuccessful() || response.body() == null) {
+      logger.warning("La solicitud a MetaMapa no fue exitosa o no tuvo body");
+      return Collections.emptyList();
     }
 
-    return listadoDeHechos;
+    return response.body();
   }
 
   public List<Hecho> listadoDeHechosPorColeccion(int id, HechoQuerys querys) throws IOException {
     MetaMapaService metaMapaService = this.retrofit.create(MetaMapaService.class);
+
+    String ubicacionStr = querys.getUbicacion() != null ?
+                          querys.getUbicacion()
+                                .toString() :
+                          null;
+
     Call<List<Hecho>> requestListadoDeHechos = metaMapaService.hechos(
         id,
         querys.getCategoria(),
-        querys.getUbicacion()
-              .toString(),
-        querys.getFechaReporteDesde(),
-        querys.getFechaReporteHasta(),
+        ubicacionStr,
+        querys.getFechaCargaDesde(),
+        querys.getFechaCargaHasta(),
         querys.getFechaAcontecimientoDesde(),
         querys.getFechaAcontecimientoHasta()
     );
-    Response<List<Hecho>> listadoDeHechosResponse = requestListadoDeHechos.execute();
-    List<Hecho> listadoDeHechos = listadoDeHechosResponse.body();
-
-    if (listadoDeHechos == null) {
-      listadoDeHechos = new ArrayList<>();
+    Response<List<Hecho>> response = requestListadoDeHechos.execute();
+    if (!response.isSuccessful() || response.body() == null) {
+      logger.warning("La solicitud a MetaMapa no fue exitosa. Código");
+      return Collections.emptyList();
     }
 
-    return listadoDeHechos;
+    return response.body();
   }
 
   public int enviarSolicitud(Solicitud solicitud) throws IOException {
@@ -89,7 +102,7 @@ public class ServicioMetaMapa {
     return response.code(); // ⬅ Devuelve el código HTTP
   }
 
-  // Adaptador para serializar/deserializar LocalDateTime con Gson
+
   static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
@@ -104,6 +117,10 @@ public class ServicioMetaMapa {
 
     @Override
     public LocalDateTime read(JsonReader in) throws IOException {
+      if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
+        in.nextNull();
+        return null;
+      }
       String str = in.nextString();
       return (str != null && !str.isEmpty()) ? LocalDateTime.parse(str, formatter) : null;
     }

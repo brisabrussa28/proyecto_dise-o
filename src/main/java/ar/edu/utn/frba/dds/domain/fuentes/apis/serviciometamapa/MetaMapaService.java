@@ -2,8 +2,10 @@ package ar.edu.utn.frba.dds.domain.fuentes.apis.serviciometamapa;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
+
 import java.time.LocalDateTime;
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;

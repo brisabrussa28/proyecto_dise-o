@@ -10,6 +10,7 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -66,7 +67,7 @@ public class ExportadorCSV<T> implements Exportador<T> {
         HeaderColumnNameMappingStrategy<T> strategy =
             this.crearEstrategiaDeMapeo(
                 (Class<? extends T>) objetos.get(0)
-                                            .getClass(),
+                    .getClass(),
                 escribirCabecera
             );
 
@@ -101,36 +102,6 @@ public class ExportadorCSV<T> implements Exportador<T> {
     Path parentDir = filePath.getParent();
     if (parentDir != null && !Files.exists(parentDir)) {
       Files.createDirectories(parentDir);
-    }
-  }
-
-  /**
-   * Devuelve la configuración del exportador en formato JSON.
-   *
-   * @return Un string con la configuración en JSON.
-   */
-  @Override
-  public String getConfiguracionJson() {
-    ObjectMapper objectMapper = new ObjectMapper();
-    ObjectNode configNode = objectMapper.createObjectNode();
-
-    configNode.put("formato", "CSV");
-    configNode.put("separador", String.valueOf(this.separador));
-    configNode.put("quote", String.valueOf(this.quote));
-
-    String modoStr = this.modoExportacion.getClass()
-                                         .getSimpleName();
-    if (modoStr.startsWith("Modo")) {
-      modoStr = modoStr.substring(4);
-    }
-    configNode.put("modo", modoStr.toUpperCase());
-
-    try {
-      return objectMapper.writerWithDefaultPrettyPrinter()
-                         .writeValueAsString(configNode);
-    } catch (JsonProcessingException e) {
-      logger.log(Level.SEVERE, "Error al generar la configuración JSON para ExportadorCSV", e);
-      return "{\"error\":\"No se pudo generar la configuración\"}";
     }
   }
 }

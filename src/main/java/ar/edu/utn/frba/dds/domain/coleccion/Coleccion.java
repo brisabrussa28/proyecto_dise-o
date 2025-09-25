@@ -2,15 +2,16 @@ package ar.edu.utn.frba.dds.domain.coleccion;
 
 import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.AlgoritmoDeConsenso;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionFactory;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion.Condicion;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.Condicion;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
+
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -29,11 +30,12 @@ public class Coleccion {
   @GeneratedValue
   Long id;
   @OneToOne
-  private final Fuente fuente;
-  private final String titulo;
-  private final String descripcion;
-  private final String categoria;
-  private String condicionJson;
+  private Fuente fuente;
+  private String titulo;
+  private String descripcion;
+  private String categoria;
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  private Condicion condicion;
   @ManyToOne
   private AlgoritmoDeConsenso algoritmo;
   @ManyToMany
@@ -71,7 +73,7 @@ public class Coleccion {
     this.fuente = fuente;
     this.descripcion = descripcion;
     this.categoria = categoria;
-    this.condicionJson = "{}";
+    this.condicion = new CondicionTrue();
   }
 
   /**
@@ -107,8 +109,11 @@ public class Coleccion {
     this.fuente = fuente;
     this.descripcion = descripcion;
     this.categoria = categoria;
-    this.condicionJson = "{}";
+    this.condicion = new CondicionTrue();
     this.algoritmo = algoritmo;
+  }
+
+  public Coleccion() {
   }
 
   /**
@@ -144,7 +149,6 @@ public class Coleccion {
    * @return Un objeto {@link Filtro} listo para ser usado.
    */
   public Filtro getFiltro() {
-    Condicion condicion = new CondicionFactory().crearCondicionDesdeJson(condicionJson);
     return new Filtro(condicion);
   }
 
@@ -155,11 +159,7 @@ public class Coleccion {
    * @param condicion El objeto {@link Condicion} que define el filtro.
    */
   public void setCondicion(Condicion condicion) {
-    if (condicion != null) {
-      this.condicionJson = condicion.unStringJson();
-    } else {
-      this.condicionJson = "{}";
-    }
+    this.condicion = condicion;
   }
 
   /**
@@ -174,11 +174,11 @@ public class Coleccion {
 
     // 2. Aplica el filtro de exclusión del repositorio
     List<Hecho> hechosSinExcluidos = repo.filtroExcluyente()
-                                         .filtrar(hechosFuente);
+        .filtrar(hechosFuente);
 
     // 3. Aplica el filtro propio de la colección
     return this.getFiltro()
-               .filtrar(hechosSinExcluidos);
+        .filtrar(hechosSinExcluidos);
   }
 
   /**
@@ -226,7 +226,7 @@ public class Coleccion {
    */
   public boolean contieneA(Hecho unHecho, RepositorioDeSolicitudes repositorioDeReportes) {
     return this.getHechos(repositorioDeReportes)
-               .contains(unHecho);
+        .contains(unHecho);
   }
 
   /**

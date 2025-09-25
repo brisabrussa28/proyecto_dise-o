@@ -1,12 +1,25 @@
-package ar.edu.utn.frba.dds.domain.filtro.condiciones.condicion;
+package ar.edu.utn.frba.dds.domain.filtro.condiciones;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
+import javax.persistence.CascadeType;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+
+@Entity
+@DiscriminatorValue("Cond_not")
 public class CondicionNot extends Condicion {
+
+  @ManyToOne(cascade = CascadeType.ALL)
   private Condicion condicion;
 
+  public CondicionNot() {
+  }
+
+  public CondicionNot(Condicion condicion) {
+    this.condicion = condicion;
+  }
 
   @Override
   public boolean evaluar(Hecho hecho) {
@@ -16,7 +29,8 @@ public class CondicionNot extends Condicion {
     return !this.condicion.evaluar(hecho);
   }
 
-  // Getters y Setters
+  // --- Getters y Setters ---
+
   public Condicion getCondicion() {
     return condicion;
   }
@@ -24,13 +38,4 @@ public class CondicionNot extends Condicion {
   public void setCondicion(Condicion condicion) {
     this.condicion = condicion;
   }
-
-  @Override
-  public Map<String, Object> unMap() {
-    Map<String, Object> mapa = new LinkedHashMap<>();
-    mapa.put("logica", "NOT");
-    mapa.put("condicion", this.condicion.unMap());
-    return mapa;
-  }
-
 }

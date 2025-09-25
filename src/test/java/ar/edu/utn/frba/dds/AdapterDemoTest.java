@@ -13,8 +13,6 @@ import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterDemo;
-import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterFactory;
-import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterMetaMapa;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.conexion.Conexion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -103,14 +101,6 @@ public class AdapterDemoTest {
       assertThrows(ConexionFuenteDemoException.class, () -> adapter.consultarHechos());
     }
 
-    @Test
-    @DisplayName("Genera la configuración en formato JSON correctamente")
-    void getConfiguracionJsonEsCorrecta() throws JsonProcessingException {
-      String configJson = adapter.getConfiguracionJson();
-      JsonNode node = new ObjectMapper().readTree(configJson);
-      assertEquals("DEMO", node.get("tipo").asText());
-      assertEquals(dummyUrl.toString(), node.get("url").asText());
-    }
 
     @Test
     @DisplayName("Usa la fecha de última actualización en consultas subsecuentes")

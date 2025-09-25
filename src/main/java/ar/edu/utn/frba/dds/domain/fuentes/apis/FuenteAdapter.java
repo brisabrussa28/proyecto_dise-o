@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.fuentes.apis;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -18,10 +19,4 @@ public interface FuenteAdapter {
    */
   List<Hecho> consultarHechos() throws IOException;
 
-  /**
-   * Devuelve la configuración del adaptador en formato JSON para poder persistirla.
-   *
-   * @return Un String con la configuración en formato JSON.
-   */
-  String getConfiguracionJson();
 }

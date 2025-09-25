@@ -59,23 +59,6 @@ public class AdapterMetaMapaTest {
     verify(servicioMetaMapaMock).listadoDeHechos(queryMock);
   }
 
-  @Test
-  @DisplayName("Adapter genera un JSON de configuración válido")
-  void getConfiguracionJsonGeneraJsonValido() throws Exception {
-    String urlApi = "http://localhost:8080/";
-    when(servicioMetaMapaMock.getUrlApi()).thenReturn(urlApi);
-
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.registerModule(new JavaTimeModule());
-
-    String jsonConfig = adapter.getConfiguracionJson();
-    JsonNode rootNode = mapper.readTree(jsonConfig);
-
-    assertEquals("METAMAPA", rootNode.get("tipo").asText());
-    assertEquals(urlApi, rootNode.get("url").asText());
-    assertEquals("Robo", rootNode.get("query").get("categoria").asText());
-    assertEquals("BsAs", rootNode.get("query").get("provincia").asText());
-  }
 
   // --- Pruebas para el Value Object HechoQuerys ---
   @Nested
