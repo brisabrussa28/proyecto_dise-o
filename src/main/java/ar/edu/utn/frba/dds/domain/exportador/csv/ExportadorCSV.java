@@ -10,6 +10,7 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -66,7 +67,7 @@ public class ExportadorCSV<T> implements Exportador<T> {
         HeaderColumnNameMappingStrategy<T> strategy =
             this.crearEstrategiaDeMapeo(
                 (Class<? extends T>) objetos.get(0)
-                                            .getClass(),
+                    .getClass(),
                 escribirCabecera
             );
 

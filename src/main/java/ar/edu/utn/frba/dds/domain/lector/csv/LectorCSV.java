@@ -10,6 +10,7 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -58,7 +59,7 @@ public class LectorCSV<T> implements Lector<T> {
         CSVReader reader = new CSVReaderBuilder(
             new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8)
         ).withCSVParser(new CSVParserBuilder().withSeparator(separator)
-                                              .build()).build()
+            .build()).build()
     ) {
       String[] headers = reader.readNext();
       if (headers == null || headers.length == 0) {

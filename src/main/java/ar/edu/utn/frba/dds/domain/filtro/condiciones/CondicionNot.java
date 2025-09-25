@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.filtro.condiciones;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+
 import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;

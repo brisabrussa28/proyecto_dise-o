@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.domain.fuentes;
 import ar.edu.utn.frba.dds.domain.exportador.configuracion.ConfiguracionExportador;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,6 +54,7 @@ public class FuenteDeAgregacion extends FuenteDeCopiaLocal {
 
   /**
    * Agrega una fuente a la lista de fuentes que serán agregadas.
+   *
    * @param fuente La fuente a agregar.
    */
   public void agregarFuente(Fuente fuente) {
@@ -64,6 +66,7 @@ public class FuenteDeAgregacion extends FuenteDeCopiaLocal {
 
   /**
    * Obtiene una copia de la lista de fuentes cargadas.
+   *
    * @return Una nueva lista conteniendo las fuentes.
    */
   public List<Fuente> getFuentesCargadas() {
@@ -73,7 +76,7 @@ public class FuenteDeAgregacion extends FuenteDeCopiaLocal {
   /**
    * Consulta los hechos de todas las fuentes cargadas, los combina
    * en una sola lista y elimina duplicados.
-   * Esta es la lógica principal de la clase.
+   *
    * @return La lista consolidada de hechos.
    */
   @Override
@@ -82,8 +85,8 @@ public class FuenteDeAgregacion extends FuenteDeCopiaLocal {
       return new ArrayList<>();
     }
     return this.fuentesCargadas.stream()
-                               .flatMap(fuente -> fuente.obtenerHechos().stream())
-                               .distinct()
-                               .collect(Collectors.toList());
+        .flatMap(fuente -> fuente.obtenerHechos().stream())
+        .distinct()
+        .collect(Collectors.toList());
   }
 }

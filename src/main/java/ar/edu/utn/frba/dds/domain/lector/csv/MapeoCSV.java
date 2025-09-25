@@ -12,34 +12,34 @@ import java.util.List;
 @Entity
 public class MapeoCSV {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+  @Id
+  @GeneratedValue
+  private Long id;
 
-    // Se cambia a String para hacerlo genérico y no depender de un Enum específico.
-    @Column(name = "campo_destino")
-    private String campo;
+  // Se cambia a String para hacerlo genérico y no depender de un Enum.
+  @Column(name = "campo_destino")
+  private String campo;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "mapeo_csv_nombres_columna", joinColumns = @JoinColumn(name = "mapeo_id"))
-    @Column(name = "nombre_columna")
-    private List<String> nombresColumnas = new ArrayList<>();
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "mapeo_csv_nombres_columna", joinColumns = @JoinColumn(name = "mapeo_id"))
+  @Column(name = "nombre_columna")
+  private List<String> nombresColumnas = new ArrayList<>();
 
-    // Constructor para JPA
-    protected MapeoCSV() {}
+  // Constructor para JPA
+  protected MapeoCSV() {
+  }
 
-    // Constructor actualizado para aceptar un String como clave del campo.
-    public MapeoCSV(String campo, List<String> nombresColumnas) {
-        this.campo = campo;
-        this.nombresColumnas = nombresColumnas;
-    }
+  public MapeoCSV(String campo, List<String> nombresColumnas) {
+    this.campo = campo;
+    this.nombresColumnas = nombresColumnas;
+  }
 
-    public String getCampo() {
-        return campo;
-    }
+  public String getCampo() {
+    return campo;
+  }
 
-    public List<String> getNombresColumnas() {
-        return nombresColumnas;
-    }
+  public List<String> getNombresColumnas() {
+    return nombresColumnas;
+  }
 }
 

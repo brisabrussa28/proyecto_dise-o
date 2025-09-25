@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.fuentes.apis.configuracion;
 
 import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
+
 import javax.persistence.*;
 
 @Entity

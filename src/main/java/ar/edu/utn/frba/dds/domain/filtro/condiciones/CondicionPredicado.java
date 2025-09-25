@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.filtro.condiciones;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+
 import java.util.function.Predicate;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -12,11 +13,11 @@ import javax.persistence.Transient;
  * El campo 'predicado' es transitorio y debe ser asignado en tiempo de ejecución.
  */
 @Entity
-@DiscriminatorValue("Cond_predicado") // Necesario para la estrategia SINGLE_TABLE
+@DiscriminatorValue("Cond_predicado")
 public class CondicionPredicado extends Condicion {
 
   @Transient
-  private Predicate<Hecho> predicado; // Se quita 'final' para poder asignarlo después
+  private Predicate<Hecho> predicado;
 
   public CondicionPredicado() {
   }
@@ -34,7 +35,6 @@ public class CondicionPredicado extends Condicion {
     return predicado.test(hecho);
   }
 
-  // --- Getter y Setter necesarios para hibernate ---
   public Predicate<Hecho> getPredicado() {
     return predicado;
   }

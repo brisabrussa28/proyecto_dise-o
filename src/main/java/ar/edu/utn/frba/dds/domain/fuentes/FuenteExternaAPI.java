@@ -5,6 +5,7 @@ import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.configuracion.ConfiguracionAdapter;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
+
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.*;
@@ -19,7 +20,9 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private ConfiguracionAdapter configuracionAdapter;
 
-  protected FuenteExternaAPI() { super(); }
+  protected FuenteExternaAPI() {
+    super();
+  }
 
   public FuenteExternaAPI(
       String nombre,
@@ -33,8 +36,8 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
     reconstruirDependencias();
   }
 
+  //postload en fuentedecopialocal
   @Override
-  @PostLoad
   protected void reconstruirDependencias() {
     super.reconstruirDependencias(); // Reconstruye Lector y Exportador del padre
     if (this.configuracionAdapter != null) {

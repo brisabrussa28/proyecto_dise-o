@@ -8,6 +8,7 @@ import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -29,10 +30,10 @@ public class Coleccion {
   @GeneratedValue
   Long id;
   @OneToOne
-  private final Fuente fuente;
-  private final String titulo;
-  private final String descripcion;
-  private final String categoria;
+  private Fuente fuente;
+  private String titulo;
+  private String descripcion;
+  private String categoria;
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private Condicion condicion;
   @ManyToOne
@@ -72,7 +73,7 @@ public class Coleccion {
     this.fuente = fuente;
     this.descripcion = descripcion;
     this.categoria = categoria;
-    this.condicion= new CondicionTrue();
+    this.condicion = new CondicionTrue();
   }
 
   /**
@@ -108,8 +109,11 @@ public class Coleccion {
     this.fuente = fuente;
     this.descripcion = descripcion;
     this.categoria = categoria;
-    this.condicion= new CondicionTrue();
+    this.condicion = new CondicionTrue();
     this.algoritmo = algoritmo;
+  }
+
+  public Coleccion() {
   }
 
   /**
@@ -155,7 +159,7 @@ public class Coleccion {
    * @param condicion El objeto {@link Condicion} que define el filtro.
    */
   public void setCondicion(Condicion condicion) {
-      this.condicion = condicion;
+    this.condicion = condicion;
   }
 
   /**
@@ -170,11 +174,11 @@ public class Coleccion {
 
     // 2. Aplica el filtro de exclusión del repositorio
     List<Hecho> hechosSinExcluidos = repo.filtroExcluyente()
-                                         .filtrar(hechosFuente);
+        .filtrar(hechosFuente);
 
     // 3. Aplica el filtro propio de la colección
     return this.getFiltro()
-               .filtrar(hechosSinExcluidos);
+        .filtrar(hechosSinExcluidos);
   }
 
   /**
@@ -222,7 +226,7 @@ public class Coleccion {
    */
   public boolean contieneA(Hecho unHecho, RepositorioDeSolicitudes repositorioDeReportes) {
     return this.getHechos(repositorioDeReportes)
-               .contains(unHecho);
+        .contains(unHecho);
   }
 
   /**

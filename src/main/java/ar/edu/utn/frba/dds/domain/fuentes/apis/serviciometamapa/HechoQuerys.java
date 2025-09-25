@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds.domain.fuentes.apis.serviciometamapa;
 
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.time.LocalDateTime;
 
 /**
@@ -24,7 +25,7 @@ public class HechoQuerys {
 
         if (fechaAcontecimientoDesde == null || fechaCargaDesde == null) {
             throw new RuntimeException(
-                    "Se debe proveer al menos una fecha de inicio ('fechaAcontecimientoDesde' o 'fechaCargaDesde').");
+                    "Debe tener fecha de acontecimiento  y/o fecha de carga");
         }
 
         this.categoria = categoria;
@@ -36,12 +37,31 @@ public class HechoQuerys {
         this.fechaCargaHasta = fechaCargaHasta;
     }
 
-    // Getters para que Jackson pueda serializar el objeto a JSON
-    public String getCategoria() { return categoria; }
-    public String getProvincia() { return provincia; }
-    public PuntoGeografico getUbicacion() { return ubicacion; }
-    public LocalDateTime getFechaAcontecimientoDesde() { return fechaAcontecimientoDesde; }
-    public LocalDateTime getFechaAcontecimientoHasta() { return fechaAcontecimientoHasta; }
-    public LocalDateTime getFechaCargaDesde() { return fechaCargaDesde; }
-    public LocalDateTime getFechaCargaHasta() { return fechaCargaHasta; }
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public String getProvincia() {
+        return provincia;
+    }
+
+    public PuntoGeografico getUbicacion() {
+        return ubicacion;
+    }
+
+    public LocalDateTime getFechaAcontecimientoDesde() {
+        return fechaAcontecimientoDesde;
+    }
+
+    public LocalDateTime getFechaAcontecimientoHasta() {
+        return fechaAcontecimientoHasta;
+    }
+
+    public LocalDateTime getFechaCargaDesde() {
+        return fechaCargaDesde;
+    }
+
+    public LocalDateTime getFechaCargaHasta() {
+        return fechaCargaHasta;
+    }
 }

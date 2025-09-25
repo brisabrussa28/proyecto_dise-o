@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.lector.configuracion;
 
 import ar.edu.utn.frba.dds.domain.lector.Lector;
+
 import javax.persistence.*;
 
 @Entity
@@ -13,7 +14,8 @@ public abstract class ConfiguracionLector {
   private Long id;
 
   /**
-   * Actúa como una fábrica para construir el objeto Lector<T> lógico y genérico.
+   * Actúa como una fabric para construir el objeto Lector<T> lógico y genérico.
+   *
    * @param clazz La clase del objeto que se espera leer (ej. Hecho.class).
    */
   public abstract <T> Lector<T> build(Class<T> clazz);

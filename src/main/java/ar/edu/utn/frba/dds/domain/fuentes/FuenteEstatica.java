@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.domain.fuentes;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
+
 import java.util.List;
 import javax.persistence.*;
 
@@ -18,7 +19,9 @@ public class FuenteEstatica extends Fuente {
   @Transient
   private Lector<Hecho> lector;
 
-  protected FuenteEstatica() { super(); }
+  protected FuenteEstatica() {
+    super();
+  }
 
   public FuenteEstatica(String nombre, String rutaArchivo, ConfiguracionLector configLector) {
     super(nombre);

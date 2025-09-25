@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,14 +9,16 @@ import javax.persistence.*;
 
 @Entity
 @DiscriminatorValue("DINAMICA")
-public class FuenteDinamica extends Fuente { // Hereda de la base
+public class FuenteDinamica extends Fuente {
 
   // Relación persistente: solo esta clase guarda Hechos en la BD.
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "fuente_dinamica_id") // Buena práctica para OneToMany
+  @JoinColumn(name = "fuente_dinamica_id")
   private List<Hecho> hechosPersistidos;
 
-  protected FuenteDinamica() { super(); }
+  protected FuenteDinamica() {
+    super();
+  }
 
   public FuenteDinamica(String nombre) {
     super(nombre);
@@ -32,7 +35,7 @@ public class FuenteDinamica extends Fuente { // Hereda de la base
   @Override
   public List<Hecho> obtenerHechos() {
     return this.hechosPersistidos == null
-           ? Collections.emptyList()
-           : new ArrayList<>(this.hechosPersistidos);
+        ? Collections.emptyList()
+        : new ArrayList<>(this.hechosPersistidos);
   }
 }

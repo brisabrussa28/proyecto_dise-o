@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
+
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -57,7 +59,7 @@ public class ServicioMetaMapa {
         Response<List<Hecho>> response = requestListadoDeHechos.execute();
 
         if (!response.isSuccessful() || response.body() == null) {
-            logger.warning("La solicitud a MetaMapa no fue exitosa o no tuvo cuerpo. Código: " + response.code());
+            logger.warning("La solicitud a MetaMapa no fue exitosa o no tuvo body");
             return Collections.emptyList();
         }
 
@@ -73,7 +75,6 @@ public class ServicioMetaMapa {
                 id,
                 querys.getCategoria(),
                 ubicacionStr,
-                // Se usan los métodos correctos de HechoQuerys.
                 querys.getFechaCargaDesde(),
                 querys.getFechaCargaHasta(),
                 querys.getFechaAcontecimientoDesde(),
@@ -81,7 +82,7 @@ public class ServicioMetaMapa {
         );
         Response<List<Hecho>> response = requestListadoDeHechos.execute();
         if (!response.isSuccessful() || response.body() == null) {
-            logger.warning("La solicitud a MetaMapa (por colección) no fue exitosa. Código: " + response.code());
+            logger.warning("La solicitud a MetaMapa no fue exitosa. Código");
             return Collections.emptyList();
         }
 
@@ -95,7 +96,7 @@ public class ServicioMetaMapa {
         return response.code(); // ⬅ Devuelve el código HTTP
     }
 
-    // Adaptador para serializar/deserializar LocalDateTime con Gson
+
     static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
         private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 

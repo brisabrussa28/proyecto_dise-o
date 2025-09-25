@@ -101,14 +101,6 @@ public class AdapterDemoTest {
       assertThrows(ConexionFuenteDemoException.class, () -> adapter.consultarHechos());
     }
 
-    @Test
-    @DisplayName("Genera la configuración en formato JSON correctamente")
-    void getConfiguracionJsonEsCorrecta() throws JsonProcessingException {
-      String configJson = adapter.getConfiguracionJson();
-      JsonNode node = new ObjectMapper().readTree(configJson);
-      assertEquals("DEMO", node.get("tipo").asText());
-      assertEquals(dummyUrl.toString(), node.get("url").asText());
-    }
 
     @Test
     @DisplayName("Usa la fecha de última actualización en consultas subsecuentes")

@@ -4,6 +4,7 @@ package ar.edu.utn.frba.dds.domain.exportador.configuracion;
 import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.exportador.csv.ExportadorCSV;
 import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.*;
+
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -20,7 +21,8 @@ public class ConfiguracionExportadorCsv extends ConfiguracionExportador {
   private ModoExportacionEnum modo;
 
   // Constructor para JPA
-  public ConfiguracionExportadorCsv() {}
+  public ConfiguracionExportadorCsv() {
+  }
 
   // Constructor para uso general
   public ConfiguracionExportadorCsv(char separador, char quote, ModoExportacionEnum modo) {
@@ -38,11 +40,16 @@ public class ConfiguracionExportadorCsv extends ConfiguracionExportador {
 
   private ModoExportacion crearModoStrategy() {
     switch (this.modo) {
-      case ANEXAR: return new ModoAnexar();
-      case SOBRESCRIBIR: return new ModoSobrescribir();
-      case NUMERAR: return new ModoNumerar();
-      case TIMESTAMP: return new ModoTimestamp();
-      default: throw new IllegalStateException("Modo de exportación desconocido: " + this.modo);
+      case ANEXAR:
+        return new ModoAnexar();
+      case SOBRESCRIBIR:
+        return new ModoSobrescribir();
+      case NUMERAR:
+        return new ModoNumerar();
+      case TIMESTAMP:
+        return new ModoTimestamp();
+      default:
+        throw new IllegalStateException("Modo de exportación desconocido: " + this.modo);
     }
   }
 }

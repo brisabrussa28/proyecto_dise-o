@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.filtro.condiciones;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
@@ -12,5 +13,7 @@ public class CondicionTrue extends Condicion {
   }
 
   @Override
-  public boolean evaluar(Hecho hecho) {return true;}
+  public boolean evaluar(Hecho hecho) {
+    return true;
+  }
 }

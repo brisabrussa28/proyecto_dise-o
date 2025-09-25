@@ -5,6 +5,7 @@ import ar.edu.utn.frba.dds.domain.exportador.configuracion.ConfiguracionExportad
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
+
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.*;
@@ -13,7 +14,7 @@ import javax.persistence.*;
  * Clase abstracta para fuentes que usan una copia local como caché EN MEMORIA.
  * Persiste la configuración de su Lector y Exportador a través de entidades.
  */
-@Entity // Ya no es MappedSuperclass, participa en la herencia
+@Entity
 public abstract class FuenteDeCopiaLocal extends Fuente {
 
   protected String rutaCopiaLocal;
@@ -33,7 +34,9 @@ public abstract class FuenteDeCopiaLocal extends Fuente {
   @Transient
   protected Exportador<Hecho> exportador;
 
-  protected FuenteDeCopiaLocal() { super(); }
+  protected FuenteDeCopiaLocal() {
+    super();
+  }
 
   public FuenteDeCopiaLocal(
       String nombre,

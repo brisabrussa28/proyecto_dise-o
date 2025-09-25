@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+
 import java.util.List;
 import javax.persistence.*;
 
@@ -16,7 +17,8 @@ public abstract class Fuente {
 
   protected String nombre;
 
-  protected Fuente() {}
+  protected Fuente() {
+  }
 
   public Fuente(String nombre) {
     if (nombre == null || nombre.isEmpty()) {

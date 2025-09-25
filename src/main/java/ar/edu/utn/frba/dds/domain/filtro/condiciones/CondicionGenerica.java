@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.filtro.condiciones;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import javax.persistence.DiscriminatorValue;
@@ -86,10 +87,27 @@ public class CondicionGenerica extends Condicion {
 
 
   // --- Getters y Setters ---
-  public String getCampo() { return campo; }
-  public void setCampo(String campo) { this.campo = campo; }
-  public Operador getOperador() { return operador; }
-  public void setOperador(Operador operador) { this.operador = operador; }
-  public String getValor() { return valor; }
-  public void setValor(String valor) { this.valor = valor; }
+  public String getCampo() {
+    return campo;
+  }
+
+  public void setCampo(String campo) {
+    this.campo = campo;
+  }
+
+  public Operador getOperador() {
+    return operador;
+  }
+
+  public void setOperador(Operador operador) {
+    this.operador = operador;
+  }
+
+  public String getValor() {
+    return valor;
+  }
+
+  public void setValor(String valor) {
+    this.valor = valor;
+  }
 }
