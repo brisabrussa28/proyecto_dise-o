@@ -53,7 +53,7 @@
 
 ## Correcciones PT4
 - [X] Evitar la serialización directa de la lógica de filtros.
-- [ ] Implementar la reconstrucción de filtros con callbacks de JPA (@PostLoad).
+- [x] Implementar la reconstrucción de filtros con callbacks de JPA (@PostLoad).
 - [X] Definir estrategia de mapeo de herencia para entidades.
 - [X] Los Hechos de fuentes externas (CSV, API, caché) no se persisten.
 - [ ] Migrar la configuración de la base de datos a PostgreSQL.
@@ -64,7 +64,7 @@
 - [ ] Investigar el método de almacenamiento de índices de Hibernate Search (Lucene).
 - [ ] Eliminar la lógica de backups por archivo a backup por DB.
 - [ ] Rediseñar y refactorizar por completo el módulo de gestión de solicitudes.
-- [ ] Refactorizar getFiltro para que devuelva this.condicion directamente. *~KUKOIDE*
+- [x] Refactorizar getFiltro para que devuelva this.condicion directamente. *~KUKOIDE*
 - [ ] Mejorar la expresividad y diseño del módulo de Colecciones (evaluar convertirla en clase abstracta).
 - [ ] Mejorar la expresividad de los Algoritmos de Consenso (evaluar uso de SQL).
 - [ ] Mejorar la expresividad y diseño de los Exportadores.

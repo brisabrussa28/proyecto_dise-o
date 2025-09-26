@@ -29,4 +29,8 @@ public class Filtro {
                  .collect(Collectors.toList());
   }
 
+  public void setCondicion(Condicion condicion) {
+    this.condicionRaiz = condicion;
+  }
+
 }

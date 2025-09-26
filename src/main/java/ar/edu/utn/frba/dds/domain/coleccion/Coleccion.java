@@ -19,6 +19,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.PostLoad;
+import javax.persistence.Transient;
 
 /**
  * Clase Coleccion.
@@ -41,6 +43,8 @@ public class Coleccion {
   private AlgoritmoDeConsenso algoritmo;
   @ManyToMany
   private List<Hecho> hechosConsensuados = new ArrayList<>();
+  @Transient
+  private  Filtro filtro;
 
   /**
    * Constructor de la colección.
@@ -75,6 +79,18 @@ public class Coleccion {
     this.descripcion = descripcion;
     this.categoria = categoria;
     this.condicion = new CondicionTrue();
+    this.filtro = new Filtro(this.condicion);
+  }
+
+  public Coleccion() {
+
+  }
+
+  @PostLoad
+  private void inicializarFiltro() {
+      if (this.condicion != null) {
+          this.filtro = new Filtro(this.condicion);
+      }
   }
 
   /**
@@ -110,7 +126,7 @@ public class Coleccion {
    * @return Un objeto {@link Filtro} listo para ser usado.
    */
   public Filtro getFiltro() {
-    return new Filtro(condicion);
+    return filtro;
   }
 
   /**
@@ -121,6 +137,7 @@ public class Coleccion {
    */
   public void setCondicion(Condicion condicion) {
     this.condicion = condicion;
+    this.filtro.setCondicion(condicion);
   }
 
   /**
