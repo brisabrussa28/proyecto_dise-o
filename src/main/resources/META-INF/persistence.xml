@@ -25,12 +25,12 @@
             <!--            <property name="hibernate.connection.password" value=""/>-->
             <!--            <property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>-->
             <!-- Activar Hibernate con Postgres -->
-            <property name="connection.driver_class" value="org.postgresql.Driver"/>
-            <property name="connection.url"
+            <property name="hibernate.connection.driver_class" value="org.postgresql.Driver"/>
+            <property name="hibernate.connection.url"
                       value="jdbc:postgresql://localhost:5432/ddstpa"/>
-            <property name="connection.username" value="postgres"/>
-            <property name="connection.password" value="1234abcd"/>
-            <property name="dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+            <property name="hibernate.connection.username" value="postgres"/>
+            <property name="hibernate.connection.password" value="1234abcd"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
 
             <!-- Activar Hibernate Search con Lucene -->
             <property name="hibernate.search.backend.type" value="lucene"/>
