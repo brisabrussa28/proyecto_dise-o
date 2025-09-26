@@ -53,7 +53,7 @@
 
 ## Correcciones PT4
 - [X] Evitar la serialización directa de la lógica de filtros.
-- [X] Implementar la reconstrucción de filtros con callbacks de JPA (@PostLoad).
+- [ ] Implementar la reconstrucción de filtros con callbacks de JPA (@PostLoad).
 - [X] Definir estrategia de mapeo de herencia para entidades.
 - [X] Los Hechos de fuentes externas (CSV, API, caché) no se persisten.
 - [ ] Migrar la configuración de la base de datos a PostgreSQL.
