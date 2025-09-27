@@ -75,3 +75,4 @@
 - [ ] Pensar y enviarle a Bulgarelli la estrategia de almacenamiento de datos (qué se guarda, por cuánto tiempo y por qué).
 - [ ] Para las estadísticas, priorizar el almacenamiento de valores absolutos en lugar de porcentajes.
 - [x] Geolocalizar via api --> Para los csv que no tengan provincia --> Podemos utilizar APIS, bibliotecas, etc, lo decimos nosotros
+- [ ] Clase Estadistica es un bruto code smell, sólo tiene accessors y no comportamiento.
