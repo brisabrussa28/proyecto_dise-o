@@ -109,6 +109,10 @@ public class Hecho {
     return descripcion;
   }
 
+  public Long getId() {
+    return id;
+  }
+
   /**
    * Obtiene la categoría del hecho.
    *
