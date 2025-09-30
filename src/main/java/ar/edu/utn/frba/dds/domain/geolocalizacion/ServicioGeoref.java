@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.geilocalizacion;
+package ar.edu.utn.frba.dds.domain.geolocalizacion;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
