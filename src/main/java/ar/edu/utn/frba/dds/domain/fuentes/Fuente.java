@@ -9,9 +9,11 @@ import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.SequenceGenerator;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -20,7 +22,8 @@ import javax.persistence.InheritanceType;
 public abstract class Fuente {
 
   @Id
-  @GeneratedValue
+  @SequenceGenerator(name = "fuente_seq", sequenceName = "fuente_sequence", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fuente_seq")
   private Long id;
 
   protected String nombre;

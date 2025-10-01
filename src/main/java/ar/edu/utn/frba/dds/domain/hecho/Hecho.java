@@ -7,11 +7,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
@@ -24,11 +29,14 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 public class Hecho {
   // Los campos que eran 'final' ahora son no-final para permitir la deserialización de Jackson
   @Id
-  @GeneratedValue
+  @SequenceGenerator(name = "hecho_seq", sequenceName = "hecho_sequence", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hecho_seq")
   Long id;
   @OneToMany
   private List<Etiqueta> etiquetas;
   private LocalDateTime fechaCarga;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "origen", nullable = false)
   private Origen fuenteOrigen; // Ya no es final
   @FullTextField
   private String titulo;
@@ -39,6 +47,8 @@ public class Hecho {
   @Embedded
   private PuntoGeografico ubicacion;
   private LocalDateTime fechaSuceso;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado", nullable = false)
   private Estado estado;
   private String provincia;
   // Constructor público sin argumentos: NECESARIO para la deserialización de Jackson
