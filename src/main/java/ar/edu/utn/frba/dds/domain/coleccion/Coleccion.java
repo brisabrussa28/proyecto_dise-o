@@ -241,4 +241,8 @@ public class Coleccion {
       return List.of(this.fuente);
     }
   }
+
+  public Fuente getFuente() {
+    return this.fuente;
+  }
 }

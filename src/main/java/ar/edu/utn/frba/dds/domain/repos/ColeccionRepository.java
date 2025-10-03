@@ -18,13 +18,13 @@ public class ColeccionRepository {
   }
 
   public List<Coleccion> findAll() {
-    return em.createQuery("SELECT * FROM coleccion", Coleccion.class)
+    return em.createQuery("SELECT c FROM Coleccion c", Coleccion.class)
              .getResultList();
 
   }
 
   public Coleccion findById(Long id) {
-    return em.createQuery("SELECT * FROM coleccion WHERE coleccion_id = id", Coleccion.class)
+    return em.createQuery("SELECT c FROM Coleccion c WHERE c.coleccion_id = :id", Coleccion.class)
              .setParameter("id", id)
              .getSingleResult();
   }

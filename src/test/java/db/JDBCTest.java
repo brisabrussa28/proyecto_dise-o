@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 
 public class JDBCTest {
+  private ColeccionRepository repo = new ColeccionRepository();
 
   @BeforeEach
   public void setUp() {
@@ -62,8 +63,12 @@ public class JDBCTest {
     Exportador<Estadistica> exportadorCsv = new ExportadorCSV<>(new ModoSobrescribir());
     calculadora.setExportador(exportadorCsv);
 
-    var coleccion = new Coleccion("Coleccion de Hechos", fuente, "Descripcion de prueba", "General");
-    var repo = new ColeccionRepository();
+    var coleccion = new Coleccion(
+        "Coleccion de Hechos",
+        fuente,
+        "Descripcion de prueba",
+        "General"
+    );
     repo.save(coleccion);
   }
 
@@ -91,29 +96,31 @@ public class JDBCTest {
     repo.save(fuente);
   }
 
-//  @Test
-//  @DisplayName("Creo un repositorio para colecciones y puedo guardar y acceder a los mismos")
-//  public void coleccionRepositoryTest() {
-//    var fuente = new FuenteDinamica("Fuente de prueba");
-//    var repoFuente = new FuentesRepository();
-//    repoFuente.save(fuente);
-//    var repo = new ColeccionRepository();
-//    Coleccion bonaerense = new Coleccion(
-//        "Robos",
-//        fuente,
-//        "Un día más siendo del conurbano",
-//        "Robos"
-//    );
-//    repo.save(bonaerense);
-//  }
+  @Test
+  @DisplayName("Creo un repositorio para colecciones y puedo guardar y acceder a los mismos")
+  public void coleccionRepositoryTest() {
+    var fuente = new FuenteDinamica("Fuente de prueba");
+    var repoFuente = new FuentesRepository();
+    repoFuente.save(fuente);
+    var repo = new ColeccionRepository();
+    Coleccion bonaerense = new Coleccion(
+        "Robos",
+        fuente,
+        "Un día más siendo del conurbano",
+        "Robos"
+    );
+    repo.save(bonaerense);
+  }
 
   @Test
   @DisplayName("Genero estadisticas y las puedo visualizar en la db")
   public void estadisticaDBTest() {
     var calculadora = new CentralDeEstadisticas();
-    var repo = new ColeccionRepository();
-    var coleccionesDB = repo.findById(2L);
-    var stat = calculadora.provinciaConMasHechos(coleccionesDB);
+    ColeccionRepository repo = new ColeccionRepository();
+    Coleccion coleccionDB = repo.findById(1L);
+    coleccionDB.getFuente()
+               .completarProvinciasFaltantes();
+    var stat = calculadora.provinciaConMasHechos(coleccionDB);
     var repoStat = new EstadisticaRepository();
     repoStat.save(stat);
   }
