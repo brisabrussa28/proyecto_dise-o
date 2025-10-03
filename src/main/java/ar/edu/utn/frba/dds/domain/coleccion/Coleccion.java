@@ -5,9 +5,7 @@ import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.Condicion;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +30,7 @@ import javax.persistence.Transient;
  */
 @Entity
 public class Coleccion {
+
   @Id
   @SequenceGenerator(name = "coleccion_seq", sequenceName = "coleccion_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "coleccion_seq")
@@ -42,15 +41,23 @@ public class Coleccion {
   private String titulo;
   private String descripcion;
   private String categoria;
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  private Condicion condicion;
+
   @ManyToOne
   private AlgoritmoDeConsenso algoritmo;
+
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  private Condicion condicion;
+
   @ManyToMany
   @JoinTable(name = "hecho_x_coleccion")
   private List<Hecho> hechosConsensuados = new ArrayList<>();
   @Transient
   private Filtro filtro;
+
+  // --- Constructores ---
+  public Coleccion() {
+    // Constructor vacío para JPA
+  }
 
   /**
    * Constructor de la colección.
@@ -61,188 +68,149 @@ public class Coleccion {
    * @param categoria   Categoría de la colección. No puede ser nula o vacía.
    * @throws RuntimeException si alguno de los parámetros obligatorios es inválido.
    */
-  @SuppressWarnings("checkstyle:ParenPad")
-  public Coleccion(
-      String titulo,
-      Fuente fuente,
-      String descripcion,
-      String categoria
-  ) {
-    if (titulo == null || titulo.isBlank()) {
-      throw new RuntimeException("El titulo es campo obligatorio.");
-    }
-    if (fuente == null) {
-      throw new RuntimeException("La fuente es campo obligatorio.");
-    }
-    if (descripcion == null || descripcion.isBlank()) {
-      throw new RuntimeException("La descripcion es campo obligatorio.");
-    }
-    if (categoria == null || categoria.isBlank()) {
-      throw new RuntimeException("La categoria es campo obligatorio.");
-    }
+  public Coleccion(String titulo, Fuente fuente, String descripcion, String categoria) {
+    validarCamposObligatorios(titulo, fuente, descripcion, categoria);
     this.titulo = titulo;
     this.fuente = fuente;
     this.descripcion = descripcion;
     this.categoria = categoria;
-    this.condicion = new CondicionTrue();
-    this.filtro = new Filtro(this.condicion);
+    this.condicion = new CondicionTrue(); // Por defecto, no filtra nada
+    inicializarFiltro();
   }
 
-  public Coleccion() {
+  // --- Métodos de Lógica Principal ---
 
-  }
-
-  @PostLoad
-  private void inicializarFiltro() {
-    if (this.condicion != null) {
-      this.filtro = new Filtro(this.condicion);
-    }
+  /**
+   * Recalcula y actualiza la lista interna de hechos consensuados.
+   *
+   * @param filtroExcluyente Un filtro (ej. de hechos eliminados) que se aplica ANTES del filtro propio.
+   */
+  public void recalcularHechosConsensuados(Filtro filtroExcluyente) {
+    List<Hecho> hechosFiltrados = this.obtenerHechosFiltrados(filtroExcluyente);
+    this.hechosConsensuados = aplicarConsenso(hechosFiltrados);
   }
 
   /**
-   * Obtiene el título de la colección.
+   * Obtiene los hechos de la fuente y aplica una cadena de filtros
    *
-   * @return El título.
+   * @param filtroExcluyente Un filtro que se aplica primero (ej. para excluir hechos eliminados).
+   * @return Una lista de hechos completamente filtrada.
    */
-  public String getTitulo() {
-    return titulo;
-  }
-
-  /**
-   * Obtiene la descripción de la colección.
-   *
-   * @return La descripción.
-   */
-  public String getDescripcion() {
-    return descripcion;
-  }
-
-  /**
-   * Obtiene la categoría de la colección.
-   *
-   * @return La categoría.
-   */
-  public String getCategoria() {
-    return categoria;
-  }
-
-  /**
-   * Construye y devuelve el filtro persistente basado en la condición JSON almacenada.
-   *
-   * @return Un objeto {@link Filtro} listo para ser usado.
-   */
-  public Filtro getFiltro() {
-    return filtro;
-  }
-
-  /**
-   * Establece la condición de filtrado para la colección.
-   * La condición se convierte a formato JSON para su almacenamiento.
-   *
-   * @param condicion El objeto {@link Condicion} que define el filtro.
-   */
-  public void setCondicion(Condicion condicion) {
-    this.condicion = condicion;
-    this.filtro.setCondicion(condicion);
-  }
-
-  /**
-   * Obtiene los hechos de la colección después de aplicar los filtros correspondientes.
-   *
-   * @param repo El repositorio de solicitudes que contiene el filtro de exclusión.
-   * @return Una lista de hechos filtrada y lista para su visualización o uso.
-   */
-  public List<Hecho> getHechos(RepositorioDeSolicitudes repo) {
-    // Obtiene los hechos de la fuente
+  public List<Hecho> obtenerHechosFiltrados(Filtro filtroExcluyente) {
     List<Hecho> hechosFuente = fuente.obtenerHechos();
-
-    // Aplica el filtro de exclusión del repositorio
-    List<Hecho> hechosSinExcluidos = repo.filtroExcluyente()
-                                         .filtrar(hechosFuente);
-
-    // Aplica el filtro propio de la colección
-    return this.getFiltro()
-               .filtrar(hechosSinExcluidos);
+    List<Hecho> hechosSinExcluidos = filtroExcluyente.filtrar(hechosFuente);
+    return this.filtro.filtrar(hechosSinExcluidos);
   }
 
-  /**
-   * Recalcula la lista de hechos consensuados aplicando el algoritmo de consenso configurado.
-   * Si no hay algoritmo, los hechos consensuados serán los mismos que los hechos filtrados.
-   *
-   * @param repo El repositorio de solicitudes necesario para obtener los hechos base.
-   */
-  public void recalcularHechosConsensuados(RepositorioDeSolicitudes repo) {
-    List<Hecho> hechosBase = getHechos(repo);
-    this.hechosConsensuados = aplicarConsenso(hechosBase);
-  }
+
+  // --- Métodos Auxiliares y de Ayuda ---
 
   /**
-   * Aplica el algoritmo de consenso de la colección, si es que tiene uno.
+   * Verifica si la colección está asociada a una fuente específica.
    *
-   * @param hechos Lista de hechos base de la colección.
-   */
-  private List<Hecho> aplicarConsenso(List<Hecho> hechos) {
-    return (algoritmo == null)
-           ? hechos
-           : algoritmo.listaDeHechosConsensuados(hechos, obtenerFuentesDelNodo());
-  }
-
-  /**
-   * Devuelve la lista de hechos que han pasado el algoritmo de consenso.
-   *
-   * @return Una copia de la lista de hechos consensuados.
-   */
-  public List<Hecho> getHechosConsensuados() {
-    return Collections.unmodifiableList(hechosConsensuados);
-  }
-
-  /**
-   * Valida si la colección contiene una fuente específica.
-   *
-   * @param unaFuente La fuente a verificar.
-   * @return {@code true} si la colección contiene la fuente, {@code false} en caso contrario.
+   * @param unaFuente La fuente a comprobar.
+   * @return {@code true} si la fuente de la colección es la misma que la proporcionada.
    */
   public boolean contieneFuente(Fuente unaFuente) {
-    return fuente == unaFuente;
+    return this.fuente.equals(unaFuente);
   }
 
   /**
    * Verifica si un hecho está presente en la colección después de aplicar todos los filtros.
    *
-   * @param unHecho               El hecho a verificar.
-   * @param repositorioDeReportes El repositorio necesario para obtener la lista de hechos filtrados
+   * @param unHecho El hecho a verificar.
+   * @param filtroExcluyente El filtro externo necesario para una comprobación precisa.
    * @return {@code true} si el hecho está en la colección, {@code false} en caso contrario.
    */
-  public boolean contieneA(Hecho unHecho, RepositorioDeSolicitudes repositorioDeReportes) {
-    return this.getHechos(repositorioDeReportes)
-               .contains(unHecho);
+  public boolean contieneHechoFiltrado(Hecho unHecho, Filtro filtroExcluyente) {
+    return this.obtenerHechosFiltrados(filtroExcluyente).contains(unHecho);
   }
 
   /**
-   * Establece el algoritmo de consenso para la colección.
+   * Aplica el algoritmo de consenso configurado sobre una lista de hechos.
+   * Si no hay ningún algoritmo asignado, devuelve la lista de hechos original sin cambios.
    *
-   * @param algoritmo El algoritmo de consenso a utilizar.
+   * @param hechos La lista de hechos a la que se le aplicará el consenso.
+   * @return Una nueva lista con los hechos que cumplen con el criterio de consenso.
    */
-  public void setAlgoritmoDeCoscenso(AlgoritmoDeConsenso algoritmo) {
-    this.algoritmo = algoritmo;
+  private List<Hecho> aplicarConsenso(List<Hecho> hechos) {
+    if (algoritmo == null) {
+      return hechos;
+    }
+    return algoritmo.listaDeHechosConsensuados(hechos, this.fuente);
   }
 
   /**
-   * Mét0do auxiliar para obtener la lista de fuentes subyacentes.
-   * Si la fuente principal es un agregador, devuelve las fuentes que lo componen.
-   * Si es una fuente simple, la devuelve en una lista unitaria.
+   * Valida que los campos obligatorios del constructor no sean nulos o vacíos.
    *
-   * @return La lista de fuentes base.
+   * @throws IllegalArgumentException si alguna validación falla.
    */
-  private List<Fuente> obtenerFuentesDelNodo() {
-    if (this.fuente instanceof FuenteDeAgregacion agregador) {
-      return agregador.getFuentesCargadas();
-    } else {
-      return List.of(this.fuente);
+  private void validarCamposObligatorios(
+      String unTitulo, Fuente unaFuente, String unaDescripcion, String unaCategoria) {
+    if (unTitulo == null || unTitulo.isBlank()) {
+      throw new IllegalArgumentException("El titulo es un campo obligatorio.");
+    }
+    if (unaFuente == null) {
+      throw new IllegalArgumentException("La fuente es un campo obligatorio.");
+    }
+    if (unaDescripcion == null || unaDescripcion.isBlank()) {
+      throw new IllegalArgumentException("La descripcion es un campo obligatorio.");
+    }
+    if (unaCategoria == null || unaCategoria.isBlank()) {
+      throw new IllegalArgumentException("La categoria es un campo obligatorio.");
     }
   }
 
-  public Fuente getFuente() {
-    return this.fuente;
+  // --- Métodos de JPA ---
+
+  /**
+   * Inicializa el objeto Filtro transitorio después de que la entidad es cargada por JPA.
+   * Esto asegura que el filtro esté disponible para ser usado incluso en entidades recuperadas
+   * de la base de datos.
+   */
+  @PostLoad
+  private void inicializarFiltro() {
+    if (this.condicion != null) {
+      this.filtro = new Filtro(this.condicion);
+    } else {
+      this.filtro = new Filtro(new CondicionTrue());
+    }
+  }
+
+  // --- Getters y Setters ---
+
+  /**
+   * Devuelve una vista no modificable de la lista de hechos consensuados.
+   * Para actualizar esta lista, se debe llamar a recalcularHechosConsensuados().
+   *
+   * @return Una lista de solo lectura de los hechos consensuados.
+   */
+  public List<Hecho> getHechosConsensuados() {
+    return Collections.unmodifiableList(hechosConsensuados);
+  }
+
+  public String getTitulo() {
+    return titulo;
+  }
+
+  public String getDescripcion() {
+    return descripcion;
+  }
+
+  public String getCategoria() {
+    return categoria;
+  }
+
+  public Filtro getFiltro() {
+    return filtro;
+  }
+
+  public void setCondicion(Condicion condicion) {
+    this.condicion = condicion;
+    this.filtro.setCondicion(condicion);
+  }
+
+  public void setAlgoritmoDeConsenso(AlgoritmoDeConsenso algoritmo) {
+    this.algoritmo = algoritmo;
   }
 }

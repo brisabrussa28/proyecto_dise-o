@@ -23,7 +23,6 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
-import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,158 +30,154 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class AlgoritmoDeConsensoTest {
-    private RepositorioDeSolicitudes repo;
-    private Filtro filtroExcluyente;
-    private AlgoritmoDeConsenso absoluta;
-    private AlgoritmoDeConsenso mayoriaSimple;
-    private AlgoritmoDeConsenso multiplesMenciones;
-    private static final LocalDateTime fecha = LocalDateTime.of(2023, 1, 1, 0, 0);
+  private Filtro filtroExcluyente;
+  private AlgoritmoDeConsenso absoluta;
+  private AlgoritmoDeConsenso mayoriaSimple;
+  private AlgoritmoDeConsenso multiplesMenciones;
+  private static final LocalDateTime fecha = LocalDateTime.of(2023, 1, 1, 0, 0);
 
 
-    @BeforeEach
-    public void setUp() {
-        repo = mock(RepositorioDeSolicitudes.class);
-        filtroExcluyente = mock(Filtro.class);
-        when(filtroExcluyente.filtrar(anyList()))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-        when(repo.filtroExcluyente()).thenReturn(filtroExcluyente);
+  @BeforeEach
+  public void setUp() {
+    // Creamos un mock del Filtro que no hace nada (devuelve la lista que recibe)
+    // para aislar la lógica de la colección de la del repositorio.
+    filtroExcluyente = mock(Filtro.class);
+    when(filtroExcluyente.filtrar(anyList()))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
-        absoluta = new Absoluta();
-        mayoriaSimple = new MayoriaSimple();
-        multiplesMenciones = new MultiplesMenciones();
+    absoluta = new Absoluta();
+    mayoriaSimple = new MayoriaSimple();
+    multiplesMenciones = new MultiplesMenciones();
+  }
+
+  private Hecho crearHecho(String titulo) {
+    return new HechoBuilder()
+        .conTitulo(titulo)
+        .conFechaSuceso(fecha)
+        .build();
+  }
+
+  private FuenteDeAgregacion crearAgregadorConFuentes(List<Hecho>... listasDeHechos) {
+    ConfiguracionLector configLectorMock = mock(ConfiguracionLector.class);
+    ConfiguracionExportador configExportadorMock = mock(ConfiguracionExportador.class);
+    Lector<Hecho> lectorMock = mock(Lector.class);
+    Exportador<Hecho> exportadorMock = mock(Exportador.class);
+
+    doReturn(lectorMock).when(configLectorMock).build(Hecho.class);
+    doReturn(exportadorMock).when(configExportadorMock).build();
+
+    when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
+
+    FuenteDeAgregacion agregador = new FuenteDeAgregacion(
+        "AgregadorDeTest", "fake-path.json", configLectorMock, configExportadorMock
+    );
+
+    for (List<Hecho> lista : listasDeHechos) {
+      Fuente f = mock(Fuente.class);
+      when(f.obtenerHechos()).thenReturn(lista);
+      agregador.agregarFuente(f);
     }
+    return agregador;
+  }
 
-    private Hecho crearHecho(String titulo) {
-        return new HechoBuilder()
-                .conTitulo(titulo)
-                .conFechaSuceso(fecha)
-                .build();
-    }
-
-    private FuenteDeAgregacion crearAgregadorConFuentes(List<Hecho>... listasDeHechos) {
-        // 1. Mockear las entidades de CONFIGURACIÓN y de LÓGICA
-        ConfiguracionLector configLectorMock = mock(ConfiguracionLector.class);
-        ConfiguracionExportador configExportadorMock = mock(ConfiguracionExportador.class);
-        Lector<Hecho> lectorMock = mock(Lector.class);
-        Exportador<Hecho> exportadorMock = mock(Exportador.class); // <-- CORRECCIÓN: Mockear el Exportador
-
-        // 2. Programar los mocks de configuración para que CONSTRUYAN los mocks de lógica
-        doReturn(lectorMock).when(configLectorMock).build(Hecho.class);
-        doReturn(exportadorMock).when(configExportadorMock).build(); // <-- CORRECCIÓN: Programar el mock
-
-        when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
-
-        // 3. Usar el nuevo constructor con las entidades de configuración
-        FuenteDeAgregacion agregador = new FuenteDeAgregacion(
-                "AgregadorDeTest", "fake-path.json", configLectorMock, configExportadorMock
-        );
-
-        for (List<Hecho> lista : listasDeHechos) {
-            Fuente f = mock(Fuente.class);
-            when(f.obtenerHechos()).thenReturn(lista);
-            agregador.agregarFuente(f);
-        }
-        return agregador;
-    }
-
-    @Test
-    public void AlgoritmoAbsolutaHechosConsensuados() {
-        Hecho h1 = crearHecho("H1");
-        Hecho h2 = crearHecho("H2");
-        FuenteDeAgregacion agregador = crearAgregadorConFuentes(
-                List.of(h1, h2),
-                List.of(h1, h2)
-        );
-        agregador.forzarActualizacionSincrona();
+  @Test
+  public void AlgoritmoAbsolutaHechosConsensuados() {
+    Hecho h1 = crearHecho("H1");
+    Hecho h2 = crearHecho("H2");
+    FuenteDeAgregacion agregador = crearAgregadorConFuentes(
+        List.of(h1, h2),
+        List.of(h1, h2)
+    );
+    agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion(
         "AbsolutaOk",
         agregador,
         "Desc",
         "Categoria");
-    coleccion.setAlgoritmoDeCoscenso(absoluta);
-    coleccion.recalcularHechosConsensuados(repo);
+    coleccion.setAlgoritmoDeConsenso(absoluta);
+    coleccion.recalcularHechosConsensuados(filtroExcluyente); // FIX: Pasar el Filtro
     List<Hecho> result = coleccion.getHechosConsensuados();
     assertEquals(2, result.size());
     assertTrue(result.contains(h1));
     assertTrue(result.contains(h2));
   }
 
-    @Test
-    public void AlgoritmoAbsolutaHechosNoConsensuados() {
-        Hecho h1 = crearHecho("H1");
-        Hecho h2 = crearHecho("H2");
-        FuenteDeAgregacion agregador = crearAgregadorConFuentes(
-                List.of(h1, h2),
-                List.of(h1) // h2 falta en esta fuente
-        );
-        agregador.forzarActualizacionSincrona();
+  @Test
+  public void AlgoritmoAbsolutaHechosNoConsensuados() {
+    Hecho h1 = crearHecho("H1");
+    Hecho h2 = crearHecho("H2");
+    FuenteDeAgregacion agregador = crearAgregadorConFuentes(
+        List.of(h1, h2),
+        List.of(h1) // h2 falta en esta fuente
+    );
+    agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion(
         "AbsolutaNoOk",
         agregador,
         "Desc",
         "Categoria");
-    coleccion.setAlgoritmoDeCoscenso(absoluta);
-    coleccion.recalcularHechosConsensuados(repo);
+    coleccion.setAlgoritmoDeConsenso(absoluta);
+    coleccion.recalcularHechosConsensuados(filtroExcluyente); // FIX: Pasar el Filtro
     List<Hecho> result = coleccion.getHechosConsensuados();
     assertEquals(1, result.size());
     assertTrue(result.contains(h1));
     assertFalse(result.contains(h2));
   }
 
-    @Test
-    public void AlgoritmoMayoriaSimpleConsensuado() {
-        Hecho h1 = crearHecho("H1");
-        FuenteDeAgregacion agregador = crearAgregadorConFuentes(
-                List.of(h1), // Aparece en 2 de 3 fuentes
-                List.of(h1),
-                List.of()
-        );
-        agregador.forzarActualizacionSincrona();
+  @Test
+  public void AlgoritmoMayoriaSimpleConsensuado() {
+    Hecho h1 = crearHecho("H1");
+    FuenteDeAgregacion agregador = crearAgregadorConFuentes(
+        List.of(h1), // Aparece en 2 de 3 fuentes
+        List.of(h1),
+        List.of()
+    );
+    agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion(
         "MayoriaOk",
         agregador,
         "Desc",
         "Categoria");
-    coleccion.setAlgoritmoDeCoscenso(mayoriaSimple);
-    coleccion.recalcularHechosConsensuados(repo);
+    coleccion.setAlgoritmoDeConsenso(mayoriaSimple);
+    coleccion.recalcularHechosConsensuados(filtroExcluyente); // FIX: Pasar el Filtro
     List<Hecho> result = coleccion.getHechosConsensuados();
     assertEquals(1, result.size());
     assertTrue(result.contains(h1));
   }
 
-    @Test
-    public void AlgoritmoMayoriaSimpleNoConsensuado() {
-        Hecho h1 = crearHecho("H1");
-        FuenteDeAgregacion agregador = crearAgregadorConFuentes(
-                List.of(h1), // Aparece en 1 de 3 fuentes, no es mayoría
-                List.of(),
-                List.of()
-        );
-        agregador.forzarActualizacionSincrona();
+  @Test
+  public void AlgoritmoMayoriaSimpleNoConsensuado() {
+    Hecho h1 = crearHecho("H1");
+    FuenteDeAgregacion agregador = crearAgregadorConFuentes(
+        List.of(h1), // Aparece en 1 de 3 fuentes, no es mayoría
+        List.of(),
+        List.of()
+    );
+    agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion(
         "MayoriaNoOk",
         agregador,
         "Desc",
         "Categoria");
-    coleccion.setAlgoritmoDeCoscenso(mayoriaSimple);
-    coleccion.recalcularHechosConsensuados(repo);
+    coleccion.setAlgoritmoDeConsenso(mayoriaSimple);
+    coleccion.recalcularHechosConsensuados(filtroExcluyente); // FIX: Pasar el Filtro
     List<Hecho> result = coleccion.getHechosConsensuados();
     assertEquals(0, result.size());
   }
 
-    @Test
-    public void testMultiplesMencionesConsensuado() {
-        Hecho h1 = crearHecho("H1");
-        FuenteDeAgregacion agregador = crearAgregadorConFuentes(
-                List.of(h1), // Aparece en 2 de 3 fuentes
-                List.of(h1),
-                List.of()
-        );
-        agregador.forzarActualizacionSincrona();
+  @Test
+  public void testMultiplesMencionesConsensuado() {
+    Hecho h1 = crearHecho("H1");
+    FuenteDeAgregacion agregador = crearAgregadorConFuentes(
+        List.of(h1), // Aparece en 2 de 3 fuentes
+        List.of(h1),
+        List.of()
+    );
+    agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion(
         "MultiplesOk",
@@ -190,21 +185,21 @@ public class AlgoritmoDeConsensoTest {
         "Desc",
         "Categoria"
     );
-    coleccion.setAlgoritmoDeCoscenso(multiplesMenciones);
-    coleccion.recalcularHechosConsensuados(repo);
+    coleccion.setAlgoritmoDeConsenso(multiplesMenciones);
+    coleccion.recalcularHechosConsensuados(filtroExcluyente); // FIX: Pasar el Filtro
     List<Hecho> result = coleccion.getHechosConsensuados();
     assertEquals(1, result.size());
     assertTrue(result.contains(h1));
   }
 
-    @Test
-    public void testMultiplesMencionesNoConsensuado() {
-        Hecho h1 = crearHecho("H1");
-        FuenteDeAgregacion agregador = crearAgregadorConFuentes(
-                List.of(h1), // Aparece solo en 1 de 2 fuentes
-                List.of()
-        );
-        agregador.forzarActualizacionSincrona();
+  @Test
+  public void testMultiplesMencionesNoConsensuado() {
+    Hecho h1 = crearHecho("H1");
+    FuenteDeAgregacion agregador = crearAgregadorConFuentes(
+        List.of(h1), // Aparece solo en 1 de 2 fuentes
+        List.of()
+    );
+    agregador.forzarActualizacionSincrona();
 
     Coleccion coleccion = new Coleccion(
         "MultiplesNoOk",
@@ -212,11 +207,11 @@ public class AlgoritmoDeConsensoTest {
         "Desc",
         "Categoria"
     );
-    coleccion.setAlgoritmoDeCoscenso(multiplesMenciones);
-    coleccion.recalcularHechosConsensuados(repo);
+    coleccion.setAlgoritmoDeConsenso(multiplesMenciones);
+    coleccion.recalcularHechosConsensuados(filtroExcluyente); // FIX: Pasar el Filtro
     List<Hecho> result = coleccion.getHechosConsensuados();
 
-        // El hecho está en solo una fuente -> no hay consenso de "múltiples menciones"
-        assertEquals(0, result.size());
-    }
+    // El hecho está en solo una fuente -> no hay consenso de "múltiples menciones"
+    assertEquals(0, result.size());
+  }
 }

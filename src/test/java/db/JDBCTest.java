@@ -6,6 +6,8 @@ import ar.edu.utn.frba.dds.domain.estadisicas.Estadistica;
 import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.exportador.csv.ExportadorCSV;
 import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoSobrescribir;
+import ar.edu.utn.frba.dds.domain.filtro.Filtro;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
@@ -17,9 +19,10 @@ import ar.edu.utn.frba.dds.domain.repos.ColeccionRepository;
 import ar.edu.utn.frba.dds.domain.repos.EstadisticaRepository;
 import ar.edu.utn.frba.dds.domain.repos.FuentesRepository;
 import java.time.LocalDateTime;
-import org.junit.Test;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 public class JDBCTest {
   private ColeccionRepository repo = new ColeccionRepository();
@@ -29,6 +32,7 @@ public class JDBCTest {
     final DetectorSpam detector = texto -> texto.contains("Troll");
     var fuente = new FuenteDinamica("Fuente para Estadísticas");
 
+    var ubicacion = new PuntoGeografico(235,-5123);
     LocalDateTime hora = LocalDateTime.now();
 
     var hecho1 = new HechoBuilder()
@@ -36,6 +40,8 @@ public class JDBCTest {
         .conCategoria("Robos")
         .conProvincia("CABA")
         .conFechaSuceso(hora.minusHours(1))
+        .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .conUbicacion(ubicacion)
         .build();
 
     var hecho2 = new HechoBuilder()
@@ -43,6 +49,8 @@ public class JDBCTest {
         .conCategoria("Robos")
         .conProvincia("CABA")
         .conFechaSuceso(hora.minusHours(1))
+        .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .conUbicacion(ubicacion)
         .build();
 
     var hecho3 = new HechoBuilder()
@@ -50,11 +58,16 @@ public class JDBCTest {
         .conCategoria("Hurtos")
         .conProvincia("PBA")
         .conFechaSuceso(hora.minusHours(2))
+        .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .conUbicacion(ubicacion)
         .build();
 
     fuente.agregarHecho(hecho1);
     fuente.agregarHecho(hecho2);
     fuente.agregarHecho(hecho3);
+
+    FuentesRepository repoFuentes = new FuentesRepository();
+    repoFuentes.save(fuente);
 
     var solicitudes = new RepositorioDeSolicitudes(detector);
     var calculadora = new CentralDeEstadisticas();
@@ -116,13 +129,11 @@ public class JDBCTest {
   @DisplayName("Genero estadisticas y las puedo visualizar en la db")
   public void estadisticaDBTest() {
     var calculadora = new CentralDeEstadisticas();
-    ColeccionRepository repo = new ColeccionRepository();
-    Coleccion coleccionDB = repo.findById(1L);
-    coleccionDB.getFuente()
-               .completarProvinciasFaltantes();
-    var stat = calculadora.provinciaConMasHechos(coleccionDB);
+    calculadora.setFiltro(new Filtro(new CondicionTrue()));
+    List<Coleccion> coleccionDB = repo.findAll();
+//    System.out.println(coleccionDB.toString());
+    var stat = calculadora.categoriaConMasHechos(coleccionDB);
     var repoStat = new EstadisticaRepository();
     repoStat.save(stat);
   }
-
 }

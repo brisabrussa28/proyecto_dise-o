@@ -98,6 +98,13 @@ public class HechoBuilder {
     return this;
   }
 
+  public HechoBuilder conOrigen(Origen origen) {
+    if (origen != null) {
+      this.fuenteOrigen = origen;
+    }
+    return this;
+  }
+
 
   /**
    * Construye y devuelve un objeto Hecho a partir de los datos proporcionados.
