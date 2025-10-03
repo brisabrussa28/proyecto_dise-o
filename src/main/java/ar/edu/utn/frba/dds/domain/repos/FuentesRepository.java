@@ -1,24 +1,35 @@
 package ar.edu.utn.frba.dds.domain.repos;
 
+import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
+import ar.edu.utn.frba.dds.domain.utils.DBUtils;
+import java.util.List;
 import javax.persistence.EntityManager;
-import org.apache.commons.dbcp2.BasicDataSource;
 
 public class FuentesRepository {
 
-  private BasicDataSource dataSource;
-  private EntityManager em;
+  private EntityManager em = DBUtils.getEntityManager();
 
-  public FuentesRepository(BasicDataSource dataSource, EntityManager em) {
-    this.em = em;
-    this.dataSource = dataSource;
+  public FuentesRepository() {
   }
 
-  public void agregarFuente(Fuente fuente) {
-    em.getTransaction()
-      .begin();
+  public void save(Fuente fuente) {
+    DBUtils.comenzarTransaccion(em);
+    fuente.completarProvinciasFaltantes();
     em.persist(fuente);
-    em.getTransaction()
-      .commit();
+    DBUtils.commit(em);
   }
+
+  public List<Coleccion> findAll() {
+    return em.createQuery("SELECT * FROM fuente", Coleccion.class)
+             .getResultList();
+
+  }
+
+  public Coleccion getById(Long id) {
+    return em.createQuery("SELECT * FROM fuente WHERE fuente_id = id", Coleccion.class)
+             .setParameter("id", id)
+             .getSingleResult();
+  }
+
 }

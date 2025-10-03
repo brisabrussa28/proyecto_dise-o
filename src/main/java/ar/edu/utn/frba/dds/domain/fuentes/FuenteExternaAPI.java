@@ -5,10 +5,11 @@ import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.configuracion.ConfiguracionAdapter;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
-
 import java.util.Collections;
 import java.util.List;
-import javax.persistence.*;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.Transient;
 
 @Entity
 @DiscriminatorValue("API_EXTERNA")
@@ -17,7 +18,8 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
   @Transient
   private FuenteAdapter adaptador;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @Transient
+//  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private ConfiguracionAdapter configuracionAdapter;
 
   protected FuenteExternaAPI() {

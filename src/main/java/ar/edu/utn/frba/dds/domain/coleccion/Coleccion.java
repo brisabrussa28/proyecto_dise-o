@@ -8,18 +8,21 @@ import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Transient;
 
 /**
@@ -30,9 +33,11 @@ import javax.persistence.Transient;
 @Entity
 public class Coleccion {
   @Id
-  @GeneratedValue
-  Long id;
+  @SequenceGenerator(name = "coleccion_seq", sequenceName = "coleccion_sequence", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "coleccion_seq")
+  Long coleccion_id;
   @OneToOne
+  @JoinColumn(name = "fuente_id")
   private Fuente fuente;
   private String titulo;
   private String descripcion;
@@ -42,9 +47,10 @@ public class Coleccion {
   @ManyToOne
   private AlgoritmoDeConsenso algoritmo;
   @ManyToMany
+  @JoinTable(name = "hecho_x_coleccion")
   private List<Hecho> hechosConsensuados = new ArrayList<>();
   @Transient
-  private  Filtro filtro;
+  private Filtro filtro;
 
   /**
    * Constructor de la colección.
@@ -88,9 +94,9 @@ public class Coleccion {
 
   @PostLoad
   private void inicializarFiltro() {
-      if (this.condicion != null) {
-          this.filtro = new Filtro(this.condicion);
-      }
+    if (this.condicion != null) {
+      this.filtro = new Filtro(this.condicion);
+    }
   }
 
   /**
@@ -151,10 +157,12 @@ public class Coleccion {
     List<Hecho> hechosFuente = fuente.obtenerHechos();
 
     // Aplica el filtro de exclusión del repositorio
-    List<Hecho> hechosSinExcluidos = repo.filtroExcluyente().filtrar(hechosFuente);
+    List<Hecho> hechosSinExcluidos = repo.filtroExcluyente()
+                                         .filtrar(hechosFuente);
 
     // Aplica el filtro propio de la colección
-    return this.getFiltro().filtrar(hechosSinExcluidos);
+    return this.getFiltro()
+               .filtrar(hechosSinExcluidos);
   }
 
   /**
@@ -175,8 +183,8 @@ public class Coleccion {
    */
   private List<Hecho> aplicarConsenso(List<Hecho> hechos) {
     return (algoritmo == null)
-        ? hechos
-        : algoritmo.listaDeHechosConsensuados(hechos, obtenerFuentesDelNodo());
+           ? hechos
+           : algoritmo.listaDeHechosConsensuados(hechos, obtenerFuentesDelNodo());
   }
 
   /**

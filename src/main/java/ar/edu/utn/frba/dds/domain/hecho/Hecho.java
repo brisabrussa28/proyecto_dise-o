@@ -31,6 +31,7 @@ public class Hecho {
   @Id
   @SequenceGenerator(name = "hecho_seq", sequenceName = "hecho_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hecho_seq")
+  @Column(name = "hecho_id")
   Long id;
   @OneToMany
   private List<Etiqueta> etiquetas;

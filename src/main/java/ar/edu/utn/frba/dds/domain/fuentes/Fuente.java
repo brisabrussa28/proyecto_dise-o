@@ -4,6 +4,7 @@ import ar.edu.utn.frba.dds.domain.geilocalizacion.ServicioGeoref;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
@@ -24,6 +25,7 @@ public abstract class Fuente {
   @Id
   @SequenceGenerator(name = "fuente_seq", sequenceName = "fuente_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fuente_seq")
+  @Column(name = "fuente_id")
   private Long id;
 
   protected String nombre;

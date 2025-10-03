@@ -5,10 +5,11 @@ import ar.edu.utn.frba.dds.domain.exportador.configuracion.ConfiguracionExportad
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
-
 import java.util.Collections;
 import java.util.List;
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.PostLoad;
+import javax.persistence.Transient;
 
 /**
  * Clase abstracta para fuentes que usan una copia local como caché EN MEMORIA.
@@ -17,15 +18,18 @@ import javax.persistence.*;
 @Entity
 public abstract class FuenteDeCopiaLocal extends Fuente {
 
+  @Transient
   protected String rutaCopiaLocal;
 
   @Transient // La caché de hechos es puramente en memoria, no se persiste.
   protected List<Hecho> cacheDeHechos;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @Transient
+//  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private ConfiguracionLector configuracionLector;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @Transient
+//  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private ConfiguracionExportador configuracionExportador;
 
   @Transient

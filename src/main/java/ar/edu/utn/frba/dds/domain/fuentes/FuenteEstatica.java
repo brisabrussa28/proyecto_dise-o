@@ -3,17 +3,21 @@ package ar.edu.utn.frba.dds.domain.fuentes;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
-
 import java.util.List;
-import javax.persistence.*;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.PostLoad;
+import javax.persistence.Transient;
 
 @Entity
 @DiscriminatorValue("ESTATICA")
 public class FuenteEstatica extends Fuente {
 
+  @Transient
   private String rutaArchivo;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @Transient
+//  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private ConfiguracionLector configuracionLector;
 
   @Transient

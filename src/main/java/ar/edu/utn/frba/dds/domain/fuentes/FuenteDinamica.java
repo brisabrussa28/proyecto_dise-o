@@ -17,7 +17,7 @@ public class FuenteDinamica extends Fuente {
 
   // Relación persistente: solo esta clase guarda Hechos en la BD.
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "fuente_dinamica_id")
+  @JoinColumn(name = "fuente_id") // Cambia el nombre de la columna FK en la tabla de relación
   private List<Hecho> hechosPersistidos;
 
   protected FuenteDinamica() {
