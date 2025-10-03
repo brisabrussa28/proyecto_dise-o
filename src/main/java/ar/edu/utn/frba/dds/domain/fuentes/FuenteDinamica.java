@@ -13,7 +13,7 @@ public class FuenteDinamica extends Fuente {
 
   // Relación persistente: solo esta clase guarda Hechos en la BD.
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "fuente_dinamica_id")
+  @JoinTable(name = "hecho_x_coleccion")
   private List<Hecho> hechosPersistidos;
 
   protected FuenteDinamica() {
@@ -26,6 +26,9 @@ public class FuenteDinamica extends Fuente {
   }
 
   public void agregarHecho(Hecho hecho) {
+    if (hecho == null) {
+      throw new IllegalArgumentException("No se puede agregar un hecho nulo.");
+    }
     if (this.hechosPersistidos == null) {
       this.hechosPersistidos = new ArrayList<>();
     }
@@ -35,7 +38,7 @@ public class FuenteDinamica extends Fuente {
   @Override
   public List<Hecho> obtenerHechos() {
     return this.hechosPersistidos == null
-        ? Collections.emptyList()
-        : new ArrayList<>(this.hechosPersistidos);
+           ? Collections.emptyList()
+           : Collections.unmodifiableList(this.hechosPersistidos);
   }
 }

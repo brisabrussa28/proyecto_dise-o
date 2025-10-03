@@ -4,6 +4,8 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.persistence.*;
 
@@ -16,8 +18,9 @@ public class FuenteEstatica extends Fuente {
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private ConfiguracionLector configuracionLector;
 
-  @Transient
-  private Lector<Hecho> lector;
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinTable(name = "hecho_x_coleccion")
+  private final List<Hecho> hechosPersistidos = new ArrayList<>();
 
   protected FuenteEstatica() {
     super();
@@ -25,23 +28,34 @@ public class FuenteEstatica extends Fuente {
 
   public FuenteEstatica(String nombre, String rutaArchivo, ConfiguracionLector configLector) {
     super(nombre);
+    if (rutaArchivo == null || rutaArchivo.isBlank()) {
+      throw new IllegalArgumentException("La ruta del archivo no puede ser nula o vacía.");
+    }
+    if (configLector == null) {
+      throw new IllegalArgumentException("La configuración del lector no puede ser nula.");
+    }
     this.rutaArchivo = rutaArchivo;
     this.configuracionLector = configLector;
-    reconstruirDependencias();
+
+    // Se cargan los hechos al crear la instancia.
+    this.cargarHechosDesdeArchivo();
   }
 
-  @PostLoad
-  protected void reconstruirDependencias() {
-    if (this.configuracionLector != null) {
-      this.lector = this.configuracionLector.build(Hecho.class);
-    }
+  /**
+   * Metodo privado que encapsula la lógica de la lectura de hechos.
+   */
+  private void cargarHechosDesdeArchivo() {
+    // El lector se crea como una variable local, solo cuando se necesita.
+    Lector<Hecho> lector = this.configuracionLector.build(Hecho.class);
+    List<Hecho> hechosImportados = lector.importar(this.rutaArchivo);
+
+    this.hechosPersistidos.clear();
+    this.hechosPersistidos.addAll(hechosImportados);
   }
 
   @Override
   public List<Hecho> obtenerHechos() {
-    if (this.lector == null) {
-      throw new IllegalStateException("El lector no fue inicializado.");
-    }
-    return lector.importar(rutaArchivo);
+    // Devuelve la lista que ya está en memoria y persistida, sin releer el archivo.
+    return Collections.unmodifiableList(this.hechosPersistidos);
   }
 }

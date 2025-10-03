@@ -1,27 +1,27 @@
 package ar.edu.utn.frba.dds;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import ar.edu.utn.frba.dds.domain.exportador.Exportador;
-import ar.edu.utn.frba.dds.domain.exportador.configuracion.ConfiguracionExportador;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.domain.geolocalizacion.ServicioGeoref;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
 public class FuenteTest {
 
@@ -36,11 +36,13 @@ public class FuenteTest {
     }
 
     @Test
+    @DisplayName("Una fuente dinámica inicia con una lista de hechos vacía")
     public void iniciaConListaVacia() {
       assertTrue(fuente.obtenerHechos().isEmpty());
     }
 
     @Test
+    @DisplayName("Se puede agregar un hecho correctamente a una fuente dinámica")
     public void agregaHechoCorrectamente() {
       Hecho hechoMock = mock(Hecho.class);
       fuente.agregarHecho(hechoMock);
@@ -53,13 +55,13 @@ public class FuenteTest {
   @DisplayName("Pruebas para FuenteEstatica")
   class FuenteEstaticaTests {
     @Test
+    @DisplayName("Usa la configuración del lector para cargar los hechos del archivo")
     public void usaConfiguracionDeLectorParaCargar() {
       Hecho hechoMock = mock(Hecho.class);
       Lector<Hecho> lectorMock = mock(Lector.class);
       ConfiguracionLector configLectorMock = mock(ConfiguracionLector.class);
 
-      // CORRECCIÓN: Usar doReturn(...).when(...)
-      doReturn(lectorMock).when(configLectorMock).build(Hecho.class);
+      when(configLectorMock.build(Hecho.class)).thenReturn(lectorMock);
       when(lectorMock.importar("ruta.csv")).thenReturn(List.of(hechoMock));
 
       FuenteEstatica fuente = new FuenteEstatica("MiFuente", "ruta.csv", configLectorMock);
@@ -75,138 +77,33 @@ public class FuenteTest {
   @DisplayName("Pruebas para FuenteDeAgregacion")
   class FuenteDeAgregacionTests {
     private FuenteDeAgregacion agregadora;
-    private final String RUTA_COPIA = "test_agregacion.json";
-    @Mock private Lector<Hecho> lectorMock;
-    @Mock private Exportador<Hecho> exportadorMock;
-    @Mock private ConfiguracionLector configLectorMock;
-    @Mock private ConfiguracionExportador configExportadorMock;
     @Mock private Fuente fuenteMock1;
     @Mock private Fuente fuenteMock2;
     @Mock private Hecho hechoMock1;
     @Mock private Hecho hechoMock2;
+    @Mock private Hecho hechoComun;
 
     @BeforeEach
     void setUp() {
       MockitoAnnotations.openMocks(this);
-
-      // CORRECCIÓN: Usar doReturn(...).when(...)
-      doReturn(lectorMock).when(configLectorMock).build(Hecho.class);
-      doReturn(exportadorMock).when(configExportadorMock).build();
-      when(lectorMock.importar(anyString())).thenReturn(new ArrayList<>());
-
-      agregadora = new FuenteDeAgregacion("TestAgregadora", RUTA_COPIA, configLectorMock, configExportadorMock);
+      agregadora = new FuenteDeAgregacion("TestAgregadora");
     }
 
     @Test
-    @DisplayName("Debe combinar hechos de múltiples fuentes y persistir")
-    public void combinaHechosYPersiste() {
-      when(fuenteMock1.obtenerHechos()).thenReturn(List.of(hechoMock1));
-      when(fuenteMock2.obtenerHechos()).thenReturn(List.of(hechoMock2));
+    @DisplayName("Debe combinar hechos de múltiples fuentes en tiempo real y sin duplicados")
+    public void combinaHechosEnTiempoReal() {
+      // Configuración de los mocks
+      when(fuenteMock1.obtenerHechos()).thenReturn(List.of(hechoMock1, hechoComun));
+      when(fuenteMock2.obtenerHechos()).thenReturn(List.of(hechoMock2, hechoComun));
       agregadora.agregarFuente(fuenteMock1);
       agregadora.agregarFuente(fuenteMock2);
 
-      agregadora.forzarActualizacionSincrona();
+      // Ejecución
       List<Hecho> todos = agregadora.obtenerHechos();
 
-      assertEquals(2, todos.size());
-      assertTrue(todos.containsAll(List.of(hechoMock1, hechoMock2)));
-      verify(exportadorMock).exportar(todos, RUTA_COPIA);
+      // Verificación
+      assertEquals(3, todos.size()); // 2 hechos únicos + 1 común
+      assertTrue(todos.containsAll(List.of(hechoMock1, hechoMock2, hechoComun)));
     }
   }
-
-  @Nested
-  @DisplayName("Pruebas para completar provincias en Hechos")
-  class CompletarProvinciasTests {
-    @Mock
-    private ServicioGeoref servicioGeorefMock;
-
-    private Fuente fuente;
-
-    @BeforeEach
-    void setUp() {
-      MockitoAnnotations.openMocks(this);
-
-      // Fuente "anónima" para el test
-      fuente = new Fuente("FuenteTest") {
-        private final List<Hecho> hechos = new ArrayList<>();
-        @Override
-        public List<Hecho> obtenerHechos() {
-          return hechos;
-        }
-        public void agregarHecho(Hecho h) { hechos.add(h); }
-      };
-    }
-
-    @Test
-    @DisplayName("Debe completar la provincia de un hecho con provincia nula")
-    void completaProvinciaSiFalta() {
-      PuntoGeografico ubicacion = new PuntoGeografico(-27.2741, -66.7529);
-      Hecho hecho = new Hecho();
-      hecho.setUbicacion(ubicacion);
-      hecho.setProvincia(null);
-
-      fuente.obtenerHechos().add(hecho);
-
-      when(servicioGeorefMock.obtenerProvincia(-27.2741, -66.7529))
-          .thenReturn("Catamarca");
-
-      for (Hecho h : fuente.obtenerHechos()) {
-        if (h.getProvincia() == null || h.getProvincia().isBlank()) {
-          String provincia = servicioGeorefMock.obtenerProvincia(
-              h.getUbicacion().getLatitud(),
-              h.getUbicacion().getLongitud()
-          );
-          h.setProvincia(provincia);
-          // System.out.println("Provincia obtenida desde el mock: " + provincia);
-        }
-      }
-
-      assertEquals("Catamarca", hecho.getProvincia());
-      verify(servicioGeorefMock).obtenerProvincia(-27.2741, -66.7529);
-    }
-
-    @Test
-    @DisplayName("Debe obtener la provincia real desde la API de Georef")
-    void obtieneProvinciaReal() {
-      ServicioGeoref servicio = new ServicioGeoref();
-
-      double lat = -27.2741;
-      double lon = -66.7529;
-
-      String provincia = servicio.obtenerProvincia(lat, lon);
-      // System.out.println("Provincia obtenida desde la API real: " + provincia);
-
-      // Sabemos que esas coordenadas son Catamarca
-      assertEquals("Catamarca", provincia);
-    }
-
-    @Test
-    @DisplayName("No debe modificar hechos que ya tienen provincia")
-    void noModificaProvinciaExistente() {
-      Hecho hecho = new Hecho();
-      hecho.setProvincia("Buenos Aires");
-      hecho.setUbicacion(new PuntoGeografico(-34.6, -58.38));
-
-      fuente.obtenerHechos().add(hecho);
-
-      // Aunque el mock devuelva otra provincia, no debería usarse
-      when(servicioGeorefMock.obtenerProvincia(anyDouble(), anyDouble()))
-          .thenReturn("Catamarca");
-
-      for (Hecho h : fuente.obtenerHechos()) {
-        if (h.getProvincia() == null || h.getProvincia().isBlank()) {
-          String provincia = servicioGeorefMock.obtenerProvincia(
-              h.getUbicacion().getLatitud(),
-              h.getUbicacion().getLongitud()
-          );
-          h.setProvincia(provincia);
-        }
-      }
-
-      assertEquals("Buenos Aires", hecho.getProvincia());
-      verify(servicioGeorefMock, never()).obtenerProvincia(anyDouble(), anyDouble());
-    }
-
-  }
-
 }

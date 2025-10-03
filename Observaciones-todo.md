@@ -77,3 +77,7 @@
 - [ ] Clase Estadistica es un bruto code smell, sólo tiene accessors y no comportamiento.
 - [ ] Algoritmo de concenso deberia revisar todas las fuentes del nodo (instancia) osea todas las fuentes del sistema
         -> necesitamos un repo de fuentes
+
+## Otros ajustes
+- [ ] Solo leer del csv en fuente estatica cuando se crea, despues persistir en bdd los hechos
+- [ ] Repositorios para persistir las clases
