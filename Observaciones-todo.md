@@ -81,3 +81,4 @@
 ## Otros ajustes
 - [ ] Solo leer del csv en fuente estatica cuando se crea, despues persistir en bdd los hechos
 - [ ] Repositorios para persistir las clases
+- [ ] Corregir api provincia
