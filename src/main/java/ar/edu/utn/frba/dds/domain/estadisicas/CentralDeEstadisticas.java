@@ -11,17 +11,12 @@ import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-/**
- * Clase responsable de calcular y exportar estadísticas a partir de una o más colecciones.
- * Debe ser configurada con un RepositorioDeSolicitudes para poder aplicar los filtros
- * de exclusión y opcionalmente con un Exportador para guardar los resultados.
- */
+
 public class CentralDeEstadisticas {
 
   private static final Logger logger = Logger.getLogger(CentralDeEstadisticas.class.getName());
   private RepositorioDeSolicitudes repo;
   private Exportador<Estadistica> exportador;
-  private Filtro filtro;
 
   // --- Lógica Principal de Estadísticas ---
 
@@ -93,14 +88,14 @@ public class CentralDeEstadisticas {
   }
 
   public int cantidadDeSolicitudesSpam() {
-//    validarRepositorioConfigurado();
+    validarRepositorioConfigurado();
     return repo.cantidadDeSpamDetectado();
   }
 
   // --- Lógica de Exportación ---
 
   public void exportar(List<Estadistica> datos, String rutaArchivo) {
-//    validarExportadorConfigurado();
+    validarExportadorConfigurado();
     if (datos == null || datos.isEmpty()) {
       logger.warning("No se exportó a '" + rutaArchivo + "' porque no había datos para exportar.");
       return;
@@ -123,10 +118,6 @@ public class CentralDeEstadisticas {
     this.repo = repo;
   }
 
-  public void setFiltro(Filtro filtro) {
-    this.filtro = filtro;
-  }
-
   private List<Hecho> obtenerTodosLosHechos(List<Coleccion> colecciones) {
     Filtro filtroExcluyente = obtenerFiltroExcluyente();
     return colecciones.stream()
@@ -135,20 +126,19 @@ public class CentralDeEstadisticas {
   }
 
   private Filtro obtenerFiltroExcluyente() {
-//    validarRepositorioConfigurado();
-//    return repo.filtroExcluyente();
-      return this.filtro;
+    validarRepositorioConfigurado();
+    return repo.filtroExcluyente();
   }
 
-//  private void validarRepositorioConfigurado() {
-//    if (this.repo == null) {
-//      throw new IllegalStateException("El repositorio no ha sido configurado. Use setRepo() primero.");
-//    }
-//  }
+  private void validarRepositorioConfigurado() {
+    if (this.repo == null) {
+      throw new IllegalStateException("El repositorio no ha sido configurado. Use setRepo() primero.");
+    }
+  }
 
-//  private void validarExportadorConfigurado() {
-//    if (this.exportador == null) {
-//      throw new IllegalStateException("El exportador no ha sido configurado. Use setExportador() primero.");
-//    }
-//  }
+  private void validarExportadorConfigurado() {
+    if (this.exportador == null) {
+      throw new IllegalStateException("El exportador no ha sido configurado. Use setExportador() primero.");
+    }
+  }
 }

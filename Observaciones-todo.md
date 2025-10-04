@@ -56,23 +56,26 @@
 - [x] Implementar la reconstrucción de filtros con callbacks de JPA (@PostLoad).
 - [X] Definir estrategia de mapeo de herencia para entidades.
 - [X] Los Hechos de fuentes externas (CSV, API, caché) no se persisten.
-- [ ] Migrar la configuración de la base de datos a PostgreSQL.
-- [ ] Persistir la configuración de las fuentes, pero no sus Hechos.
-        Idea de implementación: Utilizar un patrón Observer en cada fuente para acumular datos estadísticos y persistir solo esas estadísticas.
+- [x] Refactorizar getFiltro para que devuelva this.condicion directamente. *~KUKOIDE*
+- [X] Mejorar la expresividad y diseño del módulo de Colecciones (evaluar convertirla en clase abstracta).
+- [X] Mejorar la expresividad de los Algoritmos de Consenso (evaluar uso de SQL).
+- [x] Pensar y enviarle a Bulgarelli la estrategia de almacenamiento de datos (qué se guarda, por cuánto tiempo y por qué).
+- [x] Geolocalizar via api --> Para los csv que no tengan provincia --> Podemos utilizar APIS, bibliotecas, etc, lo decimos nosotros
+- [X] Migrar la configuración de la base de datos a PostgreSQL.
+- [X] Eliminar la lógica de backups por archivo a backup por DB.
+- [X] Mejorar la expresividad y diseño de los Exportadores.
+- [X] Mejorar la expresividad y diseño de los Lectores.
+- [X] Solo leer del csv en fuente estatica cuando se crea, despues persistir en bdd los hechos
+- [X] Corregir api provincia
 - [ ] Persistir Colecciones, Estadísticas, Solicitudes de Eliminación (incluyendo SPAM) y Hechos Eliminados.
 - [ ] Hacer el cálculo de estadísticas utilizando consultas SQL nativas.
 - [ ] Investigar el método de almacenamiento de índices de Hibernate Search (Lucene).
-- [ ] Eliminar la lógica de backups por archivo a backup por DB.
 - [ ] Rediseñar y refactorizar por completo el módulo de gestión de solicitudes.
-- [x] Refactorizar getFiltro para que devuelva this.condicion directamente. *~KUKOIDE*
-- [ ] Mejorar la expresividad y diseño del módulo de Colecciones (evaluar convertirla en clase abstracta).
-- [ ] Mejorar la expresividad de los Algoritmos de Consenso (evaluar uso de SQL).
-- [ ] Mejorar la expresividad y diseño de los Exportadores.
-- [ ] Mejorar la expresividad y diseño de los Lectores.
-- [ ] Implementar un servicio de geolocalización (vía API) para Hechos sin provincia.
 - [ ] Agregar los tests para Hecho Editable.
 - [ ] Revisar y asegurar la consistencia del campo provincia en todo el sistema.
-- [ ] Pensar y enviarle a Bulgarelli la estrategia de almacenamiento de datos (qué se guarda, por cuánto tiempo y por qué).
 - [ ] Para las estadísticas, priorizar el almacenamiento de valores absolutos en lugar de porcentajes.
-- [x] Geolocalizar via api --> Para los csv que no tengan provincia --> Podemos utilizar APIS, bibliotecas, etc, lo decimos nosotros
 - [ ] Clase Estadistica es un bruto code smell, sólo tiene accessors y no comportamiento.
+- [ ] Algoritmo de concenso deberia revisar todas las fuentes del nodo (instancia) osea todas las fuentes del sistema
+        -> necesitamos un repo de fuentes
+- [ ] Repositorios para persistir las clases
+- [ ] Optimizar el mecanismo de hechos eliminados

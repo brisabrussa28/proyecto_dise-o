@@ -5,6 +5,7 @@ import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.Condicion;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -212,5 +213,20 @@ public class Coleccion {
 
   public void setAlgoritmoDeConsenso(AlgoritmoDeConsenso algoritmo) {
     this.algoritmo = algoritmo;
+  }
+
+  /**
+   * Mét0do auxiliar para obtener la lista de fuentes subyacentes.
+   * Si la fuente principal es un agregador, devuelve las fuentes que lo componen.
+   * Si es una fuente simple, la devuelve en una lista unitaria.
+   *
+   * @return La lista de fuentes base.
+   */
+  private List<Fuente> obtenerFuentesDelNodo() {
+    if (this.fuente instanceof FuenteDeAgregacion agregador) {
+      return agregador.getFuentesCargadas();
+    } else {
+      return List.of(this.fuente);
+    }
   }
 }

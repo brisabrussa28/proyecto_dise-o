@@ -1,20 +1,18 @@
 package ar.edu.utn.frba.dds;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import ar.edu.utn.frba.dds.domain.calendarizacion.App;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Map;
-import org.junit.jupiter.api.AfterEach;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteExternaAPI;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class AppTest {
   private App app;
@@ -24,18 +22,9 @@ public class AppTest {
     app = new App();
   }
 
-  // AfterEach se puede omitir si los tests no crean archivos reales.
-  // Lo mantenemos por si la configuración por defecto los crea.
-  @AfterEach
-  void tearDown() throws IOException {
-    Files.deleteIfExists(Paths.get("agregados.json"));
-    Files.deleteIfExists(Paths.get("dinamica.json"));
-  }
-
   @Test
   @DisplayName("Una fuente puede ser registrada correctamente")
   void registrarFuenteCorrectamente() {
-    // Ahora mockeamos la clase base Fuente, que es más genérica.
     Fuente mockFuente = mock(Fuente.class);
     when(mockFuente.getNombre()).thenReturn("TestFuente");
 
@@ -48,26 +37,32 @@ public class AppTest {
   }
 
   @Test
-  @DisplayName("La actualización se ejecuta solo para fuentes actualizables (que son FuenteDeCopiaLocal)")
-  void ejecutarActualizacionParaFuentesActualizables() {
+  @DisplayName("La actualización se ejecuta solo para fuentes que heredan de FuenteDeCopiaLocal")
+  void ejecutarActualizacionParaFuentesCorrectas() {
     // Caso 1: Una fuente que SÍ es actualizable (hereda de FuenteDeCopiaLocal)
-    FuenteDeAgregacion mockFuenteAgregadora = mock(FuenteDeAgregacion.class);
-    when(mockFuenteAgregadora.getNombre()).thenReturn("FuenteAgregadora");
+    FuenteExternaAPI mockFuenteActualizable = mock(FuenteExternaAPI.class);
+    when(mockFuenteActualizable.getNombre()).thenReturn("FuenteAPI");
 
-    // Caso 2: Una fuente que NO es actualizable
-    FuenteDinamica mockFuenteDinamica = mock(FuenteDinamica.class);
-    when(mockFuenteDinamica.getNombre()).thenReturn("FuenteDinamica");
+    // Caso 2: Una fuente que NO es actualizable (no hereda de FuenteDeCopiaLocal)
+    FuenteDeAgregacion mockFuenteNoActualizable1 = mock(FuenteDeAgregacion.class);
+    when(mockFuenteNoActualizable1.getNombre()).thenReturn("FuenteAgregadora");
 
-    app.registrarFuente(mockFuenteAgregadora);
-    app.registrarFuente(mockFuenteDinamica);
+    // Caso 3: Otra fuente que NO es actualizable
+    FuenteDinamica mockFuenteNoActualizable2 = mock(FuenteDinamica.class);
+    when(mockFuenteNoActualizable2.getNombre()).thenReturn("FuenteDinamica");
+
+    app.registrarFuente(mockFuenteActualizable);
+    app.registrarFuente(mockFuenteNoActualizable1);
+    app.registrarFuente(mockFuenteNoActualizable2);
 
     app.ejecutarActualizacionTodasLasFuentes();
 
     // Verificamos que el método SÍ se llamó en la que corresponde
-    verify(mockFuenteAgregadora, times(1)).forzarActualizacionSincrona();
+    verify(mockFuenteActualizable, times(1)).forzarActualizacionSincrona();
 
-    // No es necesario verificar que no se llamó en la otra,
-    // ya que el test fallaría con un error de casteo si la lógica en App fuera incorrecta.
+    // Verificamos explícitamente que el método NO se llamó en las otras.
+    verify(mockFuenteNoActualizable1, never()).obtenerHechos(); // Usamos un método diferente porque no tiene forzarActualizacion
+    verify(mockFuenteNoActualizable2, never()).obtenerHechos();
   }
 
   @Test
@@ -78,12 +73,10 @@ public class AppTest {
 
     Map<String, Fuente> registeredSources = configuredApp.getFuentesRegistradas();
 
-    // Verificamos que se registren las dos fuentes principales
     assertEquals(2, registeredSources.size());
     assertTrue(registeredSources.containsKey("agregadora_principal"));
     assertTrue(registeredSources.containsKey("dinamica_principal"));
 
-    // Verificamos que cada una sea del tipo correcto
     assertTrue(registeredSources.get("agregadora_principal") instanceof FuenteDeAgregacion);
     assertTrue(registeredSources.get("dinamica_principal") instanceof FuenteDinamica);
   }
@@ -91,7 +84,6 @@ public class AppTest {
   @Test
   @DisplayName("El método main se ejecuta sin lanzar excepciones (Test de Integración Ligero)")
   void mainSeEjecutaSinErrores() {
-    // Este test verifica que el punto de entrada de la app es ejecutable.
     assertDoesNotThrow(
         () -> App.main(new String[]{}),
         "El método main no debería lanzar una excepción al ejecutarse con la configuración por defecto."

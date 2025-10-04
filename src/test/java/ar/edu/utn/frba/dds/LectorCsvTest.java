@@ -128,8 +128,7 @@ public class LectorCsvTest {
                 CampoHecho.LATITUD, List.of("latitud"),
                 CampoHecho.LONGITUD, List.of("longitud"),
                 CampoHecho.TITULO, List.of("titulo"),
-                CampoHecho.FECHA_SUCESO, List.of("fechaSuceso"),
-                CampoHecho.PROVINCIA, List.of("provincia")
+                CampoHecho.FECHA_SUCESO, List.of("fechaSuceso")
         ));
 
         LectorCSV<Hecho> lector = crearLector("dd/MM/yyyy", mapeo);

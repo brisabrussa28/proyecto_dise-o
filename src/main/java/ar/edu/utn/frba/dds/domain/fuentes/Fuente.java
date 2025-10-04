@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
-import ar.edu.utn.frba.dds.domain.geilocalizacion.ServicioGeoref;
+import ar.edu.utn.frba.dds.domain.geolocalizacion.ServicioGeoref;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.util.List;
@@ -44,31 +44,6 @@ public abstract class Fuente {
 
   public String getNombre() {
     return this.nombre;
-  }
-
-  public Long getId() {
-    return this.id;
-  }
-
-  public void completarProvinciasFaltantes() {
-    ServicioGeoref servicio = new ServicioGeoref();
-    List<Hecho> hechos = this.obtenerHechos();
-
-    for (Hecho hecho : hechos) {
-      if (hecho.getProvincia() == null || hecho.getProvincia()
-                                               .isBlank()) {
-        PuntoGeografico ubicacion = hecho.getUbicacion();
-        if (ubicacion != null) {
-          String provincia = servicio.obtenerProvincia(
-              ubicacion.getLatitud(),
-              ubicacion.getLongitud()
-          );
-          if (provincia != null && !provincia.isBlank()) {
-            hecho.setProvincia(provincia);
-          }
-        }
-      }
-    }
   }
 
 }

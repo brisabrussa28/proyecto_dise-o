@@ -39,5 +39,3 @@ public class MayoriaSimple extends AlgoritmoDeConsenso {
   }
 }
 
-//mayoría simple: si al menos la mitad de las fuentes del nodo contienen el mismo hecho,
-// se lo considera consensuado;
