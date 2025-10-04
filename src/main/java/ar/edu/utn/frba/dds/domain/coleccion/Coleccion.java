@@ -5,41 +5,43 @@ import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.Condicion;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
+import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Transient;
 
 /**
+ * Clase Coleccion.
  * Representa una colección de hechos obtenidos de una fuente específica,
- * con la capacidad de aplicar un filtro propio y un algoritmo de consenso.
- * Su responsabilidad es manejar su propia lógica de filtrado y consenso.
- * Puede recibir un filtro externo (ej. de hechos eliminados) para aplicarlo
- * antes que su filtro interno.
+ * con la capacidad de aplicar filtros y algoritmos de consenso.
  */
 @Entity
 public class Coleccion {
 
   @Id
-  @GeneratedValue
-  private Long id;
-
+  @SequenceGenerator(name = "coleccion_seq", sequenceName = "coleccion_sequence", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "coleccion_seq")
+  Long coleccion_id;
+  @OneToOne
+  @JoinColumn(name = "fuente_id")
+  private Fuente fuente;
   private String titulo;
   private String descripcion;
   private String categoria;
-
-  @OneToOne
-  private Fuente fuente;
 
   @ManyToOne
   private AlgoritmoDeConsenso algoritmo;
@@ -48,9 +50,8 @@ public class Coleccion {
   private Condicion condicion;
 
   @ManyToMany
+  @JoinTable(name = "hecho_x_coleccion")
   private List<Hecho> hechosConsensuados = new ArrayList<>();
-
-  // --- Atributos Transitorios ---
   @Transient
   private Filtro filtro;
 
@@ -60,12 +61,13 @@ public class Coleccion {
   }
 
   /**
-   * Constructor para crear una nueva Coleccion con sus datos fundamentales.
+   * Constructor de la colección.
    *
-   * @param titulo      El título de la colección.
-   * @param fuente      La fuente de donde se obtendrán los hechos.
-   * @param descripcion Una breve descripción del propósito de la colección.
-   * @param categoria   Una categoría para organizar la colección.
+   * @param titulo      Título de la colección. No puede ser nulo o vacío.
+   * @param fuente      Fuente de datos de la colección. No puede ser nula.
+   * @param descripcion Descripción de la colección. No puede ser nula o vacía.
+   * @param categoria   Categoría de la colección. No puede ser nula o vacía.
+   * @throws RuntimeException si alguno de los parámetros obligatorios es inválido.
    */
   public Coleccion(String titulo, Fuente fuente, String descripcion, String categoria) {
     validarCamposObligatorios(titulo, fuente, descripcion, categoria);
@@ -211,5 +213,20 @@ public class Coleccion {
 
   public void setAlgoritmoDeConsenso(AlgoritmoDeConsenso algoritmo) {
     this.algoritmo = algoritmo;
+  }
+
+  /**
+   * Mét0do auxiliar para obtener la lista de fuentes subyacentes.
+   * Si la fuente principal es un agregador, devuelve las fuentes que lo componen.
+   * Si es una fuente simple, la devuelve en una lista unitaria.
+   *
+   * @return La lista de fuentes base.
+   */
+  private List<Fuente> obtenerFuentesDelNodo() {
+    if (this.fuente instanceof FuenteDeAgregacion agregador) {
+      return agregador.getFuentesCargadas();
+    } else {
+      return List.of(this.fuente);
+    }
   }
 }

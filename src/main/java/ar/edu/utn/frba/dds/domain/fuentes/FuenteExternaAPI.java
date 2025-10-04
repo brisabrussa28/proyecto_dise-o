@@ -1,12 +1,15 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
+import ar.edu.utn.frba.dds.domain.exportador.configuracion.ConfiguracionExportador;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.configuracion.ConfiguracionAdapter;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-
+import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
 import java.util.Collections;
 import java.util.List;
-import javax.persistence.*;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.Transient;
 
 @Entity
 @DiscriminatorValue("API_EXTERNA")
@@ -15,50 +18,45 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
   @Transient
   private FuenteAdapter adaptador;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @Transient
+//  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private ConfiguracionAdapter configuracionAdapter;
 
   protected FuenteExternaAPI() {
     super();
   }
 
-  public FuenteExternaAPI(String nombre, ConfiguracionAdapter configAdapter) {
-    super(nombre);
-    if (configAdapter == null) {
-      throw new IllegalArgumentException("La configuración del adaptador no puede ser nula.");
-    }
+  public FuenteExternaAPI(
+      String nombre,
+      ConfiguracionAdapter configAdapter,
+      String rutaCopia,
+      ConfiguracionLector configLector,
+      ConfiguracionExportador configExportador
+  ) {
+    super(nombre, rutaCopia, configLector, configExportador);
     this.configuracionAdapter = configAdapter;
-    this.reconstruirDependencias(); // Construye el adaptador al crear la instancia
+    reconstruirDependencias();
   }
 
-  /**
-   * Reconstruye las dependencias transitorias (como el adaptador) después
-   * de que la entidad es cargada desde la base de datos.
-   */
-  @PostLoad
+  //postload en fuentedecopialocal
+  @Override
   protected void reconstruirDependencias() {
+    super.reconstruirDependencias(); // Reconstruye Lector y Exportador del padre
     if (this.configuracionAdapter != null) {
-      this.adaptador = this.configuracionAdapter.build();
+      this.adaptador = this.configuracionAdapter.build(); // Reconstruye el Adapter
     }
   }
 
-  /**
-   * Implementa la lógica para consultar los hechos desde la API externa
-   * a través del adaptador configurado.
-   *
-   * @return Una lista de hechos obtenidos de la API, o una lista vacía si ocurre un error.
-   */
   @Override
   protected List<Hecho> consultarNuevosHechos() {
     if (this.adaptador == null) {
-      System.err.println("Advertencia: El adaptador para la fuente '" + this.nombre + "' no está inicializado.");
+      // Loggear o manejar el error de que el adaptador no está configurado
       return Collections.emptyList();
     }
     try {
       return this.adaptador.consultarHechos();
     } catch (Exception e) {
-      System.err.println("Error al consultar la API externa para la fuente '" + this.nombre + "': " + e.getMessage());
-      // Devolvemos una lista vacía para no borrar la copia local si la API falla.
+      // Loggear el error de la API
       return Collections.emptyList();
     }
   }

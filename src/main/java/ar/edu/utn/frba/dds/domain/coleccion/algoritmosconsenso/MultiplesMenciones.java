@@ -1,10 +1,7 @@
 package ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso;
 
-import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;

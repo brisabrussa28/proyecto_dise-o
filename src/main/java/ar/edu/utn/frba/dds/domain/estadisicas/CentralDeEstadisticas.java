@@ -11,11 +11,7 @@ import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-/**
- * Clase responsable de calcular y exportar estadísticas a partir de una o más colecciones.
- * Debe ser configurada con un RepositorioDeSolicitudes para poder aplicar los filtros
- * de exclusión y opcionalmente con un Exportador para guardar los resultados.
- */
+
 public class CentralDeEstadisticas {
 
   private static final Logger logger = Logger.getLogger(CentralDeEstadisticas.class.getName());
