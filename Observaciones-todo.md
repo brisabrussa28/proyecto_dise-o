@@ -78,3 +78,4 @@
 - [ ] Algoritmo de concenso deberia revisar todas las fuentes del nodo (instancia) osea todas las fuentes del sistema
         -> necesitamos un repo de fuentes
 - [ ] Repositorios para persistir las clases
+- [ ] Optimizar el mecanismo de hechos eliminados
