@@ -35,26 +35,4 @@ public abstract class Fuente {
     return this.nombre;
   }
 
-
-  //TODO: ELIMINAR
-  public void completarProvinciasFaltantes() {
-    ServicioGeoref servicio = new ServicioGeoref();
-    List<Hecho> hechos = this.obtenerHechos();
-
-    for (Hecho hecho : hechos) {
-      if (hecho.getProvincia() == null || hecho.getProvincia().isBlank()) {
-        PuntoGeografico ubicacion = hecho.getUbicacion();
-        if (ubicacion != null) {
-          String provincia = servicio.obtenerProvincia(
-              ubicacion.getLatitud(),
-              ubicacion.getLongitud()
-          );
-          if (provincia != null && !provincia.isBlank()) {
-            hecho.setProvincia(provincia);
-          }
-        }
-      }
-    }
-  }
-
 }
