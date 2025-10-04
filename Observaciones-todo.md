@@ -79,3 +79,5 @@
         -> necesitamos un repo de fuentes
 - [ ] Repositorios para persistir las clases
 - [ ] Optimizar el mecanismo de hechos eliminados
+- [ ] Optimizar api, si superas la cantidad de request en cierto tiempo se rompe. corregirlo
+- [ ] Corregir test centralDeEstadisticas
