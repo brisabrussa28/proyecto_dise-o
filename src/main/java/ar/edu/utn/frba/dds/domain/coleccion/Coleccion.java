@@ -5,7 +5,6 @@ import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.Condicion;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,9 +24,11 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Transient;
 
 /**
- * Clase Coleccion.
  * Representa una colección de hechos obtenidos de una fuente específica,
- * con la capacidad de aplicar filtros y algoritmos de consenso.
+ * con la capacidad de aplicar un filtro propio y un algoritmo de consenso.
+ * Su responsabilidad es manejar su propia lógica de filtrado y consenso.
+ * Puede recibir un filtro externo (ej. de hechos eliminados) para aplicarlo
+ * antes que su filtro interno.
  */
 @Entity
 public class Coleccion {
@@ -52,6 +53,8 @@ public class Coleccion {
   @ManyToMany
   @JoinTable(name = "hecho_x_coleccion")
   private List<Hecho> hechosConsensuados = new ArrayList<>();
+
+  // --- Atributos Transitorios ---
   @Transient
   private Filtro filtro;
 
@@ -61,13 +64,12 @@ public class Coleccion {
   }
 
   /**
-   * Constructor de la colección.
+   * Constructor para crear una nueva Coleccion con sus datos fundamentales.
    *
-   * @param titulo      Título de la colección. No puede ser nulo o vacío.
-   * @param fuente      Fuente de datos de la colección. No puede ser nula.
-   * @param descripcion Descripción de la colección. No puede ser nula o vacía.
-   * @param categoria   Categoría de la colección. No puede ser nula o vacía.
-   * @throws RuntimeException si alguno de los parámetros obligatorios es inválido.
+   * @param titulo      El título de la colección.
+   * @param fuente      La fuente de donde se obtendrán los hechos.
+   * @param descripcion Una breve descripción del propósito de la colección.
+   * @param categoria   Una categoría para organizar la colección.
    */
   public Coleccion(String titulo, Fuente fuente, String descripcion, String categoria) {
     validarCamposObligatorios(titulo, fuente, descripcion, categoria);
@@ -119,12 +121,13 @@ public class Coleccion {
   /**
    * Verifica si un hecho está presente en la colección después de aplicar todos los filtros.
    *
-   * @param unHecho El hecho a verificar.
+   * @param unHecho          El hecho a verificar.
    * @param filtroExcluyente El filtro externo necesario para una comprobación precisa.
    * @return {@code true} si el hecho está en la colección, {@code false} en caso contrario.
    */
   public boolean contieneHechoFiltrado(Hecho unHecho, Filtro filtroExcluyente) {
-    return this.obtenerHechosFiltrados(filtroExcluyente).contains(unHecho);
+    return this.obtenerHechosFiltrados(filtroExcluyente)
+               .contains(unHecho);
   }
 
   /**
@@ -213,20 +216,5 @@ public class Coleccion {
 
   public void setAlgoritmoDeConsenso(AlgoritmoDeConsenso algoritmo) {
     this.algoritmo = algoritmo;
-  }
-
-  /**
-   * Mét0do auxiliar para obtener la lista de fuentes subyacentes.
-   * Si la fuente principal es un agregador, devuelve las fuentes que lo componen.
-   * Si es una fuente simple, la devuelve en una lista unitaria.
-   *
-   * @return La lista de fuentes base.
-   */
-  private List<Fuente> obtenerFuentesDelNodo() {
-    if (this.fuente instanceof FuenteDeAgregacion agregador) {
-      return agregador.getFuentesCargadas();
-    } else {
-      return List.of(this.fuente);
-    }
   }
 }

@@ -1,14 +1,13 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 
 /**
  * Fuente que combina los hechos de múltiples otras fuentes en tiempo real.
@@ -22,7 +21,7 @@ public class FuenteDeAgregacion extends Fuente {
    * Relación con las fuentes que se van a agregar.
    * LAZY se usa para que las fuentes no se carguen de la BD hasta que se necesiten.
    */
-  @ManyToMany(fetch = FetchType.LAZY)
+  @OneToMany(fetch = FetchType.LAZY)
   private List<Fuente> fuentesCargadas = new ArrayList<>();
 
   /**

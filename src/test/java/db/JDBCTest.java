@@ -32,7 +32,7 @@ public class JDBCTest {
     final DetectorSpam detector = texto -> texto.contains("Troll");
     var fuente = new FuenteDinamica("Fuente para Estadísticas");
 
-    var ubicacion = new PuntoGeografico(235,-5123);
+    var ubicacion = new PuntoGeografico(235, -5123);
     LocalDateTime hora = LocalDateTime.now();
 
     var hecho1 = new HechoBuilder()
@@ -56,7 +56,7 @@ public class JDBCTest {
     var hecho3 = new HechoBuilder()
         .conTitulo("Hurto en Avellaneda")
         .conCategoria("Hurtos")
-        .conProvincia("PBA")
+        .conProvincia("Buenos Aires")
         .conFechaSuceso(hora.minusHours(2))
         .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .conUbicacion(ubicacion)
@@ -131,9 +131,12 @@ public class JDBCTest {
     var calculadora = new CentralDeEstadisticas();
     calculadora.setFiltro(new Filtro(new CondicionTrue()));
     List<Coleccion> coleccionDB = repo.findAll();
-//    System.out.println(coleccionDB.toString());
+    //System.out.println(coleccionDB.toString());
     var stat = calculadora.categoriaConMasHechos(coleccionDB);
     var repoStat = new EstadisticaRepository();
     repoStat.save(stat);
+    Coleccion coleccion = repo.findById(1L);
+    var stat2 = calculadora.provinciaConMasHechos(coleccion);
+    repoStat.save(stat2);
   }
 }
