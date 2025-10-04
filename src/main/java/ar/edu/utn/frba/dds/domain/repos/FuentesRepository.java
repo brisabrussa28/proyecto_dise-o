@@ -15,7 +15,6 @@ public class FuentesRepository {
 
   public void save(Fuente fuente) {
     DBUtils.comenzarTransaccion(em);
-    fuente.completarProvinciasFaltantes();
     em.persist(fuente);
     DBUtils.commit(em);
   }
