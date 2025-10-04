@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds.domain.info;
 
-import com.fasterxml.jackson.annotation.JsonCreator; // Import para @JsonCreator
-import com.fasterxml.jackson.annotation.JsonProperty; // Import para @JsonProperty
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import javax.persistence.Embeddable;
 
@@ -14,16 +14,23 @@ public class PuntoGeografico {
   private double longitud;
 
   /**
-   * Constructor de PuntoGeografico.
+   * Constructor de PuntoGeografico que valida las coordenadas.
    *
-   * @param latitud  Latitud del punto geográfico
-   * @param longitud Longitud del punto geográfico
+   * @param latitud  Latitud del punto geográfico (debe estar entre -90 y 90).
+   * @param longitud Longitud del punto geográfico (debe estar entre -180 y 180).
+   * @throws IllegalArgumentException si las coordenadas están fuera de rango.
    */
   @JsonCreator
   public PuntoGeografico(
       @JsonProperty("latitud") double latitud,
       @JsonProperty("longitud") double longitud
   ) {
+    if (latitud < -90 || latitud > 90) {
+      throw new IllegalArgumentException("La latitud debe estar entre -90 y 90.");
+    }
+    if (longitud < -180 || longitud > 180) {
+      throw new IllegalArgumentException("La longitud debe estar entre -180 y 180.");
+    }
     this.latitud = latitud;
     this.longitud = longitud;
   }

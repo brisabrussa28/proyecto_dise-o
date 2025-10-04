@@ -42,13 +42,13 @@ public class ExportadorCsvTest {
 
     hechoCompleto1 = new Hecho(
         "Prueba hecho 1", "este test es una prueba", "Prueba",
-        "direcciondeprueba", "Buenos Aires", new PuntoGeografico(1234456, -1234456),
+        "direcciondeprueba", "Buenos Aires", new PuntoGeografico(12.34456, -12.34456),
         fechaSuceso, fechaCarga, Origen.PROVISTO_CONTRIBUYENTE, Collections.emptyList()
     );
 
     hechoCompleto2 = new Hecho(
         "Prueba hecho 2", "este test es otra prueba", "Prueba",
-        "direcciondeprueba", "Ciudad Autonoma de Buenos Aires", new PuntoGeografico(1234456, -1234456),
+        "direcciondeprueba", "Ciudad Autonoma de Buenos Aires", new PuntoGeografico(12.34456, -12.34456),
         fechaSuceso, fechaCarga, Origen.PROVISTO_CONTRIBUYENTE, Collections.emptyList()
     );
   }

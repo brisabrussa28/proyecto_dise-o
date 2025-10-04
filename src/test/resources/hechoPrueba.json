@@ -5,8 +5,8 @@
   "direccion": "Prueba 123",
   "provincia": "CABA",
   "ubicacion": {
-    "latitud": 123456,
-    "longitud": -123456
+    "latitud": 12.3456,
+    "longitud": -12.3456
   },
   "fechasuceso": "2025-09-17T14:36:31.228431996",
   "fechacarga": "2025-09-17T14:36:31.228431996",

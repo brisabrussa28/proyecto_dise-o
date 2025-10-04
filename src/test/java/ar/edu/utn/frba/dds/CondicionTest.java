@@ -38,12 +38,12 @@ public class CondicionTest {
                                .minusDays(1);
     hechoRobo = new Hecho(
         "Prueba Robo", "Descripción Robo", "Robos", "123", "PBA",
-        new PuntoGeografico(123, 123), fechaSuceso, LocalDateTime.now(),
+        new PuntoGeografico(12.3, 12.3), fechaSuceso, LocalDateTime.now(),
         Origen.PROVISTO_CONTRIBUYENTE, List.of(new Etiqueta("#ROBO"))
     );
     hechoPrueba = new Hecho(
         "Prueba General", "Descripción Prueba", "Pruebas", "direccion", "PBA",
-        new PuntoGeografico(123, 123), fechaSuceso, LocalDateTime.now(),
+        new PuntoGeografico(12.3, 12.3), fechaSuceso, LocalDateTime.now(),
         Origen.PROVISTO_CONTRIBUYENTE, List.of(new Etiqueta("#PRUEBA"))
     );
   }
