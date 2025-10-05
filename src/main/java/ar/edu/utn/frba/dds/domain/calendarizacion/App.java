@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
 /**
@@ -104,6 +105,10 @@ public class App {
    * Punto de entrada principal para ejecutar la aplicación de ejemplo.
    */
   public static void main(String[] args) {
+    // ✅ SOLUCIÓN GENERAL PARA DEPLOY Y EJECUCIÓN
+    // Se establece la zona horaria correcta como la PRIMERA acción de toda la aplicación.
+    TimeZone.setDefault(TimeZone.getTimeZone("America/Argentina/Buenos_Aires"));
+
     logger.info("======================================================");
     logger.info("== INICIANDO CONFIGURACIÓN DE LA APLICACIÓN DE DATOS ==");
     logger.info("======================================================");
@@ -126,4 +131,3 @@ public class App {
     }
   }
 }
-

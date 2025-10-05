@@ -18,5 +18,13 @@ public class ContextTest implements SimplePersistenceTest {
     withTransaction(() -> {
     });
   }
+  @Test
+  void imprimirTimeZoneDeLaJVM() {
+    System.out.println("================== PRUEBA DE DIAGNÓSTICO ==================");
+    String timeZone = System.getProperty("user.timezone");
+    System.out.println("La propiedad 'user.timezone' de la JVM es: " + timeZone);
+    System.out.println("=========================================================");
+    // Este test no necesita aserciones, solo queremos ver la salida.
+  }
 
 }
