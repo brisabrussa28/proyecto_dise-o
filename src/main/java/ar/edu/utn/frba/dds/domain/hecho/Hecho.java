@@ -52,7 +52,6 @@ public class Hecho {
   @Column(name = "estado", nullable = false)
   private Estado estado;
   private String provincia;
-  // Constructor público sin argumentos: NECESARIO para la deserialización de Jackson
 
   /**
    * Constructor para un Hecho.

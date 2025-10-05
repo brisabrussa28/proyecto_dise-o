@@ -1,126 +1,44 @@
 package ar.edu.utn.frba.dds.domain.reportes;
 
-import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionPredicado;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
- * Gestor de Reportes.
+ * Repositorio de Solicitudes. Responsable únicamente del almacenamiento
+ * y recuperación de las solicitudes.
  */
 public class RepositorioDeSolicitudes {
 
   private final Set<Solicitud> solicitudes = new HashSet<>();
-  private final Set<Solicitud> solicitudesSpam = new HashSet<>(); // Responsabilidad movida aquí
-  private final Set<Hecho> hechosEliminados = new HashSet<>(); // Usamos Set para evitar duplicados
-  private final DetectorSpam detectorSpam;
 
-  /**
-   * Constructor del gestor de reportes.
-   *
-   * @param detectorSpam Detector de spam para filtrar solicitudes
-   */
-  public RepositorioDeSolicitudes(DetectorSpam detectorSpam) {
-    this.detectorSpam = detectorSpam;
+  public void guardar(Solicitud solicitud) {
+    // Si ya existe, la elimina para luego agregar la versión actualizada.
+    solicitudes.remove(solicitud);
+    solicitudes.add(solicitud);
   }
 
-  /**
-   * Agrega una solicitud al gestor de reportes.
-   * Si la razón de eliminación es spam, se agrega a la lista de spam.
-   */
-  public void agregarSolicitud(UUID id, Hecho hecho, String motivo) {
-
-    if (hecho == null || motivo == null || motivo.isBlank()) {
-      throw new IllegalArgumentException("Hecho y motivo deben estar definidos");
-    }
-    Solicitud solicitud = new Solicitud(id, hecho, motivo);
-    if (!detectorSpam.esSpam(solicitud.getRazonEliminacion())) {
-      solicitudes.add(solicitud);
-    } else {
-      solicitudesSpam.add(solicitud); // Se agrega a la lista interna del repositorio
-    }
+  public Optional<Solicitud> buscarPorHechoYRazon(Hecho hecho, String razon) {
+    return solicitudes.stream()
+                      .filter(s -> s.getHechoSolicitado().equals(hecho) && s.getRazonEliminacion().equals(razon))
+                      .findFirst();
   }
 
-  /**
-   * Devuelve la cantidad de solicitudes registradas.
-   *
-   * @return Cantidad de solicitudes
-   */
+  public List<Solicitud> obtenerTodas() {
+    return new ArrayList<>(solicitudes);
+  }
 
-  public int cantidadSolicitudes() {
+  public List<Solicitud> obtenerPorEstado(EstadoSolicitud estado) {
+    return solicitudes.stream()
+                      .filter(s -> s.getEstado() == estado)
+                      .collect(Collectors.toList());
+  }
+
+  public int cantidadTotal() {
     return solicitudes.size();
   }
-
-  /**
-   * Obtiene la primera solicitud registrada.
-   * Si no hay solicitudes, devuelve null.
-   *
-   * @return Primera solicitud o null si no hay solicitudes
-   */
-  public Solicitud obtenerSolicitud() {
-    return solicitudes.isEmpty() ? null : new ArrayList<>(solicitudes).get(0);
-  }
-
-  /**
-   * Gestiona una solicitud, aceptándola o rechazándola.
-   * Si se acepta, marca el hecho solicitado como eliminado.
-   *
-   * @param solicitud        Solicitud a gestionar
-   * @param aceptarSolicitud Indica si se acepta o rechaza la solicitud
-   * @throws SolicitudInexistenteException Si la solicitud no existe en el gestor
-   */
-  public void gestionarSolicitud(Solicitud solicitud, AceptarSolicitud aceptarSolicitud) {
-    if (!solicitudes.contains(solicitud)) {
-      throw new SolicitudInexistenteException("La solicitud no existe en el gestor.");
-    }
-
-    solicitudes.remove(solicitud);
-
-    if (aceptarSolicitud == AceptarSolicitud.ACEPTAR) {
-      marcarComoEliminado(solicitud.getHechoSolicitado());
-    }
-  }
-
-  /**
-   * Marca un hecho como eliminado.
-   * Si el hecho ya está eliminado, no se agrega nuevamente.
-   *
-   * @param hecho Hecho a marcar como eliminado
-   */
-  public void marcarComoEliminado(Hecho hecho) {
-    if (hecho == null) {
-      throw new NullPointerException("Hecho no puede ser null");
-    }
-    hechosEliminados.add(hecho);
-  }
-
-  /**
-   * Devuelve una lista de todos los hechos eliminados.
-   *
-   * @return Lista de hechos eliminados
-   */
-  public List<Hecho> hechosEliminados() {
-    return new ArrayList<>(hechosEliminados);
-  }
-
-  /**
-   * Devuelve un filtro que excluye los hechos eliminados.
-   * Este filtro se puede usar para filtrar hechos en reportes.
-   *
-   * @return Filtro que excluye los hechos eliminados
-   */
-  public Filtro filtroExcluyente() {
-    return new Filtro(new CondicionPredicado(h -> !hechosEliminados.contains(h)));
-  }
-
-  public int cantidadDeSpamDetectado() {
-    return this.solicitudesSpam.size(); // Devuelve el tamaño de su propia lista
-  }
-
 }

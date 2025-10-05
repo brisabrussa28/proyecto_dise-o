@@ -10,7 +10,8 @@ import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.serviciodevisualizacion.ServicioDeVisualizacion;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +22,7 @@ public class ServicioDeVisualizacionTest {
 
   private ServicioDeVisualizacion servicio;
   private Coleccion coleccionMock;
-  private RepositorioDeSolicitudes repositorioMock;
+  private GestorDeSolicitudes gestorMock;
   private Filtro filtroAdicionalMock;
   private Hecho hecho1;
   private Hecho hecho2;
@@ -31,12 +32,12 @@ public class ServicioDeVisualizacionTest {
     // Inicialización de objetos
     servicio = new ServicioDeVisualizacion();
     coleccionMock = mock(Coleccion.class);
-    repositorioMock = mock(RepositorioDeSolicitudes.class);
+    gestorMock = mock(GestorDeSolicitudes.class);
     filtroAdicionalMock = mock(Filtro.class);
     hecho1 = mock(Hecho.class);
     hecho2 = mock(Hecho.class);
     Filtro filtroNulo = new Filtro(new CondicionTrue());
-    when(repositorioMock.filtroExcluyente()).thenReturn(filtroNulo);
+    when(gestorMock.filtroExcluyenteDeHechosEliminados()).thenReturn(filtroNulo);
   }
 
   @Test
@@ -47,7 +48,7 @@ public class ServicioDeVisualizacionTest {
     when(coleccionMock.obtenerHechosFiltrados(any(Filtro.class))).thenReturn(hechosEsperados);
 
     // Act
-    List<Hecho> resultado = servicio.obtenerHechosDeColeccion(coleccionMock, repositorioMock);
+    List<Hecho> resultado = servicio.obtenerHechosDeColeccion(coleccionMock, gestorMock);
 
     // Assert
     assertEquals(2, resultado.size());
@@ -65,7 +66,7 @@ public class ServicioDeVisualizacionTest {
     when(filtroAdicionalMock.filtrar(hechosBase)).thenReturn(hechosFiltradosEsperados);
 
     // Act
-    List<Hecho> resultado = servicio.filtrarHechosDeColeccion(coleccionMock, filtroAdicionalMock, repositorioMock);
+    List<Hecho> resultado = servicio.filtrarHechosDeColeccion(coleccionMock, filtroAdicionalMock, gestorMock);
 
     // Assert
     assertEquals(1, resultado.size());
@@ -80,7 +81,7 @@ public class ServicioDeVisualizacionTest {
     when(filtroAdicionalMock.filtrar(List.of())).thenReturn(List.of());
 
     // Act
-    List<Hecho> resultado = servicio.filtrarHechosDeColeccion(coleccionMock, filtroAdicionalMock, repositorioMock);
+    List<Hecho> resultado = servicio.filtrarHechosDeColeccion(coleccionMock, filtroAdicionalMock, gestorMock);
 
     // Assert
     assertTrue(resultado.isEmpty());

@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds.domain.repos;
 
-import ar.edu.utn.frba.dds.domain.estadisicas.Estadistica;
+import ar.edu.utn.frba.dds.domain.estadisticas.Estadistica;
 import ar.edu.utn.frba.dds.domain.utils.DBUtils;
 import java.util.List;
 import javax.persistence.EntityManager;

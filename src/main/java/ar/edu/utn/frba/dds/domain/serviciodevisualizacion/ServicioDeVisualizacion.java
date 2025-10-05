@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.domain.serviciodevisualizacion;
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import java.util.List;
 
@@ -19,9 +20,9 @@ public class ServicioDeVisualizacion {
    */
   public List<Hecho> obtenerHechosDeColeccion(
       Coleccion coleccion,
-      RepositorioDeSolicitudes gestorDeReportes
+      GestorDeSolicitudes gestorDeReportes
   ) {
-    Filtro filtroExcluyente = gestorDeReportes.filtroExcluyente();
+    Filtro filtroExcluyente = gestorDeReportes.filtroExcluyenteDeHechosEliminados();
 
     return coleccion.obtenerHechosFiltrados(filtroExcluyente);
   }
@@ -38,7 +39,7 @@ public class ServicioDeVisualizacion {
   public List<Hecho> filtrarHechosDeColeccion(
       Coleccion coleccion,
       Filtro filtroAdicional,
-      RepositorioDeSolicitudes gestorDeReportes
+      GestorDeSolicitudes gestorDeReportes
   ) {
     List<Hecho> hechosVisibles = obtenerHechosDeColeccion(coleccion, gestorDeReportes);
 

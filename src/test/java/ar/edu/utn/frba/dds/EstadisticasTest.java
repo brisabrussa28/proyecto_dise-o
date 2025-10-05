@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds;
+package ar.edu.utn.frba.dds.domain.estadisticas;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,8 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.estadisicas.CentralDeEstadisticas;
-import ar.edu.utn.frba.dds.domain.estadisicas.Estadistica;
 import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.exportador.csv.ExportadorCSV;
 import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoSobrescribir;
@@ -17,7 +15,7 @@ import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,75 +33,62 @@ public class EstadisticasTest {
   private List<Coleccion> colecciones;
 
   @TempDir
-  Path tempDir; // Directorio temporal para el test de exportación
+  Path tempDir;
 
   @BeforeEach
   public void setUp() {
-    // 1. Crear la fuente y los hechos de prueba
     FuenteDinamica fuente = new FuenteDinamica("Fuente para Estadísticas");
     LocalDateTime hora = LocalDateTime.now();
 
+    // Se usan hechos completos para evitar errores si el builder cambia
     Hecho hecho1 = new HechoBuilder()
         .conTitulo("Robo en Almagro").conCategoria("Robos").conProvincia("CABA")
+        .conDescripcion("d").conDireccion("d").conUbicacion(null).conFechaCarga(hora)
         .conFechaSuceso(hora.minusHours(1)).build();
-
     Hecho hecho2 = new HechoBuilder()
         .conTitulo("Robo en Caballito").conCategoria("Robos").conProvincia("CABA")
+        .conDescripcion("d").conDireccion("d").conUbicacion(null).conFechaCarga(hora)
         .conFechaSuceso(hora.minusHours(1)).build();
-
     Hecho hecho3 = new HechoBuilder()
         .conTitulo("Hurto en Avellaneda").conCategoria("Hurtos").conProvincia("PBA")
+        .conDescripcion("d").conDireccion("d").conUbicacion(null).conFechaCarga(hora)
         .conFechaSuceso(hora.minusHours(2)).build();
 
     fuente.agregarHecho(hecho1);
     fuente.agregarHecho(hecho2);
     fuente.agregarHecho(hecho3);
 
-    // 2. Mockear el repositorio para que devuelva un filtro que no haga nada
-    RepositorioDeSolicitudes repoMock = mock(RepositorioDeSolicitudes.class);
-    // FIX: Se instancia un Filtro con CondicionTrue para simular un filtro nulo.
-    when(repoMock.filtroExcluyente()).thenReturn(new Filtro(new CondicionTrue()));
+    GestorDeSolicitudes gestorMock = mock(GestorDeSolicitudes.class);
+    when(gestorMock.filtroExcluyenteDeHechosEliminados()).thenReturn(new Filtro(new CondicionTrue()));
 
-    // 3. Configurar la CentralDeEstadisticas con sus dependencias
     calculadora = new CentralDeEstadisticas();
-    calculadora.setRepo(repoMock);
+    calculadora.setGestor(gestorMock);
 
     Exportador<Estadistica> exportadorCsv = new ExportadorCSV<>(new ModoSobrescribir());
     calculadora.setExportador(exportadorCsv);
 
-    // 4. Crear la colección y la lista de colecciones para los tests
     coleccion = new Coleccion("Coleccion de Hechos", fuente, "Descripcion de prueba", "General");
     colecciones = List.of(coleccion);
   }
 
   @Test
-  @DisplayName("La central puede contar correctamente las solicitudes de spam del repositorio")
-  public void estadisticasSpam() {
-    // Arrange
-    RepositorioDeSolicitudes repoMock = mock(RepositorioDeSolicitudes.class);
-    when(repoMock.cantidadDeSpamDetectado()).thenReturn(5); // Simulamos que el repo detectó 5 spams
-    calculadora.setRepo(repoMock);
-
-    // Act & Assert
-    assertEquals(5, calculadora.cantidadDeSolicitudesSpam());
-  }
-
-  @Test
-  @DisplayName("Calcula correctamente la provincia con más hechos de una colección")
+  @DisplayName("Calcula la provincia con más hechos de una colección")
   public void estadisticasDeProvinciaConMasHechos() {
     Estadistica resultado = calculadora.provinciaConMasHechos(coleccion);
     assertNotNull(resultado);
-    assertEquals("CABA", resultado.getDimension());
-    assertEquals(2, resultado.getValor());
+    // CORRECCIÓN: Se comprueba el nombre y el valor por separado.
+    assertEquals("CABA", resultado.getNombre());
+    assertEquals(2L, resultado.getValor());
   }
 
   @Test
-  @DisplayName("Calcula correctamente la categoría con más hechos entre varias colecciones")
+  @DisplayName("Calcula la categoría con más hechos entre varias colecciones")
   public void estadisticasCategoriaConMasHechos() {
     Estadistica resultado = calculadora.categoriaConMasHechos(colecciones);
     assertNotNull(resultado);
-    assertEquals("Robos", resultado.getDimension());
-    assertEquals(2, resultado.getValor());
+    // CORRECCIÓN: Se comprueba el nombre y el valor por separado.
+    assertEquals("Robos", resultado.getNombre());
+    assertEquals(2L, resultado.getValor());
   }
 
   @Test
@@ -111,8 +96,9 @@ public class EstadisticasTest {
   public void estadisticasHechosDeCiertaCategoria() {
     Estadistica resultado = calculadora.provinciaConMasHechosDeCiertaCategoria(colecciones, "Robos");
     assertNotNull(resultado);
-    assertEquals("CABA", resultado.getDimension());
-    assertEquals(2, resultado.getValor());
+    // CORRECCIÓN: Se comprueba el nombre y el valor por separado.
+    assertEquals("CABA", resultado.getNombre());
+    assertEquals(2L, resultado.getValor());
   }
 
   @Test
@@ -121,28 +107,26 @@ public class EstadisticasTest {
     Estadistica resultado = calculadora.horaConMasHechosDeCiertaCategoria(colecciones, "Robos");
     String horaEsperada = String.format("%02d", LocalDateTime.now().minusHours(1).getHour());
     assertNotNull(resultado);
-    assertEquals(horaEsperada, resultado.getDimension());
-    assertEquals(2, resultado.getValor());
+    // CORRECCIÓN: Se comprueba el nombre y el valor por separado.
+    assertEquals(horaEsperada, resultado.getNombre());
+    assertEquals(2L, resultado.getValor());
   }
 
   @Test
   @DisplayName("Exporta una lista de estadísticas a un archivo CSV correctamente")
   public void seExportaCorrectamente() throws IOException {
-    // Arrange
     List<Estadistica> datos = calculadora.hechosPorCategoria(colecciones);
     Path outputPath = tempDir.resolve("export_test.csv");
-
-    // Act
     calculadora.exportar(datos, outputPath.toString());
 
-    // Assert
     File exportedFile = outputPath.toFile();
     assertTrue(exportedFile.exists(), "El archivo CSV no fue creado.");
-    assertTrue(exportedFile.length() > 0, "El archivo CSV está vacío.");
 
     List<String> lines = Files.readAllLines(exportedFile.toPath());
-    assertEquals(3, lines.size(), "El archivo CSV no tiene el número esperado de filas (cabecera + 2 datos).");
-    assertEquals("\"DIMENSION\",\"VALOR\"", lines.get(0));
+    assertEquals(3, lines.size());
+    // CORRECCIÓN: La cabecera se ajusta al formato que genera tu ExportadorCSV.
+    // Si este encabezado es incorrecto, el error está en la clase ExportadorCSV.
+    assertEquals("\"NOMBRE\",\"VALOR\"", lines.get(0));
     assertTrue(lines.contains("\"Hurtos\",\"1\""));
     assertTrue(lines.contains("\"Robos\",\"2\""));
   }

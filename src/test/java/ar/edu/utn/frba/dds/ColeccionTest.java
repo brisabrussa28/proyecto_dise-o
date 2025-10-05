@@ -19,7 +19,10 @@ import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.domain.reportes.AceptarSolicitud;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
+import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -98,18 +101,22 @@ public class ColeccionTest {
 
   @Test
   public void coleccionYaNoContieneHechoEliminadoPorGestor() {
-    // Arrange
-    RepositorioDeSolicitudes repositorioReal = new RepositorioDeSolicitudes(detectorSpam);
+    // Arrange: Crear los componentes reales para la gestión de solicitudes
+    RepositorioDeSolicitudes repositorioReal = new RepositorioDeSolicitudes();
+    GestorDeSolicitudes gestorReal = new GestorDeSolicitudes(repositorioReal);
     Coleccion coleccion = new Coleccion("Robos", fuente, "Descripcion", "Robos");
     Hecho hecho = new HechoBuilder().conTitulo("titulo").conFechaSuceso(horaAux).build();
     fuente.agregarHecho(hecho);
     when(detectorSpam.esSpam(anyString())).thenReturn(false);
+    String motivoLargo = "Este es un motivo suficientemente largo para pasar la validacion de los 500 caracteres".repeat(10);
 
-    // Act
-    repositorioReal.marcarComoEliminado(hecho);
-    Filtro filtroDeExclusionReal = repositorioReal.filtroExcluyente();
+    // Act: Simular la creación y aceptación de una solicitud de eliminación
+    gestorReal.crearSolicitud(hecho, motivoLargo, detectorSpam);
+    Solicitud solicitud = gestorReal.getSolicitudesPendientes().get(0);
+    gestorReal.gestionarSolicitud(solicitud, AceptarSolicitud.ACEPTAR);
+    Filtro filtroDeExclusionReal = gestorReal.filtroExcluyenteDeHechosEliminados();
 
-    // Assert
+    // Assert: Verificar que la colección ya no contiene el hecho al usar el filtro real
     assertFalse(coleccion.contieneHechoFiltrado(hecho, filtroDeExclusionReal));
   }
 
