@@ -82,11 +82,11 @@ public class HechoEditor {
   public Hecho finalizar() {
     // Se utiliza el método ifPresent() de Optional para aplicar cada cambio
     // solo si fue especificado. Esto resulta en un código muy limpio y declarativo.
-    titulo.ifPresent(hecho::setTitulo);
-    descripcion.ifPresent(hecho::setDescripcion);
-    categoria.ifPresent(hecho::setCategoria);
-    direccion.ifPresent(hecho::setDireccion);
-    ubicacion.ifPresent(hecho::setUbicacion);
+    titulo.ifPresent(hecho::setHecho_titulo);
+    descripcion.ifPresent(hecho::setHecho_descripcion);
+    categoria.ifPresent(hecho::setHecho_categoria);
+    direccion.ifPresent(hecho::setHecho_direccion);
+    ubicacion.ifPresent(hecho::setHecho_ubicacion);
     etiquetas.ifPresent(hecho::setEtiquetas);
     fechaSuceso.ifPresent(hecho::setFechasuceso);
 

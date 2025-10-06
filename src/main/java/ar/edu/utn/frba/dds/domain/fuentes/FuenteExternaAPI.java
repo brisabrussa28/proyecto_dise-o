@@ -8,6 +8,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
@@ -20,6 +21,7 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
   private FuenteAdapter adaptador;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "fuente_configuracion_adapter")
   private ConfiguracionAdapter configuracionAdapter;
 
   protected FuenteExternaAPI() {
@@ -55,13 +57,13 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
   @Override
   protected List<Hecho> consultarNuevosHechos() {
     if (this.adaptador == null) {
-      System.err.println("Advertencia: El adaptador para la fuente '" + this.nombre + "' no está inicializado.");
+      System.err.println("Advertencia: El adaptador para la fuente '" + this.fuente_nombre + "' no está inicializado.");
       return Collections.emptyList();
     }
     try {
       return this.adaptador.consultarHechos();
     } catch (Exception e) {
-      System.err.println("Error al consultar la API externa para la fuente '" + this.nombre + "': " + e.getMessage());
+      System.err.println("Error al consultar la API externa para la fuente '" + this.fuente_nombre + "': " + e.getMessage());
       // Devolvemos una lista vacía para no borrar la copia local si la API falla.
       return Collections.emptyList();
     }

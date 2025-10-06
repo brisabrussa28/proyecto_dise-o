@@ -8,7 +8,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinTable;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 
 @Entity
@@ -17,7 +17,7 @@ public class FuenteDinamica extends Fuente {
 
   // Relación persistente: solo esta clase guarda Hechos en la BD.
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinTable(name = "fuente_hecho")
+  @JoinColumn(name = "hecho_fuente")
   private List<Hecho> hechosPersistidos;
 
   protected FuenteDinamica() {

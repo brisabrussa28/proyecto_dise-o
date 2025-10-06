@@ -56,7 +56,7 @@ public class LectorCsvTest {
         List<Hecho> csv = lector.importar(dir + "ejemplo.csv");
         Hecho primerHecho = csv.get(0);
 
-        assertEquals("auto", primerHecho.getCategoria());
+        assertEquals("auto", primerHecho.getHecho_categoria());
         assertEquals(5, csv.size());
     }
 
@@ -91,7 +91,7 @@ public class LectorCsvTest {
         List<Hecho> csv = lector.importar(dir + "rarito.csv");
         Hecho hecho = csv.get(0);
 
-        assertEquals("Imputado idRegistro 13483", hecho.getTitulo());
+        assertEquals("Imputado idRegistro 13483", hecho.getHecho_titulo());
     }
 
     @Test
@@ -113,7 +113,7 @@ public class LectorCsvTest {
         List<Hecho> hechos = lector.importar(tempFile.toString());
         assertEquals(1, hechos.size());
         assertNull(hechos.get(0)
-                .getDescripcion());
+                .getHecho_descripcion());
     }
 
     @Test
@@ -135,7 +135,7 @@ public class LectorCsvTest {
         List<Hecho> hechos = lector.importar(tempFile.toString());
         assertEquals(1, hechos.size());
         assertNull(hechos.get(0)
-                .getUbicacion());
+                .getHecho_ubicacion());
     }
 
     @Test

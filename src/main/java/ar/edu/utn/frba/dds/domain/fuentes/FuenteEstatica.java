@@ -10,7 +10,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinTable;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
@@ -18,29 +18,29 @@ import javax.persistence.OneToOne;
 @DiscriminatorValue("ESTATICA")
 public class FuenteEstatica extends Fuente {
 
-  private String rutaArchivo;
+  private String fuente_ruta_archivo;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  private ConfiguracionLector configuracionLector;
+  private ConfiguracionLector fuente_configuracion_lector;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinTable(name = "hecho_x_fuente")
+  @JoinColumn(name = "hecho_fuente")
   private final List<Hecho> hechosPersistidos = new ArrayList<>();
 
   protected FuenteEstatica() {
     super();
   }
 
-  public FuenteEstatica(String nombre, String rutaArchivo, ConfiguracionLector configLector) {
+  public FuenteEstatica(String nombre, String fuente_ruta_archivo, ConfiguracionLector configLector) {
     super(nombre);
-    if (rutaArchivo == null || rutaArchivo.isBlank()) {
+    if (fuente_ruta_archivo == null || fuente_ruta_archivo.isBlank()) {
       throw new IllegalArgumentException("La ruta del archivo no puede ser nula o vacía.");
     }
     if (configLector == null) {
       throw new IllegalArgumentException("La configuración del lector no puede ser nula.");
     }
-    this.rutaArchivo = rutaArchivo;
-    this.configuracionLector = configLector;
+    this.fuente_ruta_archivo = fuente_ruta_archivo;
+    this.fuente_configuracion_lector = configLector;
 
     // Se cargan los hechos al crear la instancia.
     this.cargarHechosDesdeArchivo();
@@ -51,8 +51,8 @@ public class FuenteEstatica extends Fuente {
    */
   private void cargarHechosDesdeArchivo() {
     // El lector se crea como una variable local, solo cuando se necesita.
-    Lector<Hecho> lector = this.configuracionLector.build(Hecho.class);
-    List<Hecho> hechosImportados = lector.importar(this.rutaArchivo);
+    Lector<Hecho> lector = this.fuente_configuracion_lector.build(Hecho.class);
+    List<Hecho> hechosImportados = lector.importar(this.fuente_ruta_archivo);
 
     this.hechosPersistidos.clear();
     this.hechosPersistidos.addAll(hechosImportados);

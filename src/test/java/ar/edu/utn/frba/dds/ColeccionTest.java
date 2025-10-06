@@ -74,9 +74,9 @@ public class ColeccionTest {
   @Test
   public void coleccionCreadaCorrectamente() {
     Coleccion bonaerense = new Coleccion("Robos", fuente, "Un día más siendo del conurbano", "Robos");
-    assertEquals("Robos", bonaerense.getTitulo());
-    assertEquals("Un día más siendo del conurbano", bonaerense.getDescripcion());
-    assertEquals("Robos", bonaerense.getCategoria());
+    assertEquals("Robos", bonaerense.getColeccion_titulo());
+    assertEquals("Un día más siendo del conurbano", bonaerense.getColeccion_descripcion());
+    assertEquals("Robos", bonaerense.getColeccion_categoria());
   }
 
   @Test
@@ -90,8 +90,8 @@ public class ColeccionTest {
   @Test
   public void coleccionEsDeCategoriaCorrectamente() {
     Coleccion coleccion = new Coleccion("Robos", fuente, "Descripcion", "Robos");
-    assertEquals("Robos", coleccion.getCategoria());
-    assertNotEquals("Violencia", coleccion.getCategoria());
+    assertEquals("Robos", coleccion.getColeccion_categoria());
+    assertNotEquals("Violencia", coleccion.getColeccion_categoria());
   }
 
   @Test
@@ -112,7 +112,7 @@ public class ColeccionTest {
   @Test
   public void nombreColeccionNoEsNull() {
     Coleccion coleccion = new Coleccion("Robos", fuente, "Descripcion", "Robos");
-    assertNotNull(coleccion.getTitulo());
+    assertNotNull(coleccion.getColeccion_titulo());
   }
 
   @Test
@@ -149,7 +149,7 @@ public class ColeccionTest {
     when(fuenteMock.obtenerHechos()).thenReturn(List.of(valido, spam, filtrado));
 
     Coleccion coleccion = new Coleccion("Test", fuenteMock, "Descripcion", "Categoria");
-    coleccion.setCondicion(new CondicionGenerica("titulo", DISTINTO, "filtrado"));
+    coleccion.setColeccion_condicion(new CondicionGenerica("titulo", DISTINTO, "filtrado"));
 
     Filtro filtroExterno = new Filtro(new CondicionGenerica("titulo", DISTINTO, "spam"));
 

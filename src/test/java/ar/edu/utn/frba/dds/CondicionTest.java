@@ -2,9 +2,7 @@ package ar.edu.utn.frba.dds;
 
 import static ar.edu.utn.frba.dds.domain.filtro.condiciones.Operador.IGUAL;
 import static ar.edu.utn.frba.dds.domain.filtro.condiciones.Operador.MAYOR_QUE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionAnd;
@@ -12,15 +10,12 @@ import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionGenerica;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionNot;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionOr;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionPredicado;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.Operador;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -142,7 +137,7 @@ public class CondicionTest {
 
     @Test
     void evaluaCorrectamenteUnPredicado() {
-      var condicionPredicado = new CondicionPredicado(h -> h.getTitulo()
+      var condicionPredicado = new CondicionPredicado(h -> h.getHecho_titulo()
                                                             .startsWith("Prueba"));
       assertTrue(condicionPredicado.evaluar(hechoRobo));
       assertTrue(condicionPredicado.evaluar(hechoPrueba));

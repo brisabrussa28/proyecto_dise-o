@@ -51,7 +51,7 @@ public class MultiplesMenciones extends AlgoritmoDeConsenso {
    * Determina si dos hechos son conflictivos: mismo título, pero no son idénticos.
    */
   private boolean esUnConflicto(Hecho hechoOriginal, Hecho otroHecho) {
-    return hechoOriginal.getTitulo().equals(otroHecho.getTitulo())
+    return hechoOriginal.getHecho_titulo().equals(otroHecho.getHecho_titulo())
         && !hechoOriginal.equals(otroHecho);
   }
 }

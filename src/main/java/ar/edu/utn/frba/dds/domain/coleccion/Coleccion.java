@@ -39,16 +39,16 @@ public class Coleccion {
   Long coleccion_id;
   @OneToOne
   @JoinColumn(name = "fuente_id")
-  private Fuente fuente;
-  private String titulo;
-  private String descripcion;
-  private String categoria;
+  private Fuente coleccion_fuente;
+  private String coleccion_titulo;
+  private String coleccion_descripcion;
+  private String coleccion_categoria;
 
   @ManyToOne
-  private AlgoritmoDeConsenso algoritmo;
+  private AlgoritmoDeConsenso coleccion_algoritmo;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  private Condicion condicion;
+  private Condicion coleccion_condicion;
 
   @ManyToMany
   @JoinTable(name = "hecho_x_coleccion")
@@ -66,18 +66,20 @@ public class Coleccion {
   /**
    * Constructor para crear una nueva Coleccion con sus datos fundamentales.
    *
-   * @param titulo      El título de la colección.
-   * @param fuente      La fuente de donde se obtendrán los hechos.
-   * @param descripcion Una breve descripción del propósito de la colección.
-   * @param categoria   Una categoría para organizar la colección.
+   * @param coleccion_titulo      El título de la colección.
+   * @param coleccion_fuente      La fuente de donde se obtendrán los hechos.
+   * @param coleccion_descripcion Una breve descripción del propósito de la colección.
+   * @param coleccion_categoria   Una categoría para organizar la colección.
    */
-  public Coleccion(String titulo, Fuente fuente, String descripcion, String categoria) {
-    validarCamposObligatorios(titulo, fuente, descripcion, categoria);
-    this.titulo = titulo;
-    this.fuente = fuente;
-    this.descripcion = descripcion;
-    this.categoria = categoria;
-    this.condicion = new CondicionTrue(); // Por defecto, no filtra nada
+  public Coleccion(String coleccion_titulo, Fuente coleccion_fuente, String coleccion_descripcion, String coleccion_categoria) {
+    validarCamposObligatorios(coleccion_titulo, coleccion_fuente, coleccion_descripcion,
+                              coleccion_categoria
+    );
+    this.coleccion_titulo = coleccion_titulo;
+    this.coleccion_fuente = coleccion_fuente;
+    this.coleccion_descripcion = coleccion_descripcion;
+    this.coleccion_categoria = coleccion_categoria;
+    this.coleccion_condicion = new CondicionTrue(); // Por defecto, no filtra nada
     inicializarFiltro();
   }
 
@@ -100,7 +102,7 @@ public class Coleccion {
    * @return Una lista de hechos completamente filtrada.
    */
   public List<Hecho> obtenerHechosFiltrados(Filtro filtroExcluyente) {
-    List<Hecho> hechosFuente = fuente.obtenerHechos();
+    List<Hecho> hechosFuente = coleccion_fuente.obtenerHechos();
     List<Hecho> hechosSinExcluidos = filtroExcluyente.filtrar(hechosFuente);
     return this.filtro.filtrar(hechosSinExcluidos);
   }
@@ -115,7 +117,7 @@ public class Coleccion {
    * @return {@code true} si la fuente de la colección es la misma que la proporcionada.
    */
   public boolean contieneFuente(Fuente unaFuente) {
-    return this.fuente.equals(unaFuente);
+    return this.coleccion_fuente.equals(unaFuente);
   }
 
   /**
@@ -138,10 +140,10 @@ public class Coleccion {
    * @return Una nueva lista con los hechos que cumplen con el criterio de consenso.
    */
   private List<Hecho> aplicarConsenso(List<Hecho> hechos) {
-    if (algoritmo == null) {
+    if (coleccion_algoritmo == null) {
       return hechos;
     }
-    return algoritmo.listaDeHechosConsensuados(hechos, this.fuente);
+    return coleccion_algoritmo.listaDeHechosConsensuados(hechos, this.coleccion_fuente);
   }
 
   /**
@@ -174,8 +176,8 @@ public class Coleccion {
    */
   @PostLoad
   private void inicializarFiltro() {
-    if (this.condicion != null) {
-      this.filtro = new Filtro(this.condicion);
+    if (this.coleccion_condicion != null) {
+      this.filtro = new Filtro(this.coleccion_condicion);
     } else {
       this.filtro = new Filtro(new CondicionTrue());
     }
@@ -193,28 +195,28 @@ public class Coleccion {
     return Collections.unmodifiableList(hechosConsensuados);
   }
 
-  public String getTitulo() {
-    return titulo;
+  public String getColeccion_titulo() {
+    return coleccion_titulo;
   }
 
-  public String getDescripcion() {
-    return descripcion;
+  public String getColeccion_descripcion() {
+    return coleccion_descripcion;
   }
 
-  public String getCategoria() {
-    return categoria;
+  public String getColeccion_categoria() {
+    return coleccion_categoria;
   }
 
   public Filtro getFiltro() {
     return filtro;
   }
 
-  public void setCondicion(Condicion condicion) {
-    this.condicion = condicion;
-    this.filtro.setCondicion(condicion);
+  public void setColeccion_condicion(Condicion coleccion_condicion) {
+    this.coleccion_condicion = coleccion_condicion;
+    this.filtro.setCondicion(coleccion_condicion);
   }
 
   public void setAlgoritmoDeConsenso(AlgoritmoDeConsenso algoritmo) {
-    this.algoritmo = algoritmo;
+    this.coleccion_algoritmo = algoritmo;
   }
 }
