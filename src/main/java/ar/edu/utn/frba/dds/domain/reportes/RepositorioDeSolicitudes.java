@@ -1,44 +1,91 @@
 package ar.edu.utn.frba.dds.domain.reportes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import java.util.ArrayList;
-import java.util.HashSet;
+import ar.edu.utn.frba.dds.domain.utils.DBUtils;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 /**
  * Repositorio de Solicitudes. Responsable únicamente del almacenamiento
- * y recuperación de las solicitudes.
+ * y recuperación de las solicitudes desde la base de datos.
  */
 public class RepositorioDeSolicitudes {
+  private final EntityManager em = DBUtils.getEntityManager();
 
-  private final Set<Solicitud> solicitudes = new HashSet<>();
+  public RepositorioDeSolicitudes() {
+  }
 
+  /**
+   * Guarda o actualiza una solicitud en la base de datos.
+   * Si la solicitud ya tiene un ID, la actualiza (merge).
+   * Si es nueva (sin ID), la inserta (persist).
+   * @param solicitud La entidad Solicitud a persistir.
+   */
   public void guardar(Solicitud solicitud) {
-    // Si ya existe, la elimina para luego agregar la versión actualizada.
-    solicitudes.remove(solicitud);
-    solicitudes.add(solicitud);
+    DBUtils.comenzarTransaccion(em);
+    if (solicitud.id == null) {
+      em.persist(solicitud);
+    } else {
+      em.merge(solicitud);
+    }
+    DBUtils.commit(em);
   }
 
+  /**
+   * Busca una solicitud específica por su ID.
+   * @param id El ID de la solicitud.
+   * @return Un Optional con la solicitud si se encuentra, o vacío si no.
+   */
+  public Optional<Solicitud> buscarPorId(Long id) {
+    return Optional.ofNullable(em.find(Solicitud.class, id));
+  }
+
+  /**
+   * Busca una solicitud basada en el hecho solicitado y el motivo.
+   * @param hecho El hecho asociado a la solicitud.
+   * @param razon El texto del motivo de la solicitud.
+   * @return Un Optional con la solicitud si se encuentra.
+   */
   public Optional<Solicitud> buscarPorHechoYRazon(Hecho hecho, String razon) {
-    return solicitudes.stream()
-                      .filter(s -> s.getHechoSolicitado().equals(hecho) && s.getRazonEliminacion().equals(razon))
-                      .findFirst();
+    try {
+      Solicitud solicitud = em.createQuery(
+                                  "SELECT s FROM Solicitud s WHERE s.hechoSolicitado = :hecho AND s.razonEliminacion = :razon", Solicitud.class)
+                              .setParameter("hecho", hecho)
+                              .setParameter("razon", razon)
+                              .getSingleResult();
+      return Optional.of(solicitud);
+    } catch (NoResultException e) {
+      return Optional.empty();
+    }
   }
 
+  /**
+   * Devuelve todas las solicitudes almacenadas en la base de datos.
+   * @return Una lista con todas las solicitudes.
+   */
   public List<Solicitud> obtenerTodas() {
-    return new ArrayList<>(solicitudes);
+    return em.createQuery("SELECT s FROM Solicitud s", Solicitud.class).getResultList();
   }
 
+  /**
+   * Devuelve todas las solicitudes que se encuentran en un estado específico.
+   * @param estado El estado por el cual filtrar (PENDIENTE, SPAM, etc.).
+   * @return Una lista de solicitudes que coinciden con el estado.
+   */
   public List<Solicitud> obtenerPorEstado(EstadoSolicitud estado) {
-    return solicitudes.stream()
-                      .filter(s -> s.getEstado() == estado)
-                      .collect(Collectors.toList());
+    return em.createQuery("SELECT s FROM Solicitud s WHERE s.estado = :estado", Solicitud.class)
+             .setParameter("estado", estado)
+             .getResultList();
   }
 
+  /**
+   * Cuenta el número total de solicitudes en la base de datos.
+   * @return La cantidad total de solicitudes.
+   */
   public int cantidadTotal() {
-    return solicitudes.size();
+    Long count = em.createQuery("SELECT COUNT(s) FROM Solicitud s", Long.class).getSingleResult();
+    return count.intValue();
   }
 }

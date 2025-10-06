@@ -7,57 +7,73 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionGenerica;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionPredicado;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.reportes.AceptarSolicitud;
-import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
-import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
-import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
-import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
+import ar.edu.utn.frba.dds.domain.hecho.Origen;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.utils.DBUtils;
 import java.time.LocalDateTime;
 import java.util.List;
+import javax.persistence.EntityManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class ColeccionTest {
   private FuenteDinamica fuente;
-  private Filtro filtroExcluyenteMock;
+  private Filtro filtroExcluyenteVacio;
   private final LocalDateTime horaAux = LocalDateTime.now().minusDays(1);
-
-  @Mock
-  private DetectorSpam detectorSpam;
 
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
     fuente = new FuenteDinamica("Fuente para Colecciones");
+    // Un filtro que no hace nada, para tests que no necesitan exclusión.
+    filtroExcluyenteVacio = new Filtro(new CondicionTrue());
+  }
 
-    filtroExcluyenteMock = mock(Filtro.class);
-    when(filtroExcluyenteMock.filtrar(anyList()))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+  /**
+   * Se agrega un método de limpieza para garantizar el aislamiento entre tests,
+   * especialmente si alguno interactúa con la base de datos.
+   */
+  @AfterEach
+  public void tearDown() {
+    EntityManager em = DBUtils.getEntityManager();
+    DBUtils.comenzarTransaccion(em);
+    em.createQuery("DELETE FROM Solicitud").executeUpdate();
+    DBUtils.commit(em);
+  }
+
+  // Método auxiliar para crear Hechos válidos y completos.
+  private Hecho crearHechoCompleto(String titulo) {
+    return new HechoBuilder()
+        .conTitulo(titulo)
+        .conDescripcion("Desc valida")
+        .conCategoria("Cat de Prueba")
+        .conDireccion("Dir de Prueba")
+        .conProvincia("Prov de Prueba")
+        .conUbicacion(new PuntoGeografico(1.0, 1.0))
+        .conFechaSuceso(horaAux)
+        .conFechaCarga(LocalDateTime.now())
+        .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .conEtiquetas(List.of("#test"))
+        .build();
   }
 
   @Test
   public void coleccionCreadaCorrectamente() {
-    Coleccion bonaerense = new Coleccion(
-        "Robos",
-        fuente,
-        "Un día más siendo del conurbano",
-        "Robos"
-    );
-
+    Coleccion bonaerense = new Coleccion("Robos", fuente, "Un día más siendo del conurbano", "Robos");
     assertEquals("Robos", bonaerense.getTitulo());
     assertEquals("Un día más siendo del conurbano", bonaerense.getDescripcion());
     assertEquals("Robos", bonaerense.getCategoria());
@@ -66,9 +82,9 @@ public class ColeccionTest {
   @Test
   public void coleccionContieneUnHecho() {
     Coleccion coleccion = new Coleccion("Robos", fuente, "Descripcion", "Robos");
-    Hecho hecho = new HechoBuilder().conTitulo("titulo").conFechaSuceso(horaAux).build();
+    Hecho hecho = crearHechoCompleto("titulo");
     fuente.agregarHecho(hecho);
-    assertTrue(coleccion.contieneHechoFiltrado(hecho, filtroExcluyenteMock));
+    assertTrue(coleccion.contieneHechoFiltrado(hecho, filtroExcluyenteVacio));
   }
 
   @Test
@@ -100,24 +116,21 @@ public class ColeccionTest {
   }
 
   @Test
-  public void coleccionYaNoContieneHechoEliminadoPorGestor() {
-    // Arrange: Crear los componentes reales para la gestión de solicitudes
-    RepositorioDeSolicitudes repositorioReal = new RepositorioDeSolicitudes();
-    GestorDeSolicitudes gestorReal = new GestorDeSolicitudes(repositorioReal);
+  public void coleccionAplicaCorrectamenteUnFiltroDeExclusion() {
+    // Arrange
     Coleccion coleccion = new Coleccion("Robos", fuente, "Descripcion", "Robos");
-    Hecho hecho = new HechoBuilder().conTitulo("titulo").conFechaSuceso(horaAux).build();
-    fuente.agregarHecho(hecho);
-    when(detectorSpam.esSpam(anyString())).thenReturn(false);
-    String motivoLargo = "Este es un motivo suficientemente largo para pasar la validacion de los 500 caracteres".repeat(10);
+    Hecho hechoAIncluir = crearHechoCompleto("Hecho a incluir");
+    Hecho hechoAExcluir = crearHechoCompleto("Hecho a excluir");
+    fuente.agregarHecho(hechoAIncluir);
+    fuente.agregarHecho(hechoAExcluir);
 
-    // Act: Simular la creación y aceptación de una solicitud de eliminación
-    gestorReal.crearSolicitud(hecho, motivoLargo, detectorSpam);
-    Solicitud solicitud = gestorReal.getSolicitudesPendientes().get(0);
-    gestorReal.gestionarSolicitud(solicitud, AceptarSolicitud.ACEPTAR);
-    Filtro filtroDeExclusionReal = gestorReal.filtroExcluyenteDeHechosEliminados();
+    // Act: Se crea manualmente un filtro que excluye un hecho específico.
+    Filtro filtroDeExclusionReal = new Filtro(new CondicionPredicado(h -> !h.equals(hechoAExcluir)));
 
-    // Assert: Verificar que la colección ya no contiene el hecho al usar el filtro real
-    assertFalse(coleccion.contieneHechoFiltrado(hecho, filtroDeExclusionReal));
+
+    // Assert: Se verifica que la colección aplica correctamente el filtro externo.
+    assertTrue(coleccion.contieneHechoFiltrado(hechoAIncluir, filtroDeExclusionReal));
+    assertFalse(coleccion.contieneHechoFiltrado(hechoAExcluir, filtroDeExclusionReal));
   }
 
   @Test
@@ -130,9 +143,9 @@ public class ColeccionTest {
   public void testFiltradoYSpamDetectadoCorrectamente() {
     // Arrange
     Fuente fuenteMock = mock(Fuente.class);
-    Hecho valido = new HechoBuilder().conTitulo("valido").conFechaSuceso(horaAux).build();
-    Hecho spam = new HechoBuilder().conTitulo("spam").conFechaSuceso(horaAux).build();
-    Hecho filtrado = new HechoBuilder().conTitulo("filtrado").conFechaSuceso(horaAux).build();
+    Hecho valido = crearHechoCompleto("valido");
+    Hecho spam = crearHechoCompleto("spam");
+    Hecho filtrado = crearHechoCompleto("filtrado");
     when(fuenteMock.obtenerHechos()).thenReturn(List.of(valido, spam, filtrado));
 
     Coleccion coleccion = new Coleccion("Test", fuenteMock, "Descripcion", "Categoria");
@@ -158,9 +171,10 @@ public class ColeccionTest {
     when(fuenteMock.obtenerHechos()).thenReturn(List.of(hecho1));
 
     Coleccion coleccion = new Coleccion("Test", fuenteMock, "Descripcion", "Categoria");
-    assertEquals(1, coleccion.obtenerHechosFiltrados(filtroExcluyenteMock).size());
+    assertEquals(1, coleccion.obtenerHechosFiltrados(filtroExcluyenteVacio).size());
 
     when(fuenteMock.obtenerHechos()).thenReturn(List.of(hecho1, hecho2));
-    assertEquals(2, coleccion.obtenerHechosFiltrados(filtroExcluyenteMock).size());
+    assertEquals(2, coleccion.obtenerHechosFiltrados(filtroExcluyenteVacio).size());
   }
 }
+

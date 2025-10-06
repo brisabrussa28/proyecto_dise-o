@@ -4,12 +4,47 @@ import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+/**
+ * Solicitud.
+ */
 
+@Entity
+@Indexed
 public class Solicitud {
+  @Id
+  @SequenceGenerator(name = "solicitud_seq", sequenceName = "solicitud_sequence", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "solicitud_seq")
+  @Column(name = "solicitud_id")
+  Long id;
 
+  @ManyToOne
+  @JoinColumn(name = "hecho_id")
   private Hecho hechoSolicitado;
+
+  @FullTextField
   private String razonEliminacion;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado", nullable = false)
   private EstadoSolicitud estado;
+
+  public void setHechoSolicitado(Hecho hechoSolicitado) {
+    this.hechoSolicitado = hechoSolicitado;
+  }
 
   @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "El objeto Hecho debe ser mutable y compartido intencionalmente")
   public Solicitud(Hecho hechoSolicitado, String motivo) {
@@ -24,6 +59,10 @@ public class Solicitud {
     this.hechoSolicitado = hechoSolicitado;
     this.razonEliminacion = motivo;
     this.estado = EstadoSolicitud.PENDIENTE;
+  }
+
+  public Solicitud() {
+
   }
 
   public Hecho getHechoSolicitado() {

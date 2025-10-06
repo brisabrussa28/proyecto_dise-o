@@ -2,24 +2,26 @@ package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.hecho.Origen;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
-import ar.edu.utn.frba.dds.domain.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.domain.hecho.Origen;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.reportes.AceptarSolicitud;
+import ar.edu.utn.frba.dds.domain.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
+import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
+import ar.edu.utn.frba.dds.domain.utils.DBUtils;
 import java.time.LocalDateTime;
 import java.util.List;
+import javax.persistence.EntityManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +43,19 @@ public class GestorDeSolicitudesTest {
     hecho = crearHechoCompleto("Hecho de prueba principal");
   }
 
-  // MÉTODO AUXILIAR para crear hechos válidos y evitar errores en el HechoBuilder
+  /**
+   * FIX: Se agrega un método de limpieza que se ejecuta después de cada test.
+   * Esto asegura que cada prueba se ejecute en un estado aislado,
+   * borrando los datos de la tabla de solicitudes para no interferir con el siguiente test.
+   */
+  @AfterEach
+  public void tearDown() {
+    EntityManager em = DBUtils.getEntityManager();
+    DBUtils.comenzarTransaccion(em);
+    em.createQuery("DELETE FROM Solicitud").executeUpdate();
+    DBUtils.commit(em);
+  }
+
   private Hecho crearHechoCompleto(String titulo) {
     return new HechoBuilder()
         .conTitulo(titulo)
@@ -77,8 +91,11 @@ public class GestorDeSolicitudesTest {
   @DisplayName("Aceptar una solicitud mueve el hecho a la lista de eliminados")
   public void hechoAceptadoApareceEnListaDeEliminados() {
     gestor.crearSolicitud(hecho, motivoLargo, detectorSpam);
-    Solicitud solicitudPendiente = gestor.getSolicitudesPendientes().get(0);
+
+    // FIX: Se busca la solicitud específica que se acaba de crear en lugar de tomar la primera de la lista.
+    Solicitud solicitudPendiente = repositorio.buscarPorHechoYRazon(hecho, motivoLargo).orElseThrow();
     gestor.gestionarSolicitud(solicitudPendiente, AceptarSolicitud.ACEPTAR);
+
     List<Hecho> eliminados = gestor.obtenerHechosEliminados();
     assertEquals(1, eliminados.size());
     assertTrue(eliminados.contains(hecho));
@@ -88,8 +105,11 @@ public class GestorDeSolicitudesTest {
   @DisplayName("Rechazar una solicitud la quita de pendientes y no elimina el hecho")
   public void rechazarSolicitudNoEliminaHecho() {
     gestor.crearSolicitud(hecho, motivoLargo, detectorSpam);
-    Solicitud solicitudPendiente = gestor.getSolicitudesPendientes().get(0);
+
+    // FIX: Se busca la solicitud específica.
+    Solicitud solicitudPendiente = repositorio.buscarPorHechoYRazon(hecho, motivoLargo).orElseThrow();
     gestor.gestionarSolicitud(solicitudPendiente, AceptarSolicitud.RECHAZAR);
+
     assertTrue(gestor.obtenerHechosEliminados().isEmpty());
     assertTrue(gestor.getSolicitudesPendientes().isEmpty());
   }
@@ -97,13 +117,13 @@ public class GestorDeSolicitudesTest {
   @Test
   @DisplayName("El filtro excluyente funciona con un hecho eliminado")
   public void filtroExcluyenteNoIncluyeHechosEliminados() {
-    // CORRECCIÓN: Se usa el método auxiliar para crear hechos completos
     Hecho hecho1 = crearHechoCompleto("Hecho a eliminar");
     Hecho hecho2 = crearHechoCompleto("Hecho que permanece");
     List<Hecho> hechosOriginales = List.of(hecho1, hecho2);
 
     gestor.crearSolicitud(hecho1, motivoLargo, detectorSpam);
-    Solicitud solicitudParaAceptar = gestor.getSolicitudesPendientes().get(0);
+    // FIX: Se busca la solicitud específica.
+    Solicitud solicitudParaAceptar = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo).orElseThrow();
     gestor.gestionarSolicitud(solicitudParaAceptar, AceptarSolicitud.ACEPTAR);
 
     List<Hecho> filtrados = gestor.filtroExcluyenteDeHechosEliminados().filtrar(hechosOriginales);
@@ -115,32 +135,32 @@ public class GestorDeSolicitudesTest {
   @Test
   @DisplayName("El filtro no excluye nada si no hay hechos eliminados")
   public void filtroSinEliminadosNoExcluyeNada() {
-    // CORRECCIÓN: Se usa el método auxiliar para crear hechos completos
     Hecho hecho1 = crearHechoCompleto("Hecho de prueba 1");
     Hecho hecho2 = crearHechoCompleto("Hecho de prueba 2");
     List<Hecho> hechosOriginales = List.of(hecho1, hecho2);
 
-    gestor.crearSolicitud(hecho1, motivoLargo, detectorSpam); // La solicitud no se acepta
+    gestor.crearSolicitud(hecho1, motivoLargo, detectorSpam);
 
     List<Hecho> filtrados = gestor.filtroExcluyenteDeHechosEliminados().filtrar(hechosOriginales);
-
     assertEquals(2, filtrados.size());
   }
 
   @Test
   @DisplayName("El filtro excluye múltiples hechos eliminados correctamente")
   public void filtroExcluyeMultiplesHechos() {
-    // CORRECCIÓN: Se usa el método auxiliar para crear hechos completos
     Hecho hecho1 = crearHechoCompleto("h1");
     Hecho hecho2 = crearHechoCompleto("h2");
     Hecho hecho3 = crearHechoCompleto("h3");
     List<Hecho> hechosOriginales = List.of(hecho1, hecho2, hecho3);
 
+    // FIX: Se gestiona cada solicitud de forma determinista.
     gestor.crearSolicitud(hecho1, motivoLargo, detectorSpam);
-    gestor.gestionarSolicitud(repositorio.obtenerPorEstado(ar.edu.utn.frba.dds.domain.reportes.EstadoSolicitud.PENDIENTE).get(0), AceptarSolicitud.ACEPTAR);
+    Solicitud solicitud1 = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo).orElseThrow();
+    gestor.gestionarSolicitud(solicitud1, AceptarSolicitud.ACEPTAR);
 
     gestor.crearSolicitud(hecho3, motivoLargo, detectorSpam);
-    gestor.gestionarSolicitud(repositorio.obtenerPorEstado(ar.edu.utn.frba.dds.domain.reportes.EstadoSolicitud.PENDIENTE).get(0), AceptarSolicitud.ACEPTAR);
+    Solicitud solicitud3 = repositorio.buscarPorHechoYRazon(hecho3, motivoLargo).orElseThrow();
+    gestor.gestionarSolicitud(solicitud3, AceptarSolicitud.ACEPTAR);
 
     List<Hecho> filtrados = gestor.filtroExcluyenteDeHechosEliminados().filtrar(hechosOriginales);
 

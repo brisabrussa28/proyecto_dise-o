@@ -27,7 +27,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 @Entity
 @Indexed
 public class Hecho {
-  // Los campos que eran 'final' ahora son no-final para permitir la deserialización de Jackson
+  // Quiza deberiamos poner el allocation a 10 pq la mayoria de los hechos se cargan en bulk
   @Id
   @SequenceGenerator(name = "hecho_seq", sequenceName = "hecho_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hecho_seq")
