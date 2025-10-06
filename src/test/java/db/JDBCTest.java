@@ -6,6 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.estadisticas.CentralDeEstadisticas;
+import ar.edu.utn.frba.dds.domain.estadisticas.Estadistica;
+import ar.edu.utn.frba.dds.domain.exportador.Exportador;
+import ar.edu.utn.frba.dds.domain.exportador.csv.ExportadorCSV;
+import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoSobrescribir;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
@@ -13,11 +17,14 @@ import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
+import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.repos.ColeccionRepository;
 import ar.edu.utn.frba.dds.domain.repos.EstadisticaRepository;
+import ar.edu.utn.frba.dds.domain.repos.FuentesRepository;
 import ar.edu.utn.frba.dds.domain.repos.HechoRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -29,12 +36,66 @@ public class JDBCTest extends PersistenceTests {
   private ColeccionRepository repo = new ColeccionRepository();
   private HechoRepository hechoRepo = new HechoRepository();
 
+  @BeforeEach
+  public void setUp() {
+    final DetectorSpam detector = texto -> texto.contains("Troll");
+    var fuente = new FuenteDinamica("Fuente para Estadísticas");
+
+    var ubicacion = new PuntoGeografico(-34.68415120338135, -58.58712709338028);
+    LocalDateTime hora = LocalDateTime.now();
+
+    var hecho1 = new HechoBuilder()
+        .conTitulo("Robo en Almagro")
+        .conCategoria("Robos")
+        .conFechaSuceso(hora.minusHours(1))
+        .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .conUbicacion(ubicacion)
+        .build();
+
+    var hecho2 = new HechoBuilder()
+        .conTitulo("Robo en Caballito")
+        .conCategoria("Robos")
+        .conFechaSuceso(hora.minusHours(1))
+        .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .conUbicacion(ubicacion)
+        .build();
+
+    var hecho3 = new HechoBuilder()
+        .conTitulo("Hurto en Avellaneda")
+        .conCategoria("Hurtos")
+        .conFechaSuceso(hora.minusHours(2))
+        .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+        .conUbicacion(ubicacion)
+        .build();
+
+    fuente.agregarHecho(hecho1);
+    fuente.agregarHecho(hecho2);
+    fuente.agregarHecho(hecho3);
+
+    FuentesRepository repoFuentes = new FuentesRepository();
+    repoFuentes.save(fuente);
+
+    var solicitudes = new RepositorioDeSolicitudes();
+    var calculadora = new CentralDeEstadisticas();
+
+    Exportador<Estadistica> exportadorCsv = new ExportadorCSV<>(new ModoSobrescribir());
+    calculadora.setExportador(exportadorCsv);
+
+    var coleccion = new Coleccion(
+        "Coleccion de Hechos",
+        fuente,
+        "Descripcion de prueba",
+        "General"
+    );
+    repo.save(coleccion);
+  }
+
   @Test
   @DisplayName("Puedo persistir un Hecho en una FuenteDinamica")
   public void puedoPersistirUnHechoEnFuenteDinamica() {
     withTransaction(() -> {
       FuenteDinamica fuente = new FuenteDinamica("Fuente de prueba para persistencia");
-      PuntoGeografico ubicacion = new PuntoGeografico(33.0, 44.0);
+      PuntoGeografico ubicacion = new PuntoGeografico(-34.68415120338135, -58.58712709338028);
 
       Hecho hecho = new HechoBuilder()
           .conTitulo("Robo")

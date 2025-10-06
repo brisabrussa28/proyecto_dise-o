@@ -38,7 +38,7 @@ public class Coleccion {
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "coleccion_seq")
   Long coleccion_id;
   @OneToOne
-  @JoinColumn(name = "fuente_id")
+  @JoinColumn(name = "coleccion_fuente")
   private Fuente coleccion_fuente;
   private String coleccion_titulo;
   private String coleccion_descripcion;
@@ -71,9 +71,15 @@ public class Coleccion {
    * @param coleccion_descripcion Una breve descripción del propósito de la colección.
    * @param coleccion_categoria   Una categoría para organizar la colección.
    */
-  public Coleccion(String coleccion_titulo, Fuente coleccion_fuente, String coleccion_descripcion, String coleccion_categoria) {
-    validarCamposObligatorios(coleccion_titulo, coleccion_fuente, coleccion_descripcion,
-                              coleccion_categoria
+  public Coleccion(
+      String coleccion_titulo,
+      Fuente coleccion_fuente,
+      String coleccion_descripcion,
+      String coleccion_categoria
+  ) {
+    validarCamposObligatorios(
+        coleccion_titulo, coleccion_fuente, coleccion_descripcion,
+        coleccion_categoria
     );
     this.coleccion_titulo = coleccion_titulo;
     this.coleccion_fuente = coleccion_fuente;
