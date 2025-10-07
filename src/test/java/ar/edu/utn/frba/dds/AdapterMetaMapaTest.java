@@ -13,9 +13,6 @@ import ar.edu.utn.frba.dds.domain.fuentes.apis.serviciometamapa.ServicioMetaMapa
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -113,7 +110,7 @@ public class AdapterMetaMapaTest {
       mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(jsonResponse).setHeader("Content-Type", "application/json"));
       List<Hecho> hechos = servicio.listadoDeHechos(querysDePrueba);
       assertEquals(1, hechos.size());
-      assertEquals("Incendio en Almagro", hechos.get(0).getTitulo());
+      assertEquals("Incendio en Almagro", hechos.get(0).getHecho_titulo());
     }
 
     @Test
@@ -132,7 +129,7 @@ public class AdapterMetaMapaTest {
       mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(jsonResponse));
       List<Hecho> hechos = servicio.listadoDeHechosPorColeccion(123, querysDePrueba);
       assertEquals(1, hechos.size());
-      assertEquals("Corte de Luz", hechos.get(0).getTitulo());
+      assertEquals("Corte de Luz", hechos.get(0).getHecho_titulo());
     }
 
     @Test

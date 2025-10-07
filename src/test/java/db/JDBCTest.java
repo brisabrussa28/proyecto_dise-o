@@ -5,23 +5,23 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.estadisicas.CentralDeEstadisticas;
-import ar.edu.utn.frba.dds.domain.estadisicas.Estadistica;
+import ar.edu.utn.frba.dds.domain.estadisticas.CentralDeEstadisticas;
+import ar.edu.utn.frba.dds.domain.estadisticas.Estadistica;
 import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.exportador.csv.ExportadorCSV;
 import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoSobrescribir;
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.repos.ColeccionRepository;
 import ar.edu.utn.frba.dds.domain.repos.EstadisticaRepository;
 import ar.edu.utn.frba.dds.domain.repos.FuentesRepository;
+import ar.edu.utn.frba.dds.domain.repos.HechoRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,21 +33,20 @@ import org.junit.jupiter.api.Test;
  * Hereda de PersistenceTests para obtener el manejo de transacciones y la configuración de la BD.
  */
 public class JDBCTest extends PersistenceTests {
-
   private ColeccionRepository repo = new ColeccionRepository();
+  private HechoRepository hechoRepo = new HechoRepository();
 
   @BeforeEach
   public void setUp() {
     final DetectorSpam detector = texto -> texto.contains("Troll");
     var fuente = new FuenteDinamica("Fuente para Estadísticas");
 
-    var ubicacion = new PuntoGeografico(50, -80);
+    var ubicacion = new PuntoGeografico(-34.68415120338135, -58.58712709338028);
     LocalDateTime hora = LocalDateTime.now();
 
     var hecho1 = new HechoBuilder()
         .conTitulo("Robo en Almagro")
         .conCategoria("Robos")
-        .conProvincia("CABA")
         .conFechaSuceso(hora.minusHours(1))
         .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .conUbicacion(ubicacion)
@@ -56,7 +55,6 @@ public class JDBCTest extends PersistenceTests {
     var hecho2 = new HechoBuilder()
         .conTitulo("Robo en Caballito")
         .conCategoria("Robos")
-        .conProvincia("CABA")
         .conFechaSuceso(hora.minusHours(1))
         .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .conUbicacion(ubicacion)
@@ -65,7 +63,6 @@ public class JDBCTest extends PersistenceTests {
     var hecho3 = new HechoBuilder()
         .conTitulo("Hurto en Avellaneda")
         .conCategoria("Hurtos")
-        .conProvincia("Buenos Aires")
         .conFechaSuceso(hora.minusHours(2))
         .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .conUbicacion(ubicacion)
@@ -78,9 +75,8 @@ public class JDBCTest extends PersistenceTests {
     FuentesRepository repoFuentes = new FuentesRepository();
     repoFuentes.save(fuente);
 
-    var solicitudes = new RepositorioDeSolicitudes(detector);
+    var solicitudes = new RepositorioDeSolicitudes();
     var calculadora = new CentralDeEstadisticas();
-    calculadora.setRepo(solicitudes);
 
     Exportador<Estadistica> exportadorCsv = new ExportadorCSV<>(new ModoSobrescribir());
     calculadora.setExportador(exportadorCsv);
@@ -99,7 +95,7 @@ public class JDBCTest extends PersistenceTests {
   public void puedoPersistirUnHechoEnFuenteDinamica() {
     withTransaction(() -> {
       FuenteDinamica fuente = new FuenteDinamica("Fuente de prueba para persistencia");
-      PuntoGeografico ubicacion = new PuntoGeografico(33.0, 44.0);
+      PuntoGeografico ubicacion = new PuntoGeografico(-34.68415120338135, -58.58712709338028);
 
       Hecho hecho = new HechoBuilder()
           .conTitulo("Robo")
@@ -109,13 +105,12 @@ public class JDBCTest extends PersistenceTests {
                                        .minusDays(5))
           .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
           .build();
-
       fuente.agregarHecho(hecho);
       persist(fuente); // Usamos el método 'persist' heredado de la librería
     });
 
     // Verificación (opcional, fuera de la transacción)
-    FuenteDinamica fuenteRecuperada = find(FuenteDinamica.class, 2L); // Asumiendo que el ID es 1
+    FuenteDinamica fuenteRecuperada = find(FuenteDinamica.class, 1L); // Asumiendo que el ID es 1
     assertNotNull(fuenteRecuperada);
     assertFalse(fuenteRecuperada.obtenerHechos()
                                 .isEmpty());
@@ -123,7 +118,7 @@ public class JDBCTest extends PersistenceTests {
         "Robo",
         fuenteRecuperada.obtenerHechos()
                         .get(0)
-                        .getTitulo()
+                        .getHecho_titulo()
     );
   }
 
@@ -145,16 +140,16 @@ public class JDBCTest extends PersistenceTests {
 
     Coleccion coleccionRecuperada = find(Coleccion.class, 1L); // Asumiendo que el ID es 1
     assertNotNull(coleccionRecuperada);
-    assertEquals("Robos en BA", coleccionRecuperada.getTitulo());
+    assertEquals("Robos en BA", coleccionRecuperada.getColeccion_titulo());
   }
 
   @Test
   @DisplayName("Genero estadisticas y las puedo visualizar en la db")
   public void estadisticaDBTest() {
     var calculadora = new CentralDeEstadisticas();
-    calculadora.setFiltro(new Filtro(new CondicionTrue()));
     List<Coleccion> coleccionDB = repo.findAll();
     //System.out.println(coleccionDB.toString());
+    calculadora.setGestor(new GestorDeSolicitudes(new RepositorioDeSolicitudes()));
     var stat = calculadora.categoriaConMasHechos(coleccionDB);
     var repoStat = new EstadisticaRepository();
     repoStat.save(stat);

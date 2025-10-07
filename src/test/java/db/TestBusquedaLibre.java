@@ -76,7 +76,7 @@ public class TestBusquedaLibre extends PersistenceTests {
     // 3. Verificar los resultados
     assertFalse(resultados.isEmpty());
     assertEquals(1, resultados.size());
-    assertEquals("Intento de robo a mano armada frustrado por vecinos", resultados.get(0).getTitulo());
+    assertEquals("Intento de robo a mano armada frustrado por vecinos", resultados.get(0).getHecho_titulo());
   }
 
   @Test
@@ -99,8 +99,8 @@ public class TestBusquedaLibre extends PersistenceTests {
     Logger logger = Logger.getLogger(TestBusquedaLibre.class.getName());
     logger.info("Resultados encontrados: " + resultados.size());
     for (Hecho hecho : resultados) {
-      logger.info("Título: " + hecho.getTitulo());
-      logger.info("  Descripción: " + hecho.getDescripcion());
+      logger.info("Título: " + hecho.getHecho_titulo());
+      logger.info("  Descripción: " + hecho.getHecho_descripcion());
       logger.info("--------------------------------------------------");
     }
   }

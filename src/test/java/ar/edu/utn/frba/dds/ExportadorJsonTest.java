@@ -1,14 +1,12 @@
 package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ar.edu.utn.frba.dds.domain.exportador.json.ExportadorJson;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.exportador.json.ExportadorJson;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
@@ -63,7 +61,7 @@ public class ExportadorJsonTest {
 
     List<Hecho> hechosLeidos = mapper.readValue(outputFile, new TypeReference<List<Hecho>>() {});
     assertEquals(2, hechosLeidos.size());
-    assertEquals("Hecho de prueba 1", hechosLeidos.get(0).getTitulo());
+    assertEquals("Hecho de prueba 1", hechosLeidos.get(0).getHecho_titulo());
     assertEquals(fechaSuceso, hechosLeidos.get(0).getFechasuceso());
   }
 

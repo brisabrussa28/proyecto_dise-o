@@ -4,21 +4,15 @@ import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
 
 /**
  * Clase abstracta para fuentes que mantienen una copia local persistida en la base de datos.
  * Las subclases deben implementar la lógica para consultar los datos frescos.
  */
-@Entity
+//@Entity
 public abstract class FuenteDeCopiaLocal extends Fuente {
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinTable(name = "hecho_x_fuente")
+  //@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<Hecho> copiaLocalDeHechos = new ArrayList<>();
 
   protected FuenteDeCopiaLocal() {

@@ -2,7 +2,6 @@ package ar.edu.utn.frba.dds.domain.fuentes;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
-import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
@@ -23,25 +22,24 @@ public abstract class Fuente {
   @Id
   @SequenceGenerator(name = "fuente_seq", sequenceName = "fuente_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fuente_seq")
-  @Column(name = "fuente_id")
-  private Long id;
+  private Long fuente_id;
 
-  protected String nombre;
+  protected String fuente_nombre;
 
   protected Fuente() {
   }
 
-  public Fuente(String nombre) {
-    if (nombre == null || nombre.isEmpty()) {
+  public Fuente(String fuente_nombre) {
+    if (fuente_nombre == null || fuente_nombre.isEmpty()) {
       throw new RuntimeException("El nombre de la fuente no puede ser nulo ni vacío.");
     }
-    this.nombre = nombre;
+    this.fuente_nombre = fuente_nombre;
   }
 
   public abstract List<Hecho> obtenerHechos();
 
-  public String getNombre() {
-    return this.nombre;
+  public String getFuente_nombre() {
+    return this.fuente_nombre;
   }
 
 }

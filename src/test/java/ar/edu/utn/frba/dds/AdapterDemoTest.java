@@ -15,9 +15,6 @@ import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterDemo;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.conexion.Conexion;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,8 +65,8 @@ public class AdapterDemoTest {
 
       assertNotNull(resultado);
       assertEquals(1, resultado.size());
-      assertEquals("Incendio Forestal", resultado.get(0).getTitulo());
-      assertEquals(-34.0, resultado.get(0).getUbicacion().getLatitud());
+      assertEquals("Incendio Forestal", resultado.get(0).getHecho_titulo());
+      assertEquals(-34.0, resultado.get(0).getHecho_ubicacion().getLatitud());
     }
 
     @Test
@@ -83,7 +80,7 @@ public class AdapterDemoTest {
       List<Hecho> resultado = adapter.consultarHechos();
 
       assertEquals(1, resultado.size());
-      assertEquals("Hecho Válido", resultado.get(0).getTitulo());
+      assertEquals("Hecho Válido", resultado.get(0).getHecho_titulo());
     }
 
     @Test
@@ -114,12 +111,12 @@ public class AdapterDemoTest {
       // Primera llamada
       List<Hecho> primeraLlamada = adapter.consultarHechos();
       assertEquals(1, primeraLlamada.size());
-      assertEquals("Primer Hecho", primeraLlamada.get(0).getTitulo());
+      assertEquals("Primer Hecho", primeraLlamada.get(0).getHecho_titulo());
 
       // Segunda llamada
       List<Hecho> segundaLlamada = adapter.consultarHechos();
       assertEquals(1, segundaLlamada.size());
-      assertEquals("Segundo Hecho", segundaLlamada.get(0).getTitulo());
+      assertEquals("Segundo Hecho", segundaLlamada.get(0).getHecho_titulo());
     }
 
     @Test
@@ -136,9 +133,9 @@ public class AdapterDemoTest {
       List<Hecho> resultado = adapter.consultarHechos();
       assertEquals(1, resultado.size());
       Hecho hecho = resultado.get(0);
-      assertEquals("Título Obligatorio", hecho.getTitulo());
-      assertNull(hecho.getDescripcion());
-      assertNull(hecho.getUbicacion());
+      assertEquals("Título Obligatorio", hecho.getHecho_titulo());
+      assertNull(hecho.getHecho_descripcion());
+      assertNull(hecho.getHecho_ubicacion());
     }
   }
 

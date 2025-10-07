@@ -24,12 +24,12 @@ public class HechoBuilder {
   private List<Etiqueta> etiquetas = new ArrayList<>();
 
   public HechoBuilder copiar(Hecho original) {
-    this.titulo = original.getTitulo();
-    this.descripcion = original.getDescripcion();
-    this.categoria = original.getCategoria();
-    this.direccion = original.getDireccion();
-    this.provincia = original.getProvincia();
-    this.ubicacion = original.getUbicacion();
+    this.titulo = original.getHecho_titulo();
+    this.descripcion = original.getHecho_descripcion();
+    this.categoria = original.getHecho_categoria();
+    this.direccion = original.getHecho_direccion();
+    this.provincia = original.getHecho_provincia();
+    this.ubicacion = original.getHecho_ubicacion();
     this.fechaSuceso = original.getFechasuceso();
     this.fechaCarga = original.getFechacarga();
     this.fuenteOrigen = original.getOrigen();

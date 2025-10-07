@@ -1,18 +1,24 @@
 package ar.edu.utn.frba.dds;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import ar.edu.utn.frba.dds.domain.calendarizacion.App;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteExternaAPI;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 public class AppTest {
   private App app;
@@ -26,7 +32,7 @@ public class AppTest {
   @DisplayName("Una fuente puede ser registrada correctamente")
   void registrarFuenteCorrectamente() {
     Fuente mockFuente = mock(Fuente.class);
-    when(mockFuente.getNombre()).thenReturn("TestFuente");
+    when(mockFuente.getFuente_nombre()).thenReturn("TestFuente");
 
     app.registrarFuente(mockFuente);
     Map<String, Fuente> fuentes = app.getFuentesRegistradas();
@@ -41,15 +47,15 @@ public class AppTest {
   void ejecutarActualizacionParaFuentesCorrectas() {
     // Caso 1: Una fuente que SÍ es actualizable (hereda de FuenteDeCopiaLocal)
     FuenteExternaAPI mockFuenteActualizable = mock(FuenteExternaAPI.class);
-    when(mockFuenteActualizable.getNombre()).thenReturn("FuenteAPI");
+    when(mockFuenteActualizable.getFuente_nombre()).thenReturn("FuenteAPI");
 
     // Caso 2: Una fuente que NO es actualizable (no hereda de FuenteDeCopiaLocal)
     FuenteDeAgregacion mockFuenteNoActualizable1 = mock(FuenteDeAgregacion.class);
-    when(mockFuenteNoActualizable1.getNombre()).thenReturn("FuenteAgregadora");
+    when(mockFuenteNoActualizable1.getFuente_nombre()).thenReturn("FuenteAgregadora");
 
     // Caso 3: Otra fuente que NO es actualizable
     FuenteDinamica mockFuenteNoActualizable2 = mock(FuenteDinamica.class);
-    when(mockFuenteNoActualizable2.getNombre()).thenReturn("FuenteDinamica");
+    when(mockFuenteNoActualizable2.getFuente_nombre()).thenReturn("FuenteDinamica");
 
     app.registrarFuente(mockFuenteActualizable);
     app.registrarFuente(mockFuenteNoActualizable1);

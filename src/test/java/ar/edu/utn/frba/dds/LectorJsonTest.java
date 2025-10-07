@@ -2,7 +2,6 @@ package ar.edu.utn.frba.dds;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.lector.json.LectorJson;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDate;
@@ -26,13 +25,13 @@ public class LectorJsonTest {
 
     logger.info(String.valueOf(hechoImportado.get(0)));
     var hecho = hechoImportado.get(0);
-    Assertions.assertEquals("Prueba", hecho.getTitulo());
-    Assertions.assertEquals("Esto es una prueba para ver si importa bien los json", hecho.getDescripcion());
-    Assertions.assertEquals("Prueba", hecho.getCategoria());
-    Assertions.assertEquals("Prueba 123", hecho.getDireccion());
-    Assertions.assertEquals("CABA", hecho.getProvincia());
-    Assertions.assertEquals(12.3456, hecho.getUbicacion().getLatitud());
-    Assertions.assertEquals(-12.3456, hecho.getUbicacion().getLongitud());
+    Assertions.assertEquals("Prueba", hecho.getHecho_titulo());
+    Assertions.assertEquals("Esto es una prueba para ver si importa bien los json", hecho.getHecho_descripcion());
+    Assertions.assertEquals("Prueba", hecho.getHecho_categoria());
+    Assertions.assertEquals("Prueba 123", hecho.getHecho_direccion());
+    Assertions.assertEquals("CABA", hecho.getHecho_provincia());
+    Assertions.assertEquals(12.3456, hecho.getHecho_ubicacion().getLatitud());
+    Assertions.assertEquals(-12.3456, hecho.getHecho_ubicacion().getLongitud());
     Assertions.assertEquals(LocalDate.parse("2025-09-17"), hecho.getFechasuceso().toLocalDate());
     Assertions.assertEquals(LocalDate.parse("2025-09-17"), hecho.getFechacarga().toLocalDate());
     Assertions.assertEquals(Origen.PROVISTO_CONTRIBUYENTE, hecho.getOrigen());

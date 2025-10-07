@@ -15,6 +15,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
@@ -34,30 +35,31 @@ public class Hecho {
   @Column(name = "hecho_id")
   Long id;
   @OneToMany
+  @JoinTable(name = "hecho_etiqueta")
   private List<Etiqueta> etiquetas;
-  private LocalDateTime fechaCarga;
+  private LocalDateTime hecho_fecha_carga;
   @Enumerated(EnumType.STRING)
-  @Column(name = "origen", nullable = false)
+  @Column(name = "hecho_origen", nullable = false)
   private Origen fuenteOrigen; // Ya no es final
   @FullTextField
-  private String titulo;
+  private String hecho_titulo;
   @FullTextField
-  private String descripcion;
-  private String categoria;
-  private String direccion;
+  private String hecho_descripcion;
+  private String hecho_categoria;
+  private String hecho_direccion;
   @Embedded
-  private PuntoGeografico ubicacion;
-  private LocalDateTime fechaSuceso;
+  private PuntoGeografico hecho_ubicacion;
+  private LocalDateTime hecho_fecha_suceso;
   @Enumerated(EnumType.STRING)
-  @Column(name = "estado", nullable = false)
+  @Column(name = "hecho_estado", nullable = false)
   private Estado estado;
-  private String provincia;
+  private String hecho_provincia;
 
   /**
    * Constructor para un Hecho.
    */
   public Hecho() {
-    this.fechaCarga = LocalDateTime.now();
+    this.hecho_fecha_carga = LocalDateTime.now();
     this.estado = Estado.ORIGINAL;
     this.etiquetas = new ArrayList<>();
   }
@@ -65,39 +67,39 @@ public class Hecho {
   /**
    * Constructor completo.
    *
-   * @param titulo       string
-   * @param descripcion  string
-   * @param categoria    string
-   * @param direccion    string
-   * @param provincia    string
-   * @param ubicacion    PuntoGeografico
-   * @param fechaSuceso  LocalDateTime
-   * @param fechaCarga   LocalDateTime
-   * @param fuenteOrigen Origen
-   * @param etiquetas    List
+   * @param hecho_titulo       string
+   * @param hecho_descripcion  string
+   * @param hecho_categoria    string
+   * @param hecho_direccion    string
+   * @param hecho_provincia    string
+   * @param hecho_ubicacion    PuntoGeografico
+   * @param hecho_fecha_suceso LocalDateTime
+   * @param hecho_fecha_carga         LocalDateTime
+   * @param fuenteOrigen       Origen
+   * @param etiquetas          List
    */
   public Hecho(
-      String titulo,
-      String descripcion,
-      String categoria,
-      String direccion,
-      String provincia,
-      PuntoGeografico ubicacion,
-      LocalDateTime fechaSuceso,
-      LocalDateTime fechaCarga,
+      String hecho_titulo,
+      String hecho_descripcion,
+      String hecho_categoria,
+      String hecho_direccion,
+      String hecho_provincia,
+      PuntoGeografico hecho_ubicacion,
+      LocalDateTime hecho_fecha_suceso,
+      LocalDateTime hecho_fecha_carga,
       Origen fuenteOrigen,
       List<Etiqueta> etiquetas
   ) {
-    this.titulo = titulo;
-    this.descripcion = descripcion;
-    this.categoria = categoria;
-    this.ubicacion = ubicacion;
-    this.direccion = direccion;
-    this.fechaSuceso = fechaSuceso;
-    this.fechaCarga = fechaCarga;
+    this.hecho_titulo = hecho_titulo;
+    this.hecho_descripcion = hecho_descripcion;
+    this.hecho_categoria = hecho_categoria;
+    this.hecho_ubicacion = hecho_ubicacion;
+    this.hecho_direccion = hecho_direccion;
+    this.hecho_fecha_suceso = hecho_fecha_suceso;
+    this.hecho_fecha_carga = hecho_fecha_carga;
     this.fuenteOrigen = fuenteOrigen;
     this.etiquetas = new ArrayList<>();
-    this.provincia = provincia;
+    this.hecho_provincia = hecho_provincia;
     this.estado = Estado.ORIGINAL;
   }
 
@@ -106,8 +108,8 @@ public class Hecho {
    *
    * @return string titulo del hecho
    */
-  public String getTitulo() {
-    return titulo;
+  public String getHecho_titulo() {
+    return hecho_titulo;
   }
 
   /**
@@ -115,8 +117,8 @@ public class Hecho {
    *
    * @return string descripción del hecho
    */
-  public String getDescripcion() {
-    return descripcion;
+  public String getHecho_descripcion() {
+    return hecho_descripcion;
   }
 
   public Long getId() {
@@ -128,8 +130,8 @@ public class Hecho {
    *
    * @return string categoría del hecho
    */
-  public String getCategoria() {
-    return categoria;
+  public String getHecho_categoria() {
+    return hecho_categoria;
   }
 
   /**
@@ -137,8 +139,8 @@ public class Hecho {
    *
    * @return string dirección del hecho
    */
-  public String getDireccion() {
-    return direccion;
+  public String getHecho_direccion() {
+    return hecho_direccion;
   }
 
   /**
@@ -146,8 +148,8 @@ public class Hecho {
    *
    * @return PuntoGeografico ubicación del hecho
    */
-  public PuntoGeografico getUbicacion() {
-    return ubicacion;
+  public PuntoGeografico getHecho_ubicacion() {
+    return hecho_ubicacion;
   }
 
   /**
@@ -156,7 +158,7 @@ public class Hecho {
    * @return Date fecha del suceso
    */
   public LocalDateTime getFechasuceso() {
-    return fechaSuceso;
+    return hecho_fecha_suceso;
   }
 
   /**
@@ -165,7 +167,7 @@ public class Hecho {
    * @return Date fecha de carga del hecho
    */
   public LocalDateTime getFechacarga() {
-    return fechaCarga;
+    return hecho_fecha_carga;
   }
 
   /**
@@ -195,32 +197,32 @@ public class Hecho {
     return estado;
   }
 
-  public String getProvincia() {
-    return provincia;
+  public String getHecho_provincia() {
+    return hecho_provincia;
   }
 
-  public void setTitulo(String titulo) {
-    this.titulo = titulo;
+  public void setHecho_titulo(String hecho_titulo) {
+    this.hecho_titulo = hecho_titulo;
   }
 
-  public void setDescripcion(String descripcion) {
-    this.descripcion = descripcion;
+  public void setHecho_descripcion(String hecho_descripcion) {
+    this.hecho_descripcion = hecho_descripcion;
   }
 
-  public void setCategoria(String categoria) {
-    this.categoria = categoria;
+  public void setHecho_categoria(String hecho_categoria) {
+    this.hecho_categoria = hecho_categoria;
   }
 
-  public void setDireccion(String direccion) {
-    this.direccion = direccion;
+  public void setHecho_direccion(String hecho_direccion) {
+    this.hecho_direccion = hecho_direccion;
   }
 
-  public void setUbicacion(PuntoGeografico ubicacion) {
-    this.ubicacion = ubicacion;
+  public void setHecho_ubicacion(PuntoGeografico hecho_ubicacion) {
+    this.hecho_ubicacion = hecho_ubicacion;
   }
 
   public void setFechasuceso(LocalDateTime fechaSuceso) {
-    this.fechaSuceso = fechaSuceso;
+    this.hecho_fecha_suceso = fechaSuceso;
   }
 
   public void setEtiquetas(List<Etiqueta> etiquetas) {
@@ -232,11 +234,11 @@ public class Hecho {
   }
 
   public void setFechacarga(LocalDateTime fechaCarga) {
-    this.fechaCarga = fechaCarga;
+    this.hecho_fecha_carga = fechaCarga;
   }
 
-  public void setProvincia(String provincia) {
-    this.provincia = provincia;
+  public void setHecho_provincia(String hecho_provincia) {
+    this.hecho_provincia = hecho_provincia;
   }
 
   @JsonProperty("origen")
@@ -253,7 +255,7 @@ public class Hecho {
    */
   public boolean esEditable() {
     return LocalDateTime.now()
-                        .isBefore(fechaCarga.plusWeeks(1));
+                        .isBefore(hecho_fecha_carga.plusWeeks(1));
   }
 
   @Override
@@ -265,17 +267,21 @@ public class Hecho {
       return false;
     }
     Hecho hecho = (Hecho) o;
-    return Objects.equals(titulo, hecho.titulo)
-        && Objects.equals(descripcion, hecho.descripcion)
-        && Objects.equals(categoria, hecho.categoria)
-        && Objects.equals(direccion, hecho.direccion)
-        && Objects.equals(ubicacion, hecho.ubicacion)
-        && Objects.equals(fechaSuceso, hecho.fechaSuceso);
+    return Objects.equals(hecho_titulo, hecho.hecho_titulo)
+        && Objects.equals(hecho_descripcion, hecho.hecho_descripcion)
+        && Objects.equals(hecho_categoria, hecho.hecho_categoria)
+        && Objects.equals(hecho_direccion, hecho.hecho_direccion)
+        && Objects.equals(hecho_ubicacion, hecho.hecho_ubicacion)
+        && Objects.equals(hecho_fecha_suceso, hecho.hecho_fecha_suceso);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(titulo, descripcion, categoria, direccion, ubicacion, fechaSuceso);
+    return Objects.hash(
+        hecho_titulo,
+        hecho_descripcion, hecho_categoria, hecho_direccion,
+        hecho_ubicacion, hecho_fecha_suceso
+    );
   }
 
 

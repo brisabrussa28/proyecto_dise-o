@@ -1,14 +1,24 @@
 package ar.edu.utn.frba.dds.domain.estadisticas;
 
 import java.util.Objects;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 
 /**
  * Representa un único dato estadístico, compuesto por un nombre (dimensión)
  * y un valor numérico.
  * Esta clase es inmutable.
  */
+@Entity
 public class Estadistica {
 
+  @Id
+  @SequenceGenerator(name = "estadistica_seq", sequenceName = "estadistica_sequence", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "estadistica_seq")
+  Long estadistica_id;
   private final String nombre;
   private final Long valor;
 

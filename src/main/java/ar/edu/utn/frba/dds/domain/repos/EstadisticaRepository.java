@@ -12,11 +12,13 @@ public class EstadisticaRepository {
   }
 
   public void save(Estadistica estadistica) {
-    DBUtils.comenzarTransaccion(em);
-    em.persist(estadistica);
-    DBUtils.commit(em);
+    if (estadistica != null) {
+      DBUtils.comenzarTransaccion(em);
+      em.persist(estadistica);
+      DBUtils.commit(em);
+    }
   }
-  
+
   public List<Estadistica> findAll() {
     return em.createQuery("SELECT * FROM estadistica", Estadistica.class)
              .getResultList();
