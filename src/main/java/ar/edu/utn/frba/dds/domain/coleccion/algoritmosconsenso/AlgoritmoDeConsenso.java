@@ -18,7 +18,7 @@ import javax.persistence.InheritanceType;
 public abstract class AlgoritmoDeConsenso {
   @Id
   @GeneratedValue
-  Long id;
+  Long algoritmo_id;
 
   public List<Hecho> listaDeHechosConsensuados(
       List<Hecho> listaDeHechos,

@@ -19,20 +19,20 @@ public class Estadistica {
   @SequenceGenerator(name = "estadistica_seq", sequenceName = "estadistica_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "estadistica_seq")
   Long estadistica_id;
-  private final String nombre;
-  private final Long valor;
+  private final String estadistica_nombre;
+  private final Long estadistica_valor;
 
-  public Estadistica(String nombre, Long valor) {
-    this.nombre = nombre;
-    this.valor = valor;
+  public Estadistica(String estadistica_nombre, Long estadistica_valor) {
+    this.estadistica_nombre = estadistica_nombre;
+    this.estadistica_valor = estadistica_valor;
   }
 
   public String getNombre() {
-    return nombre;
+    return estadistica_nombre;
   }
 
   public Long getValor() {
-    return valor;
+    return estadistica_valor;
   }
 
   @Override
@@ -44,16 +44,17 @@ public class Estadistica {
       return false;
     }
     Estadistica that = (Estadistica) o;
-    return Objects.equals(nombre, that.nombre) && Objects.equals(valor, that.valor);
+    return Objects.equals(estadistica_nombre, that.estadistica_nombre) && Objects.equals(
+        estadistica_valor, that.estadistica_valor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(nombre, valor);
+    return Objects.hash(estadistica_nombre, estadistica_valor);
   }
 
   @Override
   public String toString() {
-    return "Estadistica{" + "nombre='" + nombre + '\'' + ", valor=" + valor + '}';
+    return "Estadistica{" + "nombre='" + estadistica_nombre + '\'' + ", valor=" + estadistica_valor + '}';
   }
 }

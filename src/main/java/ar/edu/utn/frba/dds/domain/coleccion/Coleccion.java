@@ -15,8 +15,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
@@ -37,9 +35,10 @@ public class Coleccion {
   @SequenceGenerator(name = "coleccion_seq", sequenceName = "coleccion_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "coleccion_seq")
   Long coleccion_id;
-  @OneToOne
+  @ManyToOne
   @JoinColumn(name = "coleccion_fuente")
   private Fuente coleccion_fuente;
+
   private String coleccion_titulo;
   private String coleccion_descripcion;
   private String coleccion_categoria;
@@ -50,13 +49,12 @@ public class Coleccion {
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private Condicion coleccion_condicion;
 
-  @ManyToMany
-  @JoinTable(name = "hecho_x_coleccion")
-  private List<Hecho> hechosConsensuados = new ArrayList<>();
-
   // --- Atributos Transitorios ---
   @Transient
   private Filtro filtro;
+
+  @Transient
+  private List<Hecho> hechosConsensuados = new ArrayList<>();
 
   // --- Constructores ---
   public Coleccion() {
@@ -217,7 +215,7 @@ public class Coleccion {
     return filtro;
   }
 
-  public void setColeccion_condicion(Condicion coleccion_condicion) {
+  public void setCondicion(Condicion coleccion_condicion) {
     this.coleccion_condicion = coleccion_condicion;
     this.filtro.setCondicion(coleccion_condicion);
   }
