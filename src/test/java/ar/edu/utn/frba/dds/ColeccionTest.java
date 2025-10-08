@@ -149,7 +149,7 @@ public class ColeccionTest {
     when(fuenteMock.obtenerHechos()).thenReturn(List.of(valido, spam, filtrado));
 
     Coleccion coleccion = new Coleccion("Test", fuenteMock, "Descripcion", "Categoria");
-    coleccion.setColeccion_condicion(new CondicionGenerica("titulo", DISTINTO, "filtrado"));
+    coleccion.setCondicion(new CondicionGenerica("titulo", DISTINTO, "filtrado"));
 
     Filtro filtroExterno = new Filtro(new CondicionGenerica("titulo", DISTINTO, "spam"));
 

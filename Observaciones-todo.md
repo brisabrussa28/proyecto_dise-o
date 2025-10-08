@@ -81,3 +81,4 @@
 - [ ] Optimizar el mecanismo de hechos eliminados
 - [ ] Optimizar api, si superas la cantidad de request en cierto tiempo se rompe. corregirlo
 - [ ] Corregir test centralDeEstadisticas
+- [ ] Corregir algoritmos de consenso y que se relacione con Hecho y Coleccion.

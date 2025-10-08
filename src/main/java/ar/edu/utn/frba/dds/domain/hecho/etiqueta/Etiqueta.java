@@ -1,6 +1,5 @@
 package ar.edu.utn.frba.dds.domain.hecho.etiqueta;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -12,16 +11,15 @@ import javax.persistence.Id;
 public class Etiqueta {
   @Id
   @GeneratedValue
-  @Column(name = "etiqueta_nombre")
-  Long id;
+  Long etiqueta_id;
 
-  String etiqueta;
+  String etiqueta_nombre;
 
   public Etiqueta(String nombreEtiqueta) {
-    this.etiqueta = nombreEtiqueta;
+    this.etiqueta_nombre = nombreEtiqueta;
   }
 
-  public String getEtiqueta() {
-    return this.etiqueta;
+  public String getEtiqueta_nombre() {
+    return this.etiqueta_nombre;
   }
 }
