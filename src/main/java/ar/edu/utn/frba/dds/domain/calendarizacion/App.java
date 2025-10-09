@@ -30,8 +30,8 @@ public class App {
    */
   public void registrarFuente(Fuente fuente) {
     if (fuente != null) {
-      this.fuentesRegistradas.put(fuente.getFuente_nombre(), fuente);
-      logger.info("Fuente registrada: '" + fuente.getFuente_nombre() + "'");
+      this.fuentesRegistradas.put(fuente.getNombre(), fuente);
+      logger.info("Fuente registrada: '" + fuente.getNombre() + "'");
     }
   }
 
@@ -45,12 +45,12 @@ public class App {
       if (fuente instanceof FuenteDeCopiaLocal) {
         try {
           ((FuenteDeCopiaLocal) fuente).forzarActualizacionSincrona();
-          logger.info("Fuente '" + fuente.getFuente_nombre() + "' actualizada correctamente.");
+          logger.info("Fuente '" + fuente.getNombre() + "' actualizada correctamente.");
         } catch (Exception e) {
-          logger.warning("Error al actualizar la fuente '" + fuente.getFuente_nombre() + "': " + e.getMessage());
+          logger.warning("Error al actualizar la fuente '" + fuente.getNombre() + "': " + e.getMessage());
         }
       } else {
-        logger.info("Fuente '" + fuente.getFuente_nombre() + "' es de tipo '" + fuente.getClass().getSimpleName() + "' y no requiere actualización síncrona.");
+        logger.info("Fuente '" + fuente.getNombre() + "' es de tipo '" + fuente.getClass().getSimpleName() + "' y no requiere actualización síncrona.");
       }
     });
     logger.info("Proceso de actualización finalizado.");
@@ -76,7 +76,7 @@ public class App {
     // --- Lógica de negocio de ejemplo ---
     // 1. Se agrega la fuente dinámica a la fuente de agregación.
     agregadora.agregarFuente(dinamica);
-    logger.info("'" + dinamica.getFuente_nombre() + "' ha sido agregada a '" + agregadora.getFuente_nombre() + "'");
+    logger.info("'" + dinamica.getNombre() + "' ha sido agregada a '" + agregadora.getNombre() + "'");
 
     // 2. Se crea un nuevo 'Hecho' y se agrega a la fuente dinámica.
     Hecho nuevoHecho = new HechoBuilder()
@@ -86,7 +86,7 @@ public class App {
         .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .build();
     dinamica.agregarHecho(nuevoHecho);
-    logger.info("Nuevo hecho '" + nuevoHecho.getHecho_titulo() + "' agregado a la fuente dinámica.");
+    logger.info("Nuevo hecho '" + nuevoHecho.getTitulo() + "' agregado a la fuente dinámica.");
 
     return aplicacion;
   }
@@ -121,11 +121,11 @@ public class App {
     // Ejemplo de uso: Obtener los hechos de la fuente de agregación.
     FuenteDeAgregacion agregadora = (FuenteDeAgregacion) miApp.getFuentesRegistradas().get("agregadora_principal");
     if (agregadora != null) {
-      List<Hecho> hechosAgregados = agregadora.obtenerHechos();
-      logger.info("Consultando hechos de '" + agregadora.getFuente_nombre() + "':");
+      List<Hecho> hechosAgregados = agregadora.getHechos();
+      logger.info("Consultando hechos de '" + agregadora.getNombre() + "':");
       logger.info("Total de hechos encontrados: " + hechosAgregados.size());
       hechosAgregados.forEach(hecho ->
-                                  logger.info("  -> Hecho: '" + hecho.getHecho_titulo())
+                                  logger.info("  -> Hecho: '" + hecho.getTitulo())
       );
     }
   }

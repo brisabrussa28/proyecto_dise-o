@@ -22,9 +22,9 @@ public class Estadistica {
   private final String estadistica_nombre;
   private final Long estadistica_valor;
 
-  public Estadistica(String estadistica_nombre, Long estadistica_valor) {
-    this.estadistica_nombre = estadistica_nombre;
-    this.estadistica_valor = estadistica_valor;
+  public Estadistica(String nombre, Long valor) {
+    this.estadistica_nombre = nombre;
+    this.estadistica_valor = valor;
   }
 
   public String getNombre() {

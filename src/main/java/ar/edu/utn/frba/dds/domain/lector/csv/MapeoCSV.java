@@ -1,6 +1,5 @@
 package ar.edu.utn.frba.dds.domain.lector.csv;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,20 +8,20 @@ import java.util.List;
  * y una lista de posibles nombres de columna en un archivo CSV.
  * Esto normaliza la estructura de la base de datos de forma genérica.
  */
-@Entity
+//@Entity
 public class MapeoCSV {
 
-  @Id
-  @GeneratedValue
-  private Long id;
+//  @Id
+//  @GeneratedValue
+//  private Long id;
 
   // Se cambia a String para hacerlo genérico y no depender de un Enum.
-  @Column(name = "campo_destino")
+//  @Column(name = "campo_destino")
   private String campo;
 
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "mapeo_csv_nombres_columna", joinColumns = @JoinColumn(name = "mapeo_id"))
-  @Column(name = "nombre_columna")
+  //  @ElementCollection(fetch = FetchType.EAGER)
+//  @CollectionTable(name = "mapeo_csv_nombres_columna", joinColumns = @JoinColumn(name = "mapeo_id"))
+//  @Column(name = "nombre_columna")
   private List<String> nombresColumnas = new ArrayList<>();
 
   // Constructor para JPA

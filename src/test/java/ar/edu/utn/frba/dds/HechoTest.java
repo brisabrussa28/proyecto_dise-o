@@ -39,11 +39,11 @@ public class HechoTest {
         .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .build();
 
-    assertEquals("Robo", hecho.getHecho_titulo());
-    assertEquals("Robo a mano armada", hecho.getHecho_descripcion());
-    assertEquals("DELITO", hecho.getHecho_categoria());
-    assertEquals("Calle falsa 123", hecho.getHecho_direccion());
-    assertEquals(ubicacion, hecho.getHecho_ubicacion());
+    assertEquals("Robo", hecho.getTitulo());
+    assertEquals("Robo a mano armada", hecho.getDescripcion());
+    assertEquals("DELITO", hecho.getCategoria());
+    assertEquals("Calle falsa 123", hecho.getDireccion());
+    assertEquals(ubicacion, hecho.getUbicacion());
     assertEquals(fechaSuceso, hecho.getFechasuceso());
     assertEquals(Origen.PROVISTO_CONTRIBUYENTE, hecho.getOrigen());
     assertNotNull(hecho.getFechacarga());

@@ -38,7 +38,7 @@ public abstract class FuenteDeCopiaLocal extends Fuente {
    * @return Una lista inmutable de los hechos cacheados.
    */
   @Override
-  public List<Hecho> obtenerHechos() {
+  public List<Hecho> getHechos() {
     return Collections.unmodifiableList(this.copiaLocalDeHechos);
   }
 

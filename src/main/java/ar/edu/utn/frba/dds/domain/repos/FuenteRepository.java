@@ -6,15 +6,20 @@ import ar.edu.utn.frba.dds.domain.utils.DBUtils;
 import java.util.List;
 import javax.persistence.EntityManager;
 
-public class FuentesRepository {
+public class FuenteRepository {
 
   private EntityManager em = DBUtils.getEntityManager();
 
-  public FuentesRepository() {
+  public FuenteRepository() {
   }
 
   public void save(Fuente fuente) {
     DBUtils.comenzarTransaccion(em);
+    fuente.getHechos()
+          .forEach(hecho -> {
+            DBUtils.completarUbicacionFaltante(hecho);
+            DBUtils.completarProvinciaFaltante(hecho);
+          });
     em.persist(fuente);
     DBUtils.commit(em);
   }

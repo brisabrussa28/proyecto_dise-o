@@ -36,7 +36,7 @@ public class CentralDeEstadisticas {
 
     return hechosFiltrados.stream()
                           .collect(Collectors.groupingBy(
-                              Hecho::getHecho_provincia,
+                              Hecho::getProvincia,
                               Collectors.counting()
                           ))
                           .entrySet()
@@ -54,7 +54,7 @@ public class CentralDeEstadisticas {
   public List<Estadistica> hechosPorCategoria(List<Coleccion> colecciones) {
     List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
     return todosLosHechos.stream()
-                         .collect(Collectors.groupingBy(Hecho::getHecho_categoria, Collectors.counting()))
+                         .collect(Collectors.groupingBy(Hecho::getCategoria, Collectors.counting()))
                          .entrySet()
                          .stream()
                          .map(entry -> new Estadistica(entry.getKey(), entry.getValue()))
@@ -71,8 +71,8 @@ public class CentralDeEstadisticas {
       List<Coleccion> colecciones, String categoria) {
     List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
     return todosLosHechos.stream()
-                         .filter(hecho -> Objects.equals(hecho.getHecho_categoria(), categoria))
-                         .collect(Collectors.groupingBy(Hecho::getHecho_provincia, Collectors.counting()))
+                         .filter(hecho -> Objects.equals(hecho.getCategoria(), categoria))
+                         .collect(Collectors.groupingBy(Hecho::getProvincia, Collectors.counting()))
                          .entrySet()
                          .stream()
                          .map(entry -> new Estadistica(entry.getKey(), entry.getValue()))
@@ -90,7 +90,7 @@ public class CentralDeEstadisticas {
   public List<Estadistica> hechosPorHora(List<Coleccion> colecciones, String categoria) {
     List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
     return todosLosHechos.stream()
-                         .filter(hecho -> Objects.equals(hecho.getHecho_categoria(), categoria))
+                         .filter(hecho -> Objects.equals(hecho.getCategoria(), categoria))
                          .collect(Collectors.groupingBy(
                              hecho -> String.format(
                                  "%02d",

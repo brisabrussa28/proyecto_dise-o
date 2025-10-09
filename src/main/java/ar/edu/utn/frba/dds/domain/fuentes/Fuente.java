@@ -36,10 +36,13 @@ public abstract class Fuente {
     this.fuente_nombre = fuente_nombre;
   }
 
-  public abstract List<Hecho> obtenerHechos();
+  public abstract List<Hecho> getHechos();
 
-  public String getFuente_nombre() {
+  public String getNombre() {
     return this.fuente_nombre;
   }
 
+  public Long getId() {
+    return this.fuente_id;
+  }
 }

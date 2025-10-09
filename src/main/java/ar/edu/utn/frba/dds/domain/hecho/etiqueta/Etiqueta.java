@@ -1,25 +1,22 @@
 package ar.edu.utn.frba.dds.domain.hecho.etiqueta;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.Embeddable;
 
 /**
  * Etiqueta.
  */
-@Entity
+@Embeddable
 public class Etiqueta {
-  @Id
-  @GeneratedValue
-  Long etiqueta_id;
+  public String etiqueta_nombre;
 
-  String etiqueta_nombre;
-
-  public Etiqueta(String nombreEtiqueta) {
-    this.etiqueta_nombre = nombreEtiqueta;
+  public Etiqueta() {
   }
 
-  public String getEtiqueta_nombre() {
+  public Etiqueta(String nombre) {
+    this.etiqueta_nombre = nombre;
+  }
+
+  public String getNombre() {
     return this.etiqueta_nombre;
   }
 }

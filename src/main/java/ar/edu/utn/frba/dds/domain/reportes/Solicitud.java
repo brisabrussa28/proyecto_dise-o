@@ -14,7 +14,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 /**
@@ -34,7 +33,7 @@ public class Solicitud {
   @JoinColumn(name = "hecho_id")
   private Hecho hechoSolicitado;
 
-  @FullTextField
+  @Column(length = 1024)
   private String razonEliminacion;
 
   @Enumerated(EnumType.STRING)

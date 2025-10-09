@@ -2,16 +2,14 @@ package ar.edu.utn.frba.dds.domain.lector.configuracion;
 
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 
-import javax.persistence.*;
-
-@Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "tipo_lector")
+//@Entity
+//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+//@DiscriminatorColumn(name = "tipo_lector")
 public abstract class ConfiguracionLector {
 
-  @Id
-  @GeneratedValue
-  private Long id;
+//  @Id
+//  @GeneratedValue
+//  private Long id;
 
   /**
    * Actúa como una fabric para construir el objeto Lector<T> lógico y genérico.
@@ -20,7 +18,7 @@ public abstract class ConfiguracionLector {
    */
   public abstract <T> Lector<T> build(Class<T> clazz);
 
-  public Long getId() {
-    return id;
-  }
+//  public Long getId() {
+//    return id;
+//  }
 }

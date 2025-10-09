@@ -1,10 +1,13 @@
 package ar.edu.utn.frba.dds.domain.utils;
 
+import ar.edu.utn.frba.dds.domain.geolocalizacion.ServicioGeoref;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import java.util.TimeZone;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
-import java.util.TimeZone;
 
 public class DBUtils {
   // La fábrica ahora no es final y se inicializará de forma "lazy" (perezosa)
@@ -47,6 +50,45 @@ public class DBUtils {
     EntityTransaction tx = em.getTransaction();
     if (tx.isActive()) {
       tx.rollback();
+    }
+  }
+
+  /**
+   * Si la provincia no está definida pero sí la ubicación, intenta obtener la provincia
+   * consultando el servicio de geolocalización.
+   *
+   * @return El propio builder para encadenar llamadas.
+   */
+  public static void completarProvinciaFaltante(Hecho hecho) {
+    if ((hecho.getProvincia() == null || hecho.getProvincia()
+                                              .isBlank()) && hecho.getUbicacion() != null) {
+      ServicioGeoref servicio = new ServicioGeoref();
+      String provinciaObtenida = servicio.obtenerProvincia(
+          hecho.getUbicacion()
+               .getLatitud(),
+          hecho.getUbicacion()
+               .getLongitud()
+      );
+      if (provinciaObtenida != null && !provinciaObtenida.isBlank()) {
+        hecho.setProvincia(provinciaObtenida); // CORRECCIÓN: Asignar la provincia encontrada
+      }
+    }
+  }
+
+  /**
+   * Si la ubicación no está definida pero sí la provincia, intenta obtener la ubicación
+   * consultando el servicio de geolocalización.
+   *
+   * @return El propio builder para encadenar llamadas.
+   */
+  public static void completarUbicacionFaltante(Hecho hecho) {
+    if (hecho.getUbicacion() == null && hecho.getProvincia() != null && !hecho.getProvincia()
+                                                                              .isBlank()) {
+      ServicioGeoref servicio = new ServicioGeoref();
+      PuntoGeografico ubicacionObtenida = servicio.obtenerUbicacion(hecho.getProvincia());
+      if (ubicacionObtenida != null) {
+        hecho.setUbicacion(ubicacionObtenida);
+      }
     }
   }
 }

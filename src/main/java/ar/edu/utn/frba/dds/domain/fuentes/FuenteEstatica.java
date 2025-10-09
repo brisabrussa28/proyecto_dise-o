@@ -12,7 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 @Entity
 @DiscriminatorValue("ESTATICA")
@@ -20,7 +20,8 @@ public class FuenteEstatica extends Fuente {
 
   private String fuente_ruta_archivo;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+//  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @Transient
   private ConfiguracionLector fuente_configuracion_lector;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -59,7 +60,7 @@ public class FuenteEstatica extends Fuente {
   }
 
   @Override
-  public List<Hecho> obtenerHechos() {
+  public List<Hecho> getHechos() {
     // Devuelve la lista que ya está en memoria y persistida, sin releer el archivo.
     return Collections.unmodifiableList(this.hechosPersistidos);
   }

@@ -65,8 +65,8 @@ public class AdapterDemoTest {
 
       assertNotNull(resultado);
       assertEquals(1, resultado.size());
-      assertEquals("Incendio Forestal", resultado.get(0).getHecho_titulo());
-      assertEquals(-34.0, resultado.get(0).getHecho_ubicacion().getLatitud());
+      assertEquals("Incendio Forestal", resultado.get(0).getTitulo());
+      assertEquals(-34.0, resultado.get(0).getUbicacion().getLatitud());
     }
 
     @Test
@@ -80,7 +80,7 @@ public class AdapterDemoTest {
       List<Hecho> resultado = adapter.consultarHechos();
 
       assertEquals(1, resultado.size());
-      assertEquals("Hecho Válido", resultado.get(0).getHecho_titulo());
+      assertEquals("Hecho Válido", resultado.get(0).getTitulo());
     }
 
     @Test
@@ -111,12 +111,12 @@ public class AdapterDemoTest {
       // Primera llamada
       List<Hecho> primeraLlamada = adapter.consultarHechos();
       assertEquals(1, primeraLlamada.size());
-      assertEquals("Primer Hecho", primeraLlamada.get(0).getHecho_titulo());
+      assertEquals("Primer Hecho", primeraLlamada.get(0).getTitulo());
 
       // Segunda llamada
       List<Hecho> segundaLlamada = adapter.consultarHechos();
       assertEquals(1, segundaLlamada.size());
-      assertEquals("Segundo Hecho", segundaLlamada.get(0).getHecho_titulo());
+      assertEquals("Segundo Hecho", segundaLlamada.get(0).getTitulo());
     }
 
     @Test
@@ -133,9 +133,9 @@ public class AdapterDemoTest {
       List<Hecho> resultado = adapter.consultarHechos();
       assertEquals(1, resultado.size());
       Hecho hecho = resultado.get(0);
-      assertEquals("Título Obligatorio", hecho.getHecho_titulo());
-      assertNull(hecho.getHecho_descripcion());
-      assertNull(hecho.getHecho_ubicacion());
+      assertEquals("Título Obligatorio", hecho.getTitulo());
+      assertNull(hecho.getDescripcion());
+      assertNull(hecho.getUbicacion());
     }
   }
 

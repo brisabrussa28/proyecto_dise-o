@@ -13,6 +13,11 @@ public class ColeccionRepository {
 
   public void save(Coleccion coleccion) {
     DBUtils.comenzarTransaccion(em);
+    coleccion.getHechosConsensuados()
+             .forEach(hecho -> {
+               DBUtils.completarProvinciaFaltante(hecho);
+               DBUtils.completarUbicacionFaltante(hecho);
+             });
     em.persist(coleccion);
     DBUtils.commit(em);
   }

@@ -1,17 +1,13 @@
 package ar.edu.utn.frba.dds.domain.lector.configuracion;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 import ar.edu.utn.frba.dds.domain.lector.json.LectorJson;
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import java.util.List;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
 
-@Entity
-@DiscriminatorValue("JSON")
+//@Entity
+//@DiscriminatorValue("JSON")
 public class ConfiguracionLectorJson extends ConfiguracionLector {
 
   @Override

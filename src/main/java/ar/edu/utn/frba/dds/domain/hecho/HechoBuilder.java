@@ -1,6 +1,5 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
-import ar.edu.utn.frba.dds.domain.geolocalizacion.ServicioGeoref;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
@@ -24,12 +23,12 @@ public class HechoBuilder {
   private List<Etiqueta> etiquetas = new ArrayList<>();
 
   public HechoBuilder copiar(Hecho original) {
-    this.titulo = original.getHecho_titulo();
-    this.descripcion = original.getHecho_descripcion();
-    this.categoria = original.getHecho_categoria();
-    this.direccion = original.getHecho_direccion();
-    this.provincia = original.getHecho_provincia();
-    this.ubicacion = original.getHecho_ubicacion();
+    this.titulo = original.getTitulo();
+    this.descripcion = original.getDescripcion();
+    this.categoria = original.getCategoria();
+    this.direccion = original.getDireccion();
+    this.provincia = original.getProvincia();
+    this.ubicacion = original.getUbicacion();
     this.fechaSuceso = original.getFechasuceso();
     this.fechaCarga = original.getFechacarga();
     this.fuenteOrigen = original.getOrigen();
@@ -139,8 +138,8 @@ public class HechoBuilder {
       throw new IllegalStateException("La fecha de carga no puede ser una fecha futura.");
     }
     // No se si hacer que la existencia de ambos campos sea obligatoria.
-    this.completarProvinciaFaltante();
-    this.completarUbicacionFaltante();
+    // this.completarProvinciaFaltante();
+    // this.completarUbicacionFaltante();
 
     return new Hecho(
         titulo,
@@ -154,42 +153,5 @@ public class HechoBuilder {
         fuenteOrigen,
         etiquetas
     );
-  }
-
-  /**
-   * Si la provincia no está definida pero sí la ubicación, intenta obtener la provincia
-   * consultando el servicio de geolocalización.
-   *
-   * @return El propio builder para encadenar llamadas.
-   */
-  public HechoBuilder completarProvinciaFaltante() {
-    if ((this.provincia == null || this.provincia.isBlank()) && this.ubicacion != null) {
-      ServicioGeoref servicio = new ServicioGeoref();
-      String provinciaObtenida = servicio.obtenerProvincia(
-          this.ubicacion.getLatitud(),
-          this.ubicacion.getLongitud()
-      );
-      if (provinciaObtenida != null && !provinciaObtenida.isBlank()) {
-        this.provincia = provinciaObtenida; // CORRECCIÓN: Asignar la provincia encontrada
-      }
-    }
-    return this;
-  }
-
-  /**
-   * Si la ubicación no está definida pero sí la provincia, intenta obtener la ubicación
-   * consultando el servicio de geolocalización.
-   *
-   * @return El propio builder para encadenar llamadas.
-   */
-  public HechoBuilder completarUbicacionFaltante() {
-    if (this.ubicacion == null && this.provincia != null && !this.provincia.isBlank()) {
-      ServicioGeoref servicio = new ServicioGeoref();
-      PuntoGeografico ubicacionObtenida = servicio.obtenerUbicacion(this.provincia);
-      if (ubicacionObtenida != null) {
-        this.ubicacion = ubicacionObtenida;
-      }
-    }
-    return this;
   }
 }

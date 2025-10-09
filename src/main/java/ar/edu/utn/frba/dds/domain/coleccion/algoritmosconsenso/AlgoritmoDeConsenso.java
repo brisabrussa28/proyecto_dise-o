@@ -53,7 +53,7 @@ public abstract class AlgoritmoDeConsenso {
    */
   List<Set<Hecho>> obtenerListasDeHechos(List<Fuente> fuentes) {
     return fuentes.stream()
-                  .map(fuente -> Set.copyOf(fuente.obtenerHechos()))
+                  .map(fuente -> Set.copyOf(fuente.getHechos()))
                   .toList();
   }
 

@@ -29,17 +29,20 @@ public class CondicionTest {
 
   @BeforeEach
   void setUp() {
+    var etiquetaRobo = new Etiqueta("#ROBO");
+
     fechaSuceso = LocalDateTime.now()
                                .minusDays(1);
     hechoRobo = new Hecho(
         "Prueba Robo", "Descripción Robo", "Robos", "123", "PBA",
         new PuntoGeografico(12.3, 12.3), fechaSuceso, LocalDateTime.now(),
-        Origen.PROVISTO_CONTRIBUYENTE, List.of(new Etiqueta("#ROBO"))
+        Origen.PROVISTO_CONTRIBUYENTE, List.of(etiquetaRobo)
     );
+
     hechoPrueba = new Hecho(
         "Prueba General", "Descripción Prueba", "Pruebas", "direccion", "PBA",
         new PuntoGeografico(12.3, 12.3), fechaSuceso, LocalDateTime.now(),
-        Origen.PROVISTO_CONTRIBUYENTE, List.of(new Etiqueta("#PRUEBA"))
+        Origen.PROVISTO_CONTRIBUYENTE, List.of(etiquetaRobo)
     );
   }
 
@@ -62,7 +65,11 @@ public class CondicionTest {
 
     @Test
     void evaluaMayorQueParaFechas() {
-      CondicionGenerica condicion = new CondicionGenerica("fechasuceso", MAYOR_QUE, fechaSuceso.minusDays(1));
+      CondicionGenerica condicion = new CondicionGenerica(
+          "fechasuceso",
+          MAYOR_QUE,
+          fechaSuceso.minusDays(1)
+      );
       assertTrue(condicion.evaluar(hechoRobo));
     }
 
@@ -91,7 +98,11 @@ public class CondicionTest {
     @Test
     void condicionOrEvaluaTrueSiUnaEsTrue() {
       CondicionOr condicionOr = new CondicionOr();
-      condicionOr.agregarCondicion(new CondicionGenerica("categoria", IGUAL, "Categoria_Inexistente"));
+      condicionOr.agregarCondicion(new CondicionGenerica(
+          "categoria",
+          IGUAL,
+          "Categoria_Inexistente"
+      ));
       condicionOr.agregarCondicion(new CondicionGenerica("direccion", IGUAL, "123"));
       assertTrue(condicionOr.evaluar(hechoRobo));
     }
@@ -137,7 +148,7 @@ public class CondicionTest {
 
     @Test
     void evaluaCorrectamenteUnPredicado() {
-      var condicionPredicado = new CondicionPredicado(h -> h.getHecho_titulo()
+      var condicionPredicado = new CondicionPredicado(h -> h.getTitulo()
                                                             .startsWith("Prueba"));
       assertTrue(condicionPredicado.evaluar(hechoRobo));
       assertTrue(condicionPredicado.evaluar(hechoPrueba));

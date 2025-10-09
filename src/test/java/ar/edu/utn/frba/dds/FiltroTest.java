@@ -51,7 +51,7 @@ public class FiltroTest {
     List<Hecho> resultado = filtro.filtrar(listaDeHechos);
 
     assertEquals(1, resultado.size());
-    assertEquals("Robos", resultado.get(0).getHecho_categoria());
+    assertEquals("Robos", resultado.get(0).getCategoria());
   }
 
   @Test

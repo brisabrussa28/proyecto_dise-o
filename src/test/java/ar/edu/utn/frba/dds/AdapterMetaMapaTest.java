@@ -106,11 +106,11 @@ public class AdapterMetaMapaTest {
     @Test
     @DisplayName("Deserializa correctamente una respuesta exitosa")
     void listadoDeHechosDeserializaRespuestaExitosa() throws IOException {
-      String jsonResponse = "[{\"titulo\":\"Incendio en Almagro\"}]";
+      String jsonResponse = "[{\"hecho_titulo\":\"Incendio en Almagro\"}]";
       mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(jsonResponse).setHeader("Content-Type", "application/json"));
       List<Hecho> hechos = servicio.listadoDeHechos(querysDePrueba);
       assertEquals(1, hechos.size());
-      assertEquals("Incendio en Almagro", hechos.get(0).getHecho_titulo());
+      assertEquals("Incendio en Almagro", hechos.get(0).getTitulo());
     }
 
     @Test
@@ -125,11 +125,12 @@ public class AdapterMetaMapaTest {
     @Test
     @DisplayName("Consulta por colección funciona correctamente")
     void listadoDeHechosPorColeccion() throws IOException {
-      String jsonResponse = "[{\"titulo\":\"Corte de Luz\"}]";
+      String jsonResponse = "[{\"hecho_titulo\":\"Corte de Luz\"}]";
       mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(jsonResponse));
       List<Hecho> hechos = servicio.listadoDeHechosPorColeccion(123, querysDePrueba);
       assertEquals(1, hechos.size());
-      assertEquals("Corte de Luz", hechos.get(0).getHecho_titulo());
+      System.out.println(hechos.get(0).getTitulo());
+      assertEquals("Corte de Luz", hechos.get(0).getTitulo());
     }
 
     @Test

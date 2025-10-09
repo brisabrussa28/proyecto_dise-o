@@ -74,9 +74,9 @@ public class ColeccionTest {
   @Test
   public void coleccionCreadaCorrectamente() {
     Coleccion bonaerense = new Coleccion("Robos", fuente, "Un día más siendo del conurbano", "Robos");
-    assertEquals("Robos", bonaerense.getColeccion_titulo());
-    assertEquals("Un día más siendo del conurbano", bonaerense.getColeccion_descripcion());
-    assertEquals("Robos", bonaerense.getColeccion_categoria());
+    assertEquals("Robos", bonaerense.getTitulo());
+    assertEquals("Un día más siendo del conurbano", bonaerense.getDescripcion());
+    assertEquals("Robos", bonaerense.getCategoria());
   }
 
   @Test
@@ -90,8 +90,8 @@ public class ColeccionTest {
   @Test
   public void coleccionEsDeCategoriaCorrectamente() {
     Coleccion coleccion = new Coleccion("Robos", fuente, "Descripcion", "Robos");
-    assertEquals("Robos", coleccion.getColeccion_categoria());
-    assertNotEquals("Violencia", coleccion.getColeccion_categoria());
+    assertEquals("Robos", coleccion.getCategoria());
+    assertNotEquals("Violencia", coleccion.getCategoria());
   }
 
   @Test
@@ -112,7 +112,7 @@ public class ColeccionTest {
   @Test
   public void nombreColeccionNoEsNull() {
     Coleccion coleccion = new Coleccion("Robos", fuente, "Descripcion", "Robos");
-    assertNotNull(coleccion.getColeccion_titulo());
+    assertNotNull(coleccion.getTitulo());
   }
 
   @Test
@@ -146,7 +146,7 @@ public class ColeccionTest {
     Hecho valido = crearHechoCompleto("valido");
     Hecho spam = crearHechoCompleto("spam");
     Hecho filtrado = crearHechoCompleto("filtrado");
-    when(fuenteMock.obtenerHechos()).thenReturn(List.of(valido, spam, filtrado));
+    when(fuenteMock.getHechos()).thenReturn(List.of(valido, spam, filtrado));
 
     Coleccion coleccion = new Coleccion("Test", fuenteMock, "Descripcion", "Categoria");
     coleccion.setCondicion(new CondicionGenerica("titulo", DISTINTO, "filtrado"));
@@ -168,12 +168,12 @@ public class ColeccionTest {
     Fuente fuenteMock = mock(Fuente.class);
     Hecho hecho1 = mock(Hecho.class);
     Hecho hecho2 = mock(Hecho.class);
-    when(fuenteMock.obtenerHechos()).thenReturn(List.of(hecho1));
+    when(fuenteMock.getHechos()).thenReturn(List.of(hecho1));
 
     Coleccion coleccion = new Coleccion("Test", fuenteMock, "Descripcion", "Categoria");
     assertEquals(1, coleccion.obtenerHechosFiltrados(filtroExcluyenteVacio).size());
 
-    when(fuenteMock.obtenerHechos()).thenReturn(List.of(hecho1, hecho2));
+    when(fuenteMock.getHechos()).thenReturn(List.of(hecho1, hecho2));
     assertEquals(2, coleccion.obtenerHechosFiltrados(filtroExcluyenteVacio).size());
   }
 }

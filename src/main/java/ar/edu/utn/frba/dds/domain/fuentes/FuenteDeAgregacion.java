@@ -68,12 +68,12 @@ public class FuenteDeAgregacion extends Fuente {
    * @return La lista consolidada y sin duplicados de hechos.
    */
   @Override
-  public List<Hecho> obtenerHechos() {
+  public List<Hecho> getHechos() {
     if (this.fuentesCargadas == null || this.fuentesCargadas.isEmpty()) {
       return new ArrayList<>();
     }
     return this.fuentesCargadas.stream()
-                               .flatMap(fuente -> fuente.obtenerHechos().stream())
+                               .flatMap(fuente -> fuente.getHechos().stream())
                                .distinct()
                                .collect(Collectors.toList());
   }

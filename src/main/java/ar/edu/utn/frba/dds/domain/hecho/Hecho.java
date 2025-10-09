@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -15,8 +16,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
@@ -34,9 +33,8 @@ public class Hecho {
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hecho_seq")
   @Column(name = "hecho_id")
   Long id;
-  @OneToMany
-  @JoinTable(name = "hecho_etiqueta")
-  private List<Etiqueta> etiquetas;
+  @ElementCollection
+  private List<Etiqueta> etiquetas = new ArrayList<>();
   private LocalDateTime hecho_fecha_carga;
   @Enumerated(EnumType.STRING)
   @Column(name = "hecho_origen", nullable = false)
@@ -67,39 +65,39 @@ public class Hecho {
   /**
    * Constructor completo.
    *
-   * @param hecho_titulo       string
-   * @param hecho_descripcion  string
-   * @param hecho_categoria    string
-   * @param hecho_direccion    string
-   * @param hecho_provincia    string
-   * @param hecho_ubicacion    PuntoGeografico
-   * @param hecho_fecha_suceso LocalDateTime
-   * @param hecho_fecha_carga         LocalDateTime
-   * @param fuenteOrigen       Origen
-   * @param etiquetas          List
+   * @param titulo       string
+   * @param descripcion  string
+   * @param categoria    string
+   * @param direccion    string
+   * @param provincia    string
+   * @param ubicacion    PuntoGeografico
+   * @param fechaSuceso  LocalDateTime
+   * @param fechaCarga   LocalDateTime
+   * @param fuenteOrigen Origen
+   * @param etiquetas    List
    */
   public Hecho(
-      String hecho_titulo,
-      String hecho_descripcion,
-      String hecho_categoria,
-      String hecho_direccion,
-      String hecho_provincia,
-      PuntoGeografico hecho_ubicacion,
-      LocalDateTime hecho_fecha_suceso,
-      LocalDateTime hecho_fecha_carga,
+      String titulo,
+      String descripcion,
+      String categoria,
+      String direccion,
+      String provincia,
+      PuntoGeografico ubicacion,
+      LocalDateTime fechaSuceso,
+      LocalDateTime fechaCarga,
       Origen fuenteOrigen,
       List<Etiqueta> etiquetas
   ) {
-    this.hecho_titulo = hecho_titulo;
-    this.hecho_descripcion = hecho_descripcion;
-    this.hecho_categoria = hecho_categoria;
-    this.hecho_ubicacion = hecho_ubicacion;
-    this.hecho_direccion = hecho_direccion;
-    this.hecho_fecha_suceso = hecho_fecha_suceso;
-    this.hecho_fecha_carga = hecho_fecha_carga;
+    this.hecho_titulo = titulo;
+    this.hecho_descripcion = descripcion;
+    this.hecho_categoria = categoria;
+    this.hecho_ubicacion = ubicacion;
+    this.hecho_direccion = direccion;
+    this.hecho_fecha_suceso = fechaSuceso;
+    this.hecho_fecha_carga = fechaCarga;
     this.fuenteOrigen = fuenteOrigen;
-    this.etiquetas = new ArrayList<>();
-    this.hecho_provincia = hecho_provincia;
+    this.etiquetas = etiquetas;
+    this.hecho_provincia = provincia;
     this.estado = Estado.ORIGINAL;
   }
 
@@ -108,7 +106,8 @@ public class Hecho {
    *
    * @return string titulo del hecho
    */
-  public String getHecho_titulo() {
+  @JsonProperty("hecho_titulo")
+  public String getTitulo() {
     return hecho_titulo;
   }
 
@@ -117,7 +116,8 @@ public class Hecho {
    *
    * @return string descripción del hecho
    */
-  public String getHecho_descripcion() {
+  @JsonProperty("hecho_descripcion")
+  public String getDescripcion() {
     return hecho_descripcion;
   }
 
@@ -130,7 +130,8 @@ public class Hecho {
    *
    * @return string categoría del hecho
    */
-  public String getHecho_categoria() {
+  @JsonProperty("hecho_categoria")
+  public String getCategoria() {
     return hecho_categoria;
   }
 
@@ -139,7 +140,8 @@ public class Hecho {
    *
    * @return string dirección del hecho
    */
-  public String getHecho_direccion() {
+  @JsonProperty("hecho_direccion")
+  public String getDireccion() {
     return hecho_direccion;
   }
 
@@ -148,7 +150,8 @@ public class Hecho {
    *
    * @return PuntoGeografico ubicación del hecho
    */
-  public PuntoGeografico getHecho_ubicacion() {
+  @JsonProperty("hecho_ubicacion")
+  public PuntoGeografico getUbicacion() {
     return hecho_ubicacion;
   }
 
@@ -157,6 +160,7 @@ public class Hecho {
    *
    * @return Date fecha del suceso
    */
+  @JsonProperty("hecho_fecha_suceso")
   public LocalDateTime getFechasuceso() {
     return hecho_fecha_suceso;
   }
@@ -166,6 +170,7 @@ public class Hecho {
    *
    * @return Date fecha de carga del hecho
    */
+  @JsonProperty("hecho_fecha_carga")
   public LocalDateTime getFechacarga() {
     return hecho_fecha_carga;
   }
@@ -175,6 +180,7 @@ public class Hecho {
    *
    * @return Origen fuente del hecho
    */
+  @JsonProperty("hecho_origen")
   public Origen getOrigen() {
     return fuenteOrigen;
   }
@@ -184,6 +190,7 @@ public class Hecho {
    *
    * @return UUID del usuario creador
    */
+  @JsonProperty("hecho_etiquetas")
   public List<Etiqueta> getEtiquetas() {
     return new ArrayList<>(this.etiquetas);
   }
@@ -193,31 +200,33 @@ public class Hecho {
    *
    * @return estado del del hecho.
    */
+  @JsonProperty("hecho_estado")
   public Estado getEstado() {
     return estado;
   }
 
-  public String getHecho_provincia() {
+  @JsonProperty("hecho_provincia")
+  public String getProvincia() {
     return hecho_provincia;
   }
 
-  public void setHecho_titulo(String hecho_titulo) {
+  public void setTitulo(String hecho_titulo) {
     this.hecho_titulo = hecho_titulo;
   }
 
-  public void setHecho_descripcion(String hecho_descripcion) {
+  public void setDescripcion(String hecho_descripcion) {
     this.hecho_descripcion = hecho_descripcion;
   }
 
-  public void setHecho_categoria(String hecho_categoria) {
+  public void setCategoria(String hecho_categoria) {
     this.hecho_categoria = hecho_categoria;
   }
 
-  public void setHecho_direccion(String hecho_direccion) {
+  public void setDireccion(String hecho_direccion) {
     this.hecho_direccion = hecho_direccion;
   }
 
-  public void setHecho_ubicacion(PuntoGeografico hecho_ubicacion) {
+  public void setUbicacion(PuntoGeografico hecho_ubicacion) {
     this.hecho_ubicacion = hecho_ubicacion;
   }
 
@@ -237,11 +246,11 @@ public class Hecho {
     this.hecho_fecha_carga = fechaCarga;
   }
 
-  public void setHecho_provincia(String hecho_provincia) {
+  public void setProvincia(String hecho_provincia) {
     this.hecho_provincia = hecho_provincia;
   }
 
-  @JsonProperty("origen")
+  @JsonProperty("hecho_origen")
   public void setOrigen(Origen fuenteOrigen) {
     this.fuenteOrigen = fuenteOrigen;
   }

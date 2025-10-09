@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.estadisticas;
+package ar.edu.utn.frba.dds;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,6 +7,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.domain.estadisticas.CentralDeEstadisticas;
+import ar.edu.utn.frba.dds.domain.estadisticas.Estadistica;
 import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.exportador.csv.ExportadorCSV;
 import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoSobrescribir;
@@ -123,12 +125,13 @@ public class EstadisticasTest {
     assertTrue(exportedFile.exists(), "El archivo CSV no fue creado.");
 
     List<String> lines = Files.readAllLines(exportedFile.toPath());
+//    System.out.println(lines);
     assertEquals(3, lines.size());
     // CORRECCIÓN: La cabecera se ajusta al formato que genera tu ExportadorCSV.
     // Si este encabezado es incorrecto, el error está en la clase ExportadorCSV.
-    assertEquals("\"NOMBRE\",\"VALOR\"", lines.get(0));
-    assertTrue(lines.contains("\"Hurtos\",\"1\""));
-    assertTrue(lines.contains("\"Robos\",\"2\""));
+    assertEquals("\"ESTADISTICA_ID\",\"ESTADISTICA_NOMBRE\",\"ESTADISTICA_VALOR\"", lines.get(0));
+    assertTrue(lines.contains("\"\",\"Hurtos\",\"1\""));
+    assertTrue(lines.contains("\"\",\"Robos\",\"2\""));
   }
 }
 

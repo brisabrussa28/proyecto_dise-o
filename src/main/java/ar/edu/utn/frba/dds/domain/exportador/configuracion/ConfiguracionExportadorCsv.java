@@ -3,21 +3,21 @@ package ar.edu.utn.frba.dds.domain.exportador.configuracion;
 
 import ar.edu.utn.frba.dds.domain.exportador.Exportador;
 import ar.edu.utn.frba.dds.domain.exportador.csv.ExportadorCSV;
-import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.*;
+import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoAnexar;
+import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoExportacion;
+import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoExportacionEnum;
+import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoNumerar;
+import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoSobrescribir;
+import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoTimestamp;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.DiscriminatorValue;
-
-@Entity
-@DiscriminatorValue("CSV")
+//@Entity
+//@DiscriminatorValue("CSV")
 public class ConfiguracionExportadorCsv extends ConfiguracionExportador {
 
   private char separador;
   private char quote;
 
-  @Enumerated(EnumType.STRING)
+//  @Enumerated(EnumType.STRING)
   private ModoExportacionEnum modo;
 
   // Constructor para JPA

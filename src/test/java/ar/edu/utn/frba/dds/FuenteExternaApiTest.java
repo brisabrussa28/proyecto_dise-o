@@ -1,25 +1,26 @@
 package ar.edu.utn.frba.dds;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteExternaAPI;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.configuracion.ConfiguracionAdapter;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class FuenteExternaApiTest {
@@ -49,7 +50,7 @@ public class FuenteExternaApiTest {
 
     // Se ejecuta la lógica de actualización
     fuenteExterna.forzarActualizacionSincrona();
-    List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
+    List<Hecho> hechosObtenidos = fuenteExterna.getHechos();
 
     // Se verifica que la copia local interna (persistida en BD) ahora contiene los hechos de la API
     assertEquals(1, hechosObtenidos.size());
@@ -64,11 +65,11 @@ public class FuenteExternaApiTest {
     when(adaptadorMock.consultarHechos()).thenThrow(new IOException("Simulando error de red"));
 
     // La lista inicial está vacía
-    assertTrue(fuenteExterna.obtenerHechos().isEmpty());
+    assertTrue(fuenteExterna.getHechos().isEmpty());
 
     // Se intenta actualizar, pero la llamada a la API fallará
     fuenteExterna.forzarActualizacionSincrona();
-    List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
+    List<Hecho> hechosObtenidos = fuenteExterna.getHechos();
 
     // La copia local debe permanecer vacía, sin cambios.
     assertTrue(hechosObtenidos.isEmpty());
@@ -82,14 +83,14 @@ public class FuenteExternaApiTest {
     Hecho hechoInicial = new HechoBuilder().conTitulo("Hecho Inicial").conFechaSuceso(LocalDateTime.now()).build();
     when(adaptadorMock.consultarHechos()).thenReturn(List.of(hechoInicial));
     fuenteExterna.forzarActualizacionSincrona();
-    assertEquals(1, fuenteExterna.obtenerHechos().size());
+    assertEquals(1, fuenteExterna.getHechos().size());
 
     // 2. Segunda actualización, la API no devuelve nada
     when(adaptadorMock.consultarHechos()).thenReturn(Collections.emptyList());
     fuenteExterna.forzarActualizacionSincrona();
 
     // 3. Se verifica que la copia local AÚN contiene el hecho inicial y no fue borrada.
-    List<Hecho> hechosObtenidos = fuenteExterna.obtenerHechos();
+    List<Hecho> hechosObtenidos = fuenteExterna.getHechos();
     assertEquals(1, hechosObtenidos.size());
     assertTrue(hechosObtenidos.contains(hechoInicial));
 

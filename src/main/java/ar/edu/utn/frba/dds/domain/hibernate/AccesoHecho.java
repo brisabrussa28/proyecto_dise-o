@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.hibernate;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.repos.HechoRepository;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 public class AccesoHecho {
   public final EntityManager em;
   private static final String[] campos = obtenerCamposIndexados(Hecho.class);
+  private HechoRepository repo = new HechoRepository();
 
   public AccesoHecho(EntityManager em) {
     this.em = em;
@@ -27,9 +29,7 @@ public class AccesoHecho {
   * @param hecho Hecho a guardar
   */
   public void guardar(Hecho hecho) {
-    em.getTransaction().begin();
-    em.persist(hecho);
-    em.getTransaction().commit();
+    repo.save(hecho);
   }
 
   public List<Hecho> fullTextSearch(String palabraClave, int cantidadResultados) {

@@ -6,32 +6,27 @@ import ar.edu.utn.frba.dds.domain.lector.csv.LectorCSV;
 import ar.edu.utn.frba.dds.domain.lector.csv.MapeoCSV;
 import ar.edu.utn.frba.dds.domain.lector.csv.filaconverter.FilaConverter;
 import ar.edu.utn.frba.dds.domain.lector.csv.filaconverter.HechoFilaConverter;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 /**
  * Entidad de configuración para un LectorCSV.
  * Persiste su configuración de forma normalizada usando la entidad MapeoCSV.
  */
-@Entity
-@DiscriminatorValue("CSV")
+//@Entity
+//@DiscriminatorValue("CSV")
 public class ConfiguracionLectorCsv extends ConfiguracionLector {
 
   private char separador;
   private String formatoFecha;
 
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-  @JoinColumn(name = "config_lector_csv_id")
+  //  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+//  @JoinColumn(name = "config_lector_csv_id")
+  @Transient
   private List<MapeoCSV> mapeos = new ArrayList<>();
 
   // Constructor para JPA.
@@ -45,13 +40,18 @@ public class ConfiguracionLectorCsv extends ConfiguracionLector {
    * @param formatoFecha  Formato de fecha a utilizar.
    * @param mapeoColumnas Mapa con clave String que representa el campo y valor como lista de nombres de columnas.
    */
-  public ConfiguracionLectorCsv(char separador, String formatoFecha, Map<String, List<String>> mapeoColumnas) {
+  public ConfiguracionLectorCsv(
+      char separador,
+      String formatoFecha,
+      Map<String, List<String>> mapeoColumnas
+  ) {
     this.separador = separador;
     this.formatoFecha = formatoFecha;
     if (mapeoColumnas != null) {
-      this.mapeos = mapeoColumnas.entrySet().stream()
-          .map(entry -> new MapeoCSV(entry.getKey(), entry.getValue()))
-          .collect(Collectors.toList());
+      this.mapeos = mapeoColumnas.entrySet()
+                                 .stream()
+                                 .map(entry -> new MapeoCSV(entry.getKey(), entry.getValue()))
+                                 .collect(Collectors.toList());
     }
   }
 
@@ -64,7 +64,10 @@ public class ConfiguracionLectorCsv extends ConfiguracionLector {
     if (clazz.equals(Hecho.class)) {
       // 1. Convertir la lista de entidades MapeoCSV de nuevo a un mapa simple.
       Map<String, List<String>> mapeoParaConverter = this.mapeos.stream()
-          .collect(Collectors.toMap(MapeoCSV::getCampo, MapeoCSV::getNombresColumnas));
+                                                                .collect(Collectors.toMap(
+                                                                    MapeoCSV::getCampo,
+                                                                    MapeoCSV::getNombresColumnas
+                                                                ));
 
       // 2. Crear el FilaConverter con el mapa simple.
       FilaConverter<Hecho> converter = new HechoFilaConverter(formatoFecha, mapeoParaConverter);

@@ -12,11 +12,11 @@ import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.reportes.AceptarSolicitud;
-import ar.edu.utn.frba.dds.domain.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
+import ar.edu.utn.frba.dds.domain.repos.HechoRepository;
 import ar.edu.utn.frba.dds.domain.utils.DBUtils;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,16 +31,19 @@ public class GestorDeSolicitudesTest {
   private Hecho hecho;
   private GestorDeSolicitudes gestor;
   private RepositorioDeSolicitudes repositorio;
+  private HechoRepository repoHechos;
   private DetectorSpam detectorSpam;
   private final String motivoLargo = "Este es un motivo válido con más de 500 caracteres ".repeat(20);
 
   @BeforeEach
   public void setUp() {
     repositorio = new RepositorioDeSolicitudes();
+    repoHechos = new HechoRepository();
     gestor = new GestorDeSolicitudes(repositorio);
     detectorSpam = mock(DetectorSpam.class);
     when(detectorSpam.esSpam(anyString())).thenReturn(false);
     hecho = crearHechoCompleto("Hecho de prueba principal");
+    repoHechos.save(hecho);
   }
 
   /**
@@ -120,7 +123,8 @@ public class GestorDeSolicitudesTest {
     Hecho hecho1 = crearHechoCompleto("Hecho a eliminar");
     Hecho hecho2 = crearHechoCompleto("Hecho que permanece");
     List<Hecho> hechosOriginales = List.of(hecho1, hecho2);
-
+    repoHechos.save(hecho1);
+    repoHechos.save(hecho2);
     gestor.crearSolicitud(hecho1, motivoLargo, detectorSpam);
     // FIX: Se busca la solicitud específica.
     Solicitud solicitudParaAceptar = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo).orElseThrow();
@@ -137,6 +141,9 @@ public class GestorDeSolicitudesTest {
   public void filtroSinEliminadosNoExcluyeNada() {
     Hecho hecho1 = crearHechoCompleto("Hecho de prueba 1");
     Hecho hecho2 = crearHechoCompleto("Hecho de prueba 2");
+    repoHechos.save(hecho1);
+    repoHechos.save(hecho2);
+
     List<Hecho> hechosOriginales = List.of(hecho1, hecho2);
 
     gestor.crearSolicitud(hecho1, motivoLargo, detectorSpam);
@@ -151,6 +158,10 @@ public class GestorDeSolicitudesTest {
     Hecho hecho1 = crearHechoCompleto("h1");
     Hecho hecho2 = crearHechoCompleto("h2");
     Hecho hecho3 = crearHechoCompleto("h3");
+    repoHechos.save(hecho1);
+    repoHechos.save(hecho2);
+    repoHechos.save(hecho3);
+
     List<Hecho> hechosOriginales = List.of(hecho1, hecho2, hecho3);
 
     // FIX: Se gestiona cada solicitud de forma determinista.

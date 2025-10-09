@@ -106,7 +106,7 @@ public class Coleccion {
    * @return Una lista de hechos completamente filtrada.
    */
   public List<Hecho> obtenerHechosFiltrados(Filtro filtroExcluyente) {
-    List<Hecho> hechosFuente = coleccion_fuente.obtenerHechos();
+    List<Hecho> hechosFuente = coleccion_fuente.getHechos();
     List<Hecho> hechosSinExcluidos = filtroExcluyente.filtrar(hechosFuente);
     return this.filtro.filtrar(hechosSinExcluidos);
   }
@@ -199,20 +199,24 @@ public class Coleccion {
     return Collections.unmodifiableList(hechosConsensuados);
   }
 
-  public String getColeccion_titulo() {
+  public String getTitulo() {
     return coleccion_titulo;
   }
 
-  public String getColeccion_descripcion() {
+  public String getDescripcion() {
     return coleccion_descripcion;
   }
 
-  public String getColeccion_categoria() {
+  public String getCategoria() {
     return coleccion_categoria;
   }
 
   public Filtro getFiltro() {
     return filtro;
+  }
+
+  public Long getId() {
+    return this.coleccion_id;
   }
 
   public void setCondicion(Condicion coleccion_condicion) {

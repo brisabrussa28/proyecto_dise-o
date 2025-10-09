@@ -40,7 +40,7 @@ public class FuenteDinamica extends Fuente {
   }
 
   @Override
-  public List<Hecho> obtenerHechos() {
+  public List<Hecho> getHechos() {
     return this.hechosPersistidos == null
            ? Collections.emptyList()
            : Collections.unmodifiableList(this.hechosPersistidos);

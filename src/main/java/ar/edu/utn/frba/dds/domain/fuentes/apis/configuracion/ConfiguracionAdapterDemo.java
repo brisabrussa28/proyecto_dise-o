@@ -3,14 +3,11 @@ package ar.edu.utn.frba.dds.domain.fuentes.apis.configuracion;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterDemo;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.domain.fuentes.apis.conexion.Conexion;
-
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-@Entity
-@DiscriminatorValue("DEMO")
+//@Entity
+//@DiscriminatorValue("DEMO")
 public class ConfiguracionAdapterDemo extends ConfiguracionAdapter {
   private String url;
 

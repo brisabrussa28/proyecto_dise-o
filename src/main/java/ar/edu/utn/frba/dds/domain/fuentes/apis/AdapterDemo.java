@@ -7,9 +7,6 @@ import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -75,14 +72,14 @@ public class AdapterDemo implements FuenteAdapter {
       }
 
       LocalDateTime fechaSuceso = datos.get("fechaSuceso") != null
-          ? LocalDateTime.parse((String) datos.get("fechaSuceso")) :
-          null;
+                                  ? LocalDateTime.parse((String) datos.get("fechaSuceso")) :
+                                  null;
       LocalDateTime fechaCarga = datos.get("fechaCarga") != null
-          ? LocalDateTime.parse((String) datos.get("fechaCarga")) :
-          null;
+                                 ? LocalDateTime.parse((String) datos.get("fechaCarga")) :
+                                 null;
       Origen fuenteOrigen = datos.get("fuenteOrigen") != null
-          ? Origen.valueOf((String) datos.get("fuenteOrigen")) :
-          null;
+                            ? Origen.valueOf((String) datos.get("fuenteOrigen")) :
+                            null;
 
       List<Etiqueta> etiquetas = new ArrayList<>();
       if (datos.get("etiquetas") instanceof List<?>) {

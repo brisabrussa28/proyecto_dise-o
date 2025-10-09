@@ -5,11 +5,8 @@ import ar.edu.utn.frba.dds.domain.fuentes.apis.configuracion.ConfiguracionAdapte
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.Collections;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
@@ -20,8 +17,9 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
   @Transient
   private FuenteAdapter adaptador;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "fuente_configuracion_adapter")
+  //  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  //  @JoinColumn(name = "fuente_configuracion_adapter")
+  @Transient
   private ConfiguracionAdapter configuracionAdapter;
 
   protected FuenteExternaAPI() {

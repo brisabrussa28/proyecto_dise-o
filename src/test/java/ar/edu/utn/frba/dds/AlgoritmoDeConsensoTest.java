@@ -56,7 +56,7 @@ public class AlgoritmoDeConsensoTest {
 
     for (List<Hecho> lista : listasDeHechos) {
       Fuente f = mock(Fuente.class);
-      when(f.obtenerHechos()).thenReturn(lista);
+      when(f.getHechos()).thenReturn(lista);
       agregador.agregarFuente(f);
     }
     return agregador;

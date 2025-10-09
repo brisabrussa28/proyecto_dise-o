@@ -32,7 +32,7 @@ public class AppTest {
   @DisplayName("Una fuente puede ser registrada correctamente")
   void registrarFuenteCorrectamente() {
     Fuente mockFuente = mock(Fuente.class);
-    when(mockFuente.getFuente_nombre()).thenReturn("TestFuente");
+    when(mockFuente.getNombre()).thenReturn("TestFuente");
 
     app.registrarFuente(mockFuente);
     Map<String, Fuente> fuentes = app.getFuentesRegistradas();
@@ -47,15 +47,15 @@ public class AppTest {
   void ejecutarActualizacionParaFuentesCorrectas() {
     // Caso 1: Una fuente que SÍ es actualizable (hereda de FuenteDeCopiaLocal)
     FuenteExternaAPI mockFuenteActualizable = mock(FuenteExternaAPI.class);
-    when(mockFuenteActualizable.getFuente_nombre()).thenReturn("FuenteAPI");
+    when(mockFuenteActualizable.getNombre()).thenReturn("FuenteAPI");
 
     // Caso 2: Una fuente que NO es actualizable (no hereda de FuenteDeCopiaLocal)
     FuenteDeAgregacion mockFuenteNoActualizable1 = mock(FuenteDeAgregacion.class);
-    when(mockFuenteNoActualizable1.getFuente_nombre()).thenReturn("FuenteAgregadora");
+    when(mockFuenteNoActualizable1.getNombre()).thenReturn("FuenteAgregadora");
 
     // Caso 3: Otra fuente que NO es actualizable
     FuenteDinamica mockFuenteNoActualizable2 = mock(FuenteDinamica.class);
-    when(mockFuenteNoActualizable2.getFuente_nombre()).thenReturn("FuenteDinamica");
+    when(mockFuenteNoActualizable2.getNombre()).thenReturn("FuenteDinamica");
 
     app.registrarFuente(mockFuenteActualizable);
     app.registrarFuente(mockFuenteNoActualizable1);
@@ -67,8 +67,8 @@ public class AppTest {
     verify(mockFuenteActualizable, times(1)).forzarActualizacionSincrona();
 
     // Verificamos explícitamente que el método NO se llamó en las otras.
-    verify(mockFuenteNoActualizable1, never()).obtenerHechos(); // Usamos un método diferente porque no tiene forzarActualizacion
-    verify(mockFuenteNoActualizable2, never()).obtenerHechos();
+    verify(mockFuenteNoActualizable1, never()).getHechos(); // Usamos un método diferente porque no tiene forzarActualizacion
+    verify(mockFuenteNoActualizable2, never()).getHechos();
   }
 
   @Test
