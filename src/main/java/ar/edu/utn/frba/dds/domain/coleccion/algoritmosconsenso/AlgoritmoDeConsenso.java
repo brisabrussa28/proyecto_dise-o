@@ -65,7 +65,7 @@ public abstract class AlgoritmoDeConsenso {
   List<Set<Hecho>> obtenerListasDeHechos(List<Fuente> fuentes) {
     return fuentes.stream()
                   .map(fuente ->
-                           fuente.obtenerHechos().stream()
+                           fuente.getHechos().stream()
                                  .filter(hecho -> hecho.getEstado() != Estado.ELIMINADO) //filtra eliminados
                                  .collect(Collectors.toSet())
                   )
