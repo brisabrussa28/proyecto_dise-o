@@ -1,14 +1,17 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
+import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoApi;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
- * Implementación del Patrón Builder para la creación de Hechos (reduce acoplamiento en especial en CSV).
+ * Implementación del Patrón Builder para la creación de Hechos.
+ * Permite la resolución asíncrona de datos geográficos.
  */
 public class HechoBuilder {
   private String titulo;
@@ -18,9 +21,10 @@ public class HechoBuilder {
   private String provincia;
   private PuntoGeografico ubicacion;
   private LocalDateTime fechaSuceso;
-  private LocalDateTime fechaCarga = LocalDateTime.now(); // Valor por defecto
+  private LocalDateTime fechaCarga = LocalDateTime.now();
   private Origen fuenteOrigen;
   private List<Etiqueta> etiquetas = new ArrayList<>();
+  private GeoApi geoApi; // Servicio para consultas geográficas
 
   public HechoBuilder copiar(Hecho original) {
     this.titulo = original.getTitulo();
@@ -32,7 +36,7 @@ public class HechoBuilder {
     this.fechaSuceso = original.getFechasuceso();
     this.fechaCarga = original.getFechacarga();
     this.fuenteOrigen = original.getOrigen();
-    this.etiquetas = new ArrayList<>(original.getEtiquetas()); // Copia defensiva
+    this.etiquetas = new ArrayList<>(original.getEtiquetas());
     return this;
   }
 
@@ -105,42 +109,67 @@ public class HechoBuilder {
     return this;
   }
 
+  /**
+   * Inyecta el servicio de geolocalización que se utilizará para completar datos.
+   * @param geoApi La implementación de GeoApi a utilizar.
+   * @return El propio builder para encadenar llamadas.
+   */
+  public HechoBuilder conGeoApi(GeoApi geoApi) {
+    this.geoApi = geoApi;
+    return this;
+  }
 
   /**
-   * Construye y devuelve un objeto Hecho a partir de los datos proporcionados.
-   *
-   * @return una nueva instancia de Hecho.
-   * @throws IllegalStateException si los datos obligatorios no se proporcionan o son inválidos.
+   * Construye un objeto Hecho de forma asíncrona.
+   * Si falta información geográfica, la buscará utilizando la GeoApi proporcionada.
+   * @return Un CompletableFuture que se completará con la instancia de Hecho.
    */
-  public Hecho build() {
+  public CompletableFuture<Hecho> build() {
+    try {
+      validarCampos();
+    } catch (IllegalStateException e) {
+      return CompletableFuture.failedFuture(e);
+    }
+
+    if (provincia == null && ubicacion != null) {
+      if (geoApi == null) {
+        return CompletableFuture.failedFuture(
+            new IllegalStateException("Se necesita un GeoApi para buscar la provincia por ubicación."));
+      }
+      return geoApi.obtenerProvincia(ubicacion.getLatitud(), ubicacion.getLongitud())
+                   .thenApply(provinciaObtenida -> {
+                     this.provincia = provinciaObtenida;
+                     return construirHechoFinal();
+                   });
+    }
+
+    // TODO: Se podría implementar la lógica inversa: buscar ubicación a partir de provincia/dirección.
+
+    return CompletableFuture.completedFuture(construirHechoFinal());
+  }
+
+  private void validarCampos() {
     if (titulo == null || titulo.isBlank()) {
       throw new IllegalStateException("El título es obligatorio para crear un Hecho.");
     }
-
     if (fechaSuceso == null) {
       throw new IllegalStateException("La fecha del suceso es obligatoria para crear un Hecho.");
     }
-
     if (fechaCarga == null) {
       throw new IllegalStateException("La fecha de carga es obligatoria para crear un Hecho.");
     }
-
     if (fechaSuceso.isAfter(fechaCarga)) {
-      throw new IllegalStateException(
-          "La fecha del suceso no puede ser posterior a la fecha de carga.");
+      throw new IllegalStateException("La fecha del suceso no puede ser posterior a la fecha de carga.");
     }
-
     if (fechaSuceso.isAfter(LocalDateTime.now())) {
       throw new IllegalStateException("La fecha del suceso no puede ser una fecha futura.");
     }
-
     if (fechaCarga.isAfter(LocalDateTime.now())) {
       throw new IllegalStateException("La fecha de carga no puede ser una fecha futura.");
     }
-    // No se si hacer que la existencia de ambos campos sea obligatoria.
-    // this.completarProvinciaFaltante();
-    // this.completarUbicacionFaltante();
+  }
 
+  private Hecho construirHechoFinal() {
     return new Hecho(
         titulo,
         descripcion,
@@ -151,7 +180,7 @@ public class HechoBuilder {
         fechaSuceso,
         fechaCarga,
         fuenteOrigen,
-        etiquetas
-    );
+        etiquetas);
   }
 }
+

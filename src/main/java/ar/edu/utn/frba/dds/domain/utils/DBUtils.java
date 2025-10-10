@@ -1,9 +1,10 @@
 package ar.edu.utn.frba.dds.domain.utils;
 
-import ar.edu.utn.frba.dds.domain.geolocalizacion.ServicioGeoref;
+import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoGeoref;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.util.TimeZone;
+import java.util.concurrent.CompletableFuture;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -62,7 +63,7 @@ public class DBUtils {
   public static void completarProvinciaFaltante(Hecho hecho) {
     if ((hecho.getProvincia() == null || hecho.getProvincia()
                                               .isBlank()) && hecho.getUbicacion() != null) {
-      ServicioGeoref servicio = new ServicioGeoref();
+      GeoGeoref servicio = new GeoGeoref();
       String provinciaObtenida = servicio.obtenerProvincia(
           hecho.getUbicacion()
                .getLatitud(),
@@ -84,8 +85,8 @@ public class DBUtils {
   public static void completarUbicacionFaltante(Hecho hecho) {
     if (hecho.getUbicacion() == null && hecho.getProvincia() != null && !hecho.getProvincia()
                                                                               .isBlank()) {
-      ServicioGeoref servicio = new ServicioGeoref();
-      PuntoGeografico ubicacionObtenida = servicio.obtenerUbicacion(hecho.getProvincia());
+      GeoGeoref servicio = new GeoGeoref();
+      CompletableFuture<PuntoGeografico> ubicacionObtenida = servicio.obtenerUbicacion(hecho.getProvincia());
       if (ubicacionObtenida != null) {
         hecho.setUbicacion(ubicacionObtenida);
       }
