@@ -9,6 +9,9 @@ import java.util.List;
  * Clase abstracta para fuentes que mantienen una copia local persistida en la base de datos.
  * Las subclases deben implementar la lógica para consultar los datos frescos.
  */
+
+//Esta deberia estar persistida.
+
 //@Entity
 public abstract class FuenteDeCopiaLocal extends Fuente {
 

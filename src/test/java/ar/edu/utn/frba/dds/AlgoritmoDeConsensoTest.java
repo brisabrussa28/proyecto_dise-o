@@ -13,12 +13,15 @@ import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.AlgoritmoDeConsen
 import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.MayoriaSimple;
 import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.MultiplesMenciones;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
+import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
 import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
+import ar.edu.utn.frba.dds.domain.hecho.Estado;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,10 +34,8 @@ public class AlgoritmoDeConsensoTest {
 
   @BeforeEach
   public void setUp() {
-    filtroExcluyente = mock(Filtro.class);
-    when(filtroExcluyente.filtrar(anyList()))
-        .thenAnswer(invocation -> invocation.getArgument(0));
-
+    // Usamos un filtro real que no filtra nada para los casos generales.
+    filtroExcluyente = new Filtro(new CondicionTrue());
     absoluta = new Absoluta();
     mayoriaSimple = new MayoriaSimple();
     multiplesMenciones = new MultiplesMenciones();
@@ -49,7 +50,6 @@ public class AlgoritmoDeConsensoTest {
 
   /**
    * Método de ayuda para crear una FuenteDeAgregacion con fuentes mockeadas.
-   * Ahora usa el constructor simple de FuenteDeAgregacion.
    */
   private FuenteDeAgregacion crearAgregadorConFuentes(List<Hecho>... listasDeHechos) {
     FuenteDeAgregacion agregador = new FuenteDeAgregacion("AgregadorDeTest");
@@ -74,7 +74,7 @@ public class AlgoritmoDeConsensoTest {
     Coleccion coleccion = new Coleccion(
         "AbsolutaOk", agregador, "Desc", "Categoria");
     coleccion.setAlgoritmoDeConsenso(absoluta);
-    coleccion.recalcularHechosConsensuados(filtroExcluyente);
+    coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
 
     assertEquals(2, result.size());
@@ -94,7 +94,7 @@ public class AlgoritmoDeConsensoTest {
     Coleccion coleccion = new Coleccion(
         "AbsolutaNoOk", agregador, "Desc", "Categoria");
     coleccion.setAlgoritmoDeConsenso(absoluta);
-    coleccion.recalcularHechosConsensuados(filtroExcluyente);
+    coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
 
     assertEquals(1, result.size());
@@ -114,7 +114,7 @@ public class AlgoritmoDeConsensoTest {
     Coleccion coleccion = new Coleccion(
         "MayoriaOk", agregador, "Desc", "Categoria");
     coleccion.setAlgoritmoDeConsenso(mayoriaSimple);
-    coleccion.recalcularHechosConsensuados(filtroExcluyente);
+    coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
 
     assertEquals(1, result.size());
@@ -133,7 +133,7 @@ public class AlgoritmoDeConsensoTest {
     Coleccion coleccion = new Coleccion(
         "MayoriaNoOk", agregador, "Desc", "Categoria");
     coleccion.setAlgoritmoDeConsenso(mayoriaSimple);
-    coleccion.recalcularHechosConsensuados(filtroExcluyente);
+    coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
 
     assertEquals(0, result.size());
@@ -151,7 +151,7 @@ public class AlgoritmoDeConsensoTest {
     Coleccion coleccion = new Coleccion(
         "MultiplesOk", agregador, "Desc", "Categoria");
     coleccion.setAlgoritmoDeConsenso(multiplesMenciones);
-    coleccion.recalcularHechosConsensuados(filtroExcluyente);
+    coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
 
     assertEquals(1, result.size());
@@ -169,9 +169,39 @@ public class AlgoritmoDeConsensoTest {
     Coleccion coleccion = new Coleccion(
         "MultiplesNoOk", agregador, "Desc", "Categoria");
     coleccion.setAlgoritmoDeConsenso(multiplesMenciones);
-    coleccion.recalcularHechosConsensuados(filtroExcluyente);
+    coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
 
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  public void hechoEliminadoNoEsConsensuado() {
+    Hecho h1 = crearHecho("H1");
+    h1.setEstado(Estado.ELIMINADO); // Marcamos el hecho como eliminado
+
+    // Creamos un MOCK de Filtro solo para este test, ya que necesitamos un comportamiento específico
+    Filtro filtroDeEliminados = mock(Filtro.class);
+    when(filtroDeEliminados.filtrar(anyList())).thenAnswer(invocation -> {
+      List<Hecho> aFiltrar = invocation.getArgument(0);
+      return aFiltrar.stream()
+                     .filter(h -> h.getEstado() != Estado.ELIMINADO)
+                     .collect(Collectors.toList());
+    });
+
+    FuenteDeAgregacion agregador = crearAgregadorConFuentes(
+        List.of(h1), // Aparece en todas las fuentes
+        List.of(h1)
+    );
+
+    Coleccion coleccion = new Coleccion(
+        "EliminadoNoConsensuado", agregador, "Desc", "Categoria");
+    coleccion.setAlgoritmoDeConsenso(absoluta);
+    // Usamos el mock local en lugar del filtro global
+    coleccion.recalcularHechosConsensuados(filtroDeEliminados, agregador.getFuentesCargadas());
+    List<Hecho> result = coleccion.getHechosConsensuados();
+
+    // El resultado debe ser 0 porque el filtro excluyente lo eliminó
     assertEquals(0, result.size());
   }
 }

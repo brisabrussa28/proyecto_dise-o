@@ -5,6 +5,7 @@ import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionPredicado;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
+import ar.edu.utn.frba.dds.domain.repos.RepositorioDeSolicitudes;
 import java.util.List;
 import java.util.stream.Collectors;
 

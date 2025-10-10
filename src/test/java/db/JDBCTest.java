@@ -16,7 +16,7 @@ import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
-import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
+import ar.edu.utn.frba.dds.domain.repos.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.domain.repos.ColeccionRepository;
 import ar.edu.utn.frba.dds.domain.repos.EstadisticaRepository;

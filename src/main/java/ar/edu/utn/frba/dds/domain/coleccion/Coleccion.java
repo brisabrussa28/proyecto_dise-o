@@ -30,7 +30,7 @@ import javax.persistence.Transient;
  */
 @Entity
 public class Coleccion {
-
+  //TODO: Poner nombres de var como la gente, no como si fueran de bd. de ultima le asignamos un nombre especal en la bd
   @Id
   @SequenceGenerator(name = "coleccion_seq", sequenceName = "coleccion_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "coleccion_seq")
@@ -52,9 +52,6 @@ public class Coleccion {
   // --- Atributos Transitorios ---
   @Transient
   private Filtro filtro;
-
-  @Transient
-  private List<Hecho> hechosConsensuados = new ArrayList<>();
 
   // --- Constructores ---
   public Coleccion() {
@@ -94,9 +91,9 @@ public class Coleccion {
    *
    * @param filtroExcluyente Un filtro (ej. de hechos eliminados) que se aplica ANTES del filtro propio.
    */
-  public void recalcularHechosConsensuados(Filtro filtroExcluyente) {
+  public void recalcularHechosConsensuados(Filtro filtroExcluyente, List<Fuente> fuentes) {
     List<Hecho> hechosFiltrados = this.obtenerHechosFiltrados(filtroExcluyente);
-    this.hechosConsensuados = aplicarConsenso(hechosFiltrados);
+    this.coleccion_algoritmo.recalcularHechosConsensuados(hechosFiltrados,fuentes);
   }
 
   /**
@@ -134,20 +131,6 @@ public class Coleccion {
   public boolean contieneHechoFiltrado(Hecho unHecho, Filtro filtroExcluyente) {
     return this.obtenerHechosFiltrados(filtroExcluyente)
                .contains(unHecho);
-  }
-
-  /**
-   * Aplica el algoritmo de consenso configurado sobre una lista de hechos.
-   * Si no hay ningún algoritmo asignado, devuelve la lista de hechos original sin cambios.
-   *
-   * @param hechos La lista de hechos a la que se le aplicará el consenso.
-   * @return Una nueva lista con los hechos que cumplen con el criterio de consenso.
-   */
-  private List<Hecho> aplicarConsenso(List<Hecho> hechos) {
-    if (coleccion_algoritmo == null) {
-      return hechos;
-    }
-    return coleccion_algoritmo.listaDeHechosConsensuados(hechos, this.coleccion_fuente);
   }
 
   /**
@@ -196,7 +179,7 @@ public class Coleccion {
    * @return Una lista de solo lectura de los hechos consensuados.
    */
   public List<Hecho> getHechosConsensuados() {
-    return Collections.unmodifiableList(hechosConsensuados);
+    return coleccion_algoritmo.getHechosConsensuados();
   }
 
   public String getColeccion_titulo() {

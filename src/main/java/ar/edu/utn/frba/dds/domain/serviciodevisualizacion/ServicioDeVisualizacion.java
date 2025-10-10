@@ -4,7 +4,6 @@ import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.domain.filtro.Filtro;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
-import ar.edu.utn.frba.dds.domain.reportes.RepositorioDeSolicitudes;
 import java.util.List;
 
 
