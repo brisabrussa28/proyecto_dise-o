@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.domain.reportes;
 
 import ar.edu.utn.frba.dds.domain.exceptions.RazonInvalidaException;
+import ar.edu.utn.frba.dds.domain.hecho.Estado;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Objects;
@@ -27,7 +28,7 @@ public class Solicitud {
   @SequenceGenerator(name = "solicitud_seq", sequenceName = "solicitud_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "solicitud_seq")
   @Column(name = "solicitud_id")
-  Long id;
+  public Long id;
 
   @ManyToOne
   @JoinColumn(name = "hecho_id")
@@ -81,6 +82,7 @@ public class Solicitud {
 
   public void aceptar() {
     this.estado = EstadoSolicitud.ACEPTADA;
+    this.hechoSolicitado.setEstado(Estado.ELIMINADO);
   }
 
   public void rechazar() {

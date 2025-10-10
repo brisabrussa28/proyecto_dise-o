@@ -1,6 +1,8 @@
-package ar.edu.utn.frba.dds.domain.reportes;
+package ar.edu.utn.frba.dds.domain.repos;
 
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.reportes.EstadoSolicitud;
+import ar.edu.utn.frba.dds.domain.reportes.Solicitud;
 import ar.edu.utn.frba.dds.domain.utils.DBUtils;
 import java.util.List;
 import java.util.Optional;

@@ -75,10 +75,11 @@
 - [ ] Revisar y asegurar la consistencia del campo provincia en todo el sistema.
 - [ ] Para las estadísticas, priorizar el almacenamiento de valores absolutos en lugar de porcentajes.
 - [ ] Clase Estadistica es un bruto code smell, sólo tiene accessors y no comportamiento.
-- [ ] Algoritmo de concenso deberia revisar todas las fuentes del nodo (instancia) osea todas las fuentes del sistema
-        -> necesitamos un repo de fuentes
 - [ ] Repositorios para persistir las clases
 - [ ] Optimizar el mecanismo de hechos eliminados
 - [ ] Optimizar api, si superas la cantidad de request en cierto tiempo se rompe. corregirlo
 - [ ] Corregir test centralDeEstadisticas
+- 
 - [ ] Corregir algoritmos de consenso y que se relacione con Hecho y Coleccion.
+- [ ] Algoritmo de concenso deberia revisar todas las fuentes del nodo (instancia) osea todas las fuentes del sistema
+    -> necesitamos un repo de fuentes
