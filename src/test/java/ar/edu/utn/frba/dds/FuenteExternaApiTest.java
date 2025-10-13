@@ -6,11 +6,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteExternaAPI;
-import ar.edu.utn.frba.dds.domain.fuentes.apis.FuenteAdapter;
-import ar.edu.utn.frba.dds.domain.fuentes.apis.configuracion.ConfiguracionAdapter;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteExternaAPI;
+import ar.edu.utn.frba.dds.model.fuentes.apis.FuenteAdapter;
+import ar.edu.utn.frba.dds.model.fuentes.apis.configuracion.ConfiguracionAdapter;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;

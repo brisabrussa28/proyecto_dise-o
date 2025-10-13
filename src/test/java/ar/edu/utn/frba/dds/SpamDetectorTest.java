@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.reportes.detectorspam.DetectorSpam;
+import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpam;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

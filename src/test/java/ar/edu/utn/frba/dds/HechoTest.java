@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds;
 
-import static ar.edu.utn.frba.dds.domain.filtro.condiciones.Operador.IGUAL;
+import static ar.edu.utn.frba.dds.model.filtro.condiciones.Operador.IGUAL;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -8,13 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.Condicion;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionGenerica;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.hecho.Origen;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.filtro.Filtro;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.Condicion;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionGenerica;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.model.hecho.Origen;
+import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;

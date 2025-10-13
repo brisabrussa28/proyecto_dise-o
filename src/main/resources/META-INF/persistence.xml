@@ -8,14 +8,14 @@
     <persistence-unit name="simple-persistence-unit" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <class>ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica</class>
-        <class>ar.edu.utn.frba.dds.domain.coleccion.Coleccion</class>
-        <class>ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.AlgoritmoDeConsenso
+        <class>ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica</class>
+        <class>ar.edu.utn.frba.dds.model.coleccion.Coleccion</class>
+        <class>ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.AlgoritmoDeConsenso
         </class>
-        <class>ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.Absoluta</class>
-        <class>ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.MayoriaSimple</class>
-        <class>ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.MultiplesMenciones</class>
-        <class>ar.edu.utn.frba.dds.domain.hecho.Hecho</class>
+        <class>ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.Absoluta</class>
+        <class>ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MayoriaSimple</class>
+        <class>ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MultiplesMenciones</class>
+        <class>ar.edu.utn.frba.dds.model.hecho.Hecho</class>
         <properties>
             <property name="hibernate.archive.autodetection" value="class"/>
             <!-- Activar Hibernate con HSQLDB -->

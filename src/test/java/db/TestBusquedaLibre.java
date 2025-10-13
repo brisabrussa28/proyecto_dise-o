@@ -3,12 +3,12 @@ package db;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.Origen;
-import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
-import ar.edu.utn.frba.dds.domain.hibernate.AccesoHecho;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.utils.DBUtils;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.Origen;
+import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
+import ar.edu.utn.frba.dds.model.hibernate.AccesoHecho;
+import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.logging.Logger;

@@ -1,13 +1,13 @@
 package ar.edu.utn.frba.dds;
 
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.Origen;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.exportador.csv.ExportadorCSV;
-import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoAnexar;
-import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoNumerar;
-import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoSobrescribir;
-import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoTimestamp;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.Origen;
+import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.exportador.csv.ExportadorCSV;
+import ar.edu.utn.frba.dds.model.exportador.csv.modoexportacion.ModoAnexar;
+import ar.edu.utn.frba.dds.model.exportador.csv.modoexportacion.ModoNumerar;
+import ar.edu.utn.frba.dds.model.exportador.csv.modoexportacion.ModoSobrescribir;
+import ar.edu.utn.frba.dds.model.exportador.csv.modoexportacion.ModoTimestamp;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

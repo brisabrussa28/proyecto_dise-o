@@ -1,19 +1,19 @@
 package ar.edu.utn.frba.dds;
 
-import static ar.edu.utn.frba.dds.domain.filtro.condiciones.Operador.IGUAL;
-import static ar.edu.utn.frba.dds.domain.filtro.condiciones.Operador.MAYOR_QUE;
+import static ar.edu.utn.frba.dds.model.filtro.condiciones.Operador.IGUAL;
+import static ar.edu.utn.frba.dds.model.filtro.condiciones.Operador.MAYOR_QUE;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionAnd;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionGenerica;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionNot;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionOr;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionPredicado;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.Origen;
-import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionAnd;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionGenerica;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionNot;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionOr;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionPredicado;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.Origen;
+import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
+import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

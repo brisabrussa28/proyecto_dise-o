@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.dds;
 
-import static ar.edu.utn.frba.dds.domain.filtro.condiciones.Operador.DISTINTO;
+import static ar.edu.utn.frba.dds.model.filtro.condiciones.Operador.DISTINTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -10,18 +10,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionGenerica;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionPredicado;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
-import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.hecho.Origen;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.utils.DBUtils;
+import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.model.filtro.Filtro;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionGenerica;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionPredicado;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionTrue;
+import ar.edu.utn.frba.dds.model.fuentes.Fuente;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.model.hecho.Origen;
+import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.EntityManager;
