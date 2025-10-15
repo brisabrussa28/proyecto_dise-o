@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
+import ar.edu.utn.frba.dds.domain.hecho.EnriquecedorDeHechos;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.lector.Lector;
 import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
@@ -16,7 +17,7 @@ import javax.persistence.Transient;
 
 @Entity
 @DiscriminatorValue("ESTATICA")
-public class FuenteEstatica extends Fuente {
+public class FuenteEstatica extends FuenteConHechos {
 
   private String fuente_ruta_archivo;
 
@@ -54,8 +55,8 @@ public class FuenteEstatica extends Fuente {
     // El lector se crea como una variable local, solo cuando se necesita.
     Lector<Hecho> lector = this.fuente_configuracion_lector.build(Hecho.class);
     List<Hecho> hechosImportados = lector.importar(this.fuente_ruta_archivo);
-
     this.hechosPersistidos.clear();
+
     this.hechosPersistidos.addAll(hechosImportados);
   }
 

@@ -1,17 +1,15 @@
 package ar.edu.utn.frba.dds.domain.hecho;
 
-import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoApi;
 import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 /**
- * Implementación del Patrón Builder para la creación de Hechos.
- * Permite la resolución asíncrona de datos geográficos.
+ * Implementación del Patrón Builder para la creación síncrona de Hechos.
+ * La validación y enriquecimiento de datos geográficos se delega a otras clases.
  */
 public class HechoBuilder {
   private String titulo;
@@ -24,7 +22,6 @@ public class HechoBuilder {
   private LocalDateTime fechaCarga = LocalDateTime.now();
   private Origen fuenteOrigen;
   private List<Etiqueta> etiquetas = new ArrayList<>();
-  private GeoApi geoApi; // Servicio para consultas geográficas
 
   public HechoBuilder copiar(Hecho original) {
     this.titulo = original.getTitulo();
@@ -110,42 +107,23 @@ public class HechoBuilder {
   }
 
   /**
-   * Inyecta el servicio de geolocalización que se utilizará para completar datos.
-   * @param geoApi La implementación de GeoApi a utilizar.
-   * @return El propio builder para encadenar llamadas.
+   * Construye y devuelve una instancia de Hecho con los datos proporcionados.
+   * @return Una nueva instancia de Hecho.
+   * @throws IllegalStateException si faltan campos obligatorios o los datos son inconsistentes.
    */
-  public HechoBuilder conGeoApi(GeoApi geoApi) {
-    this.geoApi = geoApi;
-    return this;
-  }
-
-  /**
-   * Construye un objeto Hecho de forma asíncrona.
-   * Si falta información geográfica, la buscará utilizando la GeoApi proporcionada.
-   * @return Un CompletableFuture que se completará con la instancia de Hecho.
-   */
-  public CompletableFuture<Hecho> build() {
-    try {
-      validarCampos();
-    } catch (IllegalStateException e) {
-      return CompletableFuture.failedFuture(e);
-    }
-
-    if (provincia == null && ubicacion != null) {
-      if (geoApi == null) {
-        return CompletableFuture.failedFuture(
-            new IllegalStateException("Se necesita un GeoApi para buscar la provincia por ubicación."));
-      }
-      return geoApi.obtenerProvincia(ubicacion.getLatitud(), ubicacion.getLongitud())
-                   .thenApply(provinciaObtenida -> {
-                     this.provincia = provinciaObtenida;
-                     return construirHechoFinal();
-                   });
-    }
-
-    // TODO: Se podría implementar la lógica inversa: buscar ubicación a partir de provincia/dirección.
-
-    return CompletableFuture.completedFuture(construirHechoFinal());
+  public Hecho build() {
+    validarCampos();
+    return new Hecho(
+        titulo,
+        descripcion,
+        categoria,
+        direccion,
+        provincia,
+        ubicacion,
+        fechaSuceso,
+        fechaCarga,
+        fuenteOrigen,
+        etiquetas);
   }
 
   private void validarCampos() {
@@ -168,19 +146,4 @@ public class HechoBuilder {
       throw new IllegalStateException("La fecha de carga no puede ser una fecha futura.");
     }
   }
-
-  private Hecho construirHechoFinal() {
-    return new Hecho(
-        titulo,
-        descripcion,
-        categoria,
-        direccion,
-        provincia,
-        ubicacion,
-        fechaSuceso,
-        fechaCarga,
-        fuenteOrigen,
-        etiquetas);
-  }
 }
-

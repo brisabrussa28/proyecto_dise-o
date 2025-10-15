@@ -227,7 +227,7 @@ public class Hecho {
     this.hecho_direccion = hecho_direccion;
   }
 
-  public void setUbicacion(CompletableFuture<PuntoGeografico> hecho_ubicacion) {
+  public void setUbicacion(PuntoGeografico hecho_ubicacion) {
     this.hecho_ubicacion = hecho_ubicacion;
   }
 

@@ -1,12 +1,10 @@
 package ar.edu.utn.frba.dds.domain.lector.csv.filaconverter;
 
-import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoApi;
 import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.domain.hecho.Origen;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -16,14 +14,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Implementación de 'FilaConverter' que transforma una fila de CSV en una promesa (CompletableFuture) de un Hecho.
+ * Implementación de 'FilaConverter' que transforma una fila de CSV en un objeto Hecho.
  */
-public class HechoFilaConverter implements FilaConverter<CompletableFuture<Hecho>> {
+public class HechoFilaConverter implements FilaConverter<Hecho> {
 
   private static final Logger logger = Logger.getLogger(HechoFilaConverter.class.getName());
 
@@ -35,29 +32,24 @@ public class HechoFilaConverter implements FilaConverter<CompletableFuture<Hecho
   private final String dateFormatStr;
   private final Map<String, List<String>> mapeoColumnas;
   private final SimpleDateFormat dateFormat;
-  private final GeoApi geoApi;
 
-  public HechoFilaConverter(String formatoFecha, Map<String, List<String>> mapeoColumnas, GeoApi geoApi) {
+  public HechoFilaConverter(String formatoFecha, Map<String, List<String>> mapeoColumnas) {
     if (formatoFecha == null || formatoFecha.isBlank() || mapeoColumnas == null || mapeoColumnas.isEmpty()) {
       throw new IllegalArgumentException("El formato de fecha y el mapeo de columnas son obligatorios.");
-    }
-    if (geoApi == null) {
-      throw new IllegalArgumentException("La implementación de GeoApi es obligatoria.");
     }
     this.dateFormatStr = formatoFecha;
     this.dateFormat = new SimpleDateFormat(formatoFecha);
     this.mapeoColumnas = new HashMap<>(mapeoColumnas);
-    this.geoApi = geoApi;
   }
 
   /**
-   * Convierte una fila de CSV en una promesa de un objeto Hecho.
+   * Convierte una fila de CSV en un objeto Hecho.
    *
    * @param fila Un mapa donde la clave es el nombre de la columna y el valor es el dato de la celda.
-   * @return Un CompletableFuture<Hecho>, o null si la fila no es válida.
+   * @return Un Hecho, o null si la fila no es válida.
    */
   @Override
-  public CompletableFuture<Hecho> convert(Map<String, String> fila) {
+  public Hecho convert(Map<String, String> fila) {
     if (!validadorDeFila(fila)) {
       logger.warning("Fila ignorada por no cumplir con los campos requeridos.");
       return null;
@@ -65,7 +57,7 @@ public class HechoFilaConverter implements FilaConverter<CompletableFuture<Hecho
 
     HechoBuilder builder = new HechoBuilder();
 
-    // Configuración del builder a partir de la fila (lógica síncrona)
+    // Configuración del builder a partir de la fila
     obtenerPrimerValor(fila, CampoHecho.TITULO.name()).ifPresent(builder::conTitulo);
     obtenerPrimerValor(fila, CampoHecho.CATEGORIA.name()).ifPresent(builder::conCategoria);
     obtenerPrimerValor(fila, CampoHecho.PROVINCIA.name()).ifPresent(builder::conProvincia);
@@ -84,11 +76,9 @@ public class HechoFilaConverter implements FilaConverter<CompletableFuture<Hecho
     builder.conFuenteOrigen(Origen.DATASET);
     builder.conFechaCarga(LocalDateTime.now());
 
-    // Se inyecta la API y se llama a build(), que devuelve el CompletableFuture.
-    return builder.conGeoApi(this.geoApi).build();
+    // Se llama a build(), que ahora devuelve el Hecho directamente.
+    return builder.build();
   }
-
-  // --- Métodos privados ---
 
   private boolean validadorDeFila(Map<String, String> fila) {
     return CAMPOS_REQUERIDOS.stream().allMatch(campo -> obtenerPrimerValor(fila, campo).isPresent());
@@ -141,4 +131,3 @@ public class HechoFilaConverter implements FilaConverter<CompletableFuture<Hecho
     return this.mapeoColumnas;
   }
 }
-

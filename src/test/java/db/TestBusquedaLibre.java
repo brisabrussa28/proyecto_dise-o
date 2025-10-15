@@ -22,34 +22,34 @@ import org.junit.jupiter.api.Test;
 public class TestBusquedaLibre extends PersistenceTests {
   private AccesoHecho accesoHecho;
 
-  Hecho roboBanco = new Hecho(
+  private final Hecho roboBanco = new Hecho(
       "Robo a mano armada en banco céntrico", "Tres individuos armados ingresaron...", "Delito",
       "Av. Corrientes 1234", "Buenos Aires", new PuntoGeografico(-34.6037, -58.3816),
-      LocalDateTime.of(2025, 9, 10, 14, 30), LocalDateTime.now(), Origen.PROVISTO_CONTRIBUYENTE,
+      LocalDateTime.now().minusDays(1), LocalDateTime.now(), Origen.PROVISTO_CONTRIBUYENTE,
       List.of(new Etiqueta("robo"), new Etiqueta("arma"), new Etiqueta("banco"))
   );
 
-  Hecho asaltoComercio = new Hecho(
+  private final Hecho asaltoComercio = new Hecho(
       "Asalto a mano armada en comercio local",
       "Un delincuente armado ingresó...",
       "Seguridad ciudadana",
       "Calle San Martín 456",
       "Santa Fe",
       new PuntoGeografico(-31.6333, -60.7000),
-      LocalDateTime.of(2025, 9, 9, 18, 15),
+      LocalDateTime.now().minusDays(2),
       LocalDateTime.now(),
       Origen.PROVISTO_CONTRIBUYENTE,
       List.of(new Etiqueta("robo"), new Etiqueta("comercio"), new Etiqueta("arma"))
   );
 
-  Hecho intentoRobo = new Hecho(
+  private final Hecho intentoRobo = new Hecho(
       "Intento de robo a mano armada frustrado por vecinos",
       "Un grupo de vecinos logró detener a un ladrón armado...",
       "Delito",
       "Pasaje Mitre 789",
       "Mendoza",
       new PuntoGeografico(-32.8908, -68.8272),
-      LocalDateTime.of(2025, 9, 8, 21, 0),
+      LocalDateTime.now().minusDays(3),
       LocalDateTime.now(),
       Origen.PROVISTO_CONTRIBUYENTE,
       List.of(new Etiqueta("robo"), new Etiqueta("arma"), new Etiqueta("vecinos"))
@@ -57,19 +57,13 @@ public class TestBusquedaLibre extends PersistenceTests {
 
   @BeforeEach
   public void setUp() {
-
-    // La transacción se inicia automáticamente por la clase base PersistenceTests.
-    // Solo inicializamos el objeto de acceso a datos.
-    accesoHecho = new AccesoHecho(DBUtils.getEntityManager());
-    accesoHecho.guardar(roboBanco);
-    accesoHecho.guardar(asaltoComercio);
-    accesoHecho.guardar(intentoRobo);
+    accesoHecho = new AccesoHecho(entityManager());
+    withTransaction(() -> {
+      accesoHecho.guardar(roboBanco);
+      accesoHecho.guardar(asaltoComercio);
+      accesoHecho.guardar(intentoRobo);
+    });
   }
-
-  /**
-   * Método helper para crear y persistir un conjunto de datos de prueba limpios.
-   * Se llama desde cada test para garantizar el aislamiento.
-   */
 
   @Test
   public void encuentraResultadoBienEscrito() {
@@ -77,13 +71,12 @@ public class TestBusquedaLibre extends PersistenceTests {
     List<Hecho> resultados = accesoHecho.fullTextSearch("ladrón armado", 10);
     mostrarResultados(resultados);
 
-    // 3. Verificar los resultados
     assertFalse(resultados.isEmpty());
-    assertEquals(7, resultados.size());
+    // CORRECCIÓN: Solo un hecho contiene la palabra "ladrón".
+    assertEquals(1, resultados.size());
     assertEquals(
         "Intento de robo a mano armada frustrado por vecinos",
-        resultados.get(0)
-                  .getTitulo()
+        resultados.get(0).getTitulo()
     );
   }
 
@@ -94,9 +87,9 @@ public class TestBusquedaLibre extends PersistenceTests {
     List<Hecho> resultados = accesoHecho.fullTextSearch("armad0", 10);
     mostrarResultados(resultados);
 
-    // 3. Verificar los resultados
     assertFalse(resultados.isEmpty());
-    assertEquals(4, resultados.size());
+    // CORRECCIÓN: Se deben encontrar los 3 hechos que contienen "armado" o "armada".
+    assertEquals(3, resultados.size());
   }
 
   private void mostrarResultados(List<Hecho> resultados) {
@@ -109,4 +102,3 @@ public class TestBusquedaLibre extends PersistenceTests {
     }
   }
 }
-
