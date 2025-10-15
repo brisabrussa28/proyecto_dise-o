@@ -19,14 +19,15 @@ import java.util.concurrent.CompletionException;
  * Incluye un LimitadorRequests para evitar un número excesivo de peticiones simultáneas.
  */
 public class GeoGeoref implements GeoApi {
-  private static final String API_BASE_URL = "https://apis.datos.gob.ar/georef/api/";
+  private final String apiBaseUrl;
   private final LimitadorRequests limitador;
 
+
   /**
-   * Constructor por defecto. Utiliza un intervalo de 50ms entre peticiones.
+   * Constructor para producción.
    */
   public GeoGeoref() {
-    this.limitador = new LimitadorRequests(50);
+    this("https://apis.datos.gob.ar/georef/api/", 50);
   }
 
   /**
@@ -34,13 +35,23 @@ public class GeoGeoref implements GeoApi {
    * @param minIntervalMillis Intervalo mínimo en milisegundos entre peticiones.
    */
   public GeoGeoref(long minIntervalMillis) {
+    this("https://apis.datos.gob.ar/georef/api/", minIntervalMillis);
+  }
+
+  /**
+   * Constructor con visibilidad de paquete para testing.
+   * @param apiBaseUrl La URL base del servicio GeoRef.
+   * @param minIntervalMillis Intervalo mínimo en milisegundos entre peticiones.
+   */
+  public GeoGeoref(String apiBaseUrl, long minIntervalMillis) {
+    this.apiBaseUrl = apiBaseUrl;
     this.limitador = new LimitadorRequests(minIntervalMillis);
   }
 
   @Override
   public CompletableFuture<String> obtenerProvincia(double lat, double lon) {
     return limitador.submit(() -> CompletableFuture.supplyAsync(() -> {
-      String urlString = API_BASE_URL + "ubicacion?lat=" + lat + "&lon=" + lon + "&campos=provincia.nombre";
+      String urlString = apiBaseUrl + "ubicacion?lat=" + lat + "&lon=" + lon + "&campos=provincia.nombre";
       try {
         JsonNode jsonNode = this.consultarApiGet(urlString);
         return jsonNode.path("ubicacion").path("provincia").path("nombre").asText(null);
@@ -55,7 +66,7 @@ public class GeoGeoref implements GeoApi {
     return limitador.submit(() -> CompletableFuture.supplyAsync(() -> {
       try {
         String provinciaCodificada = URLEncoder.encode(nombreProvincia, StandardCharsets.UTF_8);
-        String urlString = API_BASE_URL + "provincias?nombre=" + provinciaCodificada;
+        String urlString = apiBaseUrl + "provincias?nombre=" + provinciaCodificada;
         JsonNode jsonNode = this.consultarApiGet(urlString);
         JsonNode provincias = jsonNode.path("provincias");
         if (provincias.isArray() && !provincias.isEmpty()) {
