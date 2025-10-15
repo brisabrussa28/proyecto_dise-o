@@ -27,7 +27,7 @@ public class EnriquecedorDeHechos {
    * Ideal para procesos de guardado en base de datos donde se necesita el dato completo.
    *
    * @param hechos La lista de hechos a completar.
-   * @return Una NUEVA lista con los hechos enriquecidos.
+   * @return La misma lista de entrada, pero con sus objetos internos modificados.
    */
   public List<Hecho> completar(List<Hecho> hechos) {
     // Llama al método asíncrono y bloquea el hilo actual hasta que se complete.
@@ -36,11 +36,11 @@ public class EnriquecedorDeHechos {
 
   /**
    * Inicia el enriquecimiento de una lista de hechos de forma asíncrona (no bloqueante).
-   * Devuelve inmediatamente un CompletableFuture que se completará con el resultado.
-   * Ideal para procesos en segundo plano o interfaces de usuario.
+   * Devuelve inmediatamente un CompletableFuture que se completará con la lista original,
+   * pero con sus objetos internos ya modificados.
    *
    * @param hechos La lista de hechos a completar.
-   * @return Un CompletableFuture que se resolverá con una NUEVA lista de hechos enriquecidos.
+   * @return Un CompletableFuture que se resolverá con la misma lista de hechos de entrada.
    */
   public CompletableFuture<List<Hecho>> completarAsincrono(List<Hecho> hechos) {
     if (hechos == null || hechos.isEmpty()) {
@@ -55,16 +55,13 @@ public class EnriquecedorDeHechos {
         futuros.toArray(new CompletableFuture[0])
     );
 
-    return allFutures.thenApply(v ->
-                                    futuros.stream()
-                                           .map(CompletableFuture::join) // .join() es seguro aquí porque allOf() garantiza la finalización
-                                           .collect(Collectors.toList())
-    );
+    // thenApply ahora devuelve la lista original, ya que los objetos fueron mutados.
+    return allFutures.thenApply(v -> hechos);
   }
 
   /**
-   * Lógica para completar un único hecho. Devuelve un futuro con el hecho,
-   * ya sea el original o una copia nueva con los datos completados.
+   * Lógica para completar un único hecho. Modifica el objeto Hecho original
+   * con los datos obtenidos de la API.
    */
   private CompletableFuture<Hecho> completarHechoIndividual(Hecho hechoOriginal) {
     boolean necesitaProvincia = (hechoOriginal.getProvincia() == null || hechoOriginal.getProvincia().isBlank()) && hechoOriginal.getUbicacion() != null;
@@ -74,11 +71,9 @@ public class EnriquecedorDeHechos {
       return geoApi.obtenerProvincia(hechoOriginal.getUbicacion().getLatitud(), hechoOriginal.getUbicacion().getLongitud())
                    .thenApply(provincia -> {
                      if (provincia != null && !provincia.isBlank()) {
-                       HechoBuilder builder = new HechoBuilder().copiar(hechoOriginal);
-                       builder.conProvincia(provincia);
-                       return builder.build();
+                       hechoOriginal.setProvincia(provincia);
                      }
-                     return hechoOriginal;
+                     return hechoOriginal; // Devuelve el objeto original mutado
                    }).exceptionally(ex -> {
             System.err.println("Error al obtener provincia para el hecho: " + hechoOriginal.getTitulo() + " - " + ex.getMessage());
             return hechoOriginal;
@@ -89,11 +84,9 @@ public class EnriquecedorDeHechos {
       return geoApi.obtenerUbicacion(hechoOriginal.getProvincia())
                    .thenApply(ubicacion -> {
                      if (ubicacion != null) {
-                       HechoBuilder builder = new HechoBuilder().copiar(hechoOriginal);
-                       builder.conUbicacion(ubicacion);
-                       return builder.build();
+                       hechoOriginal.setUbicacion(ubicacion);
                      }
-                     return hechoOriginal;
+                     return hechoOriginal; // Devuelve el objeto original mutado
                    }).exceptionally(ex -> {
             System.err.println("Error al obtener ubicación para el hecho: " + hechoOriginal.getTitulo() + " - " + ex.getMessage());
             return hechoOriginal;
