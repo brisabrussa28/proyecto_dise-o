@@ -8,7 +8,10 @@ import javax.persistence.EntityManager;
 public class EstadisticaRepository {
   EntityManager em = DBUtils.getEntityManager();
 
-  public EstadisticaRepository() {
+  private static final EstadisticaRepository INSTANCE = new EstadisticaRepository();
+
+  public static EstadisticaRepository instance() {
+    return INSTANCE;
   }
 
   public void save(Estadistica estadistica) {

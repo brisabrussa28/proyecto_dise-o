@@ -16,7 +16,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
@@ -29,8 +28,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 public class Hecho {
   // Quiza deberiamos poner el allocation a 10 pq la mayoria de los hechos se cargan en bulk
   @Id
-  @SequenceGenerator(name = "hecho_seq", sequenceName = "hecho_sequence", allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hecho_seq")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "hecho_id")
   Long id;
   @ElementCollection

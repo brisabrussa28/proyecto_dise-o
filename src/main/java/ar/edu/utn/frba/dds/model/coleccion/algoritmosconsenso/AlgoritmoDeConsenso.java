@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -22,7 +23,7 @@ import javax.persistence.Transient;
 @DiscriminatorColumn(name = "tipo_algoritmo")
 public abstract class AlgoritmoDeConsenso {
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long algoritmo_id;
 
   @Transient
@@ -42,6 +43,7 @@ public abstract class AlgoritmoDeConsenso {
                         .filter(hecho -> esConsensuado(hecho, hechosPorFuenteEnSets))
                         .toList();
   }
+
   /**
    * Mét0do auxiliar para obtener la lista de fuentes subyacentes.
    * Si la fuente principal es un agregador, devuelve las fuentes que lo componen.
@@ -64,7 +66,8 @@ public abstract class AlgoritmoDeConsenso {
   List<Set<Hecho>> obtenerListasDeHechos(List<Fuente> fuentes) {
     return fuentes.stream()
                   .map(fuente ->
-                           fuente.getHechos().stream()
+                           fuente.getHechos()
+                                 .stream()
                                  .filter(hecho -> hecho.getEstado() != Estado.ELIMINADO) //filtra eliminados
                                  .collect(Collectors.toSet())
                   )
@@ -75,7 +78,7 @@ public abstract class AlgoritmoDeConsenso {
    * Recalcula y actualiza la lista interna de hechos consensuados.
    *
    * @param hechosColeccion hechos de la coleccion que aplica al algoriitmo
-   * @param fuentes Lista de fuentes sobre la cual se aplica el algoritmo
+   * @param fuentes         Lista de fuentes sobre la cual se aplica el algoritmo
    */
   public void recalcularHechosConsensuados(List<Hecho> hechosColeccion, List<Fuente> fuentes) {
     this.hechosConsensuados = this.listaDeHechosConsensuados(hechosColeccion, fuentes);
@@ -84,7 +87,6 @@ public abstract class AlgoritmoDeConsenso {
   public List<Hecho> getHechosConsensuados() {
     return Collections.unmodifiableList(hechosConsensuados);
   }
-
 
 
   protected abstract boolean esConsensuado(Hecho hecho, List<Set<Hecho>> hechosDeFuentes);

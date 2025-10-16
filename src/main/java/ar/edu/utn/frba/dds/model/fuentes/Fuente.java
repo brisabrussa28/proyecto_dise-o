@@ -11,7 +11,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.SequenceGenerator;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -20,8 +19,7 @@ import javax.persistence.SequenceGenerator;
 public abstract class Fuente {
 
   @Id
-  @SequenceGenerator(name = "fuente_seq", sequenceName = "fuente_sequence", allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fuente_seq")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long fuente_id;
 
   protected String fuente_nombre;

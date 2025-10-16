@@ -14,7 +14,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 /**
@@ -25,8 +24,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 @Indexed
 public class Solicitud {
   @Id
-  @SequenceGenerator(name = "solicitud_seq", sequenceName = "solicitud_sequence", allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "solicitud_seq")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "solicitud_id")
   public Long id;
 

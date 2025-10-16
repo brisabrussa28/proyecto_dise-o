@@ -9,6 +9,7 @@ import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.model.hibernate.AccesoHecho;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.utils.DBUtils;
+import io.github.flbulgarelli.jpa.extras.test.SimplePersistenceTest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.logging.Logger;
@@ -19,7 +20,7 @@ import org.junit.jupiter.api.Test;
  * Tests para la funcionalidad de búsqueda full-text sobre la entidad Hecho.
  * Hereda de PersistenceTests para obtener el manejo de transacciones y la configuración de la BD.
  */
-public class TestBusquedaLibre extends PersistenceTests {
+public class TestBusquedaLibre implements SimplePersistenceTest {
   private AccesoHecho accesoHecho;
 
   Hecho roboBanco = new Hecho(

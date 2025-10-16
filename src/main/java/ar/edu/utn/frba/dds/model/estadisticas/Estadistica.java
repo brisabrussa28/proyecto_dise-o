@@ -5,7 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 
 /**
  * Representa un único dato estadístico, compuesto por un nombre (dimensión)
@@ -16,8 +15,7 @@ import javax.persistence.SequenceGenerator;
 public class Estadistica {
 
   @Id
-  @SequenceGenerator(name = "estadistica_seq", sequenceName = "estadistica_sequence", allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "estadistica_seq")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long estadistica_id;
   private final String estadistica_nombre;
   private final Long estadistica_valor;

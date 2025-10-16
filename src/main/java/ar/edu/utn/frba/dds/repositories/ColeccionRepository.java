@@ -7,8 +7,10 @@ import javax.persistence.EntityManager;
 
 public class ColeccionRepository {
   EntityManager em = DBUtils.getEntityManager();
+  private static final ColeccionRepository INSTANCE = new ColeccionRepository();
 
-  public ColeccionRepository() {
+  public static ColeccionRepository instance() {
+    return INSTANCE;
   }
 
   public void save(Coleccion coleccion) {

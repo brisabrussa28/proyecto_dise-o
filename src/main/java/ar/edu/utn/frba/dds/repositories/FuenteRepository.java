@@ -10,7 +10,10 @@ public class FuenteRepository {
 
   private EntityManager em = DBUtils.getEntityManager();
 
-  public FuenteRepository() {
+  private static final FuenteRepository INSTANCE = new FuenteRepository();
+
+  public static FuenteRepository instance() {
+    return INSTANCE;
   }
 
   public void save(Fuente fuente) {

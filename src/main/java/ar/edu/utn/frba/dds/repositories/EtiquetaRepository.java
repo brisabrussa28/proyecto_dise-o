@@ -9,7 +9,10 @@ import javax.persistence.EntityManager;
 public class EtiquetaRepository {
   EntityManager em = DBUtils.getEntityManager();
 
-  public EtiquetaRepository() {
+  private static final EtiquetaRepository INSTANCE = new EtiquetaRepository();
+
+  public static EtiquetaRepository instance() {
+    return INSTANCE;
   }
 
   public void save(Etiqueta etiqueta) {

@@ -16,7 +16,10 @@ import javax.persistence.NoResultException;
 public class RepositorioDeSolicitudes {
   private final EntityManager em = DBUtils.getEntityManager();
 
-  public RepositorioDeSolicitudes() {
+  private static final RepositorioDeSolicitudes INSTANCE = new RepositorioDeSolicitudes();
+
+  public static RepositorioDeSolicitudes instance() {
+    return INSTANCE;
   }
 
   /**

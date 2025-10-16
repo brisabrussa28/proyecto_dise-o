@@ -8,7 +8,10 @@ import javax.persistence.EntityManager;
 public class HechoRepository {
   EntityManager em = DBUtils.getEntityManager();
 
-  public HechoRepository() {
+  private static final HechoRepository INSTANCE = new HechoRepository();
+
+  public static HechoRepository instance() {
+    return INSTANCE;
   }
 
   public void save(Hecho hecho) {

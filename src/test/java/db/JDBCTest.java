@@ -3,6 +3,8 @@ package db;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.Absoluta;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MultiplesMenciones;
 import ar.edu.utn.frba.dds.model.estadisticas.CentralDeEstadisticas;
 import ar.edu.utn.frba.dds.model.estadisticas.Estadistica;
 import ar.edu.utn.frba.dds.model.exportador.Exportador;
@@ -14,12 +16,14 @@ import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.reportes.GestorDeSolicitudes;
-import ar.edu.utn.frba.dds.repositories.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpam;
+import ar.edu.utn.frba.dds.repositories.AlgoritmoRepository;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.EstadisticaRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
+import ar.edu.utn.frba.dds.repositories.RepositorioDeSolicitudes;
+import io.github.flbulgarelli.jpa.extras.test.SimplePersistenceTest;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -31,10 +35,11 @@ import org.junit.jupiter.api.Test;
  * Tests que verifican la correcta persistencia de diferentes entidades del dominio.
  * Hereda de PersistenceTests para obtener el manejo de transacciones y la configuración de la BD.
  */
-public class JDBCTest extends PersistenceTests {
-  private ColeccionRepository repoColeccion = new ColeccionRepository();
-  private HechoRepository hechoRepo = new HechoRepository();
-  private FuenteRepository fuenteRepo = new FuenteRepository();
+public class JDBCTest implements SimplePersistenceTest {
+  private ColeccionRepository repoColeccion = ColeccionRepository.instance();
+  private HechoRepository hechoRepo = HechoRepository.instance();
+  private FuenteRepository fuenteRepo = FuenteRepository.instance();
+  private AlgoritmoRepository algoritmoRepository = AlgoritmoRepository.instance();
 
   @BeforeEach
   public void setUp() {
@@ -85,6 +90,9 @@ public class JDBCTest extends PersistenceTests {
         "Descripcion de prueba",
         "General"
     );
+    var algoritmo = new Absoluta();
+    coleccion.setAlgoritmoDeConsenso(algoritmo);
+    algoritmoRepository.save(algoritmo);
     repoColeccion.save(coleccion);
   }
 
@@ -103,10 +111,10 @@ public class JDBCTest extends PersistenceTests {
         .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .build();
     fuente.agregarHecho(hecho);
-    fuenteRepo.save(fuente); // Usamos el método 'persist' heredado de la librería
+    fuenteRepo.save(fuente);
     var id = fuente.getId();
     // Verificación (opcional, fuera de la transacción)
-    FuenteDinamica fuenteRecuperada = find(FuenteDinamica.class, id); // Asumiendo que el ID es 1
+    FuenteDinamica fuenteRecuperada = find(FuenteDinamica.class, id);
     assertNotNull(fuenteRecuperada);
     Assertions.assertFalse(fuenteRecuperada.getHechos()
                                            .isEmpty());
@@ -128,6 +136,9 @@ public class JDBCTest extends PersistenceTests {
         "Hechos delictivos en Buenos Aires",
         "Robos"
     );
+    var multiplesMenciones = new MultiplesMenciones();
+    coleccionBonaerense.setAlgoritmoDeConsenso(multiplesMenciones);
+    algoritmoRepository.save(multiplesMenciones);
     repoColeccion.save(coleccionBonaerense);
     var id = coleccionBonaerense.getId();
     Coleccion coleccionRecuperada = find(Coleccion.class, id);
@@ -143,7 +154,7 @@ public class JDBCTest extends PersistenceTests {
     //System.out.println(coleccionDB.toString());
     calculadora.setGestor(new GestorDeSolicitudes(new RepositorioDeSolicitudes()));
     var stat = calculadora.categoriaConMasHechos(coleccionDB);
-    var repoStat = new EstadisticaRepository();
+    var repoStat = EstadisticaRepository.instance();
     repoStat.save(stat);
     var coleccion = repoColeccion.findById(1L);
     var stat2 = calculadora.provinciaConMasHechos(coleccion);

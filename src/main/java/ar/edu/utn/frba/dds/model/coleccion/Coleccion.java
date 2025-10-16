@@ -16,7 +16,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Transient;
 
 /**
@@ -30,8 +29,7 @@ import javax.persistence.Transient;
 public class Coleccion {
   //TODO: Poner nombres de var como la gente, no como si fueran de bd. de ultima le asignamos un nombre especal en la bd
   @Id
-  @SequenceGenerator(name = "coleccion_seq", sequenceName = "coleccion_sequence", allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "coleccion_seq")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long coleccion_id;
   @ManyToOne
   @JoinColumn(name = "coleccion_fuente")
@@ -42,6 +40,7 @@ public class Coleccion {
   private String coleccion_categoria;
 
   @ManyToOne
+  @JoinColumn(name = "coleccion_algoritmo")
   private AlgoritmoDeConsenso coleccion_algoritmo;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
