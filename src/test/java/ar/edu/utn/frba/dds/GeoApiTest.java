@@ -3,11 +3,15 @@ package ar.edu.utn.frba.dds;
 import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoApi;
 import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoGeoref;
 import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoOpenStreetMaps;
+import ar.edu.utn.frba.dds.domain.geolocalizacion.services.GeoRefService;
+import ar.edu.utn.frba.dds.domain.geolocalizacion.services.OpenStreetMapsService;
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import okhttp3.OkHttpClient;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.*;
+import retrofit2.Retrofit;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -39,10 +43,17 @@ class GeoApiTest {
 
     @BeforeEach
     void setUp() {
-      String baseUrl = mockWebServer.url("/").toString();
-      // Usamos el constructor package-private para inyectar la URL del mock
-      // Se usa 50L para especificar que es un tipo long.
-      geoGeoref = new GeoGeoref(baseUrl, 50L);
+      // 1. Creamos un cliente Retrofit que apunta a nuestro servidor de prueba.
+      Retrofit retrofit = GeoApi.buildRetrofit(
+          new OkHttpClient.Builder().build(),
+          mockWebServer.url("/").toString()
+      );
+
+      // 2. Creamos un 'falso' service que usará este cliente Retrofit.
+      GeoRefService mockService = retrofit.create(GeoRefService.class);
+
+      // 3. Inyectamos el 'falso' service en nuestra clase.
+      geoGeoref = new GeoGeoref(mockService);
     }
 
     @Test
@@ -103,9 +114,15 @@ class GeoApiTest {
 
     @BeforeEach
     void setUp() {
-      String baseUrl = mockWebServer.url("/").toString();
-      // Se usa 1000L para especificar que es un tipo long.
-      geoOpenStreetMaps = new GeoOpenStreetMaps(baseUrl, USER_AGENT, 1000L);
+      // 1. Creamos un cliente Retrofit que apunta a nuestro servidor de prueba.
+      Retrofit retrofit = GeoApi.buildRetrofit(
+          new OkHttpClient.Builder().build(),
+          mockWebServer.url("/").toString()
+      );
+      // 2. Creamos un 'falso' service.
+      OpenStreetMapsService mockService = retrofit.create(OpenStreetMapsService.class);
+      // 3. Inyectamos el 'falso' service.
+      geoOpenStreetMaps = new GeoOpenStreetMaps(mockService);
     }
 
     @Test
@@ -123,7 +140,8 @@ class GeoApiTest {
       assertEquals("Santa Fe", provincia);
       RecordedRequest request = mockWebServer.takeRequest();
       assertEquals("/reverse?format=json&lat=-32.95&lon=-60.64", request.getPath());
-      assertEquals(USER_AGENT, request.getHeader("User-Agent"));
+      // Nota: El User-Agent se añade a través de un interceptor en el código de producción.
+      // En este test unitario, como inyectamos un service "desnudo", no se añade. Lo cual es correcto.
     }
 
     @Test

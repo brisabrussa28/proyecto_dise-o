@@ -1,6 +1,11 @@
 package ar.edu.utn.frba.dds.domain.geolocalizacion;
 
 import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -25,4 +30,19 @@ public interface GeoApi {
    * @return Un CompletableFuture que se resolverá con el PuntoGeografico.
    */
   CompletableFuture<PuntoGeografico> obtenerUbicacion(String nombreProvincia);
+
+  /**
+   * Construye una instancia base de Retrofit.
+   * Es package-private para que solo las clases de este paquete puedan usarlo.
+   */
+  static Retrofit buildRetrofit(OkHttpClient client, String baseUrl) {
+    ObjectMapper mapper = new ObjectMapper()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    return new Retrofit.Builder()
+        .baseUrl(baseUrl)
+        .client(client)
+        .addConverterFactory(JacksonConverterFactory.create(mapper))
+        .build();
+  }
 }
