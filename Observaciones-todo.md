@@ -83,3 +83,21 @@
 - [ ] Corregir algoritmos de consenso y que se relacione con Hecho y Coleccion.
 - [ ] Algoritmo de concenso deberia revisar todas las fuentes del nodo (instancia) osea todas las fuentes del sistema
     -> necesitamos un repo de fuentes
+
+## Entrega 5
+ - [ ] Maquetado y wireframe de las paginas
+ - [ ] Cliente liviano desacoplado 
+ - [ ] Cliente que permite navegar colecciones y hechos aplicando filtros
+ - [ ] Cliente que permite solicitar eliminacion de hechos
+ - [ ] Administrador de la pagina que pueda aprobar solicitudes
+ - [ ] Administrador de la pagina que pueda configurar distintas fuentes
+ - [ ] Administrador de la pagina puede consultar estadisticas
+ - [ ] Administrador de la pagina que pueda crear colecciones a partir de fuentes disponibles
+ - [ ] Cliente que permita ver hechos en un mapa
+ - [ ] Contribuyente que pueda cargar y editar hechos de una fuente dinamica
+ - [ ] Contribuyente que pueda iniciar sesion
+ - [ ] Contribuyente que pueda adjuntar contenido multimedia (imagenes o video)
+ - [ ] Administrador de la pagina puede configurar fuentes y algoritmos de consenso de una coleccion
+ - [ ] Implementacion todas interfaces considerando esto
+ - [ ] Manejo de sesion usando autenticacion delegada
+ - [ ] Sumar los requerimientos adicionales propuestos anteriormente
