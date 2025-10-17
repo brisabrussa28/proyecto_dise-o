@@ -1,15 +1,11 @@
 package ar.edu.utn.frba.dds.repositories;
 
-import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.utils.DBUtils;
+import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import java.util.List;
-import javax.persistence.EntityManager;
 
-public class FuenteRepository {
-
-  private EntityManager em = DBUtils.getEntityManager();
-
+public class FuenteRepository implements WithSimplePersistenceUnit {
   private static final FuenteRepository INSTANCE = new FuenteRepository();
 
   public static FuenteRepository instance() {
@@ -17,26 +13,22 @@ public class FuenteRepository {
   }
 
   public void save(Fuente fuente) {
-    DBUtils.comenzarTransaccion(em);
     fuente.getHechos()
           .forEach(hecho -> {
             DBUtils.completarUbicacionFaltante(hecho);
             DBUtils.completarProvinciaFaltante(hecho);
           });
-    em.persist(fuente);
-    DBUtils.commit(em);
+    entityManager().persist(fuente);
   }
 
-  public List<Coleccion> findAll() {
-    return em.createQuery("SELECT * FROM fuente", Coleccion.class)
-             .getResultList();
+  public List<Fuente> findAll() {
+    return entityManager().createQuery("SELECT * FROM Fuente", Fuente.class)
+                          .getResultList();
 
   }
 
-  public Coleccion getById(Long id) {
-    return em.createQuery("SELECT * FROM fuente WHERE fuente_id = id", Coleccion.class)
-             .setParameter("id", id)
-             .getSingleResult();
+  public Fuente getById(Long id) {
+    return entityManager().find(Fuente.class, id);
   }
 
 }

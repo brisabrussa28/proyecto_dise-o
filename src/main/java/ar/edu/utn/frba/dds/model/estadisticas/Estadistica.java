@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * Representa un único dato estadístico, compuesto por un nombre (dimensión)
@@ -12,6 +13,7 @@ import javax.persistence.Id;
  * Esta clase es inmutable.
  */
 @Entity
+@Table(name = "Estadistica")
 public class Estadistica {
 
   @Id

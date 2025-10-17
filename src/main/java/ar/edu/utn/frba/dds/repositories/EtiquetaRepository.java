@@ -2,13 +2,10 @@ package ar.edu.utn.frba.dds.repositories;
 
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
-import ar.edu.utn.frba.dds.utils.DBUtils;
+import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import java.util.List;
-import javax.persistence.EntityManager;
 
-public class EtiquetaRepository {
-  EntityManager em = DBUtils.getEntityManager();
-
+public class EtiquetaRepository implements WithSimplePersistenceUnit {
   private static final EtiquetaRepository INSTANCE = new EtiquetaRepository();
 
   public static EtiquetaRepository instance() {
@@ -16,20 +13,16 @@ public class EtiquetaRepository {
   }
 
   public void save(Etiqueta etiqueta) {
-    DBUtils.comenzarTransaccion(em);
-    em.persist(etiqueta);
-    DBUtils.commit(em);
+    entityManager().persist(etiqueta);
   }
 
   public List<Hecho> findAll() {
-    return em.createQuery("SELECT hecho_etiqueta FROM hecho", Hecho.class)
-             .getResultList();
+    return entityManager().createQuery("SELECT * FROM Hecho", Hecho.class)
+                          .getResultList();
 
   }
 
   public Hecho getById(Long id) {
-    return em.createQuery("SELECT hecho_etiqueta FROM hecho WHERE hecho_etiqueta = id", Hecho.class)
-             .setParameter("id", id)
-             .getSingleResult();
+    return entityManager().find(Hecho.class, id);
   }
 }

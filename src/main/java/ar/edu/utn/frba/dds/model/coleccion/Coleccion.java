@@ -16,6 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 
 /**
@@ -26,6 +27,7 @@ import javax.persistence.Transient;
  * antes que su filtro interno.
  */
 @Entity
+@Table(name = "Coleccion")
 public class Coleccion {
   //TODO: Poner nombres de var como la gente, no como si fueran de bd. de ultima le asignamos un nombre especal en la bd
   @Id

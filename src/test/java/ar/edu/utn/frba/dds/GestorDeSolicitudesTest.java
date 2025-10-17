@@ -13,10 +13,10 @@ import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.reportes.AceptarSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.GestorDeSolicitudes;
-import ar.edu.utn.frba.dds.repositories.RepositorioDeSolicitudes;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
+import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,14 +30,14 @@ public class GestorDeSolicitudesTest {
 
   private Hecho hecho;
   private GestorDeSolicitudes gestor;
-  private RepositorioDeSolicitudes repositorio;
+  private SolicitudesRepository repositorio;
   private HechoRepository repoHechos;
   private DetectorSpam detectorSpam;
   private final String motivoLargo = "Este es un motivo válido con más de 500 caracteres ".repeat(20);
 
   @BeforeEach
   public void setUp() {
-    repositorio = new RepositorioDeSolicitudes();
+    repositorio = new SolicitudesRepository();
     repoHechos = new HechoRepository();
     gestor = new GestorDeSolicitudes(repositorio);
     detectorSpam = mock(DetectorSpam.class);

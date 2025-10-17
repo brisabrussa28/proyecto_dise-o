@@ -2,12 +2,10 @@ package ar.edu.utn.frba.dds.repositories;
 
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.utils.DBUtils;
+import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import java.util.List;
-import javax.persistence.EntityManager;
 
-public class HechoRepository {
-  EntityManager em = DBUtils.getEntityManager();
-
+public class HechoRepository implements WithSimplePersistenceUnit {
   private static final HechoRepository INSTANCE = new HechoRepository();
 
   public static HechoRepository instance() {
@@ -15,22 +13,18 @@ public class HechoRepository {
   }
 
   public void save(Hecho hecho) {
-    DBUtils.comenzarTransaccion(em);
     DBUtils.completarUbicacionFaltante(hecho);
     DBUtils.completarProvinciaFaltante(hecho);
-    em.persist(hecho);
-    DBUtils.commit(em);
+    entityManager().persist(hecho);
   }
 
   public List<Hecho> findAll() {
-    return em.createQuery("SELECT * FROM hecho", Hecho.class)
-             .getResultList();
+    return entityManager().createQuery("SELECT * FROM Hecho", Hecho.class)
+                          .getResultList();
 
   }
 
   public Hecho getById(Long id) {
-    return em.createQuery("SELECT * FROM hecho WHERE hecho_id = id", Hecho.class)
-             .setParameter("id", id)
-             .getSingleResult();
+    return entityManager().find(Hecho.class, id);
   }
 }

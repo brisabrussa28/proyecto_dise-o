@@ -22,7 +22,7 @@ import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.EstadisticaRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
-import ar.edu.utn.frba.dds.repositories.RepositorioDeSolicitudes;
+import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import io.github.flbulgarelli.jpa.extras.test.SimplePersistenceTest;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -78,7 +78,7 @@ public class JDBCTest implements SimplePersistenceTest {
     FuenteRepository repoFuentes = new FuenteRepository();
     repoFuentes.save(fuente);
 
-    var solicitudes = new RepositorioDeSolicitudes();
+    var solicitudes = new SolicitudesRepository();
     var calculadora = new CentralDeEstadisticas();
 
     Exportador<Estadistica> exportadorCsv = new ExportadorCSV<>(new ModoSobrescribir());
@@ -152,7 +152,7 @@ public class JDBCTest implements SimplePersistenceTest {
     CentralDeEstadisticas calculadora = new CentralDeEstadisticas();
     List<Coleccion> coleccionDB = repoColeccion.findAll();
     //System.out.println(coleccionDB.toString());
-    calculadora.setGestor(new GestorDeSolicitudes(new RepositorioDeSolicitudes()));
+    calculadora.setGestor(new GestorDeSolicitudes(new SolicitudesRepository()));
     var stat = calculadora.categoriaConMasHechos(coleccionDB);
     var repoStat = EstadisticaRepository.instance();
     repoStat.save(stat);

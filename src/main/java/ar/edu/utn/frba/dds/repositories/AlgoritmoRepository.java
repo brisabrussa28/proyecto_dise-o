@@ -1,11 +1,9 @@
 package ar.edu.utn.frba.dds.repositories;
 
 import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.AlgoritmoDeConsenso;
-import ar.edu.utn.frba.dds.utils.DBUtils;
-import javax.persistence.EntityManager;
+import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 
-public class AlgoritmoRepository {
-  EntityManager em = DBUtils.getEntityManager();
+public class AlgoritmoRepository implements WithSimplePersistenceUnit {
   private static final AlgoritmoRepository INSTANCE = new AlgoritmoRepository();
 
   public static AlgoritmoRepository instance() {
@@ -13,8 +11,6 @@ public class AlgoritmoRepository {
   }
 
   public void save(AlgoritmoDeConsenso algoritmo) {
-    DBUtils.comenzarTransaccion(em);
-    em.persist(algoritmo);
-    DBUtils.commit(em);
+    entityManager().persist(algoritmo);
   }
 }

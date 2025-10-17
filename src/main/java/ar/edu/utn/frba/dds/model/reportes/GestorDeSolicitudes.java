@@ -5,7 +5,7 @@ import ar.edu.utn.frba.dds.model.filtro.Filtro;
 import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionPredicado;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpam;
-import ar.edu.utn.frba.dds.repositories.RepositorioDeSolicitudes;
+import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
  */
 public class GestorDeSolicitudes {
 
-  private final RepositorioDeSolicitudes repositorio;
+  private final SolicitudesRepository repositorio;
 
-  public GestorDeSolicitudes(RepositorioDeSolicitudes repositorio) {
+  public GestorDeSolicitudes(SolicitudesRepository repositorio) {
     this.repositorio = repositorio;
   }
 
