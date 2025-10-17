@@ -22,6 +22,7 @@ import ar.edu.utn.frba.dds.domain.repos.FuenteRepository;
 import ar.edu.utn.frba.dds.domain.repos.HechoRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,9 +33,10 @@ import org.junit.jupiter.api.Test;
  * Hereda de PersistenceTests para obtener el manejo de transacciones y la configuración de la BD.
  */
 public class JDBCTest extends PersistenceTests {
-  private ColeccionRepository repoColeccion = new ColeccionRepository();
-  private HechoRepository hechoRepo = new HechoRepository();
-  private FuenteRepository fuenteRepo = new FuenteRepository();
+  private final ColeccionRepository repoColeccion = new ColeccionRepository();
+  private final HechoRepository hechoRepo = new HechoRepository();
+  private final FuenteRepository fuenteRepo = new FuenteRepository();
+  private Coleccion coleccionDePrueba;
 
   @BeforeEach
   public void setUp() {
@@ -70,22 +72,15 @@ public class JDBCTest extends PersistenceTests {
     fuente.agregarHecho(hecho1);
     fuente.agregarHecho(hecho2);
     fuente.agregarHecho(hecho3);
-    FuenteRepository repoFuentes = new FuenteRepository();
-    repoFuentes.save(fuente);
+    fuenteRepo.save(fuente);
 
-    var solicitudes = new RepositorioDeSolicitudes();
-    var calculadora = new CentralDeEstadisticas();
-
-    Exportador<Estadistica> exportadorCsv = new ExportadorCSV<>(new ModoSobrescribir());
-    calculadora.setExportador(exportadorCsv);
-
-    var coleccion = new Coleccion(
+    coleccionDePrueba = new Coleccion(
         "Coleccion de Hechos",
         fuente,
         "Descripcion de prueba",
         "General"
     );
-    repoColeccion.save(coleccion);
+    repoColeccion.save(coleccionDePrueba);
   }
 
   @Test
@@ -98,23 +93,17 @@ public class JDBCTest extends PersistenceTests {
         .conTitulo("Robo")
         .conDescripcion("Robo a mano armada")
         .conUbicacion(ubicacion)
-        .conFechaSuceso(LocalDateTime.now()
-                                     .minusDays(5))
+        .conFechaSuceso(LocalDateTime.now().minusDays(5))
         .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .build();
     fuente.agregarHecho(hecho);
-    fuenteRepo.save(fuente); // Usamos el método 'persist' heredado de la librería
+    fuenteRepo.save(fuente);
     var id = fuente.getId();
-    // Verificación (opcional, fuera de la transacción)
-    FuenteDinamica fuenteRecuperada = find(FuenteDinamica.class, id); // Asumiendo que el ID es 1
+
+    FuenteDinamica fuenteRecuperada = find(FuenteDinamica.class, id);
     assertNotNull(fuenteRecuperada);
-    Assertions.assertFalse(fuenteRecuperada.getHechos()
-                                           .isEmpty());
-    Assertions.assertEquals(
-        "Robo", fuenteRecuperada.getHechos()
-                                .get(0)
-                                .getTitulo()
-    );
+    Assertions.assertFalse(fuenteRecuperada.getHechos().isEmpty());
+    Assertions.assertEquals("Robo", fuenteRecuperada.getHechos().get(0).getTitulo());
   }
 
   @Test
@@ -140,13 +129,17 @@ public class JDBCTest extends PersistenceTests {
   public void estadisticaDBTest() {
     CentralDeEstadisticas calculadora = new CentralDeEstadisticas();
     List<Coleccion> coleccionDB = repoColeccion.findAll();
-    //System.out.println(coleccionDB.toString());
     calculadora.setGestor(new GestorDeSolicitudes(new RepositorioDeSolicitudes()));
     var stat = calculadora.categoriaConMasHechos(coleccionDB);
     var repoStat = new EstadisticaRepository();
     repoStat.save(stat);
-    var coleccion = repoColeccion.findById(1L);
-    var stat2 = calculadora.provinciaConMasHechos(coleccion);
-    repoStat.save(stat2);
+
+    Optional<Coleccion> coleccionOpt = repoColeccion.findById(coleccionDePrueba.getId());
+    Assertions.assertTrue(coleccionOpt.isPresent(), "La colección de prueba no fue encontrada en la BD.");
+    coleccionOpt.ifPresent(coleccion -> {
+      var stat2 = calculadora.provinciaConMasHechos(coleccion);
+      repoStat.save(stat2);
+    });
   }
 }
+

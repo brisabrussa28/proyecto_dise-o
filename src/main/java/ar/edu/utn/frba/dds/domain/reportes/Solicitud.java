@@ -89,6 +89,10 @@ public class Solicitud {
     this.estado = EstadoSolicitud.RECHAZADA;
   }
 
+  public long getId() {
+    return this.id;
+  }
+
   void validarMotivo(String motivo) {
     if (motivo.length() < 500) {
       throw new RazonInvalidaException("Tiene menos de 500 caracteres.");

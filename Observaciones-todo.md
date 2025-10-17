@@ -79,10 +79,14 @@
 - [ ] Optimizar el mecanismo de hechos eliminados
 - [ ] Optimizar api, si superas la cantidad de request en cierto tiempo se rompe. corregirlo
 - [ ] Corregir test centralDeEstadisticas
-- 
-- [ ] Corregir algoritmos de consenso y que se relacione con Hecho y Coleccion.
-- [ ] Algoritmo de concenso deberia revisar todas las fuentes del nodo (instancia) osea todas las fuentes del sistema
+
+- [x] Optimizar el mecanismo de hechos eliminados
+- [x] Corregir algoritmos de consenso y que se relacione con Hecho y Coleccion.
+- [X] Algoritmo de concenso deberia revisar todas las fuentes del nodo (instancia) osea todas las fuentes del sistema
     -> necesitamos un repo de fuentes
+
+- [X] Gestionar las CompletableFuture que devuelve el hechobuilder en las fuentes, el lector csv, el lector json.
+- [X] Optimizar api, si superas la cantidad de request en cierto tiempo se rompe. corregirlo
 
 ## Entrega 5
  - [ ] Maquetado y wireframe de las paginas

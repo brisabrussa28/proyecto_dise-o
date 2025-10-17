@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.domain.fuentes;
 
+import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoApi;
 import ar.edu.utn.frba.dds.domain.hecho.Hecho;
 import java.util.List;
 import javax.persistence.DiscriminatorColumn;
@@ -35,6 +36,7 @@ public abstract class Fuente {
     }
     this.fuente_nombre = fuente_nombre;
   }
+
 
   public abstract List<Hecho> getHechos();
 
