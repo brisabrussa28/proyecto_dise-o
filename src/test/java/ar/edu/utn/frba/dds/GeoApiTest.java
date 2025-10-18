@@ -1,11 +1,11 @@
 package ar.edu.utn.frba.dds;
 
-import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoApi;
-import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoGeoref;
-import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoOpenStreetMaps;
-import ar.edu.utn.frba.dds.domain.geolocalizacion.services.GeoRefService;
-import ar.edu.utn.frba.dds.domain.geolocalizacion.services.OpenStreetMapsService;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.geolocalizacion.GeoApi;
+import ar.edu.utn.frba.dds.model.geolocalizacion.GeoGeoref;
+import ar.edu.utn.frba.dds.model.geolocalizacion.GeoOpenStreetMaps;
+import ar.edu.utn.frba.dds.model.geolocalizacion.services.GeoRefService;
+import ar.edu.utn.frba.dds.model.geolocalizacion.services.OpenStreetMapsService;
+import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import okhttp3.OkHttpClient;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

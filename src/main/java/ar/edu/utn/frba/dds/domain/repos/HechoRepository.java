@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds.domain.repos;
 
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.utils.DBUtils;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;

@@ -1,10 +1,10 @@
-package ar.edu.utn.frba.dds.domain.geolocalizacion;
+package ar.edu.utn.frba.dds.model.geolocalizacion;
 
-import ar.edu.utn.frba.dds.domain.geolocalizacion.model.OpenStreetMapsModels.*;
-import ar.edu.utn.frba.dds.domain.geolocalizacion.retrofit.GeoRateLimitInterceptor;
-import ar.edu.utn.frba.dds.domain.geolocalizacion.retrofit.GeoUserAgentInterceptor;
-import ar.edu.utn.frba.dds.domain.geolocalizacion.services.OpenStreetMapsService;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.geolocalizacion.services.OpenStreetMapsService;
+import ar.edu.utn.frba.dds.model.geolocalizacion.retrofit.GeoRateLimitInterceptor;
+import ar.edu.utn.frba.dds.model.geolocalizacion.retrofit.GeoUserAgentInterceptor;
+import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.geolocalizacion.model.OpenStreetMapsModels.*;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 

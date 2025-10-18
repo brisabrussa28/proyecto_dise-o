@@ -1,9 +1,9 @@
-package ar.edu.utn.frba.dds.domain.geolocalizacion;
+package ar.edu.utn.frba.dds.model.geolocalizacion;
 
-import ar.edu.utn.frba.dds.domain.geolocalizacion.model.GeoRefModels.*;
-import ar.edu.utn.frba.dds.domain.geolocalizacion.retrofit.GeoRateLimitInterceptor;
-import ar.edu.utn.frba.dds.domain.geolocalizacion.services.GeoRefService;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.geolocalizacion.services.GeoRefService;
+import ar.edu.utn.frba.dds.model.geolocalizacion.retrofit.GeoRateLimitInterceptor;
+import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.geolocalizacion.model.GeoRefModels.*;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 

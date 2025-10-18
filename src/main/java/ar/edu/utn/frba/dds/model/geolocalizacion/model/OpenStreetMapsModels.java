@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.geolocalizacion.model;
+package ar.edu.utn.frba.dds.model.geolocalizacion.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

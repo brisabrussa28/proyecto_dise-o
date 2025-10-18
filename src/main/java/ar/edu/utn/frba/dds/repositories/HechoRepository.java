@@ -13,8 +13,7 @@ public class HechoRepository implements WithSimplePersistenceUnit {
   }
 
   public void save(Hecho hecho) {
-    DBUtils.completarUbicacionFaltante(hecho);
-    DBUtils.completarProvinciaFaltante(hecho);
+    DBUtils.enriquecerHecho(hecho);
     entityManager().persist(hecho);
   }
 

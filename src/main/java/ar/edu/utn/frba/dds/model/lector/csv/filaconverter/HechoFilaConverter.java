@@ -5,12 +5,6 @@ import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
-
-import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.hecho.Origen;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;

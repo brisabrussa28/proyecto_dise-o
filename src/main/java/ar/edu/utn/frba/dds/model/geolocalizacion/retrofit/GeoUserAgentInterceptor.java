@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.geolocalizacion.retrofit;
+package ar.edu.utn.frba.dds.model.geolocalizacion.retrofit;
 
 import okhttp3.Interceptor;
 import okhttp3.Request;

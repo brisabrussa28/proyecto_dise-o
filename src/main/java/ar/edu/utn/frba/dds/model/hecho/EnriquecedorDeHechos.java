@@ -1,6 +1,6 @@
-package ar.edu.utn.frba.dds.domain.hecho;
+package ar.edu.utn.frba.dds.model.hecho;
 
-import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoApi;
+import ar.edu.utn.frba.dds.model.geolocalizacion.GeoApi;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

@@ -1,14 +1,11 @@
 package ar.edu.utn.frba.dds.utils;
 
-import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoApi;
-import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoGeoref;
-import ar.edu.utn.frba.dds.domain.hecho.EnriquecedorDeHechos;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.geolocalizacion.GeoApi;
+import ar.edu.utn.frba.dds.model.geolocalizacion.GeoGeoref;
+import ar.edu.utn.frba.dds.model.hecho.EnriquecedorDeHechos;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import java.util.Collections;
 import java.util.List;
-import ar.edu.utn.frba.dds.model.geolocalizacion.ServicioGeoref;
-import ar.edu.utn.frba.dds.model.hecho.Hecho;
-import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import java.util.TimeZone;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;

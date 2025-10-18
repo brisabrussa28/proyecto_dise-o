@@ -1,7 +1,7 @@
-package ar.edu.utn.frba.dds.domain.geolocalizacion.services;
+package ar.edu.utn.frba.dds.model.geolocalizacion.services;
 
-import ar.edu.utn.frba.dds.domain.geolocalizacion.model.GeoRefModels.GeoRefProvinciaResponse;
-import ar.edu.utn.frba.dds.domain.geolocalizacion.model.GeoRefModels.GeoRefUbicacionResponse;
+import ar.edu.utn.frba.dds.model.geolocalizacion.model.GeoRefModels.GeoRefProvinciaResponse;
+import ar.edu.utn.frba.dds.model.geolocalizacion.model.GeoRefModels.GeoRefUbicacionResponse;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 import java.util.concurrent.CompletableFuture;

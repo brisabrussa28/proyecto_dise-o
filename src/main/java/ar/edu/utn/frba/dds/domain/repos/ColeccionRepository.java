@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds.domain.repos;
 
-import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.utils.DBUtils;
+import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;

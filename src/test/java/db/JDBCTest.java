@@ -158,7 +158,7 @@ public class JDBCTest implements SimplePersistenceTest {
     var repoStat = EstadisticaRepository.instance();
     repoStat.save(stat);
 
-    Optional<Coleccion> coleccionOpt = repoColeccion.findById(coleccionDePrueba.getId());
+    Optional<Coleccion> coleccionOpt = Optional.ofNullable(repoColeccion.findById(coleccionDePrueba.getId()));
     Assertions.assertTrue(coleccionOpt.isPresent(), "La colección de prueba no fue encontrada en la BD.");
     coleccionOpt.ifPresent(coleccion -> {
       var stat2 = calculadora.provinciaConMasHechos(coleccion);

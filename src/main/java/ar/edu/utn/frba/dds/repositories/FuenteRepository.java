@@ -15,8 +15,7 @@ public class FuenteRepository implements WithSimplePersistenceUnit {
   public void save(Fuente fuente) {
     fuente.getHechos()
           .forEach(hecho -> {
-            DBUtils.completarUbicacionFaltante(hecho);
-            DBUtils.completarProvinciaFaltante(hecho);
+            DBUtils.enriquecerHecho(hecho);
           });
     entityManager().persist(fuente);
   }

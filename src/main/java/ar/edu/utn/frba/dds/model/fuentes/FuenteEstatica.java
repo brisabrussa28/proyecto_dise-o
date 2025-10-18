@@ -1,9 +1,9 @@
 package ar.edu.utn.frba.dds.model.fuentes;
 
-import ar.edu.utn.frba.dds.domain.hecho.EnriquecedorDeHechos;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.lector.Lector;
-import ar.edu.utn.frba.dds.domain.lector.configuracion.ConfiguracionLector;
+import ar.edu.utn.frba.dds.model.hecho.EnriquecedorDeHechos;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.lector.Lector;
+import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLector;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.lector.Lector;
 import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLector;

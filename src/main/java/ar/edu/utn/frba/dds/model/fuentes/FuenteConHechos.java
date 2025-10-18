@@ -1,8 +1,8 @@
-package ar.edu.utn.frba.dds.domain.fuentes;
+package ar.edu.utn.frba.dds.model.fuentes;
 
-import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoApi;
-import ar.edu.utn.frba.dds.domain.hecho.EnriquecedorDeHechos;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.geolocalizacion.GeoApi;
+import ar.edu.utn.frba.dds.model.hecho.EnriquecedorDeHechos;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

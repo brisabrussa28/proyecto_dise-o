@@ -1,6 +1,6 @@
-package ar.edu.utn.frba.dds.domain.geolocalizacion;
+package ar.edu.utn.frba.dds.model.geolocalizacion;
 
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.OkHttpClient;

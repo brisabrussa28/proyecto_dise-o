@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds.domain.repos;
 
-import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
-import ar.edu.utn.frba.dds.domain.utils.DBUtils;
+import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
+import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityManager;

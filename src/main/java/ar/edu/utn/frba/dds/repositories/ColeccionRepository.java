@@ -15,8 +15,7 @@ public class ColeccionRepository implements WithSimplePersistenceUnit {
   public void save(Coleccion coleccion) {
     coleccion.getHechosConsensuados()
              .forEach(hecho -> {
-               DBUtils.completarProvinciaFaltante(hecho);
-               DBUtils.completarUbicacionFaltante(hecho);
+               DBUtils.enriquecerHecho(hecho);
              });
     entityManager().persist(coleccion);
   }

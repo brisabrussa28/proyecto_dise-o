@@ -1,7 +1,7 @@
-package ar.edu.utn.frba.dds.domain.geolocalizacion.services;
+package ar.edu.utn.frba.dds.model.geolocalizacion.services;
 
-import ar.edu.utn.frba.dds.domain.geolocalizacion.model.OpenStreetMapsModels.OpenStreetMapsReverseResponse;
-import ar.edu.utn.frba.dds.domain.geolocalizacion.model.OpenStreetMapsModels.OpenStreetMapsSearchResponse;
+import ar.edu.utn.frba.dds.model.geolocalizacion.model.OpenStreetMapsModels.OpenStreetMapsReverseResponse;
+import ar.edu.utn.frba.dds.model.geolocalizacion.model.OpenStreetMapsModels.OpenStreetMapsSearchResponse;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 import java.util.List;
