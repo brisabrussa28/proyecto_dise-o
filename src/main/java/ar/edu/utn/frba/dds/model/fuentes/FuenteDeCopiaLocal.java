@@ -13,7 +13,7 @@ import java.util.List;
 //Esta deberia estar persistida.
 
 //@Entity
-public abstract class FuenteDeCopiaLocal extends Fuente {
+public abstract class FuenteDeCopiaLocal extends FuenteConHechos {
 
   //@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<Hecho> copiaLocalDeHechos = new ArrayList<>();

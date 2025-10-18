@@ -26,6 +26,7 @@ import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import io.github.flbulgarelli.jpa.extras.test.SimplePersistenceTest;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +41,7 @@ public class JDBCTest implements SimplePersistenceTest {
   private HechoRepository hechoRepo = HechoRepository.instance();
   private FuenteRepository fuenteRepo = FuenteRepository.instance();
   private AlgoritmoRepository algoritmoRepository = AlgoritmoRepository.instance();
+  private Coleccion coleccionDePrueba;
 
   @BeforeEach
   public void setUp() {
@@ -106,12 +108,11 @@ public class JDBCTest implements SimplePersistenceTest {
         .conTitulo("Robo")
         .conDescripcion("Robo a mano armada")
         .conUbicacion(ubicacion)
-        .conFechaSuceso(LocalDateTime.now()
-                                     .minusDays(5))
+        .conFechaSuceso(LocalDateTime.now().minusDays(5))
         .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .build();
     fuente.agregarHecho(hecho);
-    fuenteRepo.save(fuente);
+    fuenteRepo.save(fuente); // Usamos el método 'persist' heredado de la librería
     var id = fuente.getId();
     // Verificación (opcional, fuera de la transacción)
     FuenteDinamica fuenteRecuperada = find(FuenteDinamica.class, id);
@@ -156,8 +157,12 @@ public class JDBCTest implements SimplePersistenceTest {
     var stat = calculadora.categoriaConMasHechos(coleccionDB);
     var repoStat = EstadisticaRepository.instance();
     repoStat.save(stat);
-    var coleccion = repoColeccion.findById(1L);
-    var stat2 = calculadora.provinciaConMasHechos(coleccion);
-    repoStat.save(stat2);
+
+    Optional<Coleccion> coleccionOpt = repoColeccion.findById(coleccionDePrueba.getId());
+    Assertions.assertTrue(coleccionOpt.isPresent(), "La colección de prueba no fue encontrada en la BD.");
+    coleccionOpt.ifPresent(coleccion -> {
+      var stat2 = calculadora.provinciaConMasHechos(coleccion);
+      repoStat.save(stat2);
+    });
   }
 }

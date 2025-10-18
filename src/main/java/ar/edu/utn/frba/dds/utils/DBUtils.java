@@ -1,5 +1,11 @@
 package ar.edu.utn.frba.dds.utils;
 
+import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoApi;
+import ar.edu.utn.frba.dds.domain.geolocalizacion.GeoGeoref;
+import ar.edu.utn.frba.dds.domain.hecho.EnriquecedorDeHechos;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import java.util.Collections;
+import java.util.List;
 import ar.edu.utn.frba.dds.model.geolocalizacion.ServicioGeoref;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
@@ -54,41 +60,44 @@ public class DBUtils {
   }
 
   /**
-   * Si la provincia no está definida pero sí la ubicación, intenta obtener la provincia
-   * consultando el servicio de geolocalización.
+   * Enriquece un único hecho con datos geográficos faltantes (provincia o ubicación)
+   * utilizando el EnriquecedorDeHechos.
+   * La operación es síncrona y modifica el objeto Hecho proporcionado.
    *
-   * @return El propio builder para encadenar llamadas.
+   * @param hecho El Hecho a enriquecer.
    */
-  public static void completarProvinciaFaltante(Hecho hecho) {
-    if ((hecho.getProvincia() == null || hecho.getProvincia()
-                                              .isBlank()) && hecho.getUbicacion() != null) {
-      ServicioGeoref servicio = new ServicioGeoref();
-      String provinciaObtenida = servicio.obtenerProvincia(
-          hecho.getUbicacion()
-               .getLatitud(),
-          hecho.getUbicacion()
-               .getLongitud()
-      );
-      if (provinciaObtenida != null && !provinciaObtenida.isBlank()) {
-        hecho.setProvincia(provinciaObtenida); // CORRECCIÓN: Asignar la provincia encontrada
-      }
+  public static void enriquecerHecho(Hecho hecho) {
+    if (hecho == null) {
+      return;
     }
-  }
+    // Determina si el hecho necesita ser enriquecido para evitar llamadas innecesarias a la API.
+    boolean necesitaProvincia = (hecho.getProvincia() == null || hecho.getProvincia().isBlank()) && hecho.getUbicacion() != null;
+    boolean necesitaUbicacion = hecho.getUbicacion() == null && (hecho.getProvincia() != null && !hecho.getProvincia().isBlank());
 
-  /**
-   * Si la ubicación no está definida pero sí la provincia, intenta obtener la ubicación
-   * consultando el servicio de geolocalización.
-   *
-   * @return El propio builder para encadenar llamadas.
-   */
-  public static void completarUbicacionFaltante(Hecho hecho) {
-    if (hecho.getUbicacion() == null && hecho.getProvincia() != null && !hecho.getProvincia()
-                                                                              .isBlank()) {
-      ServicioGeoref servicio = new ServicioGeoref();
-      PuntoGeografico ubicacionObtenida = servicio.obtenerUbicacion(hecho.getProvincia());
-      if (ubicacionObtenida != null) {
-        hecho.setUbicacion(ubicacionObtenida);
+    if (!necesitaProvincia && !necesitaUbicacion) {
+      return; // No hay nada que hacer.
+    }
+
+    try {
+      GeoApi servicioGeo = new GeoGeoref();
+      EnriquecedorDeHechos enriquecedor = new EnriquecedorDeHechos(servicioGeo);
+
+      // El enriquecedor trabaja con listas, así que envolvemos el hecho en una.
+      List<Hecho> listaOriginal = Collections.singletonList(hecho);
+
+      // El método `completar` devuelve una nueva lista con los hechos enriquecidos.
+      List<Hecho> listaEnriquecida = enriquecedor.completar(listaOriginal);
+
+      // Si el enriquecimiento fue exitoso, copiamos los datos al objeto original.
+      if (listaEnriquecida != null && !listaEnriquecida.isEmpty()) {
+        Hecho hechoEnriquecido = listaEnriquecida.get(0);
+        hecho.setProvincia(hechoEnriquecido.getProvincia());
+        hecho.setUbicacion(hechoEnriquecido.getUbicacion());
       }
+    } catch (Exception e) {
+      // Manejo de errores si la llamada a la API o el enriquecimiento fallan
+      System.err.println("Error al enriquecer el hecho ID " + hecho.getId() + ": " + e.getMessage());
     }
   }
 }
+

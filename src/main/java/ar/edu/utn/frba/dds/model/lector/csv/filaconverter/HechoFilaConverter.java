@@ -6,6 +6,11 @@ import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 
+import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
+import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.domain.hecho.Origen;
+import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -14,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -27,7 +33,6 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
 
   private static final Logger logger = Logger.getLogger(HechoFilaConverter.class.getName());
 
-  // Define los campos que son obligatorios en el CSV para que una fila sea válida.
   private static final Set<String> CAMPOS_REQUERIDOS = Set.of(
       CampoHecho.TITULO.name(),
       CampoHecho.FECHA_SUCESO.name()
@@ -53,10 +58,10 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
   }
 
   /**
-   * Convierte una fila de CSV, representada como un mapa, en un objeto Hecho.
+   * Convierte una fila de CSV en un objeto Hecho.
    *
    * @param fila Un mapa donde la clave es el nombre de la columna y el valor es el dato de la celda.
-   * @return Un objeto Hecho, o null si la fila no es válida.
+   * @return Un Hecho, o null si la fila no es válida.
    */
   @Override
   public Hecho convert(Map<String, String> fila) {
@@ -67,7 +72,7 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
 
     HechoBuilder builder = new HechoBuilder();
 
-    // Para campos que se espera que sean únicos (título, categoría), se busca el primer valor no vacío.
+    // Configuración del builder a partir de la fila
     obtenerPrimerValor(fila, CampoHecho.TITULO.name()).ifPresent(builder::conTitulo);
     obtenerPrimerValor(fila, CampoHecho.CATEGORIA.name()).ifPresent(builder::conCategoria);
     obtenerPrimerValor(fila, CampoHecho.PROVINCIA.name()).ifPresent(builder::conProvincia);
@@ -93,6 +98,7 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
     builder.conFuenteOrigen(Origen.DATASET);
     builder.conFechaCarga(LocalDateTime.now());
 
+    // Se llama a build(), que ahora devuelve el Hecho directamente.
     return builder.build();
   }
 
@@ -103,8 +109,7 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
    * @return true si la fila es válida, false en caso contrario.
    */
   private boolean validadorDeFila(Map<String, String> fila) {
-    return CAMPOS_REQUERIDOS.stream()
-        .allMatch(campo -> obtenerPrimerValor(fila, campo).isPresent());
+    return CAMPOS_REQUERIDOS.stream().allMatch(campo -> obtenerPrimerValor(fila, campo).isPresent());
   }
 
   /**
@@ -116,13 +121,8 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
    */
   private List<String> obtenerTodosLosValores(Map<String, String> fila, String campo) {
     List<String> posiblesColumnas = mapeoColumnas.get(campo);
-    if (posiblesColumnas == null) {
-      return Collections.emptyList();
-    }
-    return posiblesColumnas.stream()
-        .map(fila::get)
-        .filter(s -> s != null && !s.isBlank())
-        .collect(Collectors.toList());
+    if (posiblesColumnas == null) return Collections.emptyList();
+    return posiblesColumnas.stream().map(fila::get).filter(s -> s != null && !s.isBlank()).collect(Collectors.toList());
   }
 
   /**
@@ -133,9 +133,7 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
    * @return El string resultante o null.
    */
   private String unirValores(List<String> valores, String separador) {
-    if (valores == null || valores.isEmpty()) {
-      return null;
-    }
+    if (valores == null || valores.isEmpty()) return null;
     return String.join(separador, valores);
   }
 
@@ -148,26 +146,19 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
    */
   private java.util.Optional<String> obtenerPrimerValor(Map<String, String> fila, String campo) {
     List<String> posiblesColumnas = mapeoColumnas.get(campo);
-    if (posiblesColumnas == null) {
-      return java.util.Optional.empty();
-    }
-    return posiblesColumnas.stream()
-        .map(fila::get)
-        .filter(s -> s != null && !s.isBlank())
-        .findFirst();
+    if (posiblesColumnas == null) return java.util.Optional.empty();
+    return posiblesColumnas.stream().map(fila::get).filter(s -> s != null && !s.isBlank()).findFirst();
   }
 
   /**
    * Convierte un String a Double, manejando comas y errores de formato.
    */
   private Double parseDouble(String valor) {
-    if (valor == null || valor.isBlank()) {
-      return null;
-    }
+    if (valor == null || valor.isBlank()) return null;
     try {
       return Double.parseDouble(valor.trim().replace(',', '.'));
     } catch (NumberFormatException e) {
-      logger.warning("Error al parsear double: '" + valor + "' no es un número válido.");
+      logger.warning("Error al parsear double: '" + valor + "'");
       return null;
     }
   }
@@ -176,9 +167,7 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
    * Convierte un String a LocalDateTime usando el formato definido en el constructor.
    */
   private LocalDateTime parseFecha(String valor) {
-    if (valor == null || valor.isBlank()) {
-      return null;
-    }
+    if (valor == null || valor.isBlank()) return null;
     try {
       return dateFormat.parse(valor).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     } catch (ParseException e) {

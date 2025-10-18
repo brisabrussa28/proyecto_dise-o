@@ -13,7 +13,7 @@ import javax.persistence.OneToMany;
 
 @Entity
 @DiscriminatorValue("DINAMICA")
-public class FuenteDinamica extends Fuente {
+public class FuenteDinamica extends FuenteConHechos {
 
   // Relación persistente: solo esta clase guarda Hechos en la BD.
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

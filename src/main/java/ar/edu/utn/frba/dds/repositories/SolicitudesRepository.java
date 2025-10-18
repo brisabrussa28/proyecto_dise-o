@@ -6,6 +6,7 @@ import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import java.util.List;
 import java.util.Optional;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 
 /**
