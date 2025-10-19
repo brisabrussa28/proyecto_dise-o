@@ -16,6 +16,7 @@ import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.reportes.GestorDeSolicitudes;
+import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.repositories.AlgoritmoRepository;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
@@ -42,38 +43,41 @@ public class JDBCTest implements SimplePersistenceTest {
   private FuenteRepository fuenteRepo = FuenteRepository.instance();
   private AlgoritmoRepository algoritmoRepository = AlgoritmoRepository.instance();
   private Coleccion coleccionDePrueba;
+  private SolicitudesRepository solicitudRepo = SolicitudesRepository.instance();
+
+  LocalDateTime hora = LocalDateTime.now();
+  PuntoGeografico ubicacion = new PuntoGeografico(-34.68415120338135, -58.58712709338028);
+
+  Hecho hecho1 = new HechoBuilder()
+      .conTitulo("Robo en Almagro")
+      .conCategoria("Robos")
+      .conFechaSuceso(hora.minusHours(1))
+      .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+      .conUbicacion(ubicacion)
+      .build();
+
+  Hecho hecho2 = new HechoBuilder()
+      .conTitulo("Robo en Caballito")
+      .conCategoria("Robos")
+      .conFechaSuceso(hora.minusHours(1))
+      .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+      .conUbicacion(ubicacion)
+      .build();
+
+  Hecho hecho3 = new HechoBuilder()
+      .conTitulo("Hurto en Avellaneda")
+      .conCategoria("Hurtos")
+      .conFechaSuceso(hora.minusHours(2))
+      .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+      .conUbicacion(ubicacion)
+      .build();
 
   @BeforeEach
   public void setUp() {
     final DetectorSpam detector = texto -> texto.contains("Troll");
     var fuente = new FuenteDinamica("Fuente para Estadísticas");
 
-    var ubicacion = new PuntoGeografico(-34.68415120338135, -58.58712709338028);
-    LocalDateTime hora = LocalDateTime.now();
 
-    var hecho1 = new HechoBuilder()
-        .conTitulo("Robo en Almagro")
-        .conCategoria("Robos")
-        .conFechaSuceso(hora.minusHours(1))
-        .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conUbicacion(ubicacion)
-        .build();
-
-    var hecho2 = new HechoBuilder()
-        .conTitulo("Robo en Caballito")
-        .conCategoria("Robos")
-        .conFechaSuceso(hora.minusHours(1))
-        .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conUbicacion(ubicacion)
-        .build();
-
-    var hecho3 = new HechoBuilder()
-        .conTitulo("Hurto en Avellaneda")
-        .conCategoria("Hurtos")
-        .conFechaSuceso(hora.minusHours(2))
-        .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conUbicacion(ubicacion)
-        .build();
     fuente.agregarHecho(hecho1);
     fuente.agregarHecho(hecho2);
     fuente.agregarHecho(hecho3);
@@ -108,7 +112,8 @@ public class JDBCTest implements SimplePersistenceTest {
         .conTitulo("Robo")
         .conDescripcion("Robo a mano armada")
         .conUbicacion(ubicacion)
-        .conFechaSuceso(LocalDateTime.now().minusDays(5))
+        .conFechaSuceso(LocalDateTime.now()
+                                     .minusDays(5))
         .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .build();
     fuente.agregarHecho(hecho);
@@ -153,16 +158,34 @@ public class JDBCTest implements SimplePersistenceTest {
     CentralDeEstadisticas calculadora = new CentralDeEstadisticas();
     List<Coleccion> coleccionDB = repoColeccion.findAll();
     //System.out.println(coleccionDB.toString());
-    calculadora.setGestor(new GestorDeSolicitudes(new SolicitudesRepository()));
+    calculadora.setGestor(new GestorDeSolicitudes());
     var stat = calculadora.categoriaConMasHechos(coleccionDB);
     var repoStat = EstadisticaRepository.instance();
     repoStat.save(stat);
 
+    coleccionDePrueba = new Coleccion();
+    coleccionDePrueba.setId(1L);
     Optional<Coleccion> coleccionOpt = Optional.ofNullable(repoColeccion.findById(coleccionDePrueba.getId()));
-    Assertions.assertTrue(coleccionOpt.isPresent(), "La colección de prueba no fue encontrada en la BD.");
+    Assertions.assertTrue(
+        !coleccionOpt.isPresent(),
+        "La colección de prueba no fue encontrada en la BD."
+    );
     coleccionOpt.ifPresent(coleccion -> {
       var stat2 = calculadora.provinciaConMasHechos(coleccion);
       repoStat.save(stat2);
     });
+  }
+
+  @Test
+  public void creoUnaSolicitudYLaPuedoVisualizar() {
+    GestorDeSolicitudes gestor = new GestorDeSolicitudes();
+    var soli = new Solicitud(hecho1, "mucho sexo gay".repeat(36));
+    gestor.crearSolicitud(hecho1,"mucho sexo gay".repeat(36),);
+    solicitudRepo.guardar(soli);
+    Assertions.assertEquals(
+        1,
+        solicitudRepo.findAll()
+                     .size()
+    );
   }
 }

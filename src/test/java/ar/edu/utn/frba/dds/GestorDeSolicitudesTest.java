@@ -39,7 +39,7 @@ public class GestorDeSolicitudesTest {
   public void setUp() {
     repositorio = new SolicitudesRepository();
     repoHechos = new HechoRepository();
-    gestor = new GestorDeSolicitudes(repositorio);
+    gestor = new GestorDeSolicitudes();
     detectorSpam = mock(DetectorSpam.class);
     when(detectorSpam.esSpam(anyString())).thenReturn(false);
     hecho = crearHechoCompleto("Hecho de prueba principal");

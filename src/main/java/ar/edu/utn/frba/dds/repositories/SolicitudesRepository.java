@@ -6,7 +6,6 @@ import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 
 /**
@@ -41,7 +40,7 @@ public class SolicitudesRepository implements WithSimplePersistenceUnit {
    * @param id El ID de la solicitud.
    * @return Un Optional con la solicitud si se encuentra, o vacío si no.
    */
-  public Optional<Solicitud> buscarPorId(Long id) {
+  public Optional<Solicitud> findById(Long id) {
     return Optional.ofNullable(entityManager().find(Solicitud.class, id));
   }
 
@@ -72,7 +71,7 @@ public class SolicitudesRepository implements WithSimplePersistenceUnit {
    *
    * @return Una lista con todas las solicitudes.
    */
-  public List<Solicitud> obtenerTodas() {
+  public List<Solicitud> findAll() {
     return entityManager().createQuery("SELECT s FROM Solicitud s", Solicitud.class)
                           .getResultList();
   }

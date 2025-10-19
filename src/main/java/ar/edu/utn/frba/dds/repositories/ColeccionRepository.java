@@ -21,7 +21,7 @@ public class ColeccionRepository implements WithSimplePersistenceUnit {
   }
 
   public List<Coleccion> findAll() {
-    return entityManager().createQuery("select * from Coleccion", Coleccion.class)
+    return entityManager().createQuery("select c from Coleccion c", Coleccion.class)
                           .getResultList();
 
   }
