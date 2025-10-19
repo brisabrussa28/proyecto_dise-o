@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.dds.repositories;
 
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
-import ar.edu.utn.frba.dds.utils.DBUtils;
+// Eliminamos DBUtils, ya no se usa aquí
 import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import java.util.List;
 
@@ -13,14 +13,16 @@ public class HechoRepository implements WithSimplePersistenceUnit {
   }
 
   public void save(Hecho hecho) {
-    DBUtils.enriquecerHecho(hecho);
-    entityManager().persist(hecho);
+    if (hecho.getId() == null) {
+      entityManager().persist(hecho);
+    } else {
+      entityManager().merge(hecho);
+    }
   }
 
   public List<Hecho> findAll() {
-    return entityManager().createQuery("SELECT * FROM Hecho", Hecho.class)
+    return entityManager().createQuery("SELECT h FROM Hecho h", Hecho.class)
                           .getResultList();
-
   }
 
   public Hecho getById(Long id) {

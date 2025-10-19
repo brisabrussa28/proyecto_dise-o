@@ -1,6 +1,9 @@
 package db;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.Absoluta;
@@ -43,6 +46,7 @@ public class JDBCTest implements SimplePersistenceTest {
   private FuenteRepository fuenteRepo = FuenteRepository.instance();
   private AlgoritmoRepository algoritmoRepository = AlgoritmoRepository.instance();
   private Coleccion coleccionDePrueba;
+  private DetectorSpam detectorSpam;
   private SolicitudesRepository solicitudRepo = SolicitudesRepository.instance();
 
   LocalDateTime hora = LocalDateTime.now();
@@ -74,8 +78,10 @@ public class JDBCTest implements SimplePersistenceTest {
 
   @BeforeEach
   public void setUp() {
-    final DetectorSpam detector = texto -> texto.contains("Troll");
     var fuente = new FuenteDinamica("Fuente para Estadísticas");
+
+    detectorSpam = mock(DetectorSpam.class);
+    when(detectorSpam.esSpam(anyString())).thenReturn(false);
 
 
     fuente.agregarHecho(hecho1);
@@ -180,7 +186,7 @@ public class JDBCTest implements SimplePersistenceTest {
   public void creoUnaSolicitudYLaPuedoVisualizar() {
     GestorDeSolicitudes gestor = new GestorDeSolicitudes();
     var soli = new Solicitud(hecho1, "mucho sexo gay".repeat(36));
-    gestor.crearSolicitud(hecho1,"mucho sexo gay".repeat(36),);
+    gestor.crearSolicitud(hecho1,"mucho sexo gay".repeat(36), detectorSpam);
     solicitudRepo.guardar(soli);
     Assertions.assertEquals(
         1,

@@ -17,16 +17,19 @@ import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
-import ar.edu.utn.frba.dds.utils.DBUtils;
+// Importamos la librería de tests de JPA
+import io.github.flbulgarelli.jpa.extras.test.SimplePersistenceTest;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.persistence.EntityManager;
-import org.junit.jupiter.api.AfterEach;
+// Ya no se necesitan TimeZone, EntityManager ni DBUtils
+import java.util.TimeZone;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class GestorDeSolicitudesTest {
+// 1. Implementamos la interfaz
+public class GestorDeSolicitudesTest implements SimplePersistenceTest {
 
   private Hecho hecho;
   private GestorDeSolicitudes gestor;
@@ -35,29 +38,27 @@ public class GestorDeSolicitudesTest {
   private DetectorSpam detectorSpam;
   private final String motivoLargo = "Este es un motivo válido con más de 500 caracteres ".repeat(20);
 
+  @BeforeAll
+  public static void setGlobalTimeZone() {
+    TimeZone.setDefault(TimeZone.getTimeZone("America/Argentina/Buenos_Aires"));
+  }
+
   @BeforeEach
   public void setUp() {
+    // 2. Ya no necesitamos setear la TimeZone aquí (va en VM Options)
     repositorio = new SolicitudesRepository();
     repoHechos = new HechoRepository();
     gestor = new GestorDeSolicitudes();
     detectorSpam = mock(DetectorSpam.class);
     when(detectorSpam.esSpam(anyString())).thenReturn(false);
+
+    // SimplePersistenceTest envuelve esto en una transacción
     hecho = crearHechoCompleto("Hecho de prueba principal");
     repoHechos.save(hecho);
   }
 
-  /**
-   * FIX: Se agrega un método de limpieza que se ejecuta después de cada test.
-   * Esto asegura que cada prueba se ejecute en un estado aislado,
-   * borrando los datos de la tabla de solicitudes para no interferir con el siguiente test.
-   */
-  @AfterEach
-  public void tearDown() {
-    EntityManager em = DBUtils.getEntityManager();
-    DBUtils.comenzarTransaccion(em);
-    em.createQuery("DELETE FROM Solicitud").executeUpdate();
-    DBUtils.commit(em);
-  }
+  // 3. ELIMINAMOS por completo el método @AfterEach
+  //    SimplePersistenceTest hace ROLLBACK automáticamente.
 
   private Hecho crearHechoCompleto(String titulo) {
     return new HechoBuilder()
@@ -95,7 +96,9 @@ public class GestorDeSolicitudesTest {
   public void hechoAceptadoApareceEnListaDeEliminados() {
     gestor.crearSolicitud(hecho, motivoLargo, detectorSpam);
 
-    // FIX: Se busca la solicitud específica que se acaba de crear en lugar de tomar la primera de la lista.
+    // 4. AÑADIMOS FLUSH: Forzamos el INSERT antes del SELECT
+    entityManager().flush();
+
     Solicitud solicitudPendiente = repositorio.buscarPorHechoYRazon(hecho, motivoLargo).orElseThrow();
     gestor.gestionarSolicitud(solicitudPendiente, AceptarSolicitud.ACEPTAR);
 
@@ -109,7 +112,9 @@ public class GestorDeSolicitudesTest {
   public void rechazarSolicitudNoEliminaHecho() {
     gestor.crearSolicitud(hecho, motivoLargo, detectorSpam);
 
-    // FIX: Se busca la solicitud específica.
+    // 4. AÑADIMOS FLUSH: Forzamos el INSERT antes del SELECT
+    entityManager().flush();
+
     Solicitud solicitudPendiente = repositorio.buscarPorHechoYRazon(hecho, motivoLargo).orElseThrow();
     gestor.gestionarSolicitud(solicitudPendiente, AceptarSolicitud.RECHAZAR);
 
@@ -125,8 +130,12 @@ public class GestorDeSolicitudesTest {
     List<Hecho> hechosOriginales = List.of(hecho1, hecho2);
     repoHechos.save(hecho1);
     repoHechos.save(hecho2);
+
     gestor.crearSolicitud(hecho1, motivoLargo, detectorSpam);
-    // FIX: Se busca la solicitud específica.
+
+    // 4. AÑADIMOS FLUSH: Forzamos el INSERT antes del SELECT
+    entityManager().flush();
+
     Solicitud solicitudParaAceptar = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo).orElseThrow();
     gestor.gestionarSolicitud(solicitudParaAceptar, AceptarSolicitud.ACEPTAR);
 
@@ -148,6 +157,8 @@ public class GestorDeSolicitudesTest {
 
     gestor.crearSolicitud(hecho1, motivoLargo, detectorSpam);
 
+    // (Aquí no hay 'buscarPorHechoYRazon', no se necesita flush)
+
     List<Hecho> filtrados = gestor.filtroExcluyenteDeHechosEliminados().filtrar(hechosOriginales);
     assertEquals(2, filtrados.size());
   }
@@ -164,12 +175,15 @@ public class GestorDeSolicitudesTest {
 
     List<Hecho> hechosOriginales = List.of(hecho1, hecho2, hecho3);
 
-    // FIX: Se gestiona cada solicitud de forma determinista.
     gestor.crearSolicitud(hecho1, motivoLargo, detectorSpam);
+    // 4. AÑADIMOS FLUSH
+    entityManager().flush();
     Solicitud solicitud1 = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo).orElseThrow();
     gestor.gestionarSolicitud(solicitud1, AceptarSolicitud.ACEPTAR);
 
     gestor.crearSolicitud(hecho3, motivoLargo, detectorSpam);
+    // 4. AÑADIMOS FLUSH
+    entityManager().flush();
     Solicitud solicitud3 = repositorio.buscarPorHechoYRazon(hecho3, motivoLargo).orElseThrow();
     gestor.gestionarSolicitud(solicitud3, AceptarSolicitud.ACEPTAR);
 
@@ -180,4 +194,3 @@ public class GestorDeSolicitudesTest {
     assertFalse(filtrados.contains(hecho3));
   }
 }
-
