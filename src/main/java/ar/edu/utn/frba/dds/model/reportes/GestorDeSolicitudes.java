@@ -15,9 +15,13 @@ import java.util.stream.Collectors;
  */
 public class GestorDeSolicitudes {
 
-  private final SolicitudesRepository repositorio = SolicitudesRepository.instance();
+  private SolicitudesRepository repositorio;
 
   public GestorDeSolicitudes() {
+  }
+
+  public GestorDeSolicitudes(SolicitudesRepository repositorio) {
+    this.repositorio = repositorio;
   }
 
   /**

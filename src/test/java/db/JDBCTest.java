@@ -19,7 +19,6 @@ import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.reportes.GestorDeSolicitudes;
-import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.repositories.AlgoritmoRepository;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
@@ -41,13 +40,13 @@ import org.junit.jupiter.api.Test;
  * Hereda de PersistenceTests para obtener el manejo de transacciones y la configuración de la BD.
  */
 public class JDBCTest implements SimplePersistenceTest {
-  private ColeccionRepository repoColeccion = ColeccionRepository.instance();
-  private HechoRepository hechoRepo = HechoRepository.instance();
-  private FuenteRepository fuenteRepo = FuenteRepository.instance();
-  private AlgoritmoRepository algoritmoRepository = AlgoritmoRepository.instance();
+  private ColeccionRepository repoColeccion = new ColeccionRepository();
+  private HechoRepository hechoRepo = new HechoRepository();
+  private FuenteRepository fuenteRepo = new FuenteRepository();
+  private AlgoritmoRepository algoritmoRepository = new AlgoritmoRepository();
   private Coleccion coleccionDePrueba;
   private DetectorSpam detectorSpam;
-  private SolicitudesRepository solicitudRepo = SolicitudesRepository.instance();
+  private SolicitudesRepository solicitudRepo = new SolicitudesRepository();
 
   LocalDateTime hora = LocalDateTime.now();
   PuntoGeografico ubicacion = new PuntoGeografico(-34.68415120338135, -58.58712709338028);
@@ -126,7 +125,7 @@ public class JDBCTest implements SimplePersistenceTest {
     fuenteRepo.save(fuente); // Usamos el método 'persist' heredado de la librería
     var id = fuente.getId();
     // Verificación (opcional, fuera de la transacción)
-    FuenteDinamica fuenteRecuperada = find(FuenteDinamica.class, id);
+    var fuenteRecuperada = fuenteRepo.findById(id);
     assertNotNull(fuenteRecuperada);
     Assertions.assertFalse(fuenteRecuperada.getHechos()
                                            .isEmpty());
@@ -153,7 +152,7 @@ public class JDBCTest implements SimplePersistenceTest {
     algoritmoRepository.save(multiplesMenciones);
     repoColeccion.save(coleccionBonaerense);
     var id = coleccionBonaerense.getId();
-    Coleccion coleccionRecuperada = find(Coleccion.class, id);
+    var coleccionRecuperada = repoColeccion.findById(id);
     assertNotNull(coleccionRecuperada);
     Assertions.assertEquals("Robos en BA", coleccionRecuperada.getTitulo());
   }
@@ -166,14 +165,14 @@ public class JDBCTest implements SimplePersistenceTest {
     //System.out.println(coleccionDB.toString());
     calculadora.setGestor(new GestorDeSolicitudes());
     var stat = calculadora.categoriaConMasHechos(coleccionDB);
-    var repoStat = EstadisticaRepository.instance();
+    var repoStat = new EstadisticaRepository();
     repoStat.save(stat);
 
     coleccionDePrueba = new Coleccion();
     coleccionDePrueba.setId(1L);
     Optional<Coleccion> coleccionOpt = Optional.ofNullable(repoColeccion.findById(coleccionDePrueba.getId()));
     Assertions.assertTrue(
-        !coleccionOpt.isPresent(),
+        coleccionOpt.isPresent(),
         "La colección de prueba no fue encontrada en la BD."
     );
     coleccionOpt.ifPresent(coleccion -> {
@@ -185,9 +184,7 @@ public class JDBCTest implements SimplePersistenceTest {
   @Test
   public void creoUnaSolicitudYLaPuedoVisualizar() {
     GestorDeSolicitudes gestor = new GestorDeSolicitudes();
-    var soli = new Solicitud(hecho1, "mucho sexo gay".repeat(36));
-    gestor.crearSolicitud(hecho1,"mucho sexo gay".repeat(36), detectorSpam);
-    solicitudRepo.guardar(soli);
+    gestor.crearSolicitud(hecho1, "mucho sexo gay".repeat(36), detectorSpam);
     Assertions.assertEquals(
         1,
         solicitudRepo.findAll()

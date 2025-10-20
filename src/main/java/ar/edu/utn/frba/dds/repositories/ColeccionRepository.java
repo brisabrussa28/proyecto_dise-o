@@ -2,31 +2,29 @@ package ar.edu.utn.frba.dds.repositories;
 
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.utils.DBUtils;
-import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import java.util.List;
+import javax.persistence.EntityManager;
 
-public class ColeccionRepository implements WithSimplePersistenceUnit {
-  private static final ColeccionRepository INSTANCE = new ColeccionRepository();
-
-  public static ColeccionRepository instance() {
-    return INSTANCE;
-  }
+public class ColeccionRepository {
+  private final EntityManager em = DBUtils.getEntityManager();
 
   public void save(Coleccion coleccion) {
+    DBUtils.comenzarTransaccion(em);
     coleccion.getHechosConsensuados()
              .forEach(hecho -> {
                DBUtils.enriquecerHecho(hecho);
              });
-    entityManager().persist(coleccion);
+    em.persist(coleccion);
+    DBUtils.commit(em);
   }
 
   public List<Coleccion> findAll() {
-    return entityManager().createQuery("select c from Coleccion c", Coleccion.class)
-                          .getResultList();
+    return em.createQuery("select c from Coleccion c", Coleccion.class)
+             .getResultList();
 
   }
 
   public Coleccion findById(Long id) {
-    return entityManager().find(Coleccion.class, id);
+    return em.find(Coleccion.class, id);
   }
 }

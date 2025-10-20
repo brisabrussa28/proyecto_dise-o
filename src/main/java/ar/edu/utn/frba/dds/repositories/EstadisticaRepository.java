@@ -1,29 +1,28 @@
 package ar.edu.utn.frba.dds.repositories;
 
 import ar.edu.utn.frba.dds.model.estadisticas.Estadistica;
-import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
+import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.List;
+import javax.persistence.EntityManager;
 
-public class EstadisticaRepository implements WithSimplePersistenceUnit {
-  private static final EstadisticaRepository INSTANCE = new EstadisticaRepository();
-
-  public static EstadisticaRepository instance() {
-    return INSTANCE;
-  }
+public class EstadisticaRepository {
+  private final EntityManager em = DBUtils.getEntityManager();
 
   public void save(Estadistica estadistica) {
     if (estadistica != null) {
-      entityManager().persist(estadistica);
+      DBUtils.comenzarTransaccion(em);
+      em.persist(estadistica);
+      DBUtils.commit(em);
     }
   }
 
   public List<Estadistica> findAll() {
-    return entityManager().createQuery("SELECT * FROM Estadistica", Estadistica.class)
-                          .getResultList();
+    return em.createQuery("SELECT * FROM Estadistica", Estadistica.class)
+             .getResultList();
 
   }
 
   public Estadistica findById(Long id) {
-    return entityManager().find(Estadistica.class, id);
+    return em.find(Estadistica.class, id);
   }
 }

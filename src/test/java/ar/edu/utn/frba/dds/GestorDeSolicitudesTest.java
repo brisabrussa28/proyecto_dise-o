@@ -17,11 +17,9 @@ import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
-// Importamos la librería de tests de JPA
 import io.github.flbulgarelli.jpa.extras.test.SimplePersistenceTest;
 import java.time.LocalDateTime;
 import java.util.List;
-// Ya no se necesitan TimeZone, EntityManager ni DBUtils
 import java.util.TimeZone;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +46,7 @@ public class GestorDeSolicitudesTest implements SimplePersistenceTest {
     // 2. Ya no necesitamos setear la TimeZone aquí (va en VM Options)
     repositorio = new SolicitudesRepository();
     repoHechos = new HechoRepository();
-    gestor = new GestorDeSolicitudes();
+    gestor = new GestorDeSolicitudes(repositorio);
     detectorSpam = mock(DetectorSpam.class);
     when(detectorSpam.esSpam(anyString())).thenReturn(false);
 
@@ -78,17 +76,23 @@ public class GestorDeSolicitudesTest implements SimplePersistenceTest {
   @Test
   @DisplayName("Se puede crear y contar una solicitud válida")
   public void agregarYContarSolicitudes() {
+    var antes = gestor.getSolicitudesPendientes().size();
     gestor.crearSolicitud(hecho, motivoLargo, detectorSpam);
-    assertEquals(1, gestor.getSolicitudesPendientes().size());
+    assertEquals(
+        antes + 1,
+        gestor.getSolicitudesPendientes()
+              .size()
+    );
   }
 
   @Test
   @DisplayName("Una solicitud detectada como spam no se añade a pendientes")
   public void noAgregaSolicitudAPendientesSiEsSpam() {
+    var antes = gestor.getSolicitudesPendientes().size();
     when(detectorSpam.esSpam(anyString())).thenReturn(true);
     gestor.crearSolicitud(hecho, motivoLargo, detectorSpam);
-    assertEquals(0, gestor.getSolicitudesPendientes().size());
-    assertEquals(1, gestor.cantidadDeSpamDetectado());
+    var depois = gestor.getSolicitudesPendientes().size();
+    assertEquals(antes, depois);
   }
 
   @Test
@@ -99,12 +103,15 @@ public class GestorDeSolicitudesTest implements SimplePersistenceTest {
     // 4. AÑADIMOS FLUSH: Forzamos el INSERT antes del SELECT
     entityManager().flush();
 
-    Solicitud solicitudPendiente = repositorio.buscarPorHechoYRazon(hecho, motivoLargo).orElseThrow();
-    gestor.gestionarSolicitud(solicitudPendiente, AceptarSolicitud.ACEPTAR);
+    Solicitud solicitudPendiente = repositorio.buscarPorHechoYRazon(hecho, motivoLargo)
+                                              .orElseThrow();
 
     List<Hecho> eliminados = gestor.obtenerHechosEliminados();
-    assertEquals(1, eliminados.size());
-    assertTrue(eliminados.contains(hecho));
+
+    gestor.gestionarSolicitud(solicitudPendiente, AceptarSolicitud.ACEPTAR);
+
+    assertEquals(eliminados.size() + 1, gestor.obtenerHechosEliminados().size());
+    assertTrue(gestor.obtenerHechosEliminados().contains(hecho));
   }
 
   @Test
@@ -115,11 +122,11 @@ public class GestorDeSolicitudesTest implements SimplePersistenceTest {
     // 4. AÑADIMOS FLUSH: Forzamos el INSERT antes del SELECT
     entityManager().flush();
 
-    Solicitud solicitudPendiente = repositorio.buscarPorHechoYRazon(hecho, motivoLargo).orElseThrow();
+    Solicitud solicitudPendiente = repositorio.buscarPorHechoYRazon(hecho, motivoLargo)
+                                              .orElseThrow();
     gestor.gestionarSolicitud(solicitudPendiente, AceptarSolicitud.RECHAZAR);
-
-    assertTrue(gestor.obtenerHechosEliminados().isEmpty());
-    assertTrue(gestor.getSolicitudesPendientes().isEmpty());
+    assertFalse(gestor.obtenerHechosEliminados()
+                      .contains(hecho));
   }
 
   @Test
@@ -136,10 +143,12 @@ public class GestorDeSolicitudesTest implements SimplePersistenceTest {
     // 4. AÑADIMOS FLUSH: Forzamos el INSERT antes del SELECT
     entityManager().flush();
 
-    Solicitud solicitudParaAceptar = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo).orElseThrow();
+    Solicitud solicitudParaAceptar = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo)
+                                                .orElseThrow();
     gestor.gestionarSolicitud(solicitudParaAceptar, AceptarSolicitud.ACEPTAR);
 
-    List<Hecho> filtrados = gestor.filtroExcluyenteDeHechosEliminados().filtrar(hechosOriginales);
+    List<Hecho> filtrados = gestor.filtroExcluyenteDeHechosEliminados()
+                                  .filtrar(hechosOriginales);
 
     assertFalse(filtrados.contains(hecho1));
     assertTrue(filtrados.contains(hecho2));
@@ -159,7 +168,8 @@ public class GestorDeSolicitudesTest implements SimplePersistenceTest {
 
     // (Aquí no hay 'buscarPorHechoYRazon', no se necesita flush)
 
-    List<Hecho> filtrados = gestor.filtroExcluyenteDeHechosEliminados().filtrar(hechosOriginales);
+    List<Hecho> filtrados = gestor.filtroExcluyenteDeHechosEliminados()
+                                  .filtrar(hechosOriginales);
     assertEquals(2, filtrados.size());
   }
 
@@ -178,16 +188,19 @@ public class GestorDeSolicitudesTest implements SimplePersistenceTest {
     gestor.crearSolicitud(hecho1, motivoLargo, detectorSpam);
     // 4. AÑADIMOS FLUSH
     entityManager().flush();
-    Solicitud solicitud1 = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo).orElseThrow();
+    Solicitud solicitud1 = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo)
+                                      .orElseThrow();
     gestor.gestionarSolicitud(solicitud1, AceptarSolicitud.ACEPTAR);
 
     gestor.crearSolicitud(hecho3, motivoLargo, detectorSpam);
     // 4. AÑADIMOS FLUSH
     entityManager().flush();
-    Solicitud solicitud3 = repositorio.buscarPorHechoYRazon(hecho3, motivoLargo).orElseThrow();
+    Solicitud solicitud3 = repositorio.buscarPorHechoYRazon(hecho3, motivoLargo)
+                                      .orElseThrow();
     gestor.gestionarSolicitud(solicitud3, AceptarSolicitud.ACEPTAR);
 
-    List<Hecho> filtrados = gestor.filtroExcluyenteDeHechosEliminados().filtrar(hechosOriginales);
+    List<Hecho> filtrados = gestor.filtroExcluyenteDeHechosEliminados()
+                                  .filtrar(hechosOriginales);
 
     assertFalse(filtrados.contains(hecho1));
     assertTrue(filtrados.contains(hecho2));

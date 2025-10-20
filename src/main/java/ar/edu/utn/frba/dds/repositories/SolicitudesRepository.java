@@ -3,21 +3,18 @@ package ar.edu.utn.frba.dds.repositories;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
-import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
+import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.List;
 import java.util.Optional;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 
 /**
  * Repositorio de Solicitudes. Responsable únicamente del almacenamiento
  * y recuperación de las solicitudes desde la base de datos.
  */
-public class SolicitudesRepository implements WithSimplePersistenceUnit {
-  private static final SolicitudesRepository INSTANCE = new SolicitudesRepository();
-
-  public static SolicitudesRepository instance() {
-    return INSTANCE;
-  }
+public class SolicitudesRepository {
+  private final EntityManager em = DBUtils.getEntityManager();
 
   /**
    * Guarda o actualiza una solicitud en la base de datos.
@@ -27,11 +24,13 @@ public class SolicitudesRepository implements WithSimplePersistenceUnit {
    * @param solicitud La entidad Solicitud a persistir.
    */
   public void guardar(Solicitud solicitud) {
+    DBUtils.comenzarTransaccion(em);
     if (solicitud.id == null) {
-      entityManager().persist(solicitud);
+      em.persist(solicitud);
     } else {
-      entityManager().merge(solicitud);
+      em.merge(solicitud);
     }
+    DBUtils.commit(em);
   }
 
   /**
@@ -40,8 +39,8 @@ public class SolicitudesRepository implements WithSimplePersistenceUnit {
    * @param id El ID de la solicitud.
    * @return Un Optional con la solicitud si se encuentra, o vacío si no.
    */
-  public Optional<Solicitud> findById(Long id) {
-    return Optional.ofNullable(entityManager().find(Solicitud.class, id));
+  public Solicitud findById(Long id) {
+    return em.find(Solicitud.class, id);
   }
 
   /**
@@ -53,13 +52,13 @@ public class SolicitudesRepository implements WithSimplePersistenceUnit {
    */
   public Optional<Solicitud> buscarPorHechoYRazon(Hecho hecho, String razon) {
     try {
-      Solicitud solicitud = entityManager().createQuery(
-                                               "SELECT s FROM Solicitud s WHERE s.hechoSolicitado = :hecho AND s.razonEliminacion = :razon",
-                                               Solicitud.class
-                                           )
-                                           .setParameter("hecho", hecho)
-                                           .setParameter("razon", razon)
-                                           .getSingleResult();
+      Solicitud solicitud = em.createQuery(
+                                  "SELECT s FROM Solicitud s WHERE s.hechoSolicitado = :hecho AND s.razonEliminacion = :razon",
+                                  Solicitud.class
+                              )
+                              .setParameter("hecho", hecho)
+                              .setParameter("razon", razon)
+                              .getSingleResult();
       return Optional.of(solicitud);
     } catch (NoResultException e) {
       return Optional.empty();
@@ -72,8 +71,8 @@ public class SolicitudesRepository implements WithSimplePersistenceUnit {
    * @return Una lista con todas las solicitudes.
    */
   public List<Solicitud> findAll() {
-    return entityManager().createQuery("SELECT s FROM Solicitud s", Solicitud.class)
-                          .getResultList();
+    return em.createQuery("SELECT s FROM Solicitud s", Solicitud.class)
+             .getResultList();
   }
 
   /**
@@ -83,12 +82,12 @@ public class SolicitudesRepository implements WithSimplePersistenceUnit {
    * @return Una lista de solicitudes que coinciden con el estado.
    */
   public List<Solicitud> obtenerPorEstado(EstadoSolicitud estado) {
-    return entityManager().createQuery(
-                              "SELECT s FROM Solicitud s WHERE s.estado = :estado",
-                              Solicitud.class
-                          )
-                          .setParameter("estado", estado)
-                          .getResultList();
+    return em.createQuery(
+                 "SELECT s FROM Solicitud s WHERE s.estado = :estado",
+                 Solicitud.class
+             )
+             .setParameter("estado", estado)
+             .getResultList();
   }
 
   /**
@@ -97,8 +96,8 @@ public class SolicitudesRepository implements WithSimplePersistenceUnit {
    * @return La cantidad total de solicitudes.
    */
   public int cantidadTotal() {
-    Long count = entityManager().createQuery("SELECT COUNT(s) FROM Solicitud s", Long.class)
-                                .getSingleResult();
+    Long count = em.createQuery("SELECT COUNT(s) FROM Solicitud s", Long.class)
+                   .getSingleResult();
     return count.intValue();
   }
 }
