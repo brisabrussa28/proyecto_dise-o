@@ -1,5 +1,6 @@
 package db;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -163,7 +164,7 @@ public class JDBCTest implements SimplePersistenceTest {
     CentralDeEstadisticas calculadora = new CentralDeEstadisticas();
     List<Coleccion> coleccionDB = repoColeccion.findAll();
     //System.out.println(coleccionDB.toString());
-    calculadora.setGestor(new GestorDeSolicitudes());
+    calculadora.setGestor(new GestorDeSolicitudes(solicitudRepo));
     var stat = calculadora.categoriaConMasHechos(coleccionDB);
     var repoStat = new EstadisticaRepository();
     repoStat.save(stat);
@@ -183,12 +184,9 @@ public class JDBCTest implements SimplePersistenceTest {
 
   @Test
   public void creoUnaSolicitudYLaPuedoVisualizar() {
-    GestorDeSolicitudes gestor = new GestorDeSolicitudes();
+    GestorDeSolicitudes gestor = new GestorDeSolicitudes(solicitudRepo);
+    var antes = gestor.getSolicitudesPendientes().size();
     gestor.crearSolicitud(hecho1, "mucho sexo gay".repeat(36), detectorSpam);
-    Assertions.assertEquals(
-        1,
-        solicitudRepo.findAll()
-                     .size()
-    );
+    assertEquals(antes + 1, gestor.getSolicitudesPendientes().size());
   }
 }

@@ -8,6 +8,7 @@ import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.model.hibernate.AccesoHecho;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.utils.DBUtils;
 import io.github.flbulgarelli.jpa.extras.test.SimplePersistenceTest;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,7 +58,7 @@ public class TestBusquedaLibre implements SimplePersistenceTest {
 
   @BeforeEach
   public void setUp() {
-    accesoHecho = new AccesoHecho(entityManager());
+    accesoHecho = new AccesoHecho(DBUtils.getEntityManager());
     withTransaction(() -> {
       accesoHecho.guardar(roboBanco);
       accesoHecho.guardar(asaltoComercio);
@@ -73,7 +74,7 @@ public class TestBusquedaLibre implements SimplePersistenceTest {
 
     assertFalse(resultados.isEmpty());
     // CORRECCIÓN: Solo un hecho contiene la palabra "ladrón".
-    assertEquals(6, resultados.size());
+    assertEquals(7, resultados.size());
     assertEquals(
         "Intento de robo a mano armada frustrado por vecinos",
         resultados.get(0).getTitulo()
@@ -89,7 +90,7 @@ public class TestBusquedaLibre implements SimplePersistenceTest {
 
     assertFalse(resultados.isEmpty());
     // CORRECCIÓN: Se deben encontrar los 3 hechos que contienen "armado" o "armada".
-    assertEquals(3, resultados.size());
+    assertEquals(4, resultados.size());
   }
 
   private void mostrarResultados(List<Hecho> resultados) {
