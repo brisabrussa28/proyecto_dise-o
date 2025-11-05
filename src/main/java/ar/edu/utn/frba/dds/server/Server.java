@@ -10,6 +10,7 @@ import io.javalin.json.JavalinJackson;
 
 public class Server {
   public static void main(String[] args) {
+    //new Bootstrap().init();
     var app = Javalin.create(javalinConfig -> {
       javalinConfig.jsonMapper(new JavalinJackson().updateMapper(objectMapper -> {
         objectMapper.registerModule(new JavaTimeModule());

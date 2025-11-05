@@ -14,4 +14,9 @@ public class HechoController {
     return HechoRepository.instance()
                           .findAny();
   }
+
+  public Hecho findById(Long id) {
+    return HechoRepository.instance()
+                          .findById(id);
+  }
 }
