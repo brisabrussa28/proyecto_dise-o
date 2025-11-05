@@ -8,7 +8,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Implementación del Patrón Builder para la creación de Hechos (reduce acoplamiento en especial en CSV).
+ * Implementación del Patrón Builder para la creación síncrona de Hechos.
+ * La validación y enriquecimiento de datos geográficos se delega a otras clases.
  */
 public class HechoBuilder {
   private String titulo;
@@ -18,7 +19,7 @@ public class HechoBuilder {
   private String provincia;
   private PuntoGeografico ubicacion;
   private LocalDateTime fechaSuceso;
-  private LocalDateTime fechaCarga = LocalDateTime.now(); // Valor por defecto
+  private LocalDateTime fechaCarga = LocalDateTime.now();
   private Origen fuenteOrigen;
   private List<Etiqueta> etiquetas = new ArrayList<>();
 
@@ -32,7 +33,7 @@ public class HechoBuilder {
     this.fechaSuceso = original.getFechasuceso();
     this.fechaCarga = original.getFechacarga();
     this.fuenteOrigen = original.getOrigen();
-    this.etiquetas = new ArrayList<>(original.getEtiquetas()); // Copia defensiva
+    this.etiquetas = new ArrayList<>(original.getEtiquetas());
     return this;
   }
 
@@ -105,42 +106,13 @@ public class HechoBuilder {
     return this;
   }
 
-
   /**
-   * Construye y devuelve un objeto Hecho a partir de los datos proporcionados.
-   *
-   * @return una nueva instancia de Hecho.
-   * @throws IllegalStateException si los datos obligatorios no se proporcionan o son inválidos.
+   * Construye y devuelve una instancia de Hecho con los datos proporcionados.
+   * @return Una nueva instancia de Hecho.
+   * @throws IllegalStateException si faltan campos obligatorios o los datos son inconsistentes.
    */
   public Hecho build() {
-    if (titulo == null || titulo.isBlank()) {
-      throw new IllegalStateException("El título es obligatorio para crear un Hecho.");
-    }
-
-    if (fechaSuceso == null) {
-      throw new IllegalStateException("La fecha del suceso es obligatoria para crear un Hecho.");
-    }
-
-    if (fechaCarga == null) {
-      throw new IllegalStateException("La fecha de carga es obligatoria para crear un Hecho.");
-    }
-
-    if (fechaSuceso.isAfter(fechaCarga)) {
-      throw new IllegalStateException(
-          "La fecha del suceso no puede ser posterior a la fecha de carga.");
-    }
-
-    if (fechaSuceso.isAfter(LocalDateTime.now())) {
-      throw new IllegalStateException("La fecha del suceso no puede ser una fecha futura.");
-    }
-
-    if (fechaCarga.isAfter(LocalDateTime.now())) {
-      throw new IllegalStateException("La fecha de carga no puede ser una fecha futura.");
-    }
-    // No se si hacer que la existencia de ambos campos sea obligatoria.
-    // this.completarProvinciaFaltante();
-    // this.completarUbicacionFaltante();
-
+    validarCampos();
     return new Hecho(
         titulo,
         descripcion,
@@ -151,7 +123,27 @@ public class HechoBuilder {
         fechaSuceso,
         fechaCarga,
         fuenteOrigen,
-        etiquetas
-    );
+        etiquetas);
+  }
+
+  private void validarCampos() {
+    if (titulo == null || titulo.isBlank()) {
+      throw new IllegalStateException("El título es obligatorio para crear un Hecho.");
+    }
+    if (fechaSuceso == null) {
+      throw new IllegalStateException("La fecha del suceso es obligatoria para crear un Hecho.");
+    }
+    if (fechaCarga == null) {
+      throw new IllegalStateException("La fecha de carga es obligatoria para crear un Hecho.");
+    }
+    if (fechaSuceso.isAfter(fechaCarga)) {
+      throw new IllegalStateException("La fecha del suceso no puede ser posterior a la fecha de carga.");
+    }
+    if (fechaSuceso.isAfter(LocalDateTime.now())) {
+      throw new IllegalStateException("La fecha del suceso no puede ser una fecha futura.");
+    }
+    if (fechaCarga.isAfter(LocalDateTime.now())) {
+      throw new IllegalStateException("La fecha de carga no puede ser una fecha futura.");
+    }
   }
 }

@@ -6,10 +6,12 @@ import java.util.Optional;
 
 public class HechoController {
   public void subirHecho(Hecho hecho) {
-    HechoRepository.instance().save(hecho);
+    HechoRepository.instance()
+                   .save(hecho);
   }
 
   public Optional<Hecho> findAny() {
-    return HechoRepository.instance().findAny();
+    return HechoRepository.instance()
+                          .findAny();
   }
 }

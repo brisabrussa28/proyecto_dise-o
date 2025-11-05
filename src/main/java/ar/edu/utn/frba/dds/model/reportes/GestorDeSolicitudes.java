@@ -15,7 +15,10 @@ import java.util.stream.Collectors;
  */
 public class GestorDeSolicitudes {
 
-  private final SolicitudesRepository repositorio;
+  private SolicitudesRepository repositorio;
+
+  public GestorDeSolicitudes() {
+  }
 
   public GestorDeSolicitudes(SolicitudesRepository repositorio) {
     this.repositorio = repositorio;
@@ -25,9 +28,9 @@ public class GestorDeSolicitudes {
    * Crea una nueva solicitud, la clasifica usando el detector de spam
    * y la guarda en el repositorio.
    *
-   * @param hecho          El hecho a solicitar eliminación.
-   * @param motivo         La razón de la solicitud.
-   * @param detectorSpam   El detector de spam a utilizar. (Inyectado por método)
+   * @param hecho        El hecho a solicitar eliminación.
+   * @param motivo       La razón de la solicitud.
+   * @param detectorSpam El detector de spam a utilizar. (Inyectado por método)
    */
   public void crearSolicitud(Hecho hecho, String motivo, DetectorSpam detectorSpam) {
     Solicitud nuevaSolicitud = new Solicitud(hecho, motivo);
@@ -43,12 +46,13 @@ public class GestorDeSolicitudes {
   /**
    * Procesa una solicitud existente para aceptarla o rechazarla.
    *
-   * @param solicitud   La solicitud a gestionar.
-   * @param decision    La decisión (ACEPTAR o RECHAZAR).
+   * @param solicitud La solicitud a gestionar.
+   * @param decision  La decisión (ACEPTAR o RECHAZAR).
    */
   public void gestionarSolicitud(Solicitud solicitud, AceptarSolicitud decision) {
     // Verificamos que la solicitud exista en estado PENDIENTE
-    if (!repositorio.obtenerPorEstado(EstadoSolicitud.PENDIENTE).contains(solicitud)) {
+    if (!repositorio.obtenerPorEstado(EstadoSolicitud.PENDIENTE)
+                    .contains(solicitud)) {
       throw new SolicitudInexistenteException("La solicitud no existe o no está pendiente.");
     }
 
@@ -67,7 +71,8 @@ public class GestorDeSolicitudes {
    * @return El número de solicitudes de spam.
    */
   public long cantidadDeSpamDetectado() {
-    return repositorio.obtenerPorEstado(EstadoSolicitud.SPAM).size();
+    return repositorio.obtenerPorEstado(EstadoSolicitud.SPAM)
+                      .size();
   }
 
   public List<Solicitud> getSolicitudesPendientes() {

@@ -2,33 +2,30 @@ package ar.edu.utn.frba.dds.repositories;
 
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.utils.DBUtils;
-import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import java.util.List;
+import javax.persistence.EntityManager;
 
-public class FuenteRepository implements WithSimplePersistenceUnit {
-  private static final FuenteRepository INSTANCE = new FuenteRepository();
-
-  public static FuenteRepository instance() {
-    return INSTANCE;
-  }
+public class FuenteRepository {
+  private final EntityManager em = DBUtils.getEntityManager();
 
   public void save(Fuente fuente) {
     fuente.getHechos()
           .forEach(hecho -> {
-            DBUtils.completarUbicacionFaltante(hecho);
-            DBUtils.completarProvinciaFaltante(hecho);
+            DBUtils.enriquecerHecho(hecho);
           });
-    entityManager().persist(fuente);
+    DBUtils.comenzarTransaccion(em);
+    em.persist(fuente);
+    DBUtils.commit(em);
   }
 
   public List<Fuente> findAll() {
-    return entityManager().createQuery("SELECT * FROM Fuente", Fuente.class)
-                          .getResultList();
+    return em.createQuery("SELECT f FROM Fuente f", Fuente.class)
+             .getResultList();
 
   }
 
   public Fuente findById(Long id) {
-    return entityManager().find(Fuente.class, id);
+    return em.find(Fuente.class, id);
   }
 
 }

@@ -1,6 +1,10 @@
 package db;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.Absoluta;
@@ -23,8 +27,10 @@ import ar.edu.utn.frba.dds.repositories.EstadisticaRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
+import io.github.flbulgarelli.jpa.extras.test.SimplePersistenceTest;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,43 +40,50 @@ import org.junit.jupiter.api.Test;
  * Tests que verifican la correcta persistencia de diferentes entidades del dominio.
  * Hereda de PersistenceTests para obtener el manejo de transacciones y la configuración de la BD.
  */
-public class JDBCTest {
-  private ColeccionRepository repoColeccion = ColeccionRepository.instance();
-  private HechoRepository hechoRepo = HechoRepository.instance();
-  private FuenteRepository fuenteRepo = FuenteRepository.instance();
-  private AlgoritmoRepository algoritmoRepository = AlgoritmoRepository.instance();
+public class JDBCTest implements SimplePersistenceTest {
+  private ColeccionRepository repoColeccion = new ColeccionRepository();
+  private HechoRepository hechoRepo = new HechoRepository();
+  private FuenteRepository fuenteRepo = new FuenteRepository();
+  private AlgoritmoRepository algoritmoRepository = new AlgoritmoRepository();
+  private Coleccion coleccionDePrueba;
+  private DetectorSpam detectorSpam;
+  private SolicitudesRepository solicitudRepo = new SolicitudesRepository();
+
+  LocalDateTime hora = LocalDateTime.now();
+  PuntoGeografico ubicacion = new PuntoGeografico(-34.68415120338135, -58.58712709338028);
+
+  Hecho hecho1 = new HechoBuilder()
+      .conTitulo("Robo en Almagro")
+      .conCategoria("Robos")
+      .conFechaSuceso(hora.minusHours(1))
+      .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+      .conUbicacion(ubicacion)
+      .build();
+
+  Hecho hecho2 = new HechoBuilder()
+      .conTitulo("Robo en Caballito")
+      .conCategoria("Robos")
+      .conFechaSuceso(hora.minusHours(1))
+      .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+      .conUbicacion(ubicacion)
+      .build();
+
+  Hecho hecho3 = new HechoBuilder()
+      .conTitulo("Hurto en Avellaneda")
+      .conCategoria("Hurtos")
+      .conFechaSuceso(hora.minusHours(2))
+      .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+      .conUbicacion(ubicacion)
+      .build();
 
   @BeforeEach
   public void setUp() {
-    final DetectorSpam detector = texto -> texto.contains("Troll");
     var fuente = new FuenteDinamica("Fuente para Estadísticas");
 
-    var ubicacion = new PuntoGeografico(-34.68415120338135, -58.58712709338028);
-    LocalDateTime hora = LocalDateTime.now();
+    detectorSpam = mock(DetectorSpam.class);
+    when(detectorSpam.esSpam(anyString())).thenReturn(false);
 
-    var hecho1 = new HechoBuilder()
-        .conTitulo("Robo en Almagro")
-        .conCategoria("Robos")
-        .conFechaSuceso(hora.minusHours(1))
-        .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conUbicacion(ubicacion)
-        .build();
 
-    var hecho2 = new HechoBuilder()
-        .conTitulo("Robo en Caballito")
-        .conCategoria("Robos")
-        .conFechaSuceso(hora.minusHours(1))
-        .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conUbicacion(ubicacion)
-        .build();
-
-    var hecho3 = new HechoBuilder()
-        .conTitulo("Hurto en Avellaneda")
-        .conCategoria("Hurtos")
-        .conFechaSuceso(hora.minusHours(2))
-        .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-        .conUbicacion(ubicacion)
-        .build();
     fuente.agregarHecho(hecho1);
     fuente.agregarHecho(hecho2);
     fuente.agregarHecho(hecho3);
@@ -110,7 +123,7 @@ public class JDBCTest {
         .conFuenteOrigen(Origen.PROVISTO_CONTRIBUYENTE)
         .build();
     fuente.agregarHecho(hecho);
-    fuenteRepo.save(fuente);
+    fuenteRepo.save(fuente); // Usamos el método 'persist' heredado de la librería
     var id = fuente.getId();
     // Verificación (opcional, fuera de la transacción)
     var fuenteRecuperada = fuenteRepo.findById(id);
@@ -140,7 +153,7 @@ public class JDBCTest {
     algoritmoRepository.save(multiplesMenciones);
     repoColeccion.save(coleccionBonaerense);
     var id = coleccionBonaerense.getId();
-    Coleccion coleccionRecuperada = repoColeccion.findById(id);
+    var coleccionRecuperada = repoColeccion.findById(id);
     assertNotNull(coleccionRecuperada);
     Assertions.assertEquals("Robos en BA", coleccionRecuperada.getTitulo());
   }
@@ -151,12 +164,29 @@ public class JDBCTest {
     CentralDeEstadisticas calculadora = new CentralDeEstadisticas();
     List<Coleccion> coleccionDB = repoColeccion.findAll();
     //System.out.println(coleccionDB.toString());
-    calculadora.setGestor(new GestorDeSolicitudes(new SolicitudesRepository()));
+    calculadora.setGestor(new GestorDeSolicitudes(solicitudRepo));
     var stat = calculadora.categoriaConMasHechos(coleccionDB);
-    var repoStat = EstadisticaRepository.instance();
+    var repoStat = new EstadisticaRepository();
     repoStat.save(stat);
-    var coleccion = repoColeccion.findById(1L);
-    var stat2 = calculadora.provinciaConMasHechos(coleccion);
-    repoStat.save(stat2);
+
+    coleccionDePrueba = new Coleccion();
+    coleccionDePrueba.setId(1L);
+    Optional<Coleccion> coleccionOpt = Optional.ofNullable(repoColeccion.findById(coleccionDePrueba.getId()));
+    Assertions.assertTrue(
+        coleccionOpt.isPresent(),
+        "La colección de prueba no fue encontrada en la BD."
+    );
+    coleccionOpt.ifPresent(coleccion -> {
+      var stat2 = calculadora.provinciaConMasHechos(coleccion);
+      repoStat.save(stat2);
+    });
+  }
+
+  @Test
+  public void creoUnaSolicitudYLaPuedoVisualizar() {
+    GestorDeSolicitudes gestor = new GestorDeSolicitudes(solicitudRepo);
+    var antes = gestor.getSolicitudesPendientes().size();
+    gestor.crearSolicitud(hecho1, "mucho sexo gay".repeat(36), detectorSpam);
+    assertEquals(antes + 1, gestor.getSolicitudesPendientes().size());
   }
 }

@@ -92,7 +92,7 @@ public class Coleccion {
    */
   public void recalcularHechosConsensuados(Filtro filtroExcluyente, List<Fuente> fuentes) {
     List<Hecho> hechosFiltrados = this.obtenerHechosFiltrados(filtroExcluyente);
-    this.coleccion_algoritmo.recalcularHechosConsensuados(hechosFiltrados,fuentes);
+    this.coleccion_algoritmo.recalcularHechosConsensuados(hechosFiltrados, fuentes);
   }
 
   /**
@@ -204,6 +204,10 @@ public class Coleccion {
   public void setCondicion(Condicion coleccion_condicion) {
     this.coleccion_condicion = coleccion_condicion;
     this.filtro.setCondicion(coleccion_condicion);
+  }
+
+  public void setId(Long id) {
+    this.coleccion_id = id;
   }
 
   public void setAlgoritmoDeConsenso(AlgoritmoDeConsenso algoritmo) {

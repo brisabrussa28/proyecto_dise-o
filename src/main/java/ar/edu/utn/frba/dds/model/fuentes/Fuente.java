@@ -11,13 +11,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.Table;
+import javax.persistence.SequenceGenerator;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_fuente", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("BASE")
-@Table(name = "Fuente")
 public abstract class Fuente {
 
   @Id
@@ -35,6 +34,7 @@ public abstract class Fuente {
     }
     this.fuente_nombre = fuente_nombre;
   }
+
 
   public abstract List<Hecho> getHechos();
 
