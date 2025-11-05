@@ -23,7 +23,6 @@ import ar.edu.utn.frba.dds.repositories.EstadisticaRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
-import io.github.flbulgarelli.jpa.extras.test.SimplePersistenceTest;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -35,7 +34,7 @@ import org.junit.jupiter.api.Test;
  * Tests que verifican la correcta persistencia de diferentes entidades del dominio.
  * Hereda de PersistenceTests para obtener el manejo de transacciones y la configuración de la BD.
  */
-public class JDBCTest implements SimplePersistenceTest {
+public class JDBCTest {
   private ColeccionRepository repoColeccion = ColeccionRepository.instance();
   private HechoRepository hechoRepo = HechoRepository.instance();
   private FuenteRepository fuenteRepo = FuenteRepository.instance();
@@ -114,7 +113,7 @@ public class JDBCTest implements SimplePersistenceTest {
     fuenteRepo.save(fuente);
     var id = fuente.getId();
     // Verificación (opcional, fuera de la transacción)
-    FuenteDinamica fuenteRecuperada = find(FuenteDinamica.class, id);
+    var fuenteRecuperada = fuenteRepo.findById(id);
     assertNotNull(fuenteRecuperada);
     Assertions.assertFalse(fuenteRecuperada.getHechos()
                                            .isEmpty());
@@ -141,7 +140,7 @@ public class JDBCTest implements SimplePersistenceTest {
     algoritmoRepository.save(multiplesMenciones);
     repoColeccion.save(coleccionBonaerense);
     var id = coleccionBonaerense.getId();
-    Coleccion coleccionRecuperada = find(Coleccion.class, id);
+    Coleccion coleccionRecuperada = repoColeccion.findById(id);
     assertNotNull(coleccionRecuperada);
     Assertions.assertEquals("Robos en BA", coleccionRecuperada.getTitulo());
   }

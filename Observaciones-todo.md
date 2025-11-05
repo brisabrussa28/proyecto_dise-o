@@ -83,3 +83,4 @@
 - [ ] Corregir algoritmos de consenso y que se relacione con Hecho y Coleccion.
 - [ ] Algoritmo de concenso deberia revisar todas las fuentes del nodo (instancia) osea todas las fuentes del sistema
     -> necesitamos un repo de fuentes
+- [ ] Central de Estadisticas deberia consultar a las colecciones de la db y a partir de eso crear las mismas.

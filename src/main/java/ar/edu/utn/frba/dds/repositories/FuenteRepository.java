@@ -27,7 +27,7 @@ public class FuenteRepository implements WithSimplePersistenceUnit {
 
   }
 
-  public Fuente getById(Long id) {
+  public Fuente findById(Long id) {
     return entityManager().find(Fuente.class, id);
   }
 
