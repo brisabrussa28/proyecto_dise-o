@@ -105,3 +105,4 @@
  - [ ] Implementacion todas interfaces considerando esto
  - [ ] Manejo de sesion usando autenticacion delegada
  - [ ] Sumar los requerimientos adicionales propuestos anteriormente
+ - [ ] La central de estadisticas debe generar las mismas consultando a la db, no probando en local
