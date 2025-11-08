@@ -92,8 +92,8 @@ public class Solicitud {
   }
 
   void validarMotivo(String motivo) {
-    if (motivo.length() < 500) {
-      throw new RazonInvalidaException("Tiene menos de 500 caracteres.");
+    if (motivo.length() < 500 || motivo.length() > 1024) {
+      throw new RazonInvalidaException("La longitud del mensaje se encuentra fuera del rango (500 < caracteres < 1024");
     }
   }
 

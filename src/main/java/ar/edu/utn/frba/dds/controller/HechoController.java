@@ -5,9 +5,10 @@ import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import java.util.Optional;
 
 public class HechoController {
-  public void subirHecho(Hecho hecho) {
+  public Hecho subirHecho(Hecho hecho) {
     HechoRepository.instance()
                    .save(hecho);
+    return hecho;
   }
 
   public Optional<Hecho> findAny() {

@@ -2,9 +2,11 @@ package ar.edu.utn.frba.dds.model.filtro;
 
 import ar.edu.utn.frba.dds.model.filtro.condiciones.Condicion;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@JsonIgnoreProperties
 public class Filtro {
   private Condicion condicionRaiz;
 

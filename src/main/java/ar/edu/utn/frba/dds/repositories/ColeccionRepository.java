@@ -8,6 +8,12 @@ import javax.persistence.EntityManager;
 public class ColeccionRepository {
   private final EntityManager em = DBUtils.getEntityManager();
 
+  private static final ColeccionRepository INSTANCE = new ColeccionRepository();
+
+  public static ColeccionRepository instance() {
+    return INSTANCE;
+  }
+
   public void save(Coleccion coleccion) {
     DBUtils.comenzarTransaccion(em);
     coleccion.getHechosConsensuados()

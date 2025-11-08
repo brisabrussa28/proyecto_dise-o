@@ -8,6 +8,12 @@ import javax.persistence.EntityManager;
 public class FuenteRepository {
   private final EntityManager em = DBUtils.getEntityManager();
 
+  private static final FuenteRepository INSTANCE = new FuenteRepository();
+
+  public static FuenteRepository instance() {
+    return INSTANCE;
+  }
+
   public void save(Fuente fuente) {
     fuente.getHechos()
           .forEach(hecho -> {

@@ -16,6 +16,12 @@ import javax.persistence.NoResultException;
 public class SolicitudesRepository {
   private final EntityManager em = DBUtils.getEntityManager();
 
+  private static final SolicitudesRepository INSTANCE = new SolicitudesRepository();
+
+  public static SolicitudesRepository instance() {
+    return INSTANCE;
+  }
+
   /**
    * Guarda o actualiza una solicitud en la base de datos.
    * Si la solicitud ya tiene un ID, la actualiza (merge).

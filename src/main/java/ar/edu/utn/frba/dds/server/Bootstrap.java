@@ -63,14 +63,14 @@ public class Bootstrap implements WithSimplePersistenceUnit {
       var calculadora = new CentralDeEstadisticas();
       Exportador<Estadistica> exportadorCsv = new ExportadorCSV<>(new ModoSobrescribir());
       calculadora.setExportador(exportadorCsv);
-
+      var algoritmo = new Absoluta();
       var coleccion = new Coleccion(
           "Coleccion de Hechos",
           fuente,
           "Descripcion de prueba",
-          "General"
+          "General",
+          algoritmo
       );
-      var algoritmo = new Absoluta();
       coleccion.setAlgoritmoDeConsenso(algoritmo);
       AlgoritmoRepository algoritmoRepository = new AlgoritmoRepository();
       algoritmoRepository.save(algoritmo);

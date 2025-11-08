@@ -69,12 +69,14 @@ public class Coleccion {
       String coleccion_titulo,
       Fuente coleccion_fuente,
       String coleccion_descripcion,
-      String coleccion_categoria
+      String coleccion_categoria,
+      AlgoritmoDeConsenso coleccion_algoritmo
   ) {
     validarCamposObligatorios(
         coleccion_titulo, coleccion_fuente, coleccion_descripcion,
         coleccion_categoria
     );
+    this.coleccion_algoritmo = coleccion_algoritmo;
     this.coleccion_titulo = coleccion_titulo;
     this.coleccion_fuente = coleccion_fuente;
     this.coleccion_descripcion = coleccion_descripcion;
