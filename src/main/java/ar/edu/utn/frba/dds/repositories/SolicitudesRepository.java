@@ -106,4 +106,18 @@ public class SolicitudesRepository {
                    .getSingleResult();
     return count.intValue();
   }
+
+  public void aceptarSolicitud(Solicitud solicitud) {
+    DBUtils.comenzarTransaccion(em);
+    solicitud.aceptar();
+    em.merge(solicitud);
+    DBUtils.commit(em);
+  }
+
+  public void rechazarSolicitud(Solicitud solicitud) {
+    DBUtils.comenzarTransaccion(em);
+    solicitud.rechazar();
+    em.merge(solicitud);
+    DBUtils.commit(em);
+  }
 }
