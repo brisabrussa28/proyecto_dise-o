@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.model.estadisticas;
 
 import java.util.Objects;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -19,9 +20,13 @@ public class Estadistica {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long estadistica_id;
-  private String estadistica_nombre;
-  private Long estadistica_valor;
+
   private String estadistica_tipo;
+
+  @Column(name = "estadistica_nombre")
+  private String estadistica_nombre;
+  @Column(name = "estadistica_valor")
+  private Long estadistica_valor;
 
 
   public Estadistica(String nombre, Long valor, String estadistica_tipo) {

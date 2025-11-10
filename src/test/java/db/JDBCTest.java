@@ -175,10 +175,10 @@ public class JDBCTest {
         coleccionOpt.isPresent(),
         "La colección de prueba no fue encontrada en la BD."
     );
-//    coleccionOpt.ifPresent(coleccion -> {
-//      var stat2 = calculadora.provinciaConMasHechos(coleccion);
-//      EstadisticaRepository.instance().save(stat2);
-//    });
+    coleccionOpt.ifPresent(coleccion -> {
+      var stat2 = calculadora.provinciaConMasHechos(coleccion);
+      EstadisticaRepository.instance().save(stat2);
+    });
   }
 
   @Test
