@@ -103,8 +103,7 @@ public class GestorDeSolicitudesTest implements SimplePersistenceTest {
     // 4. AÑADIMOS FLUSH: Forzamos el INSERT antes del SELECT
     entityManager().flush();
 
-    Solicitud solicitudPendiente = repositorio.buscarPorHechoYRazon(hecho, motivoLargo)
-                                              .orElseThrow();
+    Solicitud solicitudPendiente = repositorio.buscarPorHechoYRazon(hecho, motivoLargo);
 
     List<Hecho> eliminados = gestor.obtenerHechosEliminados();
 
@@ -122,8 +121,7 @@ public class GestorDeSolicitudesTest implements SimplePersistenceTest {
     // 4. AÑADIMOS FLUSH: Forzamos el INSERT antes del SELECT
     entityManager().flush();
 
-    Solicitud solicitudPendiente = repositorio.buscarPorHechoYRazon(hecho, motivoLargo)
-                                              .orElseThrow();
+    Solicitud solicitudPendiente = repositorio.buscarPorHechoYRazon(hecho, motivoLargo);
     gestor.gestionarSolicitud(solicitudPendiente, AceptarSolicitud.RECHAZAR);
     assertFalse(gestor.obtenerHechosEliminados()
                       .contains(hecho));
@@ -143,8 +141,7 @@ public class GestorDeSolicitudesTest implements SimplePersistenceTest {
     // 4. AÑADIMOS FLUSH: Forzamos el INSERT antes del SELECT
     entityManager().flush();
 
-    Solicitud solicitudParaAceptar = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo)
-                                                .orElseThrow();
+    Solicitud solicitudParaAceptar = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo);
     gestor.gestionarSolicitud(solicitudParaAceptar, AceptarSolicitud.ACEPTAR);
 
     List<Hecho> filtrados = gestor.filtroExcluyenteDeHechosEliminados()
@@ -188,15 +185,13 @@ public class GestorDeSolicitudesTest implements SimplePersistenceTest {
     gestor.crearSolicitud(hecho1, motivoLargo, detectorSpam);
     // 4. AÑADIMOS FLUSH
     entityManager().flush();
-    Solicitud solicitud1 = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo)
-                                      .orElseThrow();
+    Solicitud solicitud1 = repositorio.buscarPorHechoYRazon(hecho1, motivoLargo);
     gestor.gestionarSolicitud(solicitud1, AceptarSolicitud.ACEPTAR);
 
     gestor.crearSolicitud(hecho3, motivoLargo, detectorSpam);
     // 4. AÑADIMOS FLUSH
     entityManager().flush();
-    Solicitud solicitud3 = repositorio.buscarPorHechoYRazon(hecho3, motivoLargo)
-                                      .orElseThrow();
+    Solicitud solicitud3 = repositorio.buscarPorHechoYRazon(hecho3, motivoLargo);
     gestor.gestionarSolicitud(solicitud3, AceptarSolicitud.ACEPTAR);
 
     List<Hecho> filtrados = gestor.filtroExcluyenteDeHechosEliminados()

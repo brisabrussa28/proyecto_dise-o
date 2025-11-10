@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.model.info;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
@@ -10,7 +11,9 @@ import javax.persistence.Embeddable;
  */
 @Embeddable
 public class PuntoGeografico {
+  @Column(name = "hecho_latitud")
   private double latitud;
+  @Column(name = "hecho_longitud")
   private double longitud;
 
   /**

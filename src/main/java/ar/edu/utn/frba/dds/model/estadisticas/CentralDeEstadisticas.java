@@ -5,6 +5,7 @@ import ar.edu.utn.frba.dds.model.exportador.Exportador;
 import ar.edu.utn.frba.dds.model.filtro.Filtro;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.GestorDeSolicitudes;
+import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -41,7 +42,7 @@ public class CentralDeEstadisticas {
                           ))
                           .entrySet()
                           .stream()
-                          .map(entry -> new Estadistica(entry.getKey(), entry.getValue()))
+                          .map(entry -> new Estadistica(entry.getKey(), entry.getValue(), "PROVINCIA CON MAS HECHOS"))
                           .collect(Collectors.toList());
   }
 
@@ -57,7 +58,7 @@ public class CentralDeEstadisticas {
                          .collect(Collectors.groupingBy(Hecho::getCategoria, Collectors.counting()))
                          .entrySet()
                          .stream()
-                         .map(entry -> new Estadistica(entry.getKey(), entry.getValue()))
+                         .map(entry -> new Estadistica(entry.getKey(), entry.getValue(), "CATEGORIA CON MAS HECHOS"))
                          .collect(Collectors.toList());
   }
 
@@ -75,12 +76,13 @@ public class CentralDeEstadisticas {
                          .collect(Collectors.groupingBy(Hecho::getProvincia, Collectors.counting()))
                          .entrySet()
                          .stream()
-                         .map(entry -> new Estadistica(entry.getKey(), entry.getValue()))
+                         .map(entry -> new Estadistica(entry.getKey(), entry.getValue(), "PROVINCIA CON MAS HECHOS DE UNA CATEGORIA"))
                          .collect(Collectors.toList());
   }
 
-  public Estadistica provinciaConMasHechosDeCiertaCategoria(
-      List<Coleccion> colecciones, String categoria) {
+  public Estadistica provinciaConMasHechosDeCiertaCategoria(String categoria) {
+    List<Coleccion> colecciones = ColeccionRepository.instance()
+                                                     .findAll();
     return hechosPorProvinciaSegunCategoria(colecciones, categoria).stream()
                                                                    .max(Comparator.comparing(
                                                                        Estadistica::getValor))
@@ -101,12 +103,13 @@ public class CentralDeEstadisticas {
                          ))
                          .entrySet()
                          .stream()
-                         .map(entry -> new Estadistica(entry.getKey(), entry.getValue()))
+                         .map(entry -> new Estadistica(entry.getKey(), entry.getValue(), "HORA CON MAS HECHOS DE UNA CATEGORIA"))
                          .collect(Collectors.toList());
   }
 
-  public Estadistica horaConMasHechosDeCiertaCategoria(
-      List<Coleccion> colecciones, String categoria) {
+  public Estadistica horaConMasHechosDeCiertaCategoria(String categoria) {
+    List<Coleccion> colecciones = ColeccionRepository.instance()
+                                                     .findAll();
     return hechosPorHora(colecciones, categoria).stream()
                                                 .max(Comparator.comparing(Estadistica::getValor))
                                                 .orElse(null);

@@ -32,11 +32,11 @@ public class Solicitud {
   @JoinColumn(name = "hecho_id")
   private Hecho hechoSolicitado;
 
-  @Column(length = 1024)
+  @Column(length = 1024, name = "solicitud_razon_eliminacion")
   private String razonEliminacion;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "estado", nullable = false)
+  @Column(name = "solicitud_estado", nullable = false)
   private EstadoSolicitud estado;
 
   public void setHechoSolicitado(Hecho hechoSolicitado) {
@@ -87,8 +87,12 @@ public class Solicitud {
     this.estado = EstadoSolicitud.RECHAZADA;
   }
 
-  public long getId() {
+  public Long getId() {
     return this.id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
   }
 
   void validarMotivo(String motivo) {

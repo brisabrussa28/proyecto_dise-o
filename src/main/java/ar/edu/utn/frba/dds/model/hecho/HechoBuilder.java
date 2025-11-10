@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.model.hecho;
 
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
+import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class HechoBuilder {
   private LocalDateTime fechaCarga = LocalDateTime.now();
   private Origen fuenteOrigen;
   private List<Etiqueta> etiquetas = new ArrayList<>();
+  private List<Multimedia> fotos = new ArrayList<>();
 
   public HechoBuilder copiar(Hecho original) {
     this.titulo = original.getTitulo();
@@ -34,6 +36,7 @@ public class HechoBuilder {
     this.fechaCarga = original.getFechacarga();
     this.fuenteOrigen = original.getOrigen();
     this.etiquetas = new ArrayList<>(original.getEtiquetas());
+//    this.fotos = new ArrayList<>(original.getFotos());
     return this;
   }
 
@@ -108,6 +111,7 @@ public class HechoBuilder {
 
   /**
    * Construye y devuelve una instancia de Hecho con los datos proporcionados.
+   *
    * @return Una nueva instancia de Hecho.
    * @throws IllegalStateException si faltan campos obligatorios o los datos son inconsistentes.
    */
@@ -123,7 +127,9 @@ public class HechoBuilder {
         fechaSuceso,
         fechaCarga,
         fuenteOrigen,
-        etiquetas);
+        etiquetas
+        //fotos
+    );
   }
 
   private void validarCampos() {

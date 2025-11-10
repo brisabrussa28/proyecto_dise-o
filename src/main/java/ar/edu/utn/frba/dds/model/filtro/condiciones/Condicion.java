@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.model.filtro.condiciones;
 
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,11 +13,12 @@ import javax.persistence.Table;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "tipo_condicion")
+@DiscriminatorColumn(name = "condicion_tipo")
 @Table(name = "Condicion")
 public abstract class Condicion {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "condicion_id")
   Long id;
 
   /**

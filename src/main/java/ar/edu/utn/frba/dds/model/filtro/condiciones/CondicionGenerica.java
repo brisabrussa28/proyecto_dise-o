@@ -1,9 +1,9 @@
 package ar.edu.utn.frba.dds.model.filtro.condiciones;
 
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
-
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,11 +12,14 @@ import javax.persistence.Enumerated;
 @Entity
 @DiscriminatorValue("Cond_generica")
 public class CondicionGenerica extends Condicion {
+  @Column(name = "condicion_campo")
   private String campo;
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "condicion_operador")
   private Operador operador;
 
+  @Column(name = "condicion_valor")
   private String valor;
 
   public CondicionGenerica() {

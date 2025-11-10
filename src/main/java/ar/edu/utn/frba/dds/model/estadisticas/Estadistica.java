@@ -19,12 +19,18 @@ public class Estadistica {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long estadistica_id;
-  private final String estadistica_nombre;
-  private final Long estadistica_valor;
+  private String estadistica_nombre;
+  private Long estadistica_valor;
+  private String estadistica_tipo;
 
-  public Estadistica(String nombre, Long valor) {
+
+  public Estadistica(String nombre, Long valor, String estadistica_tipo) {
     this.estadistica_nombre = nombre;
     this.estadistica_valor = valor;
+    this.estadistica_tipo = estadistica_tipo;
+  }
+
+  public Estadistica() {
   }
 
   public String getNombre() {
@@ -33,6 +39,18 @@ public class Estadistica {
 
   public Long getValor() {
     return estadistica_valor;
+  }
+
+  public Long getId() {
+    return this.estadistica_id;
+  }
+
+  public String getTipo() {
+    return this.estadistica_tipo;
+  }
+
+  public void setId(Long id) {
+    this.estadistica_id = id;
   }
 
   @Override

@@ -5,9 +5,7 @@ import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.List;
-import java.util.Optional;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 
 /**
  * Repositorio de Solicitudes. Responsable únicamente del almacenamiento
@@ -31,10 +29,12 @@ public class SolicitudesRepository {
    */
   public void guardar(Solicitud solicitud) {
     DBUtils.comenzarTransaccion(em);
-    if (solicitud.id == null) {
-      em.persist(solicitud);
-    } else {
+    Solicitud existente = buscarPorHechoYRazon(solicitud.getHechoSolicitado(), solicitud.getRazonEliminacion());
+    if (existente != null) {
+      solicitud.setId(existente.getId());
       em.merge(solicitud);
+    } else {
+      em.persist(solicitud);
     }
     DBUtils.commit(em);
   }
@@ -56,19 +56,16 @@ public class SolicitudesRepository {
    * @param razon El texto del motivo de la solicitud.
    * @return Un Optional con la solicitud si se encuentra.
    */
-  public Optional<Solicitud> buscarPorHechoYRazon(Hecho hecho, String razon) {
-    try {
-      Solicitud solicitud = em.createQuery(
-                                  "SELECT s FROM Solicitud s WHERE s.hechoSolicitado = :hecho AND s.razonEliminacion = :razon",
-                                  Solicitud.class
-                              )
-                              .setParameter("hecho", hecho)
-                              .setParameter("razon", razon)
-                              .getSingleResult();
-      return Optional.of(solicitud);
-    } catch (NoResultException e) {
-      return Optional.empty();
-    }
+  public Solicitud buscarPorHechoYRazon(Hecho hecho, String razon) {
+    return em.createQuery(
+                 "SELECT s FROM Solicitud s WHERE s.hechoSolicitado = :hecho AND s.razonEliminacion = :razon",
+                 Solicitud.class
+             )
+             .setParameter("hecho", hecho)
+             .setParameter("razon", razon)
+             .getResultStream()
+             .findFirst()
+             .orElse(null);
   }
 
   /**

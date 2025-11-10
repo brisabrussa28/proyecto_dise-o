@@ -11,11 +11,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.SequenceGenerator;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "tipo_fuente", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "fuente_tipo", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("BASE")
 public abstract class Fuente {
 

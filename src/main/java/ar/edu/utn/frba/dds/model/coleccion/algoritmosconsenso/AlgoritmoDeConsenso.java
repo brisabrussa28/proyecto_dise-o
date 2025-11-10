@@ -21,7 +21,7 @@ import javax.persistence.Transient;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "tipo_algoritmo")
+@DiscriminatorColumn(name = "algoritmo_tipo")
 @Table(name = "AlgoritmoDeConsenso")
 public abstract class AlgoritmoDeConsenso {
   @Id

@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
@@ -53,6 +52,8 @@ public class Hecho {
   @Column(name = "hecho_estado", nullable = false)
   private Estado estado;
   private String hecho_provincia;
+//  @ElementCollection
+//  List<Multimedia> fotos;
 
   /**
    * Constructor para un Hecho.
@@ -75,7 +76,7 @@ public class Hecho {
    * @param fechaSuceso  LocalDateTime
    * @param fechaCarga   LocalDateTime
    * @param fuenteOrigen Origen
-   * @param etiquetas    List
+   * //@param etiquetas    List
    */
   public Hecho(
       String titulo,
@@ -88,6 +89,7 @@ public class Hecho {
       LocalDateTime fechaCarga,
       Origen fuenteOrigen,
       List<Etiqueta> etiquetas
+//      List<Multimedia> fotos
   ) {
     this.hecho_titulo = titulo;
     this.hecho_descripcion = descripcion;
@@ -100,6 +102,7 @@ public class Hecho {
     this.etiquetas = etiquetas;
     this.hecho_provincia = provincia;
     this.estado = Estado.ORIGINAL;
+//    this.fotos = fotos;
   }
 
   /**
@@ -210,6 +213,11 @@ public class Hecho {
   public String getProvincia() {
     return hecho_provincia;
   }
+
+//  @JsonProperty("hecho_fotos")
+//  public List<Multimedia> getFotos() {
+//    return new ArrayList<>(this.fotos);
+//  }
 
   public void setTitulo(String hecho_titulo) {
     this.hecho_titulo = hecho_titulo;

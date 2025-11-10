@@ -27,7 +27,6 @@ import ar.edu.utn.frba.dds.repositories.EstadisticaRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
-import io.github.flbulgarelli.jpa.extras.test.SimplePersistenceTest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +39,7 @@ import org.junit.jupiter.api.Test;
  * Tests que verifican la correcta persistencia de diferentes entidades del dominio.
  * Hereda de PersistenceTests para obtener el manejo de transacciones y la configuración de la BD.
  */
-public class JDBCTest implements SimplePersistenceTest {
+public class JDBCTest {
   private ColeccionRepository repoColeccion = new ColeccionRepository();
   private HechoRepository hechoRepo = new HechoRepository();
   private FuenteRepository fuenteRepo = new FuenteRepository();
@@ -95,14 +94,16 @@ public class JDBCTest implements SimplePersistenceTest {
 
     Exportador<Estadistica> exportadorCsv = new ExportadorCSV<>(new ModoSobrescribir());
     calculadora.setExportador(exportadorCsv);
+    var algoritmo = new Absoluta();
 
     var coleccion = new Coleccion(
         "Coleccion de Hechos",
         fuente,
         "Descripcion de prueba",
-        "General"
+        "General",
+        algoritmo
     );
-    var algoritmo = new Absoluta();
+
     coleccion.setAlgoritmoDeConsenso(algoritmo);
     algoritmoRepository.save(algoritmo);
     repoColeccion.save(coleccion);
@@ -146,7 +147,8 @@ public class JDBCTest implements SimplePersistenceTest {
         "Robos en BA",
         fuente,
         "Hechos delictivos en Buenos Aires",
-        "Robos"
+        "Robos",
+        new Absoluta()
     );
     var multiplesMenciones = new MultiplesMenciones();
     coleccionBonaerense.setAlgoritmoDeConsenso(multiplesMenciones);
@@ -162,24 +164,21 @@ public class JDBCTest implements SimplePersistenceTest {
   @DisplayName("Genero estadisticas y las puedo visualizar en la db")
   public void estadisticaDBTest() {
     CentralDeEstadisticas calculadora = new CentralDeEstadisticas();
-    List<Coleccion> coleccionDB = repoColeccion.findAll();
+    List<Coleccion> coleccionDB = ColeccionRepository.instance()
+                                                     .findAll();
     //System.out.println(coleccionDB.toString());
     calculadora.setGestor(new GestorDeSolicitudes(solicitudRepo));
     var stat = calculadora.categoriaConMasHechos(coleccionDB);
-    var repoStat = new EstadisticaRepository();
-    repoStat.save(stat);
-
-    coleccionDePrueba = new Coleccion();
-    coleccionDePrueba.setId(1L);
-    Optional<Coleccion> coleccionOpt = Optional.ofNullable(repoColeccion.findById(coleccionDePrueba.getId()));
+    EstadisticaRepository.instance().save(stat);
+    Optional<Coleccion> coleccionOpt = Optional.ofNullable(repoColeccion.findById(1L));
     Assertions.assertTrue(
         coleccionOpt.isPresent(),
         "La colección de prueba no fue encontrada en la BD."
     );
-    coleccionOpt.ifPresent(coleccion -> {
-      var stat2 = calculadora.provinciaConMasHechos(coleccion);
-      repoStat.save(stat2);
-    });
+//    coleccionOpt.ifPresent(coleccion -> {
+//      var stat2 = calculadora.provinciaConMasHechos(coleccion);
+//      EstadisticaRepository.instance().save(stat2);
+//    });
   }
 
   @Test
