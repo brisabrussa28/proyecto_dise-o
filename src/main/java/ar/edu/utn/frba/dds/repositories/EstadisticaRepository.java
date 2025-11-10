@@ -26,19 +26,19 @@ public class EstadisticaRepository {
 //    }
 //  }
 
-  public Estadistica findByNombreAndTipo(String nombre, String tipoEstadistica) {
+  public Estadistica findByNombreAndTipo(String tipoEstadistica) {
     return em.createQuery(
-                 "SELECT e FROM Estadistica e WHERE e.estadistica_nombre = :nombre AND e.estadistica_tipo = :tipo", Estadistica.class)
-             .setParameter("nombre", nombre)
+                 "SELECT e FROM Estadistica e WHERE e.estadistica_tipo = :tipo",
+                 Estadistica.class
+             )
              .setParameter("tipo", tipoEstadistica)
              .getResultStream()
              .findFirst()
              .orElse(null);
   }
 
-  // Update save method
   public void save(Estadistica estadistica) {
-    Estadistica existing = findByNombreAndTipo(estadistica.getNombre(), estadistica.getTipo());
+    Estadistica existing = findByNombreAndTipo(estadistica.getTipo());
     DBUtils.comenzarTransaccion(em);
     if (existing != null) {
       estadistica.setId(existing.getId());
