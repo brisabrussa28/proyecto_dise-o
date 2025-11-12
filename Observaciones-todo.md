@@ -105,4 +105,10 @@
  - [ ] Implementacion todas interfaces considerando esto
  - [ ] Manejo de sesion usando autenticacion delegada
  - [ ] Sumar los requerimientos adicionales propuestos anteriormente
- - [ ] La central de estadisticas debe generar las mismas consultando a la db, no probando en local
+ - [X] La central de estadisticas debe generar las mismas consultando a la db, no probando en local
+ - [X] Habilitar endpoints para listar categorias
+ - [X] Habilitar endpoint para crear una fuente dinamica
+ - [X] Endpoint para crear coleccion
+ - [ ] Ver como crear una fuente estatica subiendo un .csv
+ - [ ] Habilitar un endpoint para generar cada estadistica
+ - [X] Poder editar un hecho

@@ -62,7 +62,9 @@ public class CentralDeEstadisticas {
                          .collect(Collectors.toList());
   }
 
-  public Estadistica categoriaConMasHechos(List<Coleccion> colecciones) {
+  public Estadistica categoriaConMasHechos() {
+    List<Coleccion> colecciones = ColeccionRepository.instance()
+                                                     .findAll();
     return hechosPorCategoria(colecciones).stream()
                                           .max(Comparator.comparing(Estadistica::getValor))
                                           .orElse(null);
@@ -76,7 +78,11 @@ public class CentralDeEstadisticas {
                          .collect(Collectors.groupingBy(Hecho::getProvincia, Collectors.counting()))
                          .entrySet()
                          .stream()
-                         .map(entry -> new Estadistica(entry.getKey(), entry.getValue(), "PROVINCIA CON MAS HECHOS DE UNA CATEGORIA"))
+                         .map(entry -> new Estadistica(
+                             entry.getKey(),
+                             entry.getValue(),
+                             "PROVINCIA CON MAS HECHOS DE UNA CATEGORIA"
+                         ))
                          .collect(Collectors.toList());
   }
 
@@ -103,7 +109,11 @@ public class CentralDeEstadisticas {
                          ))
                          .entrySet()
                          .stream()
-                         .map(entry -> new Estadistica(entry.getKey(), entry.getValue(), "HORA CON MAS HECHOS DE UNA CATEGORIA"))
+                         .map(entry -> new Estadistica(
+                             entry.getKey(),
+                             entry.getValue(),
+                             "HORA CON MAS HECHOS DE UNA CATEGORIA"
+                         ))
                          .collect(Collectors.toList());
   }
 
@@ -115,9 +125,9 @@ public class CentralDeEstadisticas {
                                                 .orElse(null);
   }
 
-  public long cantidadDeSolicitudesSpam() {
+  public Estadistica cantidadDeSolicitudesSpam() {
     validarGestorConfigurado();
-    return gestor.cantidadDeSpamDetectado();
+    return new Estadistica(null, gestor.cantidadDeSpamDetectado(), "CANTIDAD DE SOLICITUDES SPAM");
   }
 
   // --- Lógica de Exportación ---

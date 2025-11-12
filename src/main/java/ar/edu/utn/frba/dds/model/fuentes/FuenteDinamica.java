@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.model.fuentes;
 
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,10 +11,15 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 @Entity
 @DiscriminatorValue("DINAMICA")
 public class FuenteDinamica extends FuenteConHechos {
+
+  @Transient
+  @JsonProperty("tipo_fuente")
+  private String tipo_fuente;
 
   // Relación persistente: solo esta clase guarda Hechos en la BD.
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -22,11 +28,13 @@ public class FuenteDinamica extends FuenteConHechos {
 
   protected FuenteDinamica() {
     super();
+    this.tipo_fuente = "DINAMICA";
   }
 
   public FuenteDinamica(String nombre) {
     super(nombre);
     this.hechosPersistidos = new ArrayList<>();
+    this.tipo_fuente = "DINAMICA";
   }
 
   public void agregarHecho(Hecho hecho) {

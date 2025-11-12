@@ -7,9 +7,9 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
-
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -55,7 +55,8 @@ public class LectorCSV<T> implements Lector<T> {
         CSVReader reader = new CSVReaderBuilder(
             new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8)
         ).withCSVParser(new CSVParserBuilder().withSeparator(separator)
-            .build()).build()
+                                              .build())
+         .build()
     ) {
       String[] headers = reader.readNext();
       if (headers == null || headers.length == 0) {
@@ -78,6 +79,41 @@ public class LectorCSV<T> implements Lector<T> {
       }
     } catch (IOException | CsvException e) {
       throw new RuntimeException("Error al leer el archivo CSV en la ruta: " + path, e);
+    }
+    return resultados;
+  }
+
+  public List<T> importar(InputStream contenido) {
+    List<T> resultados = new ArrayList<>();
+    try (
+        // Usamos el inputStream directamente en lugar de un FileInputStream
+        CSVReader reader = new CSVReaderBuilder(
+            new InputStreamReader(contenido, StandardCharsets.UTF_8)
+        ).withCSVParser(new CSVParserBuilder().withSeparator(separator)
+                                              .build())
+         .build()
+    ) {
+      String[] headers = reader.readNext();
+      if (headers == null || headers.length == 0) {
+        throw new IllegalArgumentException("El archivo CSV no contiene encabezados.");
+      }
+
+      String[] row;
+      int linea = 1;
+
+      while ((row = reader.readNext()) != null) {
+        linea++;
+        Map<String, String> filaMapeada = mapearFila(row, headers);
+        T objeto = converter.convert(Collections.unmodifiableMap(filaMapeada));
+
+        if (objeto != null) {
+          resultados.add(objeto);
+        } else {
+          logger.warning("[Línea " + linea + "] Fila descartada por el conversor.");
+        }
+      }
+    } catch (IOException | CsvException e) {
+      throw new RuntimeException("Error al leer el stream CSV", e);
     }
     return resultados;
   }

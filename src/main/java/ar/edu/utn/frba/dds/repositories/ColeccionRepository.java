@@ -33,4 +33,9 @@ public class ColeccionRepository {
   public Coleccion findById(Long id) {
     return em.find(Coleccion.class, id);
   }
+
+  public List<String> getCategorias() {
+    return em.createQuery("select distinct c.coleccion_categoria from Coleccion c", String.class)
+             .getResultList();
+  }
 }

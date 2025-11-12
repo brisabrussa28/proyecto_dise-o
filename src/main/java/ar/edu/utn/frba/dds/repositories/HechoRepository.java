@@ -17,6 +17,7 @@ public class HechoRepository {
 
   public void save(Hecho hecho) {
     DBUtils.comenzarTransaccion(em);
+    DBUtils.enriquecerHecho(hecho);
     if (hecho.getId() == null) {
       em.persist(hecho);
     } else {

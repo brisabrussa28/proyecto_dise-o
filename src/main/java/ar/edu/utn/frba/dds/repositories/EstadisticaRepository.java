@@ -28,7 +28,9 @@ public class EstadisticaRepository {
 
   public Estadistica findByNombreAndTipo(String nombre, String tipoEstadistica) {
     return em.createQuery(
-                 "SELECT e FROM Estadistica e WHERE e.estadistica_nombre = :nombre AND e.estadistica_tipo = :tipo", Estadistica.class)
+                 "SELECT e FROM Estadistica e WHERE e.estadistica_nombre = :nombre AND e.estadistica_tipo = :tipo",
+                 Estadistica.class
+             )
              .setParameter("nombre", nombre)
              .setParameter("tipo", tipoEstadistica)
              .getResultStream()
@@ -51,7 +53,7 @@ public class EstadisticaRepository {
 
 
   public List<Estadistica> findAll() {
-    return em.createQuery("SELECT f FROM Estadistica f", Estadistica.class)
+    return em.createQuery("SELECT e FROM Estadistica e", Estadistica.class)
              .getResultList();
 
   }
@@ -59,4 +61,11 @@ public class EstadisticaRepository {
   public Estadistica findById(Long id) {
     return em.find(Estadistica.class, id);
   }
+
+  public Estadistica findByTipo(String tipo) {
+    return em.createQuery("SELECT e from Estadistica e where e.estadistica_tipo = :tipo", Estadistica.class)
+             .setParameter("tipo", tipo)
+             .getSingleResult();
+  }
+
 }

@@ -168,7 +168,7 @@ public class JDBCTest {
                                                      .findAll();
     //System.out.println(coleccionDB.toString());
     calculadora.setGestor(new GestorDeSolicitudes(solicitudRepo));
-    var stat = calculadora.categoriaConMasHechos(coleccionDB);
+    var stat = calculadora.categoriaConMasHechos();
     EstadisticaRepository.instance().save(stat);
     Optional<Coleccion> coleccionOpt = Optional.ofNullable(repoColeccion.findById(1L));
     Assertions.assertTrue(
@@ -179,6 +179,8 @@ public class JDBCTest {
       var stat2 = calculadora.provinciaConMasHechos(coleccion);
       EstadisticaRepository.instance().save(stat2);
     });
+    var stat3 = calculadora.horaConMasHechosDeCiertaCategoria("Robos");
+    EstadisticaRepository.instance().save(stat3);
   }
 
   @Test

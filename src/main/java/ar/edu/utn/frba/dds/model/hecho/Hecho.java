@@ -76,7 +76,7 @@ public class Hecho {
    * @param fechaSuceso  LocalDateTime
    * @param fechaCarga   LocalDateTime
    * @param fuenteOrigen Origen
-   * //@param etiquetas    List
+   *                     //@param etiquetas    List
    */
   public Hecho(
       String titulo,

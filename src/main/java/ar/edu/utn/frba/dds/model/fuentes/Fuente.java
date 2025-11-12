@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.Transient;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -21,6 +22,9 @@ public abstract class Fuente {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long fuente_id;
+
+  @Transient
+  private String tipo_fuente;
 
   protected String fuente_nombre;
 

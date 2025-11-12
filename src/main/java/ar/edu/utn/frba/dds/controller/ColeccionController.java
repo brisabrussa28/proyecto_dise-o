@@ -10,6 +10,7 @@ import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.repositories.AlgoritmoRepository;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
+import java.util.List;
 
 public class ColeccionController {
   public Coleccion crearColeccion(ColeccionDTO coleccionDTO) {
@@ -38,5 +39,9 @@ public class ColeccionController {
     ColeccionRepository.instance()
                        .save(coleccion);
     return coleccion;
+  }
+
+  public List<String> getCategorias() {
+    return ColeccionRepository.instance().getCategorias();
   }
 }

@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.model.fuentes;
 import ar.edu.utn.frba.dds.model.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.model.fuentes.apis.configuracion.ConfiguracionAdapter;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.DiscriminatorValue;
@@ -14,6 +15,11 @@ import javax.persistence.Transient;
 @DiscriminatorValue("API_EXTERNA")
 public class FuenteExternaAPI extends FuenteDeCopiaLocal {
 
+
+  @Transient
+  @JsonProperty("tipo_fuente")
+  private String tipo_fuente;
+
   @Transient
   private FuenteAdapter adaptador;
 
@@ -24,6 +30,7 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
 
   protected FuenteExternaAPI() {
     super();
+    this.tipo_fuente = "API_EXTERNA";
   }
 
   public FuenteExternaAPI(String nombre, ConfiguracionAdapter configAdapter) {

@@ -89,7 +89,7 @@ public class EstadisticasTest {
   @Test
   @DisplayName("Calcula la categoría con más hechos entre varias colecciones")
   public void estadisticasCategoriaConMasHechos() {
-    Estadistica resultado = calculadora.categoriaConMasHechos(colecciones);
+    Estadistica resultado = calculadora.categoriaConMasHechos();
     assertNotNull(resultado);
     // CORRECCIÓN: Se comprueba el nombre y el valor por separado.
     assertEquals("Robos", resultado.getNombre());

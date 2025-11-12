@@ -71,7 +71,7 @@ public class GestorDeSolicitudes {
    * @return El número de solicitudes de spam.
    */
   public long cantidadDeSpamDetectado() {
-    return repositorio.obtenerPorEstado(EstadoSolicitud.SPAM)
+    return repositorio.obtenerPorEstado(EstadoSolicitud.ACEPTADA)
                       .size();
   }
 

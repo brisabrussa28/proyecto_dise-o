@@ -8,18 +8,33 @@ import ar.edu.utn.frba.dds.model.exportador.Exportador;
 import ar.edu.utn.frba.dds.model.exportador.csv.ExportadorCSV;
 import ar.edu.utn.frba.dds.model.exportador.csv.modoexportacion.ModoSobrescribir;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteEstatica;
+import ar.edu.utn.frba.dds.model.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLectorCsv;
 import ar.edu.utn.frba.dds.repositories.AlgoritmoRepository;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Bootstrap implements WithSimplePersistenceUnit {
+  private Map<String, List<String>> convertirMapeoAString(Map<CampoHecho, List<String>> mapeoEnum) {
+    return mapeoEnum.entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(
+                        entry -> entry.getKey()
+                                      .name(), Map.Entry::getValue
+                    ));
+  }
+
   public void init() {
     //    HechoRepository hechoRepo = new HechoRepository();
     //    FuenteRepository fuenteRepo = new FuenteRepository();
@@ -54,11 +69,28 @@ public class Bootstrap implements WithSimplePersistenceUnit {
           .build();
 
       var fuente = new FuenteDinamica("Fuente para Estadísticas");
+      Map<String, List<String>> mapeoColumnas = convertirMapeoAString(Map.of(
+          CampoHecho.TITULO, List.of("titulo"),
+          CampoHecho.DESCRIPCION, List.of("descripcion"),
+          CampoHecho.LATITUD, List.of("latitud"),
+          CampoHecho.LONGITUD, List.of("longitud"),
+          CampoHecho.FECHA_SUCESO, List.of("fechaSuceso"),
+          CampoHecho.CATEGORIA, List.of("categoria"),
+          CampoHecho.DIRECCION, List.of("direccion"),
+          CampoHecho.PROVINCIA, List.of("provincia")
+      ));
+      // HechoFilaConverter converter = new HechoFilaConverter("dd/MM/yyyy", mapeoColumnas);
+      var fuenteCsv = new FuenteEstatica(
+          "Una fuente estatica",
+          "src/main/resources/csvs/ejemplo.csv",
+          new ConfiguracionLectorCsv(',', "dd/MM/yyyy", mapeoColumnas)
+      );
       fuente.agregarHecho(hecho1);
       fuente.agregarHecho(hecho2);
       fuente.agregarHecho(hecho3);
       FuenteRepository repoFuentes = new FuenteRepository();
       repoFuentes.save(fuente);
+      repoFuentes.save(fuenteCsv);
       var solicitudes = new SolicitudesRepository();
       var calculadora = new CentralDeEstadisticas();
       Exportador<Estadistica> exportadorCsv = new ExportadorCSV<>(new ModoSobrescribir());

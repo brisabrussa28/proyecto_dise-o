@@ -1,12 +1,9 @@
 package ar.edu.utn.frba.dds.model.fuentes;
 
-import ar.edu.utn.frba.dds.model.hecho.EnriquecedorDeHechos;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.lector.Lector;
 import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLector;
-import ar.edu.utn.frba.dds.model.hecho.Hecho;
-import ar.edu.utn.frba.dds.model.lector.Lector;
-import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLector;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,9 +19,13 @@ import javax.persistence.Transient;
 @DiscriminatorValue("ESTATICA")
 public class FuenteEstatica extends FuenteConHechos {
 
+  @Transient
+  @JsonProperty("tipo_fuente")
+  private String tipo_fuente;
+
   private String fuente_ruta_archivo;
 
-//  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  //@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   @Transient
   private ConfiguracionLector fuente_configuracion_lector;
 
@@ -34,6 +35,7 @@ public class FuenteEstatica extends FuenteConHechos {
 
   protected FuenteEstatica() {
     super();
+    this.tipo_fuente = "ESTATICA";
   }
 
   public FuenteEstatica(String nombre, String fuente_ruta_archivo, ConfiguracionLector configLector) {
@@ -49,6 +51,24 @@ public class FuenteEstatica extends FuenteConHechos {
 
     // Se cargan los hechos al crear la instancia.
     this.cargarHechosDesdeArchivo();
+  }
+
+  /**
+   * Crea una FuenteEstatica a partir de hechos ya leídos.
+   */
+  public FuenteEstatica(String nombre, List<Hecho> hechosImportados) {
+    super(nombre);
+    if (hechosImportados == null) {
+      throw new IllegalArgumentException("La lista de hechos no puede ser nula.");
+    }
+
+    // No guardamos ruta ni config, solo los hechos.
+    this.fuente_ruta_archivo = null; // O un valor default como "cargado_en_memoria"
+    this.fuente_configuracion_lector = null; // Es transitorio de todos modos
+
+    // Cargamos los hechos directamente
+    this.hechosPersistidos.clear();
+    this.hechosPersistidos.addAll(hechosImportados);
   }
 
   /**

@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.model.fuentes;
 
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 /**
  * Fuente que combina los hechos de múltiples otras fuentes en tiempo real.
@@ -17,6 +19,10 @@ import javax.persistence.OneToMany;
 @Entity
 @DiscriminatorValue("AGREGACION")
 public class FuenteDeAgregacion extends Fuente {
+
+  @Transient
+  @JsonProperty("tipo_fuente")
+  private String tipo_fuente;
 
   /**
    * Relación con las fuentes que se van a agregar.
@@ -31,6 +37,7 @@ public class FuenteDeAgregacion extends Fuente {
    */
   protected FuenteDeAgregacion() {
     super();
+    this.tipo_fuente = "AGREGACION";
   }
 
   public FuenteDeAgregacion(String nombre) {
@@ -73,7 +80,8 @@ public class FuenteDeAgregacion extends Fuente {
       return new ArrayList<>();
     }
     return this.fuentesCargadas.stream()
-                               .flatMap(fuente -> fuente.getHechos().stream())
+                               .flatMap(fuente -> fuente.getHechos()
+                                                        .stream())
                                .distinct()
                                .collect(Collectors.toList());
   }
