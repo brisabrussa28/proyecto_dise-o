@@ -16,9 +16,12 @@ import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.http.UploadedFile;
 import java.util.List;
+import java.util.Map;
 
 public class Router {
   public void configure(Javalin app) {
@@ -121,11 +124,51 @@ public class Router {
     );
     app.post(
         "/fuentes", ctx -> {
-          UploadedFile csvSubido = ctx.uploadedFile("archivoCsv"); //"archivoCsv" es un nombre generico, tiene que tener el nombre con el que venga del front en la req.
-          String nombreFuente = ctx.queryParam("nombre");
+          UploadedFile csvSubido = ctx.uploadedFile("archivoCsv");
+
+          String nombreFuente = ctx.formParam("nombre");
+
+          if (nombreFuente == null || nombreFuente.isEmpty()) {
+            ctx.status(400)
+               .json("Error: El campo 'nombre' es requerido.");
+            return; // Detener la ejecución
+          }
+
           if (csvSubido != null) {
-            //ctx.json(fuenteController.crearFuente(nombreFuente, csvSubido));
+            String formatoFecha = ctx.formParam("formatoFecha");
+            String separadorStr = ctx.formParam("separador");
+
+            String columnasJson = ctx.formParam("columnas");
+
+            if (columnasJson == null) {
+              ctx.status(400)
+                 .json("Error: Falta aclarar columnas para la fuente estática.");
+              return;
+            }
+
+            if (formatoFecha == null || formatoFecha.isEmpty()) {
+              formatoFecha = "dd/MM/yyyy";
+            }
+
+            char separador = ',';
+
+            if (separadorStr != null || !separadorStr.isEmpty()) {
+              separador = separadorStr.charAt(0);
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, List<String>> columnas = mapper.readValue(
+                columnasJson,
+                new TypeReference<Map<String, List<String>>>() {}
+            );
+
+            ctx.json(
+                fuenteController.crearFuente(
+                    nombreFuente, csvSubido, formatoFecha, columnas, separador
+                )
+            );
             ctx.status(201);
+
           } else {
             ctx.json(fuenteController.crearFuente(nombreFuente));
             ctx.status(201);
