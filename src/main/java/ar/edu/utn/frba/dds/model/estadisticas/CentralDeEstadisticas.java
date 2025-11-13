@@ -36,13 +36,13 @@ public class CentralDeEstadisticas {
     }
 
     return hechosFiltrados.stream()
-                          .collect(Collectors.groupingBy(
-                              Hecho::getProvincia,
-                              Collectors.counting()
-                          ))
+                          .collect(Collectors.groupingBy(Hecho::getProvincia, Collectors.counting()))
                           .entrySet()
                           .stream()
-                          .map(entry -> new Estadistica(entry.getKey(), entry.getValue(), "PROVINCIA CON MAS HECHOS"))
+                          .map(entry -> new Estadistica(
+                              entry.getKey(), entry.getValue(), "PROVINCIA CON MAS HECHOS",
+                              null
+                          ))
                           .collect(Collectors.toList());
   }
 
@@ -58,7 +58,10 @@ public class CentralDeEstadisticas {
                          .collect(Collectors.groupingBy(Hecho::getCategoria, Collectors.counting()))
                          .entrySet()
                          .stream()
-                         .map(entry -> new Estadistica(entry.getKey(), entry.getValue(), "CATEGORIA CON MAS HECHOS"))
+                         .map(entry -> new Estadistica(
+                             entry.getKey(), entry.getValue(), "CATEGORIA CON MAS HECHOS",
+                             entry.getKey()
+                         ))
                          .collect(Collectors.toList());
   }
 
@@ -70,8 +73,7 @@ public class CentralDeEstadisticas {
                                           .orElse(null);
   }
 
-  public List<Estadistica> hechosPorProvinciaSegunCategoria(
-      List<Coleccion> colecciones, String categoria) {
+  public List<Estadistica> hechosPorProvinciaSegunCategoria(List<Coleccion> colecciones, String categoria) {
     List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
     return todosLosHechos.stream()
                          .filter(hecho -> Objects.equals(hecho.getCategoria(), categoria))
@@ -81,7 +83,8 @@ public class CentralDeEstadisticas {
                          .map(entry -> new Estadistica(
                              entry.getKey(),
                              entry.getValue(),
-                             "PROVINCIA CON MAS HECHOS DE UNA CATEGORIA"
+                             "PROVINCIA CON MAS HECHOS DE UNA CATEGORIA",
+                             categoria
                          ))
                          .collect(Collectors.toList());
   }
@@ -90,8 +93,7 @@ public class CentralDeEstadisticas {
     List<Coleccion> colecciones = ColeccionRepository.instance()
                                                      .findAll();
     return hechosPorProvinciaSegunCategoria(colecciones, categoria).stream()
-                                                                   .max(Comparator.comparing(
-                                                                       Estadistica::getValor))
+                                                                   .max(Comparator.comparing(Estadistica::getValor))
                                                                    .orElse(null);
   }
 
@@ -104,15 +106,15 @@ public class CentralDeEstadisticas {
                                  "%02d",
                                  hecho.getFechasuceso()
                                       .getHour()
-                             ),
-                             Collectors.counting()
+                             ), Collectors.counting()
                          ))
                          .entrySet()
                          .stream()
                          .map(entry -> new Estadistica(
                              entry.getKey(),
                              entry.getValue(),
-                             "HORA CON MAS HECHOS DE UNA CATEGORIA"
+                             "HORA CON MAS HECHOS DE UNA CATEGORIA",
+                             categoria
                          ))
                          .collect(Collectors.toList());
   }
@@ -127,7 +129,7 @@ public class CentralDeEstadisticas {
 
   public Estadistica cantidadDeSolicitudesSpam() {
     validarGestorConfigurado();
-    return new Estadistica(null, gestor.cantidadDeSpamDetectado(), "CANTIDAD DE SOLICITUDES SPAM");
+    return new Estadistica(null, gestor.cantidadDeSpamDetectado(), "CANTIDAD DE SOLICITUDES SPAM", null);
   }
 
   // --- Lógica de Exportación ---
@@ -163,8 +165,7 @@ public class CentralDeEstadisticas {
   private List<Hecho> obtenerTodosLosHechos(List<Coleccion> colecciones) {
     Filtro filtroExcluyente = obtenerFiltroExcluyente();
     List<Hecho> todosLosHechos = colecciones.stream()
-                                            .flatMap(coleccion -> coleccion.obtenerHechosFiltrados(
-                                                                               filtroExcluyente)
+                                            .flatMap(coleccion -> coleccion.obtenerHechosFiltrados(filtroExcluyente)
                                                                            .stream())
                                             .collect(Collectors.toList());
 
@@ -187,8 +188,7 @@ public class CentralDeEstadisticas {
 
   private void validarExportadorConfigurado() {
     if (this.exportador == null) {
-      throw new IllegalStateException(
-          "El exportador no ha sido configurado. Use setExportador() primero.");
+      throw new IllegalStateException("El exportador no ha sido configurado. Use setExportador() primero.");
     }
   }
 }

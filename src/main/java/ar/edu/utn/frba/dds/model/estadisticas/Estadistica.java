@@ -22,6 +22,7 @@ public class Estadistica {
   Long estadistica_id;
 
   private String estadistica_tipo;
+  private String estadistica_categoria;
 
   @Column(name = "estadistica_nombre")
   private String estadistica_nombre;
@@ -29,10 +30,11 @@ public class Estadistica {
   private Long estadistica_valor;
 
 
-  public Estadistica(String nombre, Long valor, String estadistica_tipo) {
+  public Estadistica(String nombre, Long valor, String estadistica_tipo, String categoria) {
     this.estadistica_nombre = nombre;
     this.estadistica_valor = valor;
     this.estadistica_tipo = estadistica_tipo;
+    this.estadistica_categoria = categoria;
   }
 
   public Estadistica() {
@@ -56,6 +58,10 @@ public class Estadistica {
 
   public void setId(Long id) {
     this.estadistica_id = id;
+  }
+
+  public String getCategoria() {
+    return this.estadistica_categoria;
   }
 
   @Override

@@ -42,6 +42,12 @@ public class ColeccionController {
   }
 
   public List<String> getCategorias() {
-    return ColeccionRepository.instance().getCategorias();
+    return ColeccionRepository.instance()
+                              .getCategorias();
+  }
+
+  public List<Coleccion> findAll() {
+    return ColeccionRepository.instance()
+                              .findAll();
   }
 }

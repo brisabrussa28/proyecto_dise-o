@@ -19,6 +19,7 @@ import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
+import io.javalin.http.Handler;
 import io.javalin.http.UploadedFile;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,22 @@ public class Router {
     ColeccionController coleccionController = new ColeccionController();
     FuenteController fuenteController = new FuenteController();
     EstadisticaController estadisticaController = new EstadisticaController();
+
+
+    KeycloakTokenVerifier keycloakTokenVerifier;
+    try {
+      keycloakTokenVerifier = new KeycloakTokenVerifier("http://localhost:8080/realms/ddsi");
+    } catch (Exception e) {
+      throw new RuntimeException("No se pudo inicializar el verificador de tokens", e);
+    }
+
+    app.before(
+        "/colecciones", ctx -> {
+          if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+            tieneRol(keycloakTokenVerifier, "admin").handle(ctx);
+          }
+        }
+    );
 
     app.get("/", ctx -> ctx.result("BENE"));
     app.get(
@@ -65,7 +82,8 @@ public class Router {
         }
     );
     app.post(
-        "/colecciones", ctx -> {
+        "/colecciones",
+        ctx -> {
           try {
             Coleccion coleccion = coleccionController.crearColeccion(ctx.bodyAsClass(ColeccionDTO.class));
             ctx.status(201);
@@ -76,6 +94,15 @@ public class Router {
           }
         }
     );
+
+    app.before(
+        "/solicitudes", ctx -> {
+          if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+            tieneRol(keycloakTokenVerifier, "admin").handle(ctx);
+          }
+        }
+    );
+
     app.put(
         "/solicitudes", ctx -> {
           String idParam = ctx.queryParam("id");
@@ -159,8 +186,11 @@ public class Router {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, List<String>> columnas = mapper.readValue(
                 columnasJson,
-                new TypeReference<Map<String, List<String>>>() {}
+                new TypeReference<Map<String, List<String>>>() {
+                }
             );
+
+            tieneRol(keycloakTokenVerifier, "admin").handle(ctx);
 
             ctx.json(
                 fuenteController.crearFuente(
@@ -173,6 +203,13 @@ public class Router {
             ctx.json(fuenteController.crearFuente(nombreFuente));
             ctx.status(201);
           }
+        }
+    );
+    app.get(
+        "/colecciones", ctx -> {
+          List<Coleccion> colecciones = coleccionController.findAll();
+          ctx.json(colecciones);
+          ctx.status(200);
         }
     );
     app.get(
@@ -196,6 +233,9 @@ public class Router {
           }
         }
     );
+
+    app.before("/estadisticas", tieneRol(keycloakTokenVerifier, "admin"));
+
     app.get(
         "/estadisticas", ctx -> {
           try {
@@ -222,5 +262,24 @@ public class Router {
           }
         }
     );
+  }
+
+  private Handler tieneRol(KeycloakTokenVerifier keycloakTokenVerifier, String rol) {
+    return ctx -> {
+      String auth = ctx.header("Authorization");
+      if (auth == null || !auth.startsWith("Bearer ")) {
+        throw new io.javalin.http.ForbiddenResponse("-- ACCESO DENEGADO: SE REQUIERE EL ROL " + rol.toUpperCase() + " --");
+      }
+      String token = auth.substring("Bearer ".length());
+      boolean tieneRol = false;
+      try {
+        tieneRol = keycloakTokenVerifier.hasRealmRole(token, rol);
+      } catch (Exception ex) {
+        tieneRol = false;
+      }
+      if (!tieneRol) {
+        throw new io.javalin.http.ForbiddenResponse("-- ACCESO DENEGADO: SE REQUIERE EL ROL " + rol.toUpperCase() + " --");
+      }
+    };
   }
 }

@@ -18,7 +18,7 @@ public class EstadisticaController {
   public Estadistica calcularEstadistica(EstadisticaDTO estadisticaDTO) {
     CentralDeEstadisticas central = new CentralDeEstadisticas();
     central.setGestor(new GestorDeSolicitudes(SolicitudesRepository.instance()));
-    if (estadisticaDTO.getColeccion() != null) {
+    if (estadisticaDTO.getColeccion() != null ) {
       Coleccion coleccion = ColeccionRepository.instance()
                                                .findById(estadisticaDTO.getColeccion());
       Estadistica stat = central.provinciaConMasHechos(coleccion);
