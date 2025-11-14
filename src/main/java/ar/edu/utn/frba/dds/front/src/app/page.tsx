@@ -61,18 +61,6 @@ export default function Home() {
         });
     };
 
-    //AUN NO FUNCIONA EL ZOOM
-    const zoomIn = () => {
-        const map = mapRef.current?.getMap?.();
-        if (!map) return;
-        map.zoomTo(map.getZoom() + 1, {duration: 300});
-    };
-    const zoomOut = () => {
-        const map = mapRef.current?.getMap?.();
-        if (!map) return;
-        map.zoomTo(map.getZoom() - 1, {duration: 300});
-    };
-
     const aplicarFiltros = (hechos: HechoFeature[], filtros: FiltersState) => {
         return hechos.filter((h) => {
             const coincideCategoria = filtros.categoria === 'Todas' || h.categoria === filtros.categoria;
@@ -250,8 +238,6 @@ export default function Home() {
                 flexDirection: 'column',
                 gap: '10px'
             }}>
-                <button className='ajuste' onClick={zoomIn}>+</button>
-                <button className='ajuste' onClick={zoomOut}>−</button>
             </div>
 
             <HechoDetalleModal
