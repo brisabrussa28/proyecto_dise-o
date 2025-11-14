@@ -9,6 +9,7 @@ import io.javalin.Javalin;
 import io.javalin.json.JavalinJackson;
 
 public class Server {
+
   public static void main(String[] args) {
     //new Bootstrap().init();
     var app = Javalin.create(javalinConfig -> {
@@ -24,8 +25,17 @@ public class Server {
           it.allowHost("http://localhost:3000");
         });
       });
+      javalinConfig.staticFiles.add("/public");
     });
+
+    // CONFIGURAR RUTAS
     new Router().configure(app);
+
+    // CARGAR DATOS INICIALES (Bootstrap)
+    new Bootstrap().init();
+
+    // INICIAR EL SERVIDOR
+    System.out.println("Iniciando servidor en http://localhost:9001");
     app.start(9001);
   }
 }
