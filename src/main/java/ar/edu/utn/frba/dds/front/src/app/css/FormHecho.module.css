@@ -35,3 +35,28 @@
     -moz-appearance: none;
     cursor: pointer;
 }
+.fechaInput {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.fechaWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.fecha {
+    flex: 1;
+    padding-right: 30px;
+}
+
+.flechita {
+    position: absolute;
+    right: 10px;
+    color: #044DBA;
+    font-size: 14px;
+    pointer-events: none;
+}
+

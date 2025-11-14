@@ -45,6 +45,13 @@ export default function FormHecho({
         const latitud = form.lat ? parseFloat(form.lat) : 0;
         const longitud = form.lng ? parseFloat(form.lng) : 0;
 
+        let fechaCompleta = form.fecha_suceso;
+        if (fechaCompleta && !fechaCompleta.includes(':')) {
+            fechaCompleta += 'T00:00:00';
+        } else if (fechaCompleta && fechaCompleta.split('T')[1]?.length === 5) {
+            fechaCompleta += ':00';
+        }
+
         const payload = {
             hecho_etiquetas: etiquetas,
             hecho_estado: 'ORIGINAL',
@@ -58,7 +65,7 @@ export default function FormHecho({
                 longitud,
             },
             hecho_origen: 'PROVISTO_CONTRIBUYENTE',
-            hecho_fecha_suceso: form.fecha_suceso || null,
+            hecho_fecha_suceso: fechaCompleta || null,
         };
         onSubmit?.(payload);
     };
@@ -124,15 +131,36 @@ export default function FormHecho({
                 />
             </div>
 
-            <div className={styles.fechaInput}>
+            <div className={styles.fechaInput} onClick={() => document.getElementById('fechaSuceso')?.focus()}>
                 <label>Fecha del Suceso</label>
-                <input
-                    type="date"
-                    className={styles.fecha}
-                    value={form.fecha_suceso}
-                    onChange={(e) => setForm({ ...form, fecha_suceso: e.target.value })}
-                    required
-                />
+                <div className={styles.fechaWrapper}>
+                    <input
+                        type="date"
+                        id="fechaSuceso"
+                        className={styles.fecha}
+                        value={form.fecha_suceso.split('T')[0] || ''}
+                        onChange={(e) => {
+                            const hora = form.fecha_suceso.split('T')[1] || '00:00';
+                            setForm({ ...form, fecha_suceso: `${e.target.value}T${hora}` });
+                        }}
+                        required
+                    />
+                    <span className={styles.flechita}>📅</span>
+                </div>
+
+                <div className={styles.fechaWrapper}>
+                    <input
+                        type="time"
+                        className={styles.fecha}
+                        value={form.fecha_suceso.split('T')[1] || ''}
+                        onChange={(e) => {
+                            const fecha = form.fecha_suceso.split('T')[0] || '';
+                            setForm({ ...form, fecha_suceso: `${fecha}T${e.target.value}` });
+                        }}
+                        required
+                    />
+                    <span className={styles.flechita}>🕒</span>
+                </div>
             </div>
 
             <UploadAdjunto />
