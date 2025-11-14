@@ -15,6 +15,7 @@ import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -108,7 +109,6 @@ public class Router {
     });
 
     app.get("/", ctx -> ctx.json(hechoController.findAll()));
-
 
     app.get(
         "/hechos/categorias", ctx -> {
@@ -307,22 +307,6 @@ public class Router {
         }
     );
 
-/*
-    app.get(
-        "/estadisticas", ctx -> {
-          try {
-            var stat = estadisticaController.getEstadistica(
-                ctx.bodyAsClass(EstadisticaDTO.class)
-            );
-            ctx.status(200);
-            ctx.json(stat);
-          } catch (RuntimeException e) {
-            ctx.status(400);
-            ctx.result(e.getMessage());
-          }
-        }
-    );*/
-
     app.get("/estadisticas/", ctx -> {
       var todas = estadisticaController.getEstadisticas();
       ctx.json(todas);
@@ -341,6 +325,12 @@ public class Router {
           }
         }
     );
+
+    app.get("/solicitudes", ctx -> {
+      List<Solicitud> pendientes = SolicitudesRepository.instance().obtenerPorEstado(EstadoSolicitud.PENDIENTE);
+      ctx.json(pendientes);
+    });
+
   }
 
   private Handler tieneRol(String rol) {

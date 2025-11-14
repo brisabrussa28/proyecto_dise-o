@@ -19,7 +19,7 @@ export default function SolicitudesPage() {
             if (!token) return;
 
             try {
-                const res = await fetch('/api/solicitudes', {
+                const res = await fetch('http://localhost:9001/solicitudes', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
@@ -38,38 +38,42 @@ export default function SolicitudesPage() {
 
     const aprobarSolicitud = async (id: string) => {
         if (!token) {
-            alert('No estás autenticado.');
+            alert('No estás autenticada.');
             return;
         }
         try {
-            const res = await fetch(`/solicitudes/${id}/aprobar`, {
-                method: 'POST',
+            const res = await fetch(`http://localhost:9001/solicitudes?id=${id}&aceptada=true`, {
+                method: 'PUT',
+                credentials: 'include',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
             });
             if (!res.ok) throw new Error('Error al aprobar solicitud');
             alert(`Solicitud ${id} aprobada`);
+            setSolicitudes(prev => prev.filter(s => s.id !== id)); // opcional: actualizar lista
         } catch (err) {
             console.error(err);
             alert('No se pudo conectar con el servidor');
         }
     };
 
-    const marcarComoSpam = async (id: string) => {
+    const rechazarSolicitud = async (id: string) => {
         if (!token) {
-            alert('No estás autenticado.');
+            alert('No estás autenticada.');
             return;
         }
         try {
-            const res = await fetch(`/solicitudes/${id}/spam`, {
-                method: 'POST',
+            const res = await fetch(`http://localhost:9001/solicitudes?id=${id}&aceptada=false`, {
+                method: 'PUT',
+                credentials: 'include',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
             });
-            if (!res.ok) throw new Error('Error al marcar como spam');
-            alert(`Solicitud ${id} marcada como spam`);
+            if (!res.ok) throw new Error('Error al rechazar solicitud');
+            alert(`Solicitud ${id} rechazada`);
+            setSolicitudes(prev => prev.filter(s => s.id !== id)); // opcional: actualizar lista
         } catch (err) {
             console.error(err);
             alert('No se pudo conectar con el servidor');
@@ -109,9 +113,9 @@ export default function SolicitudesPage() {
                                 </button>
                                 <button
                                     className={`${stylesSolicitudes.btn} ${stylesSolicitudes.btnRed}`}
-                                    onClick={() => marcarComoSpam(s.id)}
+                                    onClick={() => rechazarSolicitud (s.id)}
                                 >
-                                    Spam
+                                    Rechazar
                                 </button>
                             </div>
                         </li>
