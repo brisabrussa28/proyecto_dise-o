@@ -15,6 +15,7 @@ import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLectorCsv;
+import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.AlgoritmoRepository;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
@@ -118,6 +119,13 @@ public class Bootstrap implements WithSimplePersistenceUnit {
       repoEstadisticas.save(new Estadistica("Buenos Aires", 43L, "PROVINCIA CON MAS HECHOS", null));
       repoEstadisticas.save(new Estadistica("15", 18L, "HORA CON MAS HECHOS DE UNA CATEGORIA", "Robos"));
       repoEstadisticas.save(new Estadistica("Spam", 37L, "CANTIDAD DE SOLICITUDES SPAM", null));
+      SolicitudesRepository repoSolicitudes = SolicitudesRepository.instance();
+      String motivoLargo1 = "x".repeat(501);
+      String motivoLargo2 = "x".repeat(503);
+      System.out.println("Motivo 1 length: " + motivoLargo1.length());
+      System.out.println("Motivo 2 length: " + motivoLargo2.length());
+      repoSolicitudes.guardar(new Solicitud(hecho1, motivoLargo1));
+      repoSolicitudes.guardar(new Solicitud(hecho2, motivoLargo2));
     });
 
   }
