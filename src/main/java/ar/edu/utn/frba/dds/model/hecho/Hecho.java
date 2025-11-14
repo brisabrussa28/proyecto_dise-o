@@ -107,6 +107,33 @@ public class Hecho {
     this.fotos = fotos;
   }
 
+  public Hecho(
+      String titulo,
+      String descripcion,
+      String categoria,
+      String direccion,
+      String provincia,
+      PuntoGeografico ubicacion,
+      LocalDateTime fechaSuceso,
+      LocalDateTime fechaCarga,
+      Origen fuenteOrigen,
+      List<Etiqueta> etiquetas
+  ) {
+    this.hecho_titulo = titulo;
+    this.hecho_descripcion = descripcion;
+    this.hecho_categoria = categoria;
+    this.hecho_ubicacion = ubicacion;
+    this.hecho_direccion = direccion;
+    this.hecho_fecha_suceso = fechaSuceso;
+    this.hecho_fecha_carga = fechaCarga;
+    this.fuenteOrigen = fuenteOrigen;
+    this.etiquetas = etiquetas;
+    this.hecho_provincia = provincia;
+    this.estado = Estado.ORIGINAL;
+    this.fotos = new ArrayList<>();
+  }
+
+
   /**
    * Obtiene el titulo del hecho.
    *

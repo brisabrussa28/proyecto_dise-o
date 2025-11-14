@@ -11,30 +11,40 @@ import io.javalin.json.JavalinJackson;
 public class Server {
 
   public static void main(String[] args) {
-    //new Bootstrap().init();
     var app = Javalin.create(javalinConfig -> {
+      // Configurar Jackson para JSON
       javalinConfig.jsonMapper(new JavalinJackson().updateMapper(objectMapper -> {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         objectMapper.registerModule(new Jdk8Module());
       }));
+
+      // Configurar motor de plantillas Handlebars
       javalinConfig.fileRenderer(new JavalinRenderer().register("hbs", new JavalinHandlebars()));
+
+      // Configurar archivos estáticos
       javalinConfig.staticFiles.add("/public");
+
+      // Configurar CORS
       javalinConfig.bundledPlugins.enableCors(cors -> {
         cors.addRule(it -> {
           it.allowHost("http://localhost:3000");
         });
       });
-      javalinConfig.staticFiles.add("/public");
+
+      // Habilitar sesiones (esto es lo que faltaba)
+      javalinConfig.jetty.modifyServletContextHandler(handler -> {
+        handler.setSessionHandler(new org.eclipse.jetty.server.session.SessionHandler());
+      });
     });
 
-    // CONFIGURAR RUTAS
+    // Configurar rutas
     new Router().configure(app);
 
-    // CARGAR DATOS INICIALES (Bootstrap)
+    // Cargar datos iniciales (Bootstrap)
     new Bootstrap().init();
 
-    // INICIAR EL SERVIDOR
+    // Iniciar el servidor
     System.out.println("Iniciando servidor en http://localhost:9001");
     app.start(9001);
   }
