@@ -1,0 +1,53 @@
+.tool-bar button {
+  border: none;
+  background: none;
+  outline: none;
+  box-shadow: none;
+  color: black;
+  font-size: 34px;
+  font-family: sans-serif !important;
+  max-width: 49px;
+  max-height: 49px;
+  min-width: 34px;
+  min-height: 34px;
+}
+/*rgb(235, 233, 233);*/
+.division{
+    display: flex;
+    flex-direction: row;
+}
+
+.tool-bar{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    max-width: 70px;
+    min-width: 48px;
+    flex: 1 1 70px;
+    align-items: center;
+}
+
+.mapa{
+    display: flex;
+    max-width: '100vw';
+    max-height: '100vh';
+}
+
+
+.icon{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 40px;
+}
+
+.options{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 15px;
+}
+
+.search-bar{
+    display: flex;
+}

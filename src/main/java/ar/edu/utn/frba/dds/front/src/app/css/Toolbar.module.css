@@ -1,0 +1,64 @@
+.toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    z-index: 100;
+    display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #044DBA;
+  color: #FFFFFF;
+  border-bottom: 1px solid #013b8d;
+}
+
+.left, .right { display: flex; align-items: center; gap: 8px; }
+.center { font-weight: 600; letter-spacing: 0.3px; }
+
+.icon {
+  background: #488FFA;
+  color: #FFFFFF;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.icon:hover { background: #3A7FF5; }
+
+.textBtn {
+  background: #488FFA;
+  color: #FFFFFF;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.textBtn:hover { background: #3A7FF5; }
+
+/* roleSelect eliminado: ahora el estado de sesión define las opciones */
+
+/* User avatar + menu */
+.user { position: relative; }
+.avatarBtn { display: inline-flex; align-items: center; justify-content: center; background: #FFFFFF; color: #044DBA; border: 1px solid transparent; border-radius: 7px;; width: 36px; height: 36px; padding: 0; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+.avatarBtn:hover { background: #f5f9ff; }
+.avatarImg { width: 30px; height: 30px; border-radius: 9999px; object-fit: cover; }
+.menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #FFFFFF;
+    color: #111827;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    min-width: 260px;
+    padding: 8px 0;
+    z-index: 9999;
+}
+.menuItem { display: block; width: 100%; text-align: left; background: transparent; border: none; padding: 10px 14px; cursor: pointer; font-size: 14px; color: #111827; }
+.menuItem:hover { background: #f5f9ff; }
+.divider { height: 1px; background: #e5e7eb; margin: 6px 0; }
+
