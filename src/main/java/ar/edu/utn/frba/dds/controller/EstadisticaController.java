@@ -8,11 +8,16 @@ import ar.edu.utn.frba.dds.model.reportes.GestorDeSolicitudes;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.EstadisticaRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
+import java.util.List;
 
 public class EstadisticaController {
   public Estadistica getEstadistica(EstadisticaDTO estadisticaDTO) {
     return EstadisticaRepository.instance()
                                 .findByTipo(estadisticaDTO.getTipo());
+  }
+
+  public List<Estadistica> getEstadisticas() {
+    return EstadisticaRepository.instance().findAll();
   }
 
   public Estadistica calcularEstadistica(EstadisticaDTO estadisticaDTO) {
