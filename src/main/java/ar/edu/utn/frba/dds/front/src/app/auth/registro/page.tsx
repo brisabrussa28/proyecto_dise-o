@@ -6,10 +6,6 @@ import { useSession } from '../../components/SessionContext';
 import styles from '../../css/AuthForm.module.css';
 import mm2 from '../../assets/imgs/mm2.png';
 
-// TODO: Implementar integración con backend en entrega 6
-// TODO: Validar formularios
-// TODO: Cargar datos reales desde API de MetaMapa
-
 export default function RegistroPage() {
   const router = useRouter();
   const { login } = useSession();
@@ -17,10 +13,28 @@ export default function RegistroPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login('Contribuyente');
-    router.replace('/');
+    try {
+      const res = await fetch('http://localhost:9001/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, email, password }),
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        const mensaje = await res.text();
+        const rolExtraido = mensaje.includes('Administrador') ? 'Administrador' : 'Contribuyente';
+        login(rolExtraido);
+        router.replace('/');
+      } else {
+        alert('Ocurrió un problema al registrar la cuenta. Intentalo nuevamente.');
+      }
+    } catch (err) {
+      console.error('Error al registrarse:', err);
+      alert('Error de conexion con el servidor');
+    }
   };
 
   return (
@@ -46,7 +60,7 @@ export default function RegistroPage() {
           <input className={styles.input} type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
         <div className={styles.actions}>
-          <button className={styles.btn} type="submit">Crear cuenta (mock)</button>
+          <button className={styles.btn} type="submit">Crear cuenta</button>
           <button className={styles.btn} type="button" onClick={() => router.push('/auth/login')}>Ya tengo cuenta</button>
         </div>
       </form>
