@@ -40,4 +40,9 @@ public class HechoRepository {
   public Hecho findById(Long id) {
     return em.find(Hecho.class, id);
   }
+
+  public List<String> getCategorias() {
+    return em.createQuery("select distinct h.hecho_categoria from Hecho h", String.class)
+             .getResultList();
+  }
 }

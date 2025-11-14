@@ -9,7 +9,7 @@ export default function CrearHechoPage() {
 
     const enviarHechoAlBackend = async (payload: any) => {
         try {
-            const res = await fetch('http://localhost:7000/hechos', {
+            const res = await fetch('http://localhost:9001/hechos', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -86,24 +86,38 @@ public class Router {
     );
 
     // Protegemos la CREACIÓN de fuentes
-    app.before("/fuentes", ctx -> {
-      if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-        tieneRol("admin").handle(ctx);
-      }
-    });
+    app.before(
+        "/fuentes", ctx -> {
+          if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+            tieneRol("admin").handle(ctx);
+          }
+        }
+    );
 
     // Protegemos la MODIFICACIÓN de hechos
-    app.before("/hechos/{id}", ctx -> {
-      if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-        tieneRol("admin").handle(ctx);
-      }
-    });
+    app.before(
+        "/hechos/{id}", ctx -> {
+          if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+            tieneRol("admin").handle(ctx);
+          }
+        }
+    );
 
 
     // Protegemos TODAS las rutas de /estadisticas
     app.before("/estadisticas", tieneRol("admin"));
 
     app.get("/", ctx -> ctx.json(hechoController.findAll()));
+
+
+    app.get(
+        "/hechos/categorias", ctx -> {
+          List<String> categorias = hechoController.getCategorias();
+          ctx.json(categorias);
+          ctx.status(200);
+        }
+    );
+
     app.get(
         "/hechos/{id}", ctx -> {
           Long id = Long.parseLong(ctx.pathParam("id"));
@@ -153,6 +167,7 @@ public class Router {
           ctx.json(hechos);
         }
     );
+
 
     app.post(
         "/solicitudes", ctx -> {

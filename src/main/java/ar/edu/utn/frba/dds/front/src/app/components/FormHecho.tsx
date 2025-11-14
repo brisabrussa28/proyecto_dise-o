@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, {useState, useEffect} from 'react';
 import styles from '../css/FormHecho.module.css';
 import UploadAdjunto from './UploadAdjunto';
 
@@ -32,7 +32,14 @@ export default function FormHecho({
         fecha_suceso: initialData?.fecha_suceso || '',
     });
 
-    const [categorias] = useState<string[]>(['Robos', 'Obras', 'Incidentes', 'Eventos', 'Dato']);
+    const [categorias, setCategorias] = useState<string[]>([]);
+
+    useEffect(() => {
+        fetch('http://localhost:9001/hechos/categorias')
+            .then(res => res.json())
+            .then(data => setCategorias(data))
+            .catch(() => setCategorias([]));
+    }, []);
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -76,7 +83,7 @@ export default function FormHecho({
                 <label>Título</label>
                 <input
                     value={form.titulo}
-                    onChange={(e) => setForm({ ...form, titulo: e.target.value })}
+                    onChange={(e) => setForm({...form, titulo: e.target.value})}
                     placeholder="Título del hecho"
                     required
                 />
@@ -85,7 +92,7 @@ export default function FormHecho({
                 <label>Descripción</label>
                 <textarea
                     value={form.descripcion}
-                    onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+                    onChange={(e) => setForm({...form, descripcion: e.target.value})}
                     placeholder="Describe el hecho"
                     rows={4}
                 />
@@ -94,18 +101,24 @@ export default function FormHecho({
             <div className={styles.grid2}>
                 <div className={styles.row}>
                     <label>Categoría</label>
-                    <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}>
-                        <option value="">Selecciona una categoría</option>
-                        {categorias.map((c) => (
-                            <option key={c} value={c}>{c}</option>
-                        ))}
-                    </select>
+                        <input
+                            list="categorias-list"
+                            value={form.categoria}
+                            onChange={(e) => setForm({...form, categoria: e.target.value})}
+                            placeholder="Selecciona o escribe una categoría"
+                        />
+                        <datalist id="categorias-list">
+                            <option value="">Selecciona una categoría</option>
+                            {categorias.map((c) => (
+                                <option key={c} value={c}>{c}</option>
+                            ))}
+                        </datalist>
                 </div>
                 <div className={styles.row}>
                     <label>Dirección (opcional)</label>
                     <input
                         value={form.direccion}
-                        onChange={(e) => setForm({ ...form, direccion: e.target.value })}
+                        onChange={(e) => setForm({...form, direccion: e.target.value})}
                         placeholder="Calle 123, Ciudad"
                     />
                 </div>
@@ -114,11 +127,13 @@ export default function FormHecho({
             <div className={styles.grid2}>
                 <div className={styles.row}>
                     <label>Latitud</label>
-                    <input type="number" step="any" min={-90} max={90} required value={form.lat} onChange={(e) => setForm({ ...form, lat: e.target.value })} />
+                    <input type="number" step="any" min={-90} max={90} required value={form.lat}
+                           onChange={(e) => setForm({...form, lat: e.target.value})}/>
                 </div>
                 <div className={styles.row}>
                     <label>Longitud</label>
-                    <input type="number" step="any" min={-180} max={180} required value={form.lng} onChange={(e) => setForm({ ...form, lng: e.target.value })} />
+                    <input type="number" step="any" min={-180} max={180} required value={form.lng}
+                           onChange={(e) => setForm({...form, lng: e.target.value})}/>
                 </div>
             </div>
 
@@ -126,7 +141,7 @@ export default function FormHecho({
                 <label>Etiquetas (separadas por coma)</label>
                 <input
                     value={form.etiquetas}
-                    onChange={(e) => setForm({ ...form, etiquetas: e.target.value })}
+                    onChange={(e) => setForm({...form, etiquetas: e.target.value})}
                     placeholder="robo, zona-sur, auto"
                 />
             </div>
@@ -141,7 +156,7 @@ export default function FormHecho({
                         value={form.fecha_suceso.split('T')[0] || ''}
                         onChange={(e) => {
                             const hora = form.fecha_suceso.split('T')[1] || '00:00';
-                            setForm({ ...form, fecha_suceso: `${e.target.value}T${hora}` });
+                            setForm({...form, fecha_suceso: `${e.target.value}T${hora}`});
                         }}
                         required
                     />
@@ -155,7 +170,7 @@ export default function FormHecho({
                         value={form.fecha_suceso.split('T')[1] || ''}
                         onChange={(e) => {
                             const fecha = form.fecha_suceso.split('T')[0] || '';
-                            setForm({ ...form, fecha_suceso: `${fecha}T${e.target.value}` });
+                            setForm({...form, fecha_suceso: `${fecha}T${e.target.value}`});
                         }}
                         required
                     />
@@ -163,7 +178,7 @@ export default function FormHecho({
                 </div>
             </div>
 
-            <UploadAdjunto />
+            <UploadAdjunto/>
 
             <div className={styles.actions}>
                 <button type="submit">Crear Hecho</button>

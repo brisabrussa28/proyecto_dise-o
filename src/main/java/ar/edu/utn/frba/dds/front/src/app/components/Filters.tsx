@@ -31,6 +31,8 @@ export default function Filters({
 
     const [filters, setFilters] = useState<FiltersState>(getInitialFilters());
 
+    console.log("aaaa" + filters);
+
     // Actualiza la URL y el estado local
     const updateFilters = (next: FiltersState) => {
         setFilters(next);

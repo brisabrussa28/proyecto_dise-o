@@ -1,15 +1,16 @@
 'use client';
-import React, { useMemo, useRef, useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import React, {useMemo, useRef, useState, useEffect} from 'react';
+import {useSearchParams} from 'next/navigation';
+import {FaEye, FaEyeSlash} from 'react-icons/fa';
 import MapCanvas from './components/Map/mapCanvas';
 import Image from 'next/image';
 import metamapa from './assets/imgs/metamapa.png';
 import HechoDetalleModal from './components/HechoDetalleModal';
-import Filters, { FiltersState } from './components/Filters';
+import Filters, {FiltersState} from './components/Filters';
 import ResultsPanel from './components/ResultsPanel';
 import styles from './css/Home.module.css';
-import { MOCK_HECHOS } from './components/Map/dataMocks';
+import {MOCK_HECHOS} from './components/Map/dataMocks';
+import api from "../lib/api";
 
 export type HechoFeature = {
     id: string;
@@ -18,11 +19,12 @@ export type HechoFeature = {
     fechaISO: string;
     categoria: string;
     fuente: string;
-    coleccion: string;
+    origen: string;
+    direccion: string;
     coords: { lat: number; lng: number };
     estado: string;
     autor: string;
-    adjuntos?: Array<{ id: string; url: string; tipo: 'imagen' | 'video' }>;
+    adjuntos?: Array<{ id: string; url: string; }>;
 };
 
 export default function Home() {
@@ -63,12 +65,12 @@ export default function Home() {
     const zoomIn = () => {
         const map = mapRef.current?.getMap?.();
         if (!map) return;
-        map.zoomTo(map.getZoom() + 1, { duration: 300 });
+        map.zoomTo(map.getZoom() + 1, {duration: 300});
     };
     const zoomOut = () => {
         const map = mapRef.current?.getMap?.();
         if (!map) return;
-        map.zoomTo(map.getZoom() - 1, { duration: 300 });
+        map.zoomTo(map.getZoom() - 1, {duration: 300});
     };
 
     const aplicarFiltros = (hechos: HechoFeature[], filtros: FiltersState) => {
@@ -89,7 +91,9 @@ export default function Home() {
             const next = Math.max(320, startWidthRef.current + delta);
             setSideWidth(next);
         };
-        const onUp = () => { draggingRef.current = false; };
+        const onUp = () => {
+            draggingRef.current = false;
+        };
         window.addEventListener('mousemove', onMove);
         window.addEventListener('mouseup', onUp);
         return () => {
@@ -107,9 +111,10 @@ export default function Home() {
         if (filters.hasta) query.set('hasta', filters.hasta);
 
         //CAMBIAR POR LA RUTA REAL --esto ocurre en cada fetch
-        const url = `miRuta?${query.toString()}`;
+        const url = "http://localhost:9001";
         console.log('Consultando:', url);
 
+        console.log("LLEGUE ACA")
         fetch(url)
             .then((res) => {
                 if (!res.ok) throw new Error('Respuesta no válida');
@@ -117,11 +122,33 @@ export default function Home() {
             })
             .then((data) => {
                 console.log('Datos reales:', data);
-                setHechos(data);
+                const hechosMapeados: HechoFeature[] = data.map((apiHecho: any) => {
+                    return {
+                        id: String(apiHecho.id),
+                        titulo: apiHecho.hecho_titulo,
+                        descripcion: apiHecho.hecho_descripcion,
+                        fechaISO: apiHecho.hecho_fecha_suceso,
+                        categoria: apiHecho.hecho_categoria,
+                        fuente: apiHecho.hecho_fuente,
+                        origen: apiHecho.hecho_origen,
+                        coords: {
+                            lat: apiHecho.hecho_ubicacion.latitud,
+                            lng: apiHecho.hecho_ubicacion.longitud,
+                        },
+                        direccion: apiHecho.hecho_direccion,
+                        adjuntos: apiHecho.hecho_fotos.map((foto: any) => ({
+                            id: foto.id,
+                            url: foto.url
+                        })),
+
+                    }
+                })
+                console.log("Datos mapeados: ", hechosMapeados)
+                setHechos(hechosMapeados);
             })
             .catch((err) => {
                 console.warn('Usando datos mockeados por error de conexión:', err);
-                setHechos(aplicarFiltros(MOCK_HECHOS, filters));
+                // setHechos(aplicarFiltros(MOCK_HECHOS, filters));
                 if (!errorMostrado) {
                     alert('No se pudo conectar con el servidor. Se están mostrando datos simulados.');
                     setErrorMostrado(true);
@@ -151,7 +178,7 @@ export default function Home() {
     return (
         <div className={styles.container}>
             {filtersOpen && (
-                <aside className={styles.side} style={{ width: sideWidth }}>
+                <aside className={styles.side} style={{width: sideWidth}}>
                     <div className={styles.headerRow}>
                         <div className={styles.sectionTitle}>Filtros</div>
                         <button
@@ -160,12 +187,12 @@ export default function Home() {
                             aria-label={filtersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
                             title={filtersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
                         >
-                            {filtersVisible ? <FaEye /> : <FaEyeSlash />}
+                            {filtersVisible ? <FaEye/> : <FaEyeSlash/>}
                         </button>
                     </div>
 
                     {filtersVisible && (
-                        <Filters  resultados={filtrados.length} variant="inline" />
+                        <Filters resultados={filtrados.length} variant="inline"/>
                     )}
 
                     <div className={styles.sectionTitle}>Hechos</div>
@@ -210,7 +237,7 @@ export default function Home() {
                     onToggleFilters={toggleFilters}
                 />
                 <div className={`${styles.mapBrand} ${styles.brandLeft}`} aria-hidden>
-                    <Image className={styles.mapBrandImg} src={metamapa} alt="MetaMapa" priority />
+                    <Image className={styles.mapBrandImg} src={metamapa} alt="MetaMapa" priority/>
                 </div>
             </section>
 
