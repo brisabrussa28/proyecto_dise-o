@@ -19,6 +19,11 @@ public class Server {
       }));
       javalinConfig.fileRenderer(new JavalinRenderer().register("hbs", new JavalinHandlebars()));
       javalinConfig.staticFiles.add("/public");
+      javalinConfig.bundledPlugins.enableCors(cors -> {
+        cors.addRule(it -> {
+          it.allowHost("http://localhost:3000");
+        });
+      });
     });
     new Router().configure(app);
     app.start(9001);

@@ -49,7 +49,7 @@ public class Router {
         }
     );
 
-    app.get("/", ctx -> ctx.result("BENE"));
+    app.get("/", ctx -> ctx.json(hechoController.findAll()));
     app.get(
         "/hechos/{id}", ctx -> {
           Long id = Long.parseLong(ctx.pathParam("id"));
@@ -64,11 +64,40 @@ public class Router {
     );
     app.post(
         "/hechos", ctx -> {
-          Hecho hecho = hechoController.subirHecho(ctx.bodyAsClass(Hecho.class));
-          ctx.status(201);
-          ctx.json(hecho);
+//          Hecho hecho = hechoController.subirHecho(hechoDTO);
+          try {
+            Hecho hecho = hechoController.subirHecho(ctx.bodyAsClass(Hecho.class));
+            ctx.status(201);
+            ctx.json(hecho);
+          } catch (RazonInvalidaException e) {
+            ctx.status(403);
+            ctx.result(e.getMessage());
+          }
+
         }
     );
+    app.put(
+        "/hechos/{id}", context -> {
+          Long idABuscar = Long.parseLong(context.pathParam("id"));
+          HechoDTO hechoModificado = context.bodyAsClass(HechoDTO.class);
+          try {
+            Hecho hechoOriginal = hechoController.findById(idABuscar);
+            hechoController.modificarHecho(hechoOriginal, hechoModificado);
+            context.json(hechoOriginal);
+          } catch (RuntimeException e) {
+            context.status(400);
+            context.result(e.getMessage());
+          }
+        }
+    );
+
+    app.get(
+        "/hechos", ctx -> {
+          List<Hecho> hechos = hechoController.findAll();
+          ctx.json(hechos);
+        }
+    );
+
     app.post(
         "/solicitudes", ctx -> {
           try {
@@ -135,12 +164,6 @@ public class Router {
             ctx.status(400);
             ctx.result("La solicitud ya ha sido analizada");
           }
-        }
-    );
-    app.get(
-        "/hechos", ctx -> {
-          List<Hecho> hechos = hechoController.findAll();
-          ctx.json(hechos);
         }
     );
     app.get(
@@ -219,20 +242,7 @@ public class Router {
           ctx.status(200);
         }
     );
-    app.put(
-        "/hechos/{id}", context -> {
-          Long idABuscar = Long.parseLong(context.pathParam("id"));
-          HechoDTO hechoModificado = context.bodyAsClass(HechoDTO.class);
-          try {
-            Hecho hechoOriginal = hechoController.findById(idABuscar);
-            hechoController.modificarHecho(hechoOriginal, hechoModificado);
-            context.json(hechoOriginal);
-          } catch (RuntimeException e) {
-            context.status(400);
-            context.result(e.getMessage());
-          }
-        }
-    );
+
 
     app.before("/estadisticas", tieneRol(keycloakTokenVerifier, "admin"));
 

@@ -127,8 +127,8 @@ public class HechoBuilder {
         fechaSuceso,
         fechaCarga,
         fuenteOrigen,
-        etiquetas
-        //fotos
+        etiquetas,
+        fotos
     );
   }
 

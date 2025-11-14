@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.model.hecho;
 
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
+import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
@@ -52,8 +53,8 @@ public class Hecho {
   @Column(name = "hecho_estado", nullable = false)
   private Estado estado;
   private String hecho_provincia;
-//  @ElementCollection
-//  List<Multimedia> fotos;
+  @ElementCollection
+  List<Multimedia> fotos;
 
   /**
    * Constructor para un Hecho.
@@ -62,6 +63,7 @@ public class Hecho {
     this.hecho_fecha_carga = LocalDateTime.now();
     this.estado = Estado.ORIGINAL;
     this.etiquetas = new ArrayList<>();
+    this.fotos = new ArrayList<>();
   }
 
   /**
@@ -76,7 +78,7 @@ public class Hecho {
    * @param fechaSuceso  LocalDateTime
    * @param fechaCarga   LocalDateTime
    * @param fuenteOrigen Origen
-   *                     //@param etiquetas    List
+   * @param etiquetas    List
    */
   public Hecho(
       String titulo,
@@ -88,8 +90,8 @@ public class Hecho {
       LocalDateTime fechaSuceso,
       LocalDateTime fechaCarga,
       Origen fuenteOrigen,
-      List<Etiqueta> etiquetas
-//      List<Multimedia> fotos
+      List<Etiqueta> etiquetas,
+      List<Multimedia> fotos
   ) {
     this.hecho_titulo = titulo;
     this.hecho_descripcion = descripcion;
@@ -102,7 +104,7 @@ public class Hecho {
     this.etiquetas = etiquetas;
     this.hecho_provincia = provincia;
     this.estado = Estado.ORIGINAL;
-//    this.fotos = fotos;
+    this.fotos = fotos;
   }
 
   /**
@@ -214,10 +216,14 @@ public class Hecho {
     return hecho_provincia;
   }
 
-//  @JsonProperty("hecho_fotos")
-//  public List<Multimedia> getFotos() {
-//    return new ArrayList<>(this.fotos);
-//  }
+  @JsonProperty("hecho_fotos")
+  public List<Multimedia> getFotos() {
+    return new ArrayList<>(fotos);
+  }
+
+  public void agregarFoto(Multimedia foto) {
+    this.fotos.add(foto);
+  }
 
   public void setTitulo(String hecho_titulo) {
     this.hecho_titulo = hecho_titulo;
@@ -264,6 +270,9 @@ public class Hecho {
     this.fuenteOrigen = fuenteOrigen;
   }
 
+  public void setFotos(List<Multimedia> fotos) {
+    this.fotos = new ArrayList<>(fotos);
+  }
 
   /**
    * Verifica si el hecho es editable por un usuario específico.
@@ -301,6 +310,4 @@ public class Hecho {
         hecho_ubicacion, hecho_fecha_suceso
     );
   }
-
-
 }
