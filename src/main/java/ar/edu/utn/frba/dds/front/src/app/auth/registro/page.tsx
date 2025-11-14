@@ -16,7 +16,7 @@ export default function RegistroPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:9001/register', {
+      const res = await fetch('http://localhost:9001/usuarios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre, email, password }),
