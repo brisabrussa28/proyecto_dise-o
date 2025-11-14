@@ -2,6 +2,7 @@
 import React, {useState, useEffect} from 'react';
 import styles from '../css/FormHecho.module.css';
 import UploadAdjunto from './UploadAdjunto';
+import {useRouter} from "next/navigation";
 
 export type HechoInput = {
     titulo: string;
@@ -41,6 +42,8 @@ export default function FormHecho({
             .catch(() => setCategorias([]));
     }, []);
 
+    const router = useRouter()
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -74,7 +77,10 @@ export default function FormHecho({
             hecho_origen: 'PROVISTO_CONTRIBUYENTE',
             hecho_fecha_suceso: fechaCompleta || null,
         };
-        onSubmit?.(payload);
+
+        Promise.resolve(onSubmit?.(payload)).finally(() => {
+            router.push('/')
+        })
     };
 
     return (
@@ -101,18 +107,18 @@ export default function FormHecho({
             <div className={styles.grid2}>
                 <div className={styles.row}>
                     <label>Categoría</label>
-                        <input
-                            list="categorias-list"
-                            value={form.categoria}
-                            onChange={(e) => setForm({...form, categoria: e.target.value})}
-                            placeholder="Selecciona o escribe una categoría"
-                        />
-                        <datalist id="categorias-list">
-                            <option value="">Selecciona una categoría</option>
-                            {categorias.map((c) => (
-                                <option key={c} value={c}>{c}</option>
-                            ))}
-                        </datalist>
+                    <input
+                        list="categorias-list"
+                        value={form.categoria}
+                        onChange={(e) => setForm({...form, categoria: e.target.value})}
+                        placeholder="Selecciona o escribe una categoría"
+                    />
+                    <datalist id="categorias-list">
+                        <option value="">Selecciona una categoría</option>
+                        {categorias.map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                        ))}
+                    </datalist>
                 </div>
                 <div className={styles.row}>
                     <label>Dirección (opcional)</label>

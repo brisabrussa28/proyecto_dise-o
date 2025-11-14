@@ -11,6 +11,7 @@ export type MapCanvasProps = {
   onFeatureClick?: (f: HechoFeature) => void;
   search: string;
   onSearchChange: React.Dispatch<React.SetStateAction<string>>;
+  onToggleFilters: () => void;
 };
 
 declare const MapCanvas: React.ForwardRefExoticComponent<

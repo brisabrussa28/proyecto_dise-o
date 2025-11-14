@@ -9,7 +9,6 @@ import HechoDetalleModal from './components/HechoDetalleModal';
 import Filters, {FiltersState} from './components/Filters';
 import ResultsPanel from './components/ResultsPanel';
 import styles from './css/Home.module.css';
-import {MOCK_HECHOS} from './components/Map/dataMocks';
 import api from "../lib/api";
 
 export type HechoFeature = {
@@ -25,7 +24,10 @@ export type HechoFeature = {
     estado: string;
     autor: string;
     adjuntos?: Array<{ id: string; url: string; }>;
+    coleccion: string;
 };
+
+type Item = HechoFeature & { coleccion: string };
 
 export default function Home() {
     const params = useSearchParams();
@@ -39,6 +41,8 @@ export default function Home() {
     }), [params]);
 
     const [hechos, setHechos] = useState<HechoFeature[]>([]);
+    const [colecciones, setColecciones] = useState<Array<{ nombre: string; fuentes: string[] }>>([]);
+    const coleccionPorFuenteRef = useRef<Record<string, string>>({});
     const [showModal, setShowModal] = useState(false);
     const [seleccionado, setSeleccionado] = useState<HechoFeature | null>(null);
     const [search, setSearch] = useState('');
@@ -77,7 +81,8 @@ export default function Home() {
         return hechos.filter((h) => {
             const coincideCategoria = filtros.categoria === 'Todas' || h.categoria === filtros.categoria;
             const coincideFuente = filtros.fuente === 'Todas' || h.fuente === filtros.fuente;
-            const coincideColeccion = filtros.coleccion === 'Todas' || h.coleccion === filtros.coleccion;
+            const fuenteColeccion = coleccionPorFuenteRef.current[h.fuente];
+            const coincideColeccion = filtros.coleccion === 'Todas' || fuenteColeccion === filtros.coleccion;
             const coincideDesde = !filtros.desde || h.fechaISO >= filtros.desde;
             const coincideHasta = !filtros.hasta || h.fechaISO <= filtros.hasta;
             return coincideCategoria && coincideFuente && coincideColeccion && coincideDesde && coincideHasta;
@@ -103,6 +108,71 @@ export default function Home() {
     }, []);
 
     useEffect(() => {
+        const url = "http://localhost:9001";
+
+        // Fetch collections to build fuente -> coleccion map
+        fetch(`${url}/colecciones`)
+            .then((res) => {
+                if (!res.ok) throw new Error('No collections');
+                return res.json();
+            })
+            .then((data: any[]) => {
+                setColecciones(data || []);
+                const map: Record<string, string> = {};
+                (data || []).forEach((c: any) => {
+                    const nombre = c.nombre || c.id || String(c);
+                    const fuentes: string[] = c.fuentes || [];
+                    fuentes.forEach((f) => {
+                        map[f] = nombre;
+                    });
+                });
+                coleccionPorFuenteRef.current = map;
+            })
+            .catch(() => {
+                coleccionPorFuenteRef.current = {};
+            }).finally(() => {
+            fetch(url)
+                .then((res) => {
+                    if (!res.ok) throw new Error('Respuesta no válida');
+                    return res.json();
+                })
+                .then((data) => {
+                    console.log('Datos reales:', data);
+                    const hechosMapeados: HechoFeature[] = data.map((apiHecho: any) => {
+                        return {
+                            id: String(apiHecho.id),
+                            titulo: apiHecho.hecho_titulo,
+                            descripcion: apiHecho.hecho_descripcion,
+                            fechaISO: apiHecho.hecho_fecha_suceso,
+                            categoria: apiHecho.hecho_categoria,
+                            fuente: apiHecho.hecho_fuente,
+                            origen: apiHecho.hecho_origen,
+                            coords: {
+                                lat: apiHecho.hecho_ubicacion.latitud,
+                                lng: apiHecho.hecho_ubicacion.longitud,
+                            },
+                            direccion: apiHecho.hecho_direccion,
+                            adjuntos: apiHecho.hecho_fotos.map((foto: any) => ({
+                                id: foto.id,
+                                url: foto.url
+                            })),
+
+                        }
+                    })
+                    console.log("Datos mapeados: ", hechosMapeados)
+                    setHechos(hechosMapeados);
+                })
+                .catch((err) => {
+                    console.warn('Usando datos mockeados por error de conexión:', err);
+                    // setHechos(aplicarFiltros(MOCK_HECHOS, filters));
+                    if (!errorMostrado) {
+                        alert('No se pudo conectar con el servidor. Se están mostrando datos simulados.');
+                        setErrorMostrado(true);
+                    }
+                });
+        })
+
+
         const query = new URLSearchParams();
         if (filters.categoria !== 'Todas') query.set('categoria', filters.categoria);
         if (filters.fuente !== 'Todas') query.set('fuente', filters.fuente);
@@ -110,64 +180,22 @@ export default function Home() {
         if (filters.desde) query.set('desde', filters.desde);
         if (filters.hasta) query.set('hasta', filters.hasta);
 
-        //CAMBIAR POR LA RUTA REAL --esto ocurre en cada fetch
-        const url = "http://localhost:9001";
-        console.log('Consultando:', url);
-
-        console.log("LLEGUE ACA")
-        fetch(url)
-            .then((res) => {
-                if (!res.ok) throw new Error('Respuesta no válida');
-                return res.json();
-            })
-            .then((data) => {
-                console.log('Datos reales:', data);
-                const hechosMapeados: HechoFeature[] = data.map((apiHecho: any) => {
-                    return {
-                        id: String(apiHecho.id),
-                        titulo: apiHecho.hecho_titulo,
-                        descripcion: apiHecho.hecho_descripcion,
-                        fechaISO: apiHecho.hecho_fecha_suceso,
-                        categoria: apiHecho.hecho_categoria,
-                        fuente: apiHecho.hecho_fuente,
-                        origen: apiHecho.hecho_origen,
-                        coords: {
-                            lat: apiHecho.hecho_ubicacion.latitud,
-                            lng: apiHecho.hecho_ubicacion.longitud,
-                        },
-                        direccion: apiHecho.hecho_direccion,
-                        adjuntos: apiHecho.hecho_fotos.map((foto: any) => ({
-                            id: foto.id,
-                            url: foto.url
-                        })),
-
-                    }
-                })
-                console.log("Datos mapeados: ", hechosMapeados)
-                setHechos(hechosMapeados);
-            })
-            .catch((err) => {
-                console.warn('Usando datos mockeados por error de conexión:', err);
-                // setHechos(aplicarFiltros(MOCK_HECHOS, filters));
-                if (!errorMostrado) {
-                    alert('No se pudo conectar con el servidor. Se están mostrando datos simulados.');
-                    setErrorMostrado(true);
-                }
-            });
     }, [filters]);
 
     const filtrados = useMemo(() => {
         const term = search.trim().toLowerCase();
-        return hechos.filter((h) =>
+        const conFiltros = aplicarFiltros(hechos, filters);
+        return conFiltros.filter((h) =>
             !term || h.titulo.toLowerCase().includes(term)
         );
-    }, [hechos, search]);
+    }, [hechos, search, filters]);
 
     const hechoSeleccionado = seleccionado
         ? {
             id: seleccionado.id,
             titulo: seleccionado.titulo,
             descripcion: seleccionado.descripcion,
+            direccion: seleccionado.direccion,
             fecha: seleccionado.fechaISO,
             categoria: seleccionado.categoria,
             ubicacion: seleccionado.coords,

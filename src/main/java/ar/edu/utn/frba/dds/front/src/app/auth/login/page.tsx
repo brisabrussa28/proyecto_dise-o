@@ -49,7 +49,7 @@ export default function LoginPage() {
             if (res.ok) {
                 const mensaje = await res.text();
                 const rolExtraido = mensaje.includes('Administrador') ? 'Administrador' : 'Contribuyente';
-                login(rolExtraido);
+                login(rolExtraido, '1234');
                 router.replace('/');
             } else {
                 alert('No se pudo iniciar sesión como admin');

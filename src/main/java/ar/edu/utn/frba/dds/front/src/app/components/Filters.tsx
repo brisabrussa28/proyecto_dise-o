@@ -1,14 +1,14 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import React, {useEffect, useState} from 'react';
+import {useSearchParams, useRouter} from 'next/navigation';
 import styles from '../css/Filters.module.css';
 
 export type FiltersState = {
-  categoria: string | 'Todas';
-  fuente: string | 'Todas';
-  coleccion: string | 'Todas';
-  desde: string; // YYYY-MM-DD
-  hasta: string; // YYYY-MM-DD
+    categoria: string | 'Todas';
+    fuente: string | 'Todas';
+    coleccion: string | 'Todas';
+    desde: string; // YYYY-MM-DD
+    hasta: string; // YYYY-MM-DD
 };
 
 export default function Filters({
@@ -30,6 +30,36 @@ export default function Filters({
     });
 
     const [filters, setFilters] = useState<FiltersState>(getInitialFilters());
+    const [categorias, setCategorias] = useState<string[]>([]);
+    const [colecciones, setColecciones] = useState<string[]>([]);
+    useEffect(() => {
+        fetch('http://localhost:9001/hechos/categorias')
+            .then((res) => {
+                if (!res.ok) throw new Error('Failed to fetch categories');
+                return res.json();
+            })
+            .then((data: string[]) => {
+                setCategorias(data || []);
+            })
+            .catch(() => {
+                setCategorias([]);
+            });
+    }, []);
+
+    useEffect(() => {
+        fetch('http://localhost:9001/colecciones')
+            .then((res) => {
+                if (!res.ok) throw new Error('Failed to fetch collections');
+                return res.json();
+            })
+            .then((data: any[]) => {
+                const names = (data || []).map((c: any) => c?.nombre ?? String(c));
+                setColecciones(names);
+            })
+            .catch(() => {
+                setColecciones([]);
+            });
+    }, []);
 
     console.log("aaaa" + filters);
 
@@ -54,13 +84,12 @@ export default function Filters({
                 <label>Categoría</label>
                 <select
                     value={filters.categoria}
-                    onChange={(e) => updateFilters({ ...filters, categoria: e.target.value })}
+                    onChange={(e) => updateFilters({...filters, categoria: e.target.value})}
                 >
                     <option value="Todas">Todas</option>
-                    <option value="Obra">Obra</option>
-                    <option value="Incidente">Incidente</option>
-                    <option value="Evento">Evento</option>
-                    <option value="Dato">Dato</option>
+                    {categorias.map((categoria) => (
+                        <option key={categoria} value={categoria}>{categoria}</option>
+                    ))}
                 </select>
             </div>
 
@@ -68,13 +97,9 @@ export default function Filters({
                 <label>Fuente</label>
                 <select
                     value={filters.fuente}
-                    onChange={(e) => updateFilters({ ...filters, fuente: e.target.value })}
+                    onChange={(e) => updateFilters({...filters, fuente: e.target.value})}
                 >
                     <option value="Todas">Todas</option>
-                    <option value="Boletín">Boletín</option>
-                    <option value="Dataset">Dataset</option>
-                    <option value="Usuario">Usuario</option>
-                    <option value="Otro">Otro</option>
                 </select>
             </div>
 
@@ -82,13 +107,12 @@ export default function Filters({
                 <label>Colección</label>
                 <select
                     value={filters.coleccion}
-                    onChange={(e) => updateFilters({ ...filters, coleccion: e.target.value })}
+                    onChange={(e) => updateFilters({...filters, coleccion: e.target.value})}
                 >
                     <option value="Todas">Todas</option>
-                    <option value="Obras Públicas">Obras Públicas</option>
-                    <option value="Incidentes Viales">Incidentes Viales</option>
-                    <option value="Eventos Culturales">Eventos Culturales</option>
-                    <option value="Infraestructura">Infraestructura</option>
+                    {colecciones.map((name) => (
+                        <option key={name} value={name}>{name}</option>
+                    ))}
                 </select>
             </div>
 
@@ -100,7 +124,7 @@ export default function Filters({
                         type="date"
                         className={styles.fecha}
                         value={filters.desde}
-                        onChange={(e) => updateFilters({ ...filters, desde: e.target.value })}
+                        onChange={(e) => updateFilters({...filters, desde: e.target.value})}
                     />
                 </div>
                 <div className={styles.fechaInput}>
@@ -109,7 +133,7 @@ export default function Filters({
                         type="date"
                         className={styles.fecha}
                         value={filters.hasta}
-                        onChange={(e) => updateFilters({ ...filters, hasta: e.target.value })}
+                        onChange={(e) => updateFilters({...filters, hasta: e.target.value})}
                     />
                 </div>
             </div>
@@ -118,7 +142,7 @@ export default function Filters({
                 <button
                     className={styles.reset}
                     onClick={() =>
-                        updateFilters({ categoria: 'Todas', fuente: 'Todas', coleccion: 'Todas', desde: '', hasta: '' })
+                        updateFilters({categoria: 'Todas', fuente: 'Todas', coleccion: 'Todas', desde: '', hasta: ''})
                     }
                 >
                     Limpiar

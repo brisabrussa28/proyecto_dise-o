@@ -1,14 +1,14 @@
 "use client";
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from '../../../components/SessionContext';
+import React, {useState, useEffect} from 'react';
+import {useRouter} from 'next/navigation';
+import {useSession} from '../../../components/SessionContext';
 import styles from '../../../css/AdminConfig.module.css';
 
-const CATEGORIAS = ['Robos', 'Obras', 'Incidentes', 'Eventos', 'Dato'];
+
 const ALGORITMOS = ['may_simple', 'prioridad_alta', 'relevancia'];
 
 export default function CrearColeccionPage() {
-    const { role, token } = useSession();
+    const {role, token} = useSession();
     const router = useRouter();
 
     const [form, setForm] = useState({
@@ -19,8 +19,39 @@ export default function CrearColeccionPage() {
         fuente: '',
     });
 
+    const [categorias, setCategorias] = useState<string[]>([]);
+    const [fuentes, setFuentes] = useState<Array<{ id: number; nombre: string }>>([]);
+
+    useEffect(() => {
+        fetch('http://localhost:9001/colecciones/categorias')
+            .then((res) => {
+                if (!res.ok) throw new Error('Failed to fetch categories');
+                return res.json();
+            })
+            .then((data: string[]) => {
+                setCategorias(data || []);
+            })
+            .catch(() => {
+                setCategorias([]);
+            });
+    }, []);
+
+    useEffect(() => {
+        fetch('http://localhost:9001/fuentes')
+            .then((res) => {
+                if (!res.ok) throw new Error('Failed to fetch fuentes');
+                return res.json();
+            })
+            .then((data: any[]) => {
+                setFuentes(data || []);
+            })
+            .catch(() => {
+                setFuentes([]);
+            });
+    }, []);
+
     const setField = (key: keyof typeof form, value: string) =>
-        setForm((prev) => ({ ...prev, [key]: value }));
+        setForm((prev) => ({...prev, [key]: value}));
 
     const guardarColeccion = async () => {
         if (!token) {
@@ -66,25 +97,34 @@ export default function CrearColeccionPage() {
 
                 <div className={styles.field}>
                     <label className={styles.label}>Título</label>
-                    <input className={styles.input} value={form.titulo} onChange={(e) => setField('titulo', e.target.value)} />
+                    <input className={styles.input} value={form.titulo}
+                           onChange={(e) => setField('titulo', e.target.value)}/>
                 </div>
 
                 <div className={styles.field}>
                     <label className={styles.label}>Descripción</label>
-                    <textarea className={styles.textarea} value={form.descripcion} onChange={(e) => setField('descripcion', e.target.value)} />
+                    <textarea className={styles.textarea} value={form.descripcion}
+                              onChange={(e) => setField('descripcion', e.target.value)}/>
                 </div>
 
                 <div className={styles.field}>
                     <label className={styles.label}>Categoría</label>
-                    <select className={styles.select} value={form.categoria} onChange={(e) => setField('categoria', e.target.value)}>
-                        <option value="">Selecciona una categoría</option>
-                        {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
-                    </select>
+                    <input
+                        className={styles.input}
+                        list="categorias-list"
+                        value={form.categoria}
+                        onChange={(e) => setField('categoria', e.target.value)}
+                        placeholder="Escribe o selecciona una categoría"
+                    />
+                    <datalist id="categorias-list">
+                        {categorias.map((c) => <option key={c} value={c} />)}
+                    </datalist>
                 </div>
 
                 <div className={styles.field}>
                     <label className={styles.label}>Algoritmo</label>
-                    <select className={styles.select} value={form.algoritmo} onChange={(e) => setField('algoritmo', e.target.value)}>
+                    <select className={styles.select} value={form.algoritmo}
+                            onChange={(e) => setField('algoritmo', e.target.value)}>
                         <option value="">Selecciona un algoritmo</option>
                         {ALGORITMOS.map((a) => <option key={a} value={a}>{a}</option>)}
                     </select>
@@ -92,7 +132,11 @@ export default function CrearColeccionPage() {
 
                 <div className={styles.field}>
                     <label className={styles.label}>Fuente</label>
-                    <input className={styles.input} value={form.fuente} onChange={(e) => setField('fuente', e.target.value)} />
+                    <select className={styles.select} value={form.fuente}
+                            onChange={(e) => setField('fuente', e.target.value)}>
+                        <option value="">Selecciona una fuente</option>
+                        {fuentes.map((f) => <option key={f.id} value={f.id}>{f.nombre}</option>)}
+                    </select>
                 </div>
 
                 <div className={styles.formActions}>
