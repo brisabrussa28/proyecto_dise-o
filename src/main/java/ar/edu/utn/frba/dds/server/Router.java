@@ -296,7 +296,7 @@ public class Router {
         }
     );
 
-
+/*
     app.get(
         "/estadisticas", ctx -> {
           try {
@@ -310,7 +310,13 @@ public class Router {
             ctx.result(e.getMessage());
           }
         }
-    );
+    );*/
+
+    app.get("/estadisticas/", ctx -> {
+      var todas = estadisticaController.getEstadisticas();
+      ctx.json(todas);
+      ctx.status(200);
+    });
 
     app.post(
         "/estadisticas", ctx -> {

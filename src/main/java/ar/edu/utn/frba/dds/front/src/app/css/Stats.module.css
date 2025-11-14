@@ -13,6 +13,10 @@
 .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
 .label { font-size: 14px; font-weight: 600; }
 .select, .btn { background: #FFFFFF; color: #044DBA; border: 1px solid #044DBA; border-radius: 9999px; padding: 8px 12px; font-size: 14px; }
+:global(select), :global(option) {
+    background-color: #FFFFFF !important;
+    color: #044DBA !important;
+}
 .btn { cursor: pointer; font-weight: 700; }
 .btn:hover { background: #f5f9ff; }
 .chartWrap { margin-top: 75px; background: #FFFFFF; border: 1px solid #044DBA; border-radius: 12px; padding: 12px; }
@@ -23,3 +27,10 @@
 .barFill { height: 100%; background: #044DBA; border-radius: 9999px; }
 .empty { color: #FFFFFF; opacity: 0.95; }
 .muted { opacity: 0.9; }
+.barRow {
+    display: grid;
+    grid-template-columns: 140px 140px minmax(60px, 80px);
+    align-items: center;
+    gap: 10px;
+    color: #044DBA;
+}
