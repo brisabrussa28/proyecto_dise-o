@@ -15,10 +15,12 @@ import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLectorCsv;
+import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.AlgoritmoRepository;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
+import ar.edu.utn.frba.dds.repositories.UserRepository;
 import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -108,6 +110,7 @@ public class Bootstrap implements WithSimplePersistenceUnit {
       algoritmoRepository.save(algoritmo);
       ColeccionRepository repoColeccion = new ColeccionRepository();
       repoColeccion.save(coleccion);
+      UserRepository.instance().guardar(new Usuario("admin1@mock.com", "admin123", "Administrador"));
     });
 
   }

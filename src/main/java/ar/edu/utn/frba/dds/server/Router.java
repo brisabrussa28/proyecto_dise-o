@@ -71,7 +71,7 @@ public class Router {
     app.before(
         "/colecciones", ctx -> {
           if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol("admin").handle(ctx);
+            tieneRol("administrador").handle(ctx);
           }
         }
     );
@@ -80,32 +80,32 @@ public class Router {
     app.before(
         "/solicitudes", ctx -> {
           if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol("admin").handle(ctx);
+            tieneRol("administrador").handle(ctx);
           }
         }
     );
 
     // Protegemos la CREACIÓN de fuentes
-    app.before(
-        "/fuentes", ctx -> {
-          if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol("admin").handle(ctx);
-          }
-        }
-    );
+    app.before("/fuentes", ctx -> {
+      if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+        tieneRol("administrador").handle(ctx);
+      }
+    });
 
     // Protegemos la MODIFICACIÓN de hechos
-    app.before(
-        "/hechos/{id}", ctx -> {
-          if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol("admin").handle(ctx);
-          }
-        }
-    );
+    app.before("/hechos/{id}", ctx -> {
+      if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+        tieneRol("administrador").handle(ctx);
+      }
+    });
 
 
     // Protegemos TODAS las rutas de /estadisticas
-    app.before("/estadisticas", tieneRol("admin"));
+    app.before("/estadisticas", ctx -> {
+      if (!"OPTIONS".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+        tieneRol("administrador").handle(ctx);
+      }
+    });
 
     app.get("/", ctx -> ctx.json(hechoController.findAll()));
 

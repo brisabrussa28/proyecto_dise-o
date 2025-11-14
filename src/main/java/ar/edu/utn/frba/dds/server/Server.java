@@ -29,6 +29,7 @@ public class Server {
       javalinConfig.bundledPlugins.enableCors(cors -> {
         cors.addRule(it -> {
           it.allowHost("http://localhost:3000");
+          it.allowCredentials = true;
         });
       });
 

@@ -7,7 +7,7 @@ interface SessionContextProps {
   role: Role;
   isAuthenticated: boolean;
   token: string | null;
-  login: (role?: Exclude<Role, 'Visitante'>, token?: string) => void; // default: Contribuyente
+  login: (role?: string, token?: string) => void; // default: Contribuyente
   logout: () => void;
 }
 
