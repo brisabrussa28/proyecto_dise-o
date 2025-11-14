@@ -12,18 +12,35 @@ export default function ReportarPage({ params }: { params: Promise<{ id: string 
   // Unwrap Next.js params Promise (React 19 `use`)
   const { id } = (React as any).use ? (React as any).use(params) : (params as unknown as { id: string });
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (motivo.trim().length < minChars) {
-      setPopup({ type: 'error', message: `El motivo debe tener al menos ${minChars} carácteres.` });
-      return;
-    }
-    // Mock de envío
-    console.log('Reporte enviado:', { hechoId: id, motivo });
-    setPopup({ type: 'success', message: 'Reporte enviado correctamente. ¡Gracias por colaborar!' });
-  };
+    const submit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (motivo.trim().length < minChars) {
+            setPopup({ type: 'error', message: `El motivo debe tener al menos ${minChars} carácteres.` });
+            return;
+        }
 
-  return (
+        try {
+            const res = await fetch('http://localhost:9001/solicitudes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    hecho_solicitado: parseInt(id),
+                    motivo_solicitud: motivo.trim()
+                }),
+            });
+
+            if (!res.ok) throw new Error('Error al enviar solicitud');
+            setPopup({ type: 'success', message: 'Reporte enviado correctamente. ¡Gracias por colaborar!' });
+        } catch (err) {
+            console.error(err);
+            setPopup({ type: 'error', message: 'No se pudo enviar el reporte. Intentalo más tarde.' });
+        }
+    };
+
+    return (
     <div className={styles.page}>
       <div className={styles.card}>
         <h1 className={styles.title}>Hecho: ID {id}</h1>
