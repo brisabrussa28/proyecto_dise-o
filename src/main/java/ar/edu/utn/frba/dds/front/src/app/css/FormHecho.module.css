@@ -23,3 +23,42 @@
 .actions { display: flex; justify-content: flex-end; margin-top: 12px; }
 .form button { background: #044DBA; color: #FFFFFF; border: 1px solid #044DBA; border-radius: 8px; padding: 10px 14px; cursor: pointer; }
 .form button:hover { background: #013b8d; }
+.fechaInput {
+    display: flex;
+    flex-direction: column;
+    min-width: 105px;
+}
+.fechaInput span { font-size: 11px; color: #FFFFFF; }
+.fecha {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    margin-top: 8px;
+}
+.fechaInput {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.fechaWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+}
+
+.fecha {
+    flex: 1;
+    padding-right: 30px;
+}
+
+.flechita {
+    position: absolute;
+    right: 10px;
+    color: #044DBA;
+    font-size: 14px;
+    pointer-events: none;
+}
+
