@@ -67,15 +67,25 @@ export async function fetchStats(
     tipo: StatKey,
     filtros: { categoria?: string; coleccion?: string }
 ): Promise<DataPoint[]> {
-    const params = new URLSearchParams({ tipo });
+    const body = {
+        estadistica_tipo: tipo,
+        estadistica_categoria: filtros.categoria,
+        estadistica_coleccion: filtros.coleccion,
+    };
 
-    if (filtros.categoria) params.append('categoria', filtros.categoria);
-    if (filtros.coleccion) params.append('coleccion', filtros.coleccion);
+    try {
+        const res = await fetch('http://localhost:9001/estadisticas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+            credentials: 'include',
+        });
 
-    const res = await fetch(`/estadisticas?${params.toString()}`);
-
-    if (!res.ok) throw new Error('Error al obtener estadísticas');
-
-    return await res.json();
+        if (!res.ok) throw new Error('Respuesta no válida');
+        return await res.json();
+    } catch (err) {
+        console.warn('Fallo la conexión con el backend. Usando datos simulados:', err);
+        return await mockFetch(tipo);
+    }
 }
 
