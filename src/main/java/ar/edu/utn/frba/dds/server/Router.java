@@ -6,6 +6,7 @@ import ar.edu.utn.frba.dds.controller.FuenteController;
 import ar.edu.utn.frba.dds.controller.HechoController;
 import ar.edu.utn.frba.dds.controller.HomeController;
 import ar.edu.utn.frba.dds.controller.SolicitudController;
+import ar.edu.utn.frba.dds.controller.UserController;
 import ar.edu.utn.frba.dds.dto.ColeccionDTO;
 import ar.edu.utn.frba.dds.dto.EstadisticaDTO;
 import ar.edu.utn.frba.dds.dto.HechoDTO;
@@ -25,31 +26,86 @@ import java.util.List;
 import java.util.Map;
 
 public class Router {
+
+
+  public static class LoginDTO {
+    private String email;
+    private String password;
+
+    public String getEmail() {
+      return email;
+    }
+
+    public void setEmail(String email) {
+      this.email = email;
+    }
+
+    public String getPassword() {
+      return password;
+    }
+
+    public void setPassword(String password) {
+      this.password = password;
+    }
+  }
+
+
   public void configure(Javalin app) {
+
     HomeController controller = new HomeController();
     HechoController hechoController = new HechoController();
     SolicitudController solicitudController = new SolicitudController();
     ColeccionController coleccionController = new ColeccionController();
     FuenteController fuenteController = new FuenteController();
     EstadisticaController estadisticaController = new EstadisticaController();
+    UserController userController = new UserController(); // <-- El nuevo
 
 
-    KeycloakTokenVerifier keycloakTokenVerifier;
-    try {
-      keycloakTokenVerifier = new KeycloakTokenVerifier("http://localhost:8080/realms/ddsi");
-    } catch (Exception e) {
-      throw new RuntimeException("No se pudo inicializar el verificador de tokens", e);
-    }
+    // --- 3. RUTAS DE AUTENTICACIÓN Y USUARIOS ---
+    app.post("/login", userController::login);
+    app.post("/logout", userController::logout);
+    app.post("/usuarios", userController::crearUsuario);
 
+
+    // --- 4. PROTECCIÓN DE RUTAS (app.before) ---
     app.before(
         "/colecciones", ctx -> {
           if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol(keycloakTokenVerifier, "admin").handle(ctx);
+            tieneRol("admin").handle(ctx);
           }
         }
     );
 
+    // Protegemos la ACEPTACIÓN/RECHAZO de solicitudes
+    app.before(
+        "/solicitudes", ctx -> {
+          if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+            tieneRol("admin").handle(ctx);
+          }
+        }
+    );
+
+    // Protegemos la CREACIÓN de fuentes
+    app.before("/fuentes", ctx -> {
+      if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+        tieneRol("admin").handle(ctx);
+      }
+    });
+
+    // Protegemos la MODIFICACIÓN de hechos
+    app.before("/hechos/{id}", ctx -> {
+      if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+        tieneRol("admin").handle(ctx);
+      }
+    });
+
+    // Protegemos TODAS las rutas de /estadisticas
+    app.before("/estadisticas", tieneRol("admin"));
+
+
+    // --- 5. RUTAS DE LA APLICACIÓN ---
     app.get("/", ctx -> ctx.result("BENE"));
+
     app.get(
         "/hechos/{id}", ctx -> {
           Long id = Long.parseLong(ctx.pathParam("id"));
@@ -62,6 +118,7 @@ public class Router {
           }
         }
     );
+
     app.post(
         "/hechos", ctx -> {
           Hecho hecho = hechoController.subirHecho(ctx.bodyAsClass(Hecho.class));
@@ -69,6 +126,7 @@ public class Router {
           ctx.json(hecho);
         }
     );
+
     app.post(
         "/solicitudes", ctx -> {
           try {
@@ -81,6 +139,7 @@ public class Router {
           }
         }
     );
+
     app.post(
         "/colecciones",
         ctx -> {
@@ -91,14 +150,6 @@ public class Router {
           } catch (RuntimeException e) {
             ctx.status(400);
             ctx.result(e.getMessage());
-          }
-        }
-    );
-
-    app.before(
-        "/solicitudes", ctx -> {
-          if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol(keycloakTokenVerifier, "admin").handle(ctx);
           }
         }
     );
@@ -137,34 +188,36 @@ public class Router {
           }
         }
     );
+
     app.get(
         "/hechos", ctx -> {
           List<Hecho> hechos = hechoController.findAll();
           ctx.json(hechos);
         }
     );
+
     app.get(
         "/fuentes", ctx -> {
           List<Fuente> fuentes = fuenteController.findAll();
           ctx.json(fuentes);
         }
     );
+
     app.post(
         "/fuentes", ctx -> {
           UploadedFile csvSubido = ctx.uploadedFile("archivoCsv");
-
           String nombreFuente = ctx.formParam("nombre");
 
           if (nombreFuente == null || nombreFuente.isEmpty()) {
             ctx.status(400)
                .json("Error: El campo 'nombre' es requerido.");
-            return; // Detener la ejecución
+            return;
           }
 
           if (csvSubido != null) {
+            // Es una fuente estática (CSV)
             String formatoFecha = ctx.formParam("formatoFecha");
             String separadorStr = ctx.formParam("separador");
-
             String columnasJson = ctx.formParam("columnas");
 
             if (columnasJson == null) {
@@ -178,8 +231,7 @@ public class Router {
             }
 
             char separador = ',';
-
-            if (separadorStr != null || !separadorStr.isEmpty()) {
+            if (separadorStr != null && !separadorStr.isEmpty()) {
               separador = separadorStr.charAt(0);
             }
 
@@ -190,8 +242,6 @@ public class Router {
                 }
             );
 
-            tieneRol(keycloakTokenVerifier, "admin").handle(ctx);
-
             ctx.json(
                 fuenteController.crearFuente(
                     nombreFuente, csvSubido, formatoFecha, columnas, separador
@@ -200,11 +250,13 @@ public class Router {
             ctx.status(201);
 
           } else {
+            // Es una fuente dinámica
             ctx.json(fuenteController.crearFuente(nombreFuente));
             ctx.status(201);
           }
         }
     );
+
     app.get(
         "/colecciones", ctx -> {
           List<Coleccion> colecciones = coleccionController.findAll();
@@ -212,6 +264,7 @@ public class Router {
           ctx.status(200);
         }
     );
+
     app.get(
         "/colecciones/categorias", ctx -> {
           List<String> categorias = coleccionController.getCategorias();
@@ -219,6 +272,7 @@ public class Router {
           ctx.status(200);
         }
     );
+
     app.put(
         "/hechos/{id}", context -> {
           Long idABuscar = Long.parseLong(context.pathParam("id"));
@@ -234,8 +288,6 @@ public class Router {
         }
     );
 
-    app.before("/estadisticas", tieneRol(keycloakTokenVerifier, "admin"));
-
     app.get(
         "/estadisticas", ctx -> {
           try {
@@ -250,6 +302,7 @@ public class Router {
           }
         }
     );
+
     app.post(
         "/estadisticas", ctx -> {
           try {
@@ -264,20 +317,11 @@ public class Router {
     );
   }
 
-  private Handler tieneRol(KeycloakTokenVerifier keycloakTokenVerifier, String rol) {
+  private Handler tieneRol(String rol) {
     return ctx -> {
-      String auth = ctx.header("Authorization");
-      if (auth == null || !auth.startsWith("Bearer ")) {
-        throw new io.javalin.http.ForbiddenResponse("-- ACCESO DENEGADO: SE REQUIERE EL ROL " + rol.toUpperCase() + " --");
-      }
-      String token = auth.substring("Bearer ".length());
-      boolean tieneRol = false;
-      try {
-        tieneRol = keycloakTokenVerifier.hasRealmRole(token, rol);
-      } catch (Exception ex) {
-        tieneRol = false;
-      }
-      if (!tieneRol) {
+      String rolEnSesion = ctx.sessionAttribute("rol");
+
+      if (rolEnSesion == null || !rolEnSesion.equalsIgnoreCase(rol)) {
         throw new io.javalin.http.ForbiddenResponse("-- ACCESO DENEGADO: SE REQUIERE EL ROL " + rol.toUpperCase() + " --");
       }
     };
