@@ -42,7 +42,6 @@ export default function HechoDetalleModal({
                 <div className={styles.content}>
                     {firstAdj && (
                         <div className={styles.cover}>
-                            // eslint-disable-next-line @next/next/no-img-element
                             <img src={firstAdj.url} alt="Imagen del hecho"/>
                         </div>
                     )}

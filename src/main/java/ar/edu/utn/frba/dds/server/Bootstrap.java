@@ -111,7 +111,8 @@ public class Bootstrap implements WithSimplePersistenceUnit {
       algoritmoRepository.save(algoritmo);
       ColeccionRepository repoColeccion = new ColeccionRepository();
       repoColeccion.save(coleccion);
-      //UserRepository.instance().guardar(new Usuario("admin1@mock.com", "admin123", "Administrador"));
+      UserRepository.instance()
+                    .guardar(new Usuario("admin1@mock.com", "admin123", "Administrador"));
       EstadisticaRepository repoEstadisticas = EstadisticaRepository.instance();
       repoEstadisticas.save(new Estadistica("Robos", 64L, "CATEGORIA CON MAS HECHOS", "Robos"));
       repoEstadisticas.save(new Estadistica("Obras", 28L, "CATEGORIA CON MAS HECHOS", "Obras"));

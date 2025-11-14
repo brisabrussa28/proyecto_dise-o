@@ -27,7 +27,7 @@ public class HechoRepository {
   }
 
   public List<Hecho> findAll() {
-    return em.createQuery("SELECT h FROM Hecho h", Hecho.class)
+    return em.createQuery("SELECT h FROM Hecho h join fetch h.fotos", Hecho.class)
              .getResultList();
   }
 
