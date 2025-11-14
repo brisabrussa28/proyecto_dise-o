@@ -74,4 +74,8 @@ public class HechoController {
       throw new RuntimeException("EL HECHO NO PUEDE SUCEDER EN EL FUTURO");
     }
   }
+
+  public List<String> getCategorias() {
+    return HechoRepository.instance().getCategorias();
+  }
 }

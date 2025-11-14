@@ -108,6 +108,16 @@ public class Router {
     });
 
     app.get("/", ctx -> ctx.json(hechoController.findAll()));
+
+
+    app.get(
+        "/hechos/categorias", ctx -> {
+          List<String> categorias = hechoController.getCategorias();
+          ctx.json(categorias);
+          ctx.status(200);
+        }
+    );
+
     app.get(
         "/hechos/{id}", ctx -> {
           Long id = Long.parseLong(ctx.pathParam("id"));
@@ -157,6 +167,7 @@ public class Router {
           ctx.json(hechos);
         }
     );
+
 
     app.post(
         "/solicitudes", ctx -> {
