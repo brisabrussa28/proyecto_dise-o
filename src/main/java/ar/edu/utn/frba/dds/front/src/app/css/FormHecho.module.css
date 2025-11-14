@@ -34,6 +34,7 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     cursor: pointer;
+    margin-top: 8px;
 }
 .fechaInput {
     display: flex;
@@ -45,6 +46,7 @@
     position: relative;
     display: flex;
     align-items: center;
+
 }
 
 .fecha {

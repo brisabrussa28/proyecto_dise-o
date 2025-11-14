@@ -145,7 +145,7 @@ export default function FormHecho({
                         }}
                         required
                     />
-                    <span className={styles.flechita}>📅</span>
+                    <span className={styles.flechita}></span>
                 </div>
 
                 <div className={styles.fechaWrapper}>
@@ -159,7 +159,7 @@ export default function FormHecho({
                         }}
                         required
                     />
-                    <span className={styles.flechita}>🕒</span>
+                    <span className={styles.flechita}></span>
                 </div>
             </div>
 
