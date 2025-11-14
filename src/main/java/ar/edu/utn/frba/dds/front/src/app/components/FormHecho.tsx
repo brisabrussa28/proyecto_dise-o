@@ -11,6 +11,7 @@ export type HechoInput = {
     lat?: string;
     lng?: string;
     etiquetas?: string; // separadas por coma
+    fecha_suceso: string;
 };
 
 export default function FormHecho({
@@ -28,6 +29,7 @@ export default function FormHecho({
         lat: initialData?.lat || '',
         lng: initialData?.lng || '',
         etiquetas: initialData?.etiquetas || '',
+        fecha_suceso: initialData?.fecha_suceso || '',
     });
 
     const [categorias] = useState<string[]>(['Robos', 'Obras', 'Incidentes', 'Eventos', 'Dato']);
@@ -56,8 +58,8 @@ export default function FormHecho({
                 longitud,
             },
             hecho_origen: 'PROVISTO_CONTRIBUYENTE',
+            hecho_fecha_suceso: form.fecha_suceso || null,
         };
-
         onSubmit?.(payload);
     };
 
@@ -119,6 +121,17 @@ export default function FormHecho({
                     value={form.etiquetas}
                     onChange={(e) => setForm({ ...form, etiquetas: e.target.value })}
                     placeholder="robo, zona-sur, auto"
+                />
+            </div>
+
+            <div className={styles.fechaInput}>
+                <label>Fecha del Suceso</label>
+                <input
+                    type="date"
+                    className={styles.fecha}
+                    value={form.fecha_suceso}
+                    onChange={(e) => setForm({ ...form, fecha_suceso: e.target.value })}
+                    required
                 />
             </div>
 
