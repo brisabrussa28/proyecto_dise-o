@@ -1,0 +1,18 @@
+# Observaciones entregas 5 y 6
+- Sacar filtro fuente
+- El renderizado se tiene que hacer del lado del servidor
+- Call to action de reporte deberia estar el de enviar a la derecha y cancelar a la izquierda
+- Paleta de colores con colores complementarios o  3 puntas para generar contraste
+- Para campos lat y long al momento de subir un hecho podemos usar la api que busque la lat y long a partr de una direccion
+- Alternativas imagenes guardarlo en la bdd como blob
+- Las imagenes se cargan por separado, no en la misma consulta del hecho
+- Separar recuadros de colecciones y fuentes, no deberian estar juntos y se tiene que separar las pantallas, evitar las tablas (completarlo con paginacion o campo busqueda)
+- Intentar hacer el despliegue (quiza google cloud platform)
+- Estadisticas hacerlas con un cron
+- Arreglar barra de busquedas
+- Id no mostrarlo en el hecho
+- Fecha en formato arg
+- Categoría y etiquetas con formato
+- Cambiar formato de admin y usuario: en admin "cuadros" en usuario "tarjetas"
+- Corregir subir fuente del front
+- Usar un framework para el CSS (Ej: Bootstrap).
