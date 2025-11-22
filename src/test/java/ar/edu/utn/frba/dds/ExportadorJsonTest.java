@@ -3,9 +3,9 @@ package ar.edu.utn.frba.dds;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ar.edu.utn.frba.dds.domain.exportador.json.ExportadorJson;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.model.exportador.json.ExportadorJson;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

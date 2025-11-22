@@ -1,8 +1,8 @@
 package ar.edu.utn.frba.dds;
 
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.Origen;
-import ar.edu.utn.frba.dds.domain.lector.json.LectorJson;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.Origen;
+import ar.edu.utn.frba.dds.model.lector.json.LectorJson;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

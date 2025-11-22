@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import ar.edu.utn.frba.dds.domain.hecho.CampoHecho;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.lector.csv.LectorCSV;
-import ar.edu.utn.frba.dds.domain.lector.csv.filaconverter.HechoFilaConverter;
+import ar.edu.utn.frba.dds.model.hecho.CampoHecho;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.lector.csv.LectorCSV;
+import ar.edu.utn.frba.dds.model.lector.csv.filaconverter.HechoFilaConverter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;

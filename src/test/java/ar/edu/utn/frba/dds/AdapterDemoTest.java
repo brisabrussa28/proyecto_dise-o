@@ -11,10 +11,10 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.exceptions.ConexionFuenteDemoException;
-import ar.edu.utn.frba.dds.domain.fuentes.apis.AdapterDemo;
-import ar.edu.utn.frba.dds.domain.fuentes.apis.conexion.Conexion;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.exceptions.ConexionFuenteDemoException;
+import ar.edu.utn.frba.dds.model.fuentes.apis.AdapterDemo;
+import ar.edu.utn.frba.dds.model.fuentes.apis.conexion.Conexion;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

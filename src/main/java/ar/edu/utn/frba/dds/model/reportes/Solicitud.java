@@ -1,0 +1,122 @@
+package ar.edu.utn.frba.dds.model.reportes;
+
+import ar.edu.utn.frba.dds.model.exceptions.RazonInvalidaException;
+import ar.edu.utn.frba.dds.model.hecho.Estado;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+
+/**
+ * Solicitud.
+ */
+
+@Entity
+@Indexed
+public class Solicitud {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "solicitud_id")
+  public Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "hecho_id")
+  private Hecho hechoSolicitado;
+
+  @Column(length = 1024, name = "solicitud_razon_eliminacion")
+  private String razonEliminacion;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "solicitud_estado", nullable = false)
+  private EstadoSolicitud estado;
+
+  public void setHechoSolicitado(Hecho hechoSolicitado) {
+    this.hechoSolicitado = hechoSolicitado;
+  }
+
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "El objeto Hecho debe ser mutable y compartido intencionalmente")
+  public Solicitud(Hecho hechoSolicitado, String motivo) {
+    if (hechoSolicitado == null) {
+      throw new NullPointerException("El hecho solicitado no puede ser null");
+    }
+    if (motivo == null) {
+      throw new RazonInvalidaException("El motivo no puede ser null");
+    }
+    this.validarMotivo(motivo);
+
+    this.hechoSolicitado = hechoSolicitado;
+    this.razonEliminacion = motivo;
+    this.estado = EstadoSolicitud.PENDIENTE;
+  }
+
+  public Solicitud() {
+
+  }
+
+  public Hecho getHechoSolicitado() {
+    return this.hechoSolicitado;
+  }
+
+  public String getRazonEliminacion() {
+    return this.razonEliminacion;
+  }
+
+  public EstadoSolicitud getEstado() {
+    return this.estado;
+  }
+
+  public void marcarComoSpam() {
+    this.estado = EstadoSolicitud.SPAM;
+  }
+
+  public void aceptar() {
+    this.estado = EstadoSolicitud.ACEPTADA;
+    this.hechoSolicitado.setEstado(Estado.ELIMINADO);
+  }
+
+  public void rechazar() {
+    this.estado = EstadoSolicitud.RECHAZADA;
+  }
+
+  public Long getId() {
+    return this.id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  void validarMotivo(String motivo) {
+    if (motivo.length() < 500 || motivo.length() > 1024) {
+      throw new RazonInvalidaException("La longitud del mensaje se encuentra fuera del rango (500 < caracteres < 1024");
+    }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Solicitud solicitud = (Solicitud) o;
+    return Objects.equals(hechoSolicitado, solicitud.hechoSolicitado)
+        && Objects.equals(razonEliminacion, solicitud.razonEliminacion);
+  }
+
+  @Override
+  public int hashCode() {
+    // CORRECCIÓN: El estado (que es mutable) se excluye del hash code.
+    return Objects.hash(hechoSolicitado, razonEliminacion);
+  }
+}

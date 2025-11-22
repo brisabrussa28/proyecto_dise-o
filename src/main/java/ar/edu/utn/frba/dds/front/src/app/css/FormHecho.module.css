@@ -1,0 +1,64 @@
+.pageWrap { min-height: 100vh; background: #488FFA; padding: 1px; }
+.title { font-size: 22px; font-weight: 800; margin: 2px 0 12px auto; }
+.form {
+    max-width: 840px;
+    margin: 16px auto;
+    padding: 16px;
+    background: #488FFA; 
+    color: #FFFFFF; 
+    border: 2px solid #044DBA;
+    border-radius: 12px;
+}
+.row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.form label { color: #FFFFFF; font-size: 14px; }
+.form input, .form textarea, .form select { background: #FFFFFF; color: #044DBA; border: 1px solid #044DBA; border-radius: 8px; padding: 10px 12px; outline: none; }
+.form input:hover, .form textarea:hover, .form select:hover { border-color: #3A7FF5; }
+.form input:focus, .form textarea:focus, .form select:focus { border-color: #3A7FF5; box-shadow: 0 0 0 2px rgba(4,77,186,0.25); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) {
+    .grid2 {
+        grid-template-columns: 1fr; /* Una sola columna en pantallas chicas */
+    }
+}
+.actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+.form button { background: #044DBA; color: #FFFFFF; border: 1px solid #044DBA; border-radius: 8px; padding: 10px 14px; cursor: pointer; }
+.form button:hover { background: #013b8d; }
+.fechaInput {
+    display: flex;
+    flex-direction: column;
+    min-width: 105px;
+}
+.fechaInput span { font-size: 11px; color: #FFFFFF; }
+.fecha {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    margin-top: 8px;
+}
+.fechaInput {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.fechaWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+}
+
+.fecha {
+    flex: 1;
+    padding-right: 30px;
+}
+
+.flechita {
+    position: absolute;
+    right: 10px;
+    color: #044DBA;
+    font-size: 14px;
+    pointer-events: none;
+}
+

@@ -32,3 +32,17 @@ target/**
 # Archivos json
 agregados.json
 dinamica.json
+/src/test/resources/csvDePrueba.csv
+/src/test/resources/csvDePruebaNumerar_1.csv
+/src/test/resources/csvDePruebaNumerar_2.csv
+/src/test/resources/csvDePruebaNumerar_3.csv
+/src/test/resources/csvDePruebaSobrescribir.csv
+/src/test/resources/csvDePruebaTimestamp_2025-09-17_01-12-15-189.csv
+/src/test/resources/csvDePruebaTimestamp_2025-09-17_01-13-12-551.csv
+/src/test/resources/csvDePruebaTimestamp_2025-09-17_01-14-12-103.csv
+/src/test/resources/csvDePruebaTimestamp_2025-09-17_01-21-30-559.csv
+/.settings/org.eclipse.core.resources.prefs
+/.settings/org.eclipse.jdt.apt.core.prefs
+/.settings/org.eclipse.m2e.core.prefs
+/src/main/java/ar/edu/utn/frba/dds/front/.next/
+/src/main/java/ar/edu/utn/frba/dds/front/node_modules/

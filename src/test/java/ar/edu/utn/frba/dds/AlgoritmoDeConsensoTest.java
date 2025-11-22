@@ -7,18 +7,18 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.Absoluta;
-import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.AlgoritmoDeConsenso;
-import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.MayoriaSimple;
-import ar.edu.utn.frba.dds.domain.coleccion.algoritmosconsenso.MultiplesMenciones;
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
-import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
-import ar.edu.utn.frba.dds.domain.hecho.Estado;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.Absoluta;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.AlgoritmoDeConsenso;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MayoriaSimple;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MultiplesMenciones;
+import ar.edu.utn.frba.dds.model.filtro.Filtro;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionTrue;
+import ar.edu.utn.frba.dds.model.fuentes.Fuente;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
+import ar.edu.utn.frba.dds.model.hecho.Estado;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,7 +72,7 @@ public class AlgoritmoDeConsensoTest {
     );
 
     Coleccion coleccion = new Coleccion(
-        "AbsolutaOk", agregador, "Desc", "Categoria");
+        "AbsolutaOk", agregador, "Desc", "Categoria", absoluta);
     coleccion.setAlgoritmoDeConsenso(absoluta);
     coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
@@ -92,7 +92,7 @@ public class AlgoritmoDeConsensoTest {
     );
 
     Coleccion coleccion = new Coleccion(
-        "AbsolutaNoOk", agregador, "Desc", "Categoria");
+        "AbsolutaNoOk", agregador, "Desc", "Categoria", absoluta);
     coleccion.setAlgoritmoDeConsenso(absoluta);
     coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
@@ -112,7 +112,7 @@ public class AlgoritmoDeConsensoTest {
     );
 
     Coleccion coleccion = new Coleccion(
-        "MayoriaOk", agregador, "Desc", "Categoria");
+        "MayoriaOk", agregador, "Desc", "Categoria", mayoriaSimple);
     coleccion.setAlgoritmoDeConsenso(mayoriaSimple);
     coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
@@ -131,7 +131,7 @@ public class AlgoritmoDeConsensoTest {
     );
 
     Coleccion coleccion = new Coleccion(
-        "MayoriaNoOk", agregador, "Desc", "Categoria");
+        "MayoriaNoOk", agregador, "Desc", "Categoria", mayoriaSimple);
     coleccion.setAlgoritmoDeConsenso(mayoriaSimple);
     coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
@@ -149,7 +149,7 @@ public class AlgoritmoDeConsensoTest {
     );
 
     Coleccion coleccion = new Coleccion(
-        "MultiplesOk", agregador, "Desc", "Categoria");
+        "MultiplesOk", agregador, "Desc", "Categoria", multiplesMenciones);
     coleccion.setAlgoritmoDeConsenso(multiplesMenciones);
     coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
@@ -167,7 +167,7 @@ public class AlgoritmoDeConsensoTest {
     );
 
     Coleccion coleccion = new Coleccion(
-        "MultiplesNoOk", agregador, "Desc", "Categoria");
+        "MultiplesNoOk", agregador, "Desc", "Categoria", multiplesMenciones);
     coleccion.setAlgoritmoDeConsenso(multiplesMenciones);
     coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
@@ -195,7 +195,7 @@ public class AlgoritmoDeConsensoTest {
     );
 
     Coleccion coleccion = new Coleccion(
-        "EliminadoNoConsensuado", agregador, "Desc", "Categoria");
+        "EliminadoNoConsensuado", agregador, "Desc", "Categoria", absoluta);
     coleccion.setAlgoritmoDeConsenso(absoluta);
     // Usamos el mock local en lugar del filtro global
     coleccion.recalcularHechosConsensuados(filtroDeEliminados, agregador.getFuentesCargadas());

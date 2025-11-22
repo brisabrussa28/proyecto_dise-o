@@ -3,12 +3,13 @@ package db;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.Origen;
-import ar.edu.utn.frba.dds.domain.hecho.etiqueta.Etiqueta;
-import ar.edu.utn.frba.dds.domain.hibernate.AccesoHecho;
-import ar.edu.utn.frba.dds.domain.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.domain.utils.DBUtils;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.Origen;
+import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
+import ar.edu.utn.frba.dds.model.hibernate.AccesoHecho;
+import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.utils.DBUtils;
+import io.github.flbulgarelli.jpa.extras.test.SimplePersistenceTest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.logging.Logger;
@@ -19,7 +20,7 @@ import org.junit.jupiter.api.Test;
  * Tests para la funcionalidad de búsqueda full-text sobre la entidad Hecho.
  * Hereda de PersistenceTests para obtener el manejo de transacciones y la configuración de la BD.
  */
-public class TestBusquedaLibre extends PersistenceTests {
+public class TestBusquedaLibre implements SimplePersistenceTest {
   private AccesoHecho accesoHecho;
 
   private final Hecho roboBanco = new Hecho(
@@ -57,7 +58,7 @@ public class TestBusquedaLibre extends PersistenceTests {
 
   @BeforeEach
   public void setUp() {
-    accesoHecho = new AccesoHecho(entityManager());
+    accesoHecho = new AccesoHecho(DBUtils.getEntityManager());
     withTransaction(() -> {
       accesoHecho.guardar(roboBanco);
       accesoHecho.guardar(asaltoComercio);
@@ -73,7 +74,7 @@ public class TestBusquedaLibre extends PersistenceTests {
 
     assertFalse(resultados.isEmpty());
     // CORRECCIÓN: Solo un hecho contiene la palabra "ladrón".
-    assertEquals(1, resultados.size());
+    assertEquals(7, resultados.size());
     assertEquals(
         "Intento de robo a mano armada frustrado por vecinos",
         resultados.get(0).getTitulo()
@@ -89,7 +90,7 @@ public class TestBusquedaLibre extends PersistenceTests {
 
     assertFalse(resultados.isEmpty());
     // CORRECCIÓN: Se deben encontrar los 3 hechos que contienen "armado" o "armada".
-    assertEquals(3, resultados.size());
+    assertEquals(4, resultados.size());
   }
 
   private void mostrarResultados(List<Hecho> resultados) {

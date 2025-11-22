@@ -1,0 +1,194 @@
+package ar.edu.utn.frba.dds.model.estadisticas;
+
+import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.model.exportador.Exportador;
+import ar.edu.utn.frba.dds.model.filtro.Filtro;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.reportes.GestorDeSolicitudes;
+import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+/**
+ * Clase responsable de calcular y exportar estadísticas.
+ * Debe ser configurada con un GestorDeSolicitudes para poder excluir
+ * los hechos eliminados de los cálculos.
+ */
+public class CentralDeEstadisticas {
+
+  private static final Logger logger = Logger.getLogger(CentralDeEstadisticas.class.getName());
+  private GestorDeSolicitudes gestor; // AHORA: Depende del Gestor
+  private Exportador<Estadistica> exportador;
+  private Filtro filtroAdicional; // Filtro opcional para refinar estadísticas
+
+  // --- Lógica Principal de Estadísticas ---
+
+  public List<Estadistica> hechosPorProvinciaDeUnaColeccion(Coleccion coleccion) {
+    Filtro filtroExcluyente = obtenerFiltroExcluyente();
+    List<Hecho> hechosFiltrados = coleccion.obtenerHechosFiltrados(filtroExcluyente);
+
+    // Se aplica el filtro adicional si fue configurado
+    if (this.filtroAdicional != null) {
+      hechosFiltrados = this.filtroAdicional.filtrar(hechosFiltrados);
+    }
+
+    return hechosFiltrados.stream()
+                          .collect(Collectors.groupingBy(Hecho::getProvincia, Collectors.counting()))
+                          .entrySet()
+                          .stream()
+                          .map(entry -> new Estadistica(
+                              entry.getKey(), entry.getValue(), "PROVINCIA CON MAS HECHOS",
+                              null
+                          ))
+                          .collect(Collectors.toList());
+  }
+
+  public Estadistica provinciaConMasHechos(Coleccion coleccion) {
+    return hechosPorProvinciaDeUnaColeccion(coleccion).stream()
+                                                      .max(Comparator.comparing(Estadistica::getValor))
+                                                      .orElse(null);
+  }
+
+  public List<Estadistica> hechosPorCategoria(List<Coleccion> colecciones) {
+    List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
+    return todosLosHechos.stream()
+                         .collect(Collectors.groupingBy(Hecho::getCategoria, Collectors.counting()))
+                         .entrySet()
+                         .stream()
+                         .map(entry -> new Estadistica(
+                             entry.getKey(), entry.getValue(), "CATEGORIA CON MAS HECHOS",
+                             entry.getKey()
+                         ))
+                         .collect(Collectors.toList());
+  }
+
+  public Estadistica categoriaConMasHechos() {
+    List<Coleccion> colecciones = ColeccionRepository.instance()
+                                                     .findAll();
+    return hechosPorCategoria(colecciones).stream()
+                                          .max(Comparator.comparing(Estadistica::getValor))
+                                          .orElse(null);
+  }
+
+  public List<Estadistica> hechosPorProvinciaSegunCategoria(List<Coleccion> colecciones, String categoria) {
+    List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
+    return todosLosHechos.stream()
+                         .filter(hecho -> Objects.equals(hecho.getCategoria(), categoria))
+                         .collect(Collectors.groupingBy(Hecho::getProvincia, Collectors.counting()))
+                         .entrySet()
+                         .stream()
+                         .map(entry -> new Estadistica(
+                             entry.getKey(),
+                             entry.getValue(),
+                             "PROVINCIA CON MAS HECHOS DE UNA CATEGORIA",
+                             categoria
+                         ))
+                         .collect(Collectors.toList());
+  }
+
+  public Estadistica provinciaConMasHechosDeCiertaCategoria(String categoria) {
+    List<Coleccion> colecciones = ColeccionRepository.instance()
+                                                     .findAll();
+    return hechosPorProvinciaSegunCategoria(colecciones, categoria).stream()
+                                                                   .max(Comparator.comparing(Estadistica::getValor))
+                                                                   .orElse(null);
+  }
+
+  public List<Estadistica> hechosPorHora(List<Coleccion> colecciones, String categoria) {
+    List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
+    return todosLosHechos.stream()
+                         .filter(hecho -> Objects.equals(hecho.getCategoria(), categoria))
+                         .collect(Collectors.groupingBy(
+                             hecho -> String.format(
+                                 "%02d",
+                                 hecho.getFechasuceso()
+                                      .getHour()
+                             ), Collectors.counting()
+                         ))
+                         .entrySet()
+                         .stream()
+                         .map(entry -> new Estadistica(
+                             entry.getKey(),
+                             entry.getValue(),
+                             "HORA CON MAS HECHOS DE UNA CATEGORIA",
+                             categoria
+                         ))
+                         .collect(Collectors.toList());
+  }
+
+  public Estadistica horaConMasHechosDeCiertaCategoria(String categoria) {
+    List<Coleccion> colecciones = ColeccionRepository.instance()
+                                                     .findAll();
+    return hechosPorHora(colecciones, categoria).stream()
+                                                .max(Comparator.comparing(Estadistica::getValor))
+                                                .orElse(null);
+  }
+
+  public Estadistica cantidadDeSolicitudesSpam() {
+    validarGestorConfigurado();
+    return new Estadistica(null, gestor.cantidadDeSpamDetectado(), "CANTIDAD DE SOLICITUDES SPAM", null);
+  }
+
+  // --- Lógica de Exportación ---
+
+  public void exportar(List<Estadistica> datos, String rutaArchivo) {
+    validarExportadorConfigurado();
+    if (datos == null || datos.isEmpty()) {
+      logger.warning("No se exportó a '" + rutaArchivo + "' porque no había datos para exportar.");
+      return;
+    }
+
+    List<Estadistica> datosValidos = datos.stream()
+                                          .filter(Objects::nonNull)
+                                          .collect(Collectors.toList());
+
+    this.exportador.exportar(datosValidos, rutaArchivo);
+  }
+
+  // --- Métodos Auxiliares y de Configuración ---
+
+  public void setExportador(Exportador<Estadistica> exportador) {
+    this.exportador = exportador;
+  }
+
+  public void setGestor(GestorDeSolicitudes gestor) {
+    this.gestor = gestor;
+  }
+
+  public void setFiltroAdicional(Filtro filtro) {
+    this.filtroAdicional = filtro;
+  }
+
+  private List<Hecho> obtenerTodosLosHechos(List<Coleccion> colecciones) {
+    Filtro filtroExcluyente = obtenerFiltroExcluyente();
+    List<Hecho> todosLosHechos = colecciones.stream()
+                                            .flatMap(coleccion -> coleccion.obtenerHechosFiltrados(filtroExcluyente)
+                                                                           .stream())
+                                            .collect(Collectors.toList());
+
+    if (this.filtroAdicional != null) {
+      todosLosHechos = this.filtroAdicional.filtrar(todosLosHechos);
+    }
+    return todosLosHechos;
+  }
+
+  private Filtro obtenerFiltroExcluyente() {
+    validarGestorConfigurado();
+    return gestor.filtroExcluyenteDeHechosEliminados();
+  }
+
+  private void validarGestorConfigurado() {
+    if (this.gestor == null) {
+      throw new IllegalStateException("El gestor no ha sido configurado. Use setGestor() primero.");
+    }
+  }
+
+  private void validarExportadorConfigurado() {
+    if (this.exportador == null) {
+      throw new IllegalStateException("El exportador no ha sido configurado. Use setExportador() primero.");
+    }
+  }
+}

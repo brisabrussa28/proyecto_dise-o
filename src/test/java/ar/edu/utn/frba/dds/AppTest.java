@@ -10,11 +10,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.calendarizacion.App;
-import ar.edu.utn.frba.dds.domain.fuentes.Fuente;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDeAgregacion;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteExternaAPI;
+import ar.edu.utn.frba.dds.model.calendarizacion.App;
+import ar.edu.utn.frba.dds.model.fuentes.Fuente;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteExternaAPI;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

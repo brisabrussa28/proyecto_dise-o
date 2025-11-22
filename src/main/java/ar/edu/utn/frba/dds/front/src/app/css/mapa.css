@@ -1,0 +1,121 @@
+.filter-navbar {
+    display: flex;
+    flex-direction: row;
+    width: auto; /* evitar que ocupe todo el ancho y se superponga */
+}
+
+.filter {
+    width: 100%;
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: bold;
+    color: rgb(112, 112, 112);
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-around;
+    overflow: visible;
+    margin-left: 15px;
+    max-width: 80px;
+    max-height: 34px;
+    border-width: 100px;
+    border: 2px solid rgb(230, 228, 228);
+    background: white;
+    border-radius: 16px;
+}
+
+.login {
+    width: 100%;
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: bold;
+    color: rgb(112, 112, 112);
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-around;
+    overflow: visible;
+    margin-left: 15px;
+    max-width: 100px;
+    max-height: 34px;
+    border-width: 100px;
+    border: 2px solid rgb(230, 228, 228);
+    background: white;
+    border-radius: 8px;
+}
+
+.register {
+    width: 100%;
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: bold;
+    color: white;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-around;
+    overflow: visible;
+    margin-left: 15px;
+    max-width: 100px;
+    max-height: 34px;
+    border-width: 100px;
+    border: 2px solid rgb(230, 228, 228);
+    background: #4285f4;
+    border-radius: 8px;
+}
+
+.ajuste {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: bold;
+    color: rgb(112, 112, 112);
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-around;
+    overflow: visible;
+    margin-left: 15px;
+    border-width: 100px;
+    border: 2px solid rgb(230, 228, 228);
+    background: white;
+    border-radius: 16px;
+}
+
+.ajustes{
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+}
+
+/* Marca/Logo MetaMapa dentro del mapa */
+.map-brand {
+    position: absolute;
+    z-index: 12;
+    bottom: var(--map-brand-offset, 12px);
+    /* Por defecto a la izquierda. Para pasarlo a la derecha desde CSS: 
+       .map-brand { --map-brand-left: auto; --map-brand-right: 12px; } */
+    left: var(--map-brand-left, 12px);
+    right: var(--map-brand-right, auto);
+    pointer-events: none; /* no bloquear interacciones del mapa */
+}
+.map-brand img {
+    display: block;
+    width: var(--map-brand-size, 120px);
+    height: auto;
+}
+
+.map-pin {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #e11;
+  border: 2px solid #fff;
+  box-shadow: 0 0 3px rgba(0,0,0,0.4);
+  cursor: pointer;
+}

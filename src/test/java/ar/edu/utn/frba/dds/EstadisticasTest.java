@@ -6,18 +6,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ar.edu.utn.frba.dds.domain.coleccion.Coleccion;
-import ar.edu.utn.frba.dds.domain.estadisticas.CentralDeEstadisticas;
-import ar.edu.utn.frba.dds.domain.estadisticas.Estadistica;
-import ar.edu.utn.frba.dds.domain.exportador.Exportador;
-import ar.edu.utn.frba.dds.domain.exportador.csv.ExportadorCSV;
-import ar.edu.utn.frba.dds.domain.exportador.csv.modoexportacion.ModoSobrescribir;
-import ar.edu.utn.frba.dds.domain.filtro.Filtro;
-import ar.edu.utn.frba.dds.domain.filtro.condiciones.CondicionTrue;
-import ar.edu.utn.frba.dds.domain.fuentes.FuenteDinamica;
-import ar.edu.utn.frba.dds.domain.hecho.Hecho;
-import ar.edu.utn.frba.dds.domain.hecho.HechoBuilder;
-import ar.edu.utn.frba.dds.domain.reportes.GestorDeSolicitudes;
+import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.Absoluta;
+import ar.edu.utn.frba.dds.model.estadisticas.CentralDeEstadisticas;
+import ar.edu.utn.frba.dds.model.estadisticas.Estadistica;
+import ar.edu.utn.frba.dds.model.exportador.Exportador;
+import ar.edu.utn.frba.dds.model.exportador.csv.ExportadorCSV;
+import ar.edu.utn.frba.dds.model.exportador.csv.modoexportacion.ModoSobrescribir;
+import ar.edu.utn.frba.dds.model.filtro.Filtro;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionTrue;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
+import ar.edu.utn.frba.dds.model.reportes.GestorDeSolicitudes;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -69,7 +70,9 @@ public class EstadisticasTest {
     Exportador<Estadistica> exportadorCsv = new ExportadorCSV<>(new ModoSobrescribir());
     calculadora.setExportador(exportadorCsv);
 
-    coleccion = new Coleccion("Coleccion de Hechos", fuente, "Descripcion de prueba", "General");
+    var algoritmo = new Absoluta();
+
+    coleccion = new Coleccion("Coleccion de Hechos", fuente, "Descripcion de prueba", "General", algoritmo);
     colecciones = List.of(coleccion);
   }
 
@@ -86,7 +89,7 @@ public class EstadisticasTest {
   @Test
   @DisplayName("Calcula la categoría con más hechos entre varias colecciones")
   public void estadisticasCategoriaConMasHechos() {
-    Estadistica resultado = calculadora.categoriaConMasHechos(colecciones);
+    Estadistica resultado = calculadora.categoriaConMasHechos();
     assertNotNull(resultado);
     // CORRECCIÓN: Se comprueba el nombre y el valor por separado.
     assertEquals("Robos", resultado.getNombre());
@@ -96,7 +99,7 @@ public class EstadisticasTest {
   @Test
   @DisplayName("Calcula la provincia con más hechos para una categoría específica")
   public void estadisticasHechosDeCiertaCategoria() {
-    Estadistica resultado = calculadora.provinciaConMasHechosDeCiertaCategoria(colecciones, "Robos");
+    Estadistica resultado = calculadora.provinciaConMasHechosDeCiertaCategoria("Robos");
     assertNotNull(resultado);
     // CORRECCIÓN: Se comprueba el nombre y el valor por separado.
     assertEquals("CABA", resultado.getNombre());
@@ -106,7 +109,7 @@ public class EstadisticasTest {
   @Test
   @DisplayName("Calcula la hora con más hechos para una categoría específica")
   public void estadisticasHoraConMasHechosDeCiertaCategoria() {
-    Estadistica resultado = calculadora.horaConMasHechosDeCiertaCategoria(colecciones, "Robos");
+    Estadistica resultado = calculadora.horaConMasHechosDeCiertaCategoria("Robos");
     String horaEsperada = String.format("%02d", LocalDateTime.now().minusHours(1).getHour());
     assertNotNull(resultado);
     // CORRECCIÓN: Se comprueba el nombre y el valor por separado.
