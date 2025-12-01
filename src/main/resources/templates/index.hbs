@@ -60,7 +60,7 @@
 
                                 <h4 class="card-text small text-muted mb-1" style="line-height: 1.2;">
                                     <i class="fa-solid fa-location-dot me-1"></i>
-                                    ${hecho.hecho_direccion || 'Sin detallar'}, ${hecho.hecho_provincia}
+                                    ${hecho.hecho_direccion ? hecho.hecho_direccion + ', ' : ''}${hecho.hecho_provincia || ''}
                                 </h4>
 
                                 <div class="text-muted small mb-2">
