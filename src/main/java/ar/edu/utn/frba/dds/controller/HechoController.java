@@ -2,20 +2,10 @@ package ar.edu.utn.frba.dds.controller;
 
 import ar.edu.utn.frba.dds.dto.HechoDTO;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
-import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
-import io.javalin.http.UploadedFile;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class HechoController {
   public Hecho subirHecho(Hecho hecho) {
@@ -76,6 +66,12 @@ public class HechoController {
   }
 
   public List<String> getCategorias() {
-    return HechoRepository.instance().getCategorias();
+    return HechoRepository.instance()
+                          .getCategorias();
+  }
+
+  public List<String> getEtiquetas() {
+    return HechoRepository.instance()
+                          .getEtiquetas();
   }
 }

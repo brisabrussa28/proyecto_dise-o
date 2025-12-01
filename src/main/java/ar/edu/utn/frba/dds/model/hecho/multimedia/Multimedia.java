@@ -1,17 +1,36 @@
 package ar.edu.utn.frba.dds.model.hecho.multimedia;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Embeddable;
+import javax.persistence.Lob;
 
 @Embeddable
 public class Multimedia {
-  @JsonProperty("url")
-  private String url;
+
+  String alt;
+  String mimetype;
+  @Lob
+  @JsonIgnore
+  private byte[] contenido;
 
   protected Multimedia() {
   }
 
-  public Multimedia(String url) {
-    this.url = url;
+  public Multimedia(String alt, String mimetype, byte[] contenido) {
+    this.alt = alt;
+    this.mimetype = mimetype;
+    this.contenido = contenido;
+  }
+
+  public String getMimetype() {
+    return this.mimetype;
+  }
+
+  public String getAlt() {
+    return this.alt;
+  }
+
+  public byte[] getDatos() {
+    return this.contenido;
   }
 }

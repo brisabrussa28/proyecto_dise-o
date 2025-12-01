@@ -11,6 +11,8 @@ import ResultsPanel from './components/ResultsPanel';
 import styles from './css/Home.module.css';
 import api from "../lib/api";
 
+
+
 export type HechoFeature = {
     id: string;
     titulo: string;
@@ -96,10 +98,9 @@ export default function Home() {
     }, []);
 
     useEffect(() => {
-        const url = "http://localhost:9001";
 
         // Fetch collections to build fuente -> coleccion map
-        fetch(`${url}/colecciones`)
+        fetch("http://localhost:9001/colecciones")
             .then((res) => {
                 if (!res.ok) throw new Error('No collections');
                 return res.json();
@@ -119,7 +120,7 @@ export default function Home() {
             .catch(() => {
                 coleccionPorFuenteRef.current = {};
             }).finally(() => {
-            fetch(url)
+            fetch("http://localhost:9001/home")
                 .then((res) => {
                     if (!res.ok) throw new Error('Respuesta no válida');
                     return res.json();
@@ -140,7 +141,7 @@ export default function Home() {
                                 lng: apiHecho.hecho_ubicacion.longitud,
                             },
                             direccion: apiHecho.hecho_direccion,
-                            adjuntos: apiHecho.hecho_fotos.map((foto: any) => ({
+                            adjuntos: apiHecho.fotos.map((foto: any) => ({
                                 id: foto.id,
                                 url: foto.url
                             })),
@@ -152,6 +153,7 @@ export default function Home() {
                 })
                 .catch((err) => {
                     console.warn('Usando datos mockeados por error de conexión:', err);
+                    console.log(err)
                     // setHechos(aplicarFiltros(MOCK_HECHOS, filters));
                     if (!errorMostrado) {
                         alert('No se pudo conectar con el servidor. Se están mostrando datos simulados.');

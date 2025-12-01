@@ -27,7 +27,7 @@ public class HechoRepository {
   }
 
   public List<Hecho> findAll() {
-    return em.createQuery("SELECT h FROM Hecho h join fetch h.fotos", Hecho.class)
+    return em.createQuery("SELECT h FROM Hecho h left join fetch h.fotos", Hecho.class)
              .getResultList();
   }
 
@@ -38,11 +38,18 @@ public class HechoRepository {
   }
 
   public Hecho findById(Long id) {
-    return em.find(Hecho.class, id);
+    return em.createQuery("SELECT h FROM Hecho h JOIN FETCH h.fotos WHERE h.id = :id", Hecho.class)
+             .setParameter("id", id)
+             .getSingleResult();
   }
 
   public List<String> getCategorias() {
     return em.createQuery("select distinct h.hecho_categoria from Hecho h", String.class)
+             .getResultList();
+  }
+
+  public List<String> getEtiquetas() {
+    return em.createQuery("SELECT DISTINCT h.nombre FROM Hecho h JOIN h.etiquetas e", String.class)
              .getResultList();
   }
 }

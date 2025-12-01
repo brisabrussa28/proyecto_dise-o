@@ -1,8 +1,8 @@
 package ar.edu.utn.frba.dds.controller;
 
+import ar.edu.utn.frba.dds.dto.LoginDTO;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.UserRepository;
-import ar.edu.utn.frba.dds.server.Router.LoginDTO; // Reutilizamos el DTO del Router
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
@@ -23,7 +23,8 @@ public class UserController {
     Usuario usuario = userRepo.findByEmail(loginData.getEmail());
 
     if (usuario == null) {
-      ctx.status(HttpStatus.UNAUTHORIZED).result("Email o password incorrectos");
+      ctx.status(HttpStatus.UNAUTHORIZED)
+         .result("Email o password incorrectos");
       return;
     }
 
@@ -35,10 +36,12 @@ public class UserController {
       ctx.sessionAttribute("usuarioLogueado", usuario.getEmail());
       ctx.sessionAttribute("rol", usuario.getRol());
 
-      ctx.status(HttpStatus.OK).result("Login exitoso. Rol: " + usuario.getRol());
+      ctx.status(HttpStatus.OK)
+         .result("Login exitoso. Rol: " + usuario.getRol());
     } else {
       // Password incorrecto
-      ctx.status(HttpStatus.UNAUTHORIZED).result("Email o password incorrectos");
+      ctx.status(HttpStatus.UNAUTHORIZED)
+         .result("Email o password incorrectos");
     }
   }
 
@@ -46,8 +49,11 @@ public class UserController {
    * Maneja el endpoint de Logout (POST /logout)
    */
   public void logout(Context ctx) {
-    ctx.req().getSession().invalidate(); // Mata la sesión
-    ctx.status(HttpStatus.OK).result("Sesión cerrada");
+    ctx.req()
+       .getSession()
+       .invalidate(); // Mata la sesión
+    ctx.status(HttpStatus.OK)
+       .result("Sesión cerrada");
   }
 
   /**
@@ -58,12 +64,14 @@ public class UserController {
 
     // Validaciones
     if (crearData.getEmail() == null || crearData.getPassword() == null) {
-      ctx.status(HttpStatus.BAD_REQUEST).result("Faltan email o password");
+      ctx.status(HttpStatus.BAD_REQUEST)
+         .result("Faltan email o password");
       return;
     }
 
     if (userRepo.emailExists(crearData.getEmail())) {
-      ctx.status(HttpStatus.CONFLICT).result("El email ya está en uso"); // 409 Conflict
+      ctx.status(HttpStatus.CONFLICT)
+         .result("El email ya está en uso"); // 409 Conflict
       return;
     }
 
@@ -78,9 +86,11 @@ public class UserController {
 
     try {
       userRepo.guardar(nuevoUsuario);
-      ctx.status(HttpStatus.CREATED).json(nuevoUsuario); // Devolvemos el usuario creado (sin el pass)
+      ctx.status(HttpStatus.CREATED)
+         .json(nuevoUsuario); // Devolvemos el usuario creado (sin el pass)
     } catch (Exception e) {
-      ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).result("Error al guardar usuario: " + e.getMessage());
+      ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+         .result("Error al guardar usuario: " + e.getMessage());
     }
   }
 }

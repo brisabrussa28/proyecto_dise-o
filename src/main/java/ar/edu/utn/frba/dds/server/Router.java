@@ -15,6 +15,10 @@ import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.Origen;
+import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
+import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
+import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
@@ -23,35 +27,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.http.Handler;
 import io.javalin.http.UploadedFile;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Router {
 
-
-  public static class LoginDTO {
-    private String email;
-    private String password;
-
-    public String getEmail() {
-      return email;
-    }
-
-    public void setEmail(String email) {
-      this.email = email;
-    }
-
-    public String getPassword() {
-      return password;
-    }
-
-    public void setPassword(String password) {
-      this.password = password;
-    }
-  }
-
-
-  public void configure(Javalin app) {
+  public void configure(Javalin app, ObjectMapper mapper) {
 
     HomeController controller = new HomeController();
     HechoController hechoController = new HechoController();
@@ -60,7 +44,6 @@ public class Router {
     FuenteController fuenteController = new FuenteController();
     EstadisticaController estadisticaController = new EstadisticaController();
     UserController userController = new UserController(); // <-- El nuevo
-
 
     // --- 3. RUTAS DE AUTENTICACIÓN Y USUARIOS ---
     app.post("/login", userController::login);
@@ -87,28 +70,52 @@ public class Router {
     );
 
     // Protegemos la CREACIÓN de fuentes
-    app.before("/fuentes", ctx -> {
-      if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-        tieneRol("administrador").handle(ctx);
-      }
-    });
+    app.before(
+        "/fuentes", ctx -> {
+          if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+            tieneRol("administrador").handle(ctx);
+          }
+        }
+    );
 
     // Protegemos la MODIFICACIÓN de hechos
-    app.before("/hechos/{id}", ctx -> {
-      if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-        tieneRol("administrador").handle(ctx);
-      }
-    });
+    app.before(
+        "/hechos/{id}", ctx -> {
+          if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+            tieneRol("administrador").handle(ctx);
+          }
+        }
+    );
 
 
     // Protegemos TODAS las rutas de /estadisticas
-    app.before("/estadisticas", ctx -> {
-      if (!"OPTIONS".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-        tieneRol("administrador").handle(ctx);
-      }
-    });
+    app.before(
+        "/estadisticas", ctx -> {
+          if (!"OPTIONS".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+            tieneRol("administrador").handle(ctx);
+          }
+        }
+    );
 
-    app.get("/", ctx -> ctx.json(hechoController.findAll()));
+    app.get(
+        "/", ctx -> {
+          // A. Buscamos todos los hechos
+          // Asegúrate de que tu repositorio tenga un método que devuelva List<Hecho>
+          // Si tu método se llama 'buscarTodos' o 'all', úsalo aquí.
+          List<Hecho> hechos = hechoController.findAll();
+
+          // B. Convertimos a JSON String para que JS lo entienda
+          String hechosJson = mapper.writeValueAsString(hechos);
+
+          // C. Preparamos el modelo de datos para la vista
+          Map<String, Object> model = new HashMap<>();
+          model.put("hechosJson", hechosJson);
+
+          // D. Renderizamos la plantilla
+          // Asegúrate de guardar el HTML que te pasé antes en: src/main/resources/templates/index.hbs
+          ctx.render("index.hbs", model);
+        }
+    );
 
     app.get(
         "/hechos/categorias", ctx -> {
@@ -117,6 +124,51 @@ public class Router {
           ctx.status(200);
         }
     );
+
+    app.get(
+        "/etiquetas", ctx -> {
+          List<String> etiquetas = hechoController.getEtiquetas();
+          ctx.json(etiquetas);
+        }
+    );
+
+    app.get(
+        "/hechos/{id}/fotos/{indice}", ctx -> {
+          Long id = Long.parseLong(ctx.pathParam("id"));
+          int indice = Integer.parseInt(ctx.pathParam("indice"));
+
+          Hecho hecho = hechoController.findById(id);
+
+          if (hecho != null && hecho.getFotos()
+                                    .size() > indice) {
+            Multimedia foto = hecho.getFotos()
+                                   .get(indice);
+            ctx.contentType(foto.getMimetype());
+            ctx.result(foto.getDatos());
+          } else {
+            ctx.status(404)
+               .result("Foto no encontrada en DB");
+          }
+        }
+    );
+
+    app.get(
+        "/auth/register", ctx -> {
+        }
+    );
+
+    app.get(
+        "/auth/login", ctx -> {
+        }
+    );
+
+    app.get(
+        "/hechos/nuevo", ctx -> {
+          ctx.render("hecho-nuevo.hbs");
+        }
+    );
+
+    app.get("/home", ctx -> ctx.json(hechoController.findAll()));
 
     app.get(
         "/hechos/{id}", ctx -> {
@@ -133,18 +185,76 @@ public class Router {
 
     app.post(
         "/hechos", ctx -> {
-//          Hecho hecho = hechoController.subirHecho(hechoDTO);
           try {
-            Hecho hecho = hechoController.subirHecho(ctx.bodyAsClass(Hecho.class));
-            ctx.status(201);
-            ctx.json(hecho);
-          } catch (RazonInvalidaException e) {
-            ctx.status(403);
-            ctx.result(e.getMessage());
-          }
+            // A. EXTRAER DATOS SIMPLES (Strings, Enums, Fechas)
+            String titulo = ctx.formParam("titulo");
+            String descripcion = ctx.formParam("descripcion");
+            String categoria = ctx.formParam("categoria");
+            String direccion = ctx.formParam("direccion");
+            String provincia = ctx.formParam("provincia");
+            String etiquteas = ctx.formParam("etiquetas");
 
+            List<Etiqueta> listaEtiquetas = new ArrayList<>();
+            if (etiquteas != null && !etiquteas.isBlank()) {
+              // 2. Separar por comas y crear objetos
+              String[] tagsArray = etiquteas.split(",");
+
+              for (String tagNombre : tagsArray) {
+                // .trim() quita los espacios en blanco alrededor (ej: " Violencia " -> "Violencia")
+                Etiqueta nuevaEtiqueta = new Etiqueta(tagNombre.trim());
+                listaEtiquetas.add(nuevaEtiqueta);
+              }
+            }
+
+            LocalDateTime fechaSuceso = LocalDateTime.parse(ctx.formParam("fechaSuceso"));
+
+            Origen origen = Origen.valueOf(ctx.formParam("origen"));
+
+            Double lat = Double.parseDouble(ctx.formParam("latitud"));
+            Double lng = Double.parseDouble(ctx.formParam("longitud"));
+            PuntoGeografico ubicacion = new PuntoGeografico(lat, lng);
+
+            List<Multimedia> listaFotos = new ArrayList<>();
+
+            for (UploadedFile file : ctx.uploadedFiles("fotos")) {
+              Multimedia foto = new Multimedia(
+                  file.filename(),
+                  file.contentType(),
+                  file.content()
+                      .readAllBytes()
+              );
+              listaFotos.add(foto);
+            }
+
+            Hecho nuevoHecho = new Hecho();
+            nuevoHecho.setTitulo(titulo);
+            nuevoHecho.setDescripcion(descripcion);
+            nuevoHecho.setCategoria(categoria);
+            nuevoHecho.setDireccion(direccion);
+            nuevoHecho.setProvincia(provincia);
+            nuevoHecho.setFechasuceso(fechaSuceso);
+            nuevoHecho.setOrigen(origen);
+            nuevoHecho.setUbicacion(ubicacion);
+            nuevoHecho.setEtiquetas(listaEtiquetas);
+            nuevoHecho.setFotos(listaFotos);
+
+            Hecho hechoGuardado = hechoController.subirHecho(nuevoHecho);
+
+            ctx.status(201);
+            ctx.redirect("/");
+
+          } catch (RazonInvalidaException e) {
+            ctx.status(403)
+               .result(e.getMessage());
+          } catch (Exception e) {
+            // Capturamos errores de parseo (fechas, enums, nulos)
+            e.printStackTrace();
+            ctx.status(400)
+               .result("Error en los datos del formulario: " + e.getMessage());
+          }
         }
     );
+
     app.put(
         "/hechos/{id}", context -> {
           Long idABuscar = Long.parseLong(context.pathParam("id"));
@@ -269,7 +379,6 @@ public class Router {
               separador = separadorStr.charAt(0);
             }
 
-            ObjectMapper mapper = new ObjectMapper();
             Map<String, List<String>> columnas = mapper.readValue(
                 columnasJson,
                 new TypeReference<Map<String, List<String>>>() {
@@ -307,11 +416,13 @@ public class Router {
         }
     );
 
-    app.get("/estadisticas/", ctx -> {
-      var todas = estadisticaController.getEstadisticas();
-      ctx.json(todas);
-      ctx.status(200);
-    });
+    app.get(
+        "/estadisticas/", ctx -> {
+          var todas = estadisticaController.getEstadisticas();
+          ctx.json(todas);
+          ctx.status(200);
+        }
+    );
 
     app.post(
         "/estadisticas", ctx -> {
@@ -326,10 +437,13 @@ public class Router {
         }
     );
 
-    app.get("/solicitudes", ctx -> {
-      List<Solicitud> pendientes = SolicitudesRepository.instance().obtenerPorEstado(EstadoSolicitud.PENDIENTE);
-      ctx.json(pendientes);
-    });
+    app.get(
+        "/solicitudes", ctx -> {
+          List<Solicitud> pendientes = SolicitudesRepository.instance()
+                                                            .obtenerPorEstado(EstadoSolicitud.PENDIENTE);
+          ctx.json(pendientes);
+        }
+    );
 
   }
 

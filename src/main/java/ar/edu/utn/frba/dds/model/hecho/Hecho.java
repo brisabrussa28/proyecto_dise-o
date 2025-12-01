@@ -8,15 +8,18 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
@@ -34,26 +37,41 @@ public class Hecho {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "hecho_id")
   Long id;
+
   @ElementCollection
   private List<Etiqueta> etiquetas = new ArrayList<>();
+
   private LocalDateTime hecho_fecha_carga;
+
   @Enumerated(EnumType.STRING)
   @Column(name = "hecho_origen", nullable = false)
   private Origen fuenteOrigen; // Ya no es final
+
   @FullTextField
   private String hecho_titulo;
+
   @FullTextField
   private String hecho_descripcion;
+
   private String hecho_categoria;
   private String hecho_direccion;
+
   @Embedded
   private PuntoGeografico hecho_ubicacion;
+
   private LocalDateTime hecho_fecha_suceso;
+
   @Enumerated(EnumType.STRING)
   @Column(name = "hecho_estado", nullable = false)
   private Estado estado;
+
   private String hecho_provincia;
-  @ElementCollection
+
+  @ElementCollection(fetch = FetchType.LAZY)
+      @CollectionTable(
+          name = "hecho_foto",
+          joinColumns = @JoinColumn(name = "hecho_id")
+      )
   List<Multimedia> fotos;
 
   /**
@@ -243,7 +261,7 @@ public class Hecho {
     return hecho_provincia;
   }
 
-  @JsonProperty("hecho_fotos")
+  //  @JsonProperty("hecho_fotos")
   public List<Multimedia> getFotos() {
     return new ArrayList<>(fotos);
   }
