@@ -34,7 +34,8 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">Categoría</label>
                                     <input type="text" name="categoria" class="form-control"
-                                           list="lista-categorias" placeholder="Escribe o busca..."
+                                           list="lista-categorias"
+                                           placeholder="Ej: Robos, Accidentes, etc..."
                                            required autocomplete="off">
                                     <datalist id="lista-categorias"></datalist>
                                 </div>
@@ -71,9 +72,10 @@
                                      style="height: 300px; width: 100%; border: 1px solid #ced4da; border-radius: 4px; margin-bottom: 10px;"></div>
 
                                 <div class="input-group input-group-sm mt-2">
-                                    <span class="input-group-text">Lat/Lng</span>
+                                    <span class="input-group-text">Lat</span>
                                     <input type="text" name="latitud" id="lat"
                                            class="form-control bg-light" readonly required>
+                                    <span class="input-group-text">Lng</span>
                                     <input type="text" name="longitud" id="lng"
                                            class="form-control bg-light" readonly required>
                                 </div>
@@ -94,66 +96,6 @@
                             </div>
                         </form>
                     </div>
-
-                    <script>
-                        document.addEventListener('DOMContentLoaded', () => {
-                            // --- 1. CARGA DE CATEGORÍAS (Backend -> Datalist) ---
-                            fetch('/hechos/categorias')
-                                .then(res => res.json())
-                                .then(data => {
-                                    const dataList = document.getElementById('lista-categorias');
-                                    data.forEach(cat => {
-                                        const option = document.createElement('option');
-                                        option.value = cat; // Inserta "ROBO", "INCENDIO", etc.
-                                        dataList.appendChild(option);
-                                    });
-                                });
-
-                            // --- 2. LOGICA DEL MAPA ---
-                            const map = L.map('map-picker').setView([-34.6037, -58.3816], 12);
-                            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-
-                            let marker;
-
-                            // Función reutilizable para mover el marcador
-                            function actualizarMarcador(lat, lng) {
-                                if (marker) {
-                                    marker.setLatLng([lat, lng]);
-                                } else {
-                                    marker = L.marker([lat, lng]).addTo(map);
-                                }
-                                map.setView([lat, lng], 15); // Zoom al punto
-
-                                // Actualizar inputs del formulario
-                                document.getElementById('lat').value = lat;
-                                document.getElementById('lng').value = lng;
-                            }
-
-                            // A. Clic en el mapa -> Actualiza coordenadas
-                            map.on('click', function(e) {
-                                actualizarMarcador(e.latlng.lat.toFixed(6), e.latlng.lng.toFixed(6));
-                            });
-
-                            // B. Buscar Dirección (Geocoding con Nominatim)
-                            document.getElementById('btn-buscar-dir').addEventListener('click', () => {
-                                const direccion = document.getElementById('input-direccion').value;
-                                if (!direccion) return;
-
-                                // Usamos la API gratuita de OpenStreetMap (Nominatim)
-                                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}`)
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        if (data && data.length > 0) {
-                                            const resultado = data[0]; // Tomamos el primer resultado
-                                            actualizarMarcador(resultado.lat, resultado.lon);
-                                        } else {
-                                            alert("No se encontró esa dirección.");
-                                        }
-                                    })
-                                    .catch(err => console.error("Error al geocodificar:", err));
-                            });
-                        });
-                    </script>
                 </div>
 
             </div>
@@ -163,31 +105,102 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Iniciar mapa pequeño en Buenos Aires
-            const map = L.map('map-picker').setView([-34.6037, -58.3816], 12);
 
+            // 1. CARGA DE DATOS (Categorías y Etiquetas)
+            const llenarDatalist = (url, idLista) => {
+                fetch(url)
+                    .then(res => res.json())
+                    .then(data => {
+                        const datalist = document.getElementById(idLista);
+                        data.forEach(item => {
+                            const option = document.createElement('option');
+                            option.value = item;
+                            datalist.appendChild(option);
+                        });
+                    })
+                    .catch(err => console.error("Error cargando lista: " + url, err));
+            };
+
+            llenarDatalist('/hechos/categorias', 'lista-categorias');
+            llenarDatalist('/etiquetas', 'lista-etiquetas');
+
+            // 2. INICIALIZAR MAPA
+            const map = L.map('map-picker').setView([-34.6037, -58.3816], 12);
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap'
             }).addTo(map);
 
             let marker;
 
-            // 2. Escuchar clics en el mapa
+            // Función para mover el marcador y guardar lat/lng en los inputs ocultos
+            function actualizarUbicacion(lat, lng) {
+                if (marker) {
+                    marker.setLatLng([lat, lng]);
+                } else {
+                    marker = L.marker([lat, lng]).addTo(map);
+                }
+                map.setView([lat, lng], 15);
+                document.getElementById('lat').value = lat;
+                document.getElementById('lng').value = lng;
+            }
+
+            // --- NUEVO: Función para obtener dirección desde coordenadas ---
+            function obtenerDireccion(lat, lng) {
+                const inputDireccion = document.getElementById('input-direccion');
+
+                // 1. Feedback visual (mientras carga)
+                inputDireccion.value = "Buscando dirección...";
+                inputDireccion.style.color = "#999"; // Gris para indicar carga
+
+                // 2. Llamada a la API
+                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+
+                fetch(url)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.display_name) {
+                            // 3. Escribir la dirección real
+                            inputDireccion.value = data.address.road;
+                            inputDireccion.style.color = "#000"; // Volver a negro
+                        } else {
+                            inputDireccion.value = "Dirección no encontrada";
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error obteniendo dirección:", err);
+                        inputDireccion.value = "";
+                    });
+            }
+
+            // --- EVENTOS ---
+
+            // A. Clic en el mapa (Actualiza marcador Y busca dirección)
             map.on('click', function(e) {
                 const lat = e.latlng.lat.toFixed(6);
                 const lng = e.latlng.lng.toFixed(6);
 
-                // Actualizar inputs visibles
-                document.getElementById('lat').value = lat;
-                document.getElementById('lng').value = lng;
-
-                // Mover o crear el marcador
-                if (marker) {
-                    marker.setLatLng(e.latlng);
-                } else {
-                    marker = L.marker(e.latlng).addTo(map);
-                }
+                actualizarUbicacion(lat, lng); // Mueve el pin
+                obtenerDireccion(lat, lng);    // Actualiza la barra de texto
             });
+
+            // B. Buscar Dirección con el botón (Actualiza marcador)
+            document.getElementById('btn-buscar-dir').addEventListener('click', () => {
+                const query = document.getElementById('input-direccion').value;
+                if (!query) return;
+
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            actualizarUbicacion(data[0].lat, data[0].lon);
+                        } else {
+                            alert("Dirección no encontrada");
+                        }
+                    })
+                    .catch(err => console.error("Error en geocoding", err));
+            });
+
+            setTimeout(() => { map.invalidateSize(); }, 200);
         });
     </script>
 {{/partial}}

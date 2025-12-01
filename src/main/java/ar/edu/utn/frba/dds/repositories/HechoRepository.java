@@ -49,7 +49,7 @@ public class HechoRepository {
   }
 
   public List<String> getEtiquetas() {
-    return em.createQuery("SELECT DISTINCT h.nombre FROM Hecho h JOIN h.etiquetas e", String.class)
+    return em.createNativeQuery("SELECT DISTINCT etiqueta_nombre FROM hecho_etiquetas")
              .getResultList();
   }
 }
