@@ -24,8 +24,13 @@ public class UserController {
   public void login(Context ctx) {
     String email = ctx.formParam("email");
     String password = ctx.formParam("password");
+    String redirect = ctx.formParam("redirect");
     Map<String, Object> model = new HashMap<>();
     model.put("email", email);
+
+    if (redirect != null) {
+      model.put("redirect", redirect);
+    }
 
     if (esVacio(email) || esVacio(password)) {
       renderizarLoginConError(ctx, model, "Ingrese usuario y contraseña.");
@@ -46,8 +51,9 @@ public class UserController {
       ctx.sessionAttribute("usuario_id", usuario.getId());
       ctx.sessionAttribute("usuario_nombre", usuario.getUserName());
       ctx.sessionAttribute("usuario_rol", usuario.getRol());
-      System.out.println("DEBUG: Sesión creada para ID: " + ctx.sessionAttribute("usuario_id")); // <--- AGREGA ESTO
-      ctx.redirect("/");
+
+      String destino = (redirect != null && !redirect.isEmpty()) ? redirect : "/";
+      ctx.redirect(destino);
     } catch (Exception e) {
       e.printStackTrace();
       renderizarLoginConError(ctx, model, "Error al iniciar sesión.");
@@ -73,10 +79,15 @@ public class UserController {
     String password = ctx.formParam("password");
     String repeatPassword = ctx.formParam("repetir_password");
     String userName = ctx.formParam("username");
+    String redirect = ctx.formParam("redirect");
 
     Map<String, Object> model = new HashMap<>();
     model.put("nombre", userName);
     model.put("email", email);
+
+    if (redirect != null) {
+      model.put("redirect", redirect);
+    }
 
 
     if (UserRepository.instance()
@@ -111,7 +122,10 @@ public class UserController {
       ctx.sessionAttribute("usuario_id", nuevoUsuario.getId());
       ctx.sessionAttribute("usuario_nombre", nuevoUsuario.getUserName());
       ctx.sessionAttribute("usuario_rol", nuevoUsuario.getRol());
-      ctx.redirect("/");
+
+      String destino = (redirect != null && !redirect.isEmpty()) ? redirect : "/";
+      System.out.println(destino);
+      ctx.redirect(destino);
     } catch (PersistenceException e) {
       e.printStackTrace();
       renderizarRegisterConError(ctx, model, "Error: El usuario o email ya existe.");
@@ -193,5 +207,28 @@ public class UserController {
   private void renderizarLoginConError(Context ctx, Map<String, Object> model, String error) {
     model.put("error", error);
     ctx.render("login.hbs", model);
+  }
+
+  public void mostrarLogin(Context ctx) {
+    String redirect = ctx.queryParam("redirect");
+
+    Map<String, Object> model = new HashMap<>();
+
+    if (redirect != null && !redirect.isEmpty()) {
+      model.put("redirect", redirect);
+    }
+
+    ctx.render("login.hbs", model);
+  }
+
+  public void mostrarRegistro(Context ctx) {
+    String redirect = ctx.queryParam("redirect");
+    Map<String, Object> model = new HashMap<>();
+
+    if (redirect != null && !redirect.isEmpty()) {
+      model.put("redirect", redirect);
+    }
+
+    ctx.render("register.hbs", model);
   }
 }

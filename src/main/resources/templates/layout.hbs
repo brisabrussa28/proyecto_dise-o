@@ -14,8 +14,15 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
     <style>
-        body, html { height: 100%; margin: 0; }
-        body { display: flex; flex-direction: column; }
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
     </style>
 </head>
 <body>
@@ -24,7 +31,7 @@
      style="flex-shrink: 0;">
 
     <div class="navbar-nav">
-        <a href="{{#if estaLogueado}}/hechos/nuevo{{else}}/auth/login{{/if}}"
+        <a href="{{#if estaLogueado}}/hechos/nuevo{{else}}/auth/login?redirect=/hechos/nuevo{{/if}}"
            class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
            title="{{#unless estaLogueado}}Debes iniciar sesión para crear un reporte{{/unless}}">
 
@@ -43,7 +50,8 @@
 
         {{#if estaLogueado}}
             <div class="dropdown">
-                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUserMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+                   id="dropdownUserMenu" data-bs-toggle="dropdown" aria-expanded="false">
 
                     <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center me-2 border border-1 border-light"
                          style="width: 35px; height: 35px;">

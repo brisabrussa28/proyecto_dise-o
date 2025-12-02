@@ -15,7 +15,9 @@
                 </div>
 
                 <form action="/login" method="POST">
-
+                    {{#if redirect}}
+                        <input type="hidden" name="redirect" value="{{redirect}}">
+                    {{/if}}
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="usuario_nombre" name="email"
                                placeholder="E-Mail" required>
@@ -37,7 +39,8 @@
 
                     <div class="text-center">
                         <span class="text-muted small">¿No tienes cuenta?</span>
-                        <a href="/auth/register" class="text-decoration-none fw-bold ms-1">Regístrate
+                        <a href="/auth/register{{#if redirect}}?redirect={{redirect}}{{/if}}"
+                        class="text-decoration-none fw-bold ms-1">Regístrate
                             aquí</a>
                     </div>
 

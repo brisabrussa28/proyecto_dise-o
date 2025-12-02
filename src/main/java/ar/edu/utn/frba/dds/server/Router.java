@@ -26,6 +26,7 @@ import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
+import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.UploadedFile;
 import java.time.LocalDateTime;
@@ -59,6 +60,10 @@ public class Router {
         ctx.sessionAttribute("esUsuario", Rol.CONTRIBUYENTE.equals(rol));
       } else {
         ctx.sessionAttribute("estaLogueado", false);
+        ctx.sessionAttribute("nombreUsuario", null);
+        ctx.sessionAttribute("rolUsuario", null);
+        ctx.sessionAttribute("esAdmin", false);
+        ctx.sessionAttribute("esUsuario", false);
       }
     });
 
@@ -68,7 +73,6 @@ public class Router {
     app.post("/usuarios", userController::register);
     app.get("/usuarios", ctx -> ctx.json(userController.findAll()));
     app.post("/usuarios/administrador", userController::registerAdmin);
-
     // --- 4. PROTECCIÓN DE RUTAS (app.before) ---
     app.before(
         "/colecciones", ctx -> {
@@ -120,13 +124,8 @@ public class Router {
           List<Hecho> hechos = hechoController.findAll();
           String hechosJson = mapper.writeValueAsString(hechos);
 
-          Map<String, Object> model = new HashMap<>();
+          Map<String, Object> model = modeloConSesion(ctx);
           model.put("hechosJson", hechosJson);
-          model.put("estaLogueado", ctx.sessionAttribute("estaLogueado"));
-          model.put("nombreUsuario", ctx.sessionAttribute("nombreUsuario"));
-          model.put("rolUsuario", ctx.sessionAttribute("rolUsuario"));
-          model.put("esAdmin", ctx.sessionAttribute("esAdmin"));
-          model.put("esUsuario", ctx.sessionAttribute("esUsuario"));
 
           ctx.render("index.hbs", model);
         }
@@ -167,25 +166,19 @@ public class Router {
         }
     );
 
-    app.get(
-        "/auth/register", ctx -> {
-          ctx.render("register.hbs");
-        }
-    );
+    app.get("/auth/register", userController::mostrarRegistro);
 
-    app.get(
-        "/auth/login", ctx -> {
-          ctx.render("login.hbs");
-        }
-    );
+    app.get("/auth/login", userController::mostrarLogin);
 
     app.get(
         "/hechos/nuevo", ctx -> {
-          if (ctx.sessionAttribute("usuario_id") == null) {
-            ctx.redirect("/login");
+          Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
+
+          if (estaLogueado == null || !estaLogueado) {
+            ctx.redirect("/auth/login?redirect=/hechos/nuevo");
             return;
           }
-          ctx.render("hecho-nuevo.hbs");
+          ctx.render("hecho-nuevo.hbs", modeloConSesion(ctx));
         }
     );
 
@@ -477,4 +470,15 @@ public class Router {
       }
     };
   }
+
+  private Map<String, Object> modeloConSesion(Context ctx) {
+    Map<String, Object> model = new HashMap<>();
+    model.put("estaLogueado", ctx.sessionAttribute("estaLogueado"));
+    model.put("nombreUsuario", ctx.sessionAttribute("nombreUsuario"));
+    model.put("rolUsuario", ctx.sessionAttribute("rolUsuario"));
+    model.put("esAdmin", ctx.sessionAttribute("esAdmin"));
+    model.put("esUsuario", ctx.sessionAttribute("esUsuario"));
+    return model;
+  }
+
 }
