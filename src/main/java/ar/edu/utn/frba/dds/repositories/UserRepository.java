@@ -1,7 +1,8 @@
 package ar.edu.utn.frba.dds.repositories;
 
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
-import ar.edu.utn.frba.dds.utils.DBUtils; // Asumo que tienes esta clase
+import ar.edu.utn.frba.dds.utils.DBUtils;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 
@@ -57,5 +58,10 @@ public class UserRepository {
                    .setParameter("email", email)
                    .getSingleResult();
     return count > 0;
+  }
+
+  public List<Usuario> findAll() {
+    return em.createQuery("SELECT u FROM Usuario u", Usuario.class)
+             .getResultList();
   }
 }

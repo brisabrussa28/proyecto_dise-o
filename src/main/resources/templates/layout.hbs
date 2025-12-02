@@ -24,8 +24,10 @@
      style="flex-shrink: 0;">
 
     <div class="navbar-nav">
-        <a href="/hechos/nuevo"
-           class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
+        <a href="{{#if estaLogueado}}/hechos/nuevo{{else}}/auth/login{{/if}}"
+           class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+           title="{{#unless estaLogueado}}Debes iniciar sesión para crear un reporte{{/unless}}">
+
             <i class="fa-solid fa-plus"></i>
             <span class="d-none d-sm-block">Nuevo Hecho</span>
         </a>
@@ -37,12 +39,71 @@
              style="height: 40px; width: auto;">
     </a>
 
-    <div class="ms-auto d-flex gap-2">
-        <a href="/auth/login" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
-            <i class="fa-regular fa-user"></i>
-            <span class="d-none d-sm-block">Ingresar</span>
-        </a>
-        <a href="/auth/register" class="btn btn-primary btn-sm fw-bold">Registrarse</a>
+    <div class="ms-auto">
+
+        {{#if estaLogueado}}
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUserMenu" data-bs-toggle="dropdown" aria-expanded="false">
+
+                    <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center me-2 border border-1 border-light"
+                         style="width: 35px; height: 35px;">
+                        <i class="fa-solid fa-user text-white" style="font-size: 1.2rem;"></i>
+                    </div>
+                    <span class="d-none d-sm-inline fw-bold">{{nombreUsuario}}</span>
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-end shadow"
+                    aria-labelledby="dropdownUserMenu">
+
+                    <li><h6 class="dropdown-header">Rol: <span
+                            class="badge bg-info text-dark">{{rolUsuario}}</span></h6></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <li><a class="dropdown-item" href="/perfil">
+                        <i class="fa-regular fa-id-card me-2 text-muted"></i>Mi Perfil
+                    </a></li>
+
+                    {{#if esAdmin}}
+                        <li><a class="dropdown-item" href="/admin/dashboard">
+                            <i class="fa-solid fa-gauge-high me-2 text-danger"></i>Panel de Admin
+                        </a></li>
+                    {{/if}}
+                    {{#if esUsuario}}
+                        <li><a class="dropdown-item" href="/mis-hechos">
+                            <i class="fa-solid fa-list me-2 text-primary"></i>Mis Reportes
+                        </a></li>
+                    {{/if}}
+
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <form action="/logout" method="POST" style="margin: 0;">
+                            <button type="submit" class="dropdown-item text-danger fw-bold"
+                                    style="border: none; background: none; width: 100%; text-align: left; cursor: pointer;">
+                                <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
+                            </button>
+                        </form>
+                    </li>
+
+                </ul>
+            </div>
+
+        {{else}}
+            <div class="d-flex gap-2">
+                <a href="/auth/login"
+                   class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
+                    <i class="fa-regular fa-user"></i>
+                    <span class="d-none d-sm-block">Ingresar</span>
+                </a>
+                <a href="/auth/register" class="btn btn-primary btn-sm fw-bold">
+                    Registrarse
+                </a>
+            </div>
+        {{/if}}
+
     </div>
 </nav>
 

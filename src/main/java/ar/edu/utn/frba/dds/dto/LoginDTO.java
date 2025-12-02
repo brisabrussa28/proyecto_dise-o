@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.dto;
 public class LoginDTO {
   private String email;
   private String password;
+  private String userName;
 
   public String getEmail() {
     return email;
@@ -16,7 +17,16 @@ public class LoginDTO {
     return password;
   }
 
+
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  public String getUserName() {
+    return this.userName;
+  }
+
+  public void setUserName(String newUserName) {
+    this.userName = newUserName;
   }
 }

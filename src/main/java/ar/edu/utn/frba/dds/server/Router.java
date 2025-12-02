@@ -21,6 +21,7 @@ import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
+import ar.edu.utn.frba.dds.model.usuario.Rol;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,19 +44,36 @@ public class Router {
     ColeccionController coleccionController = new ColeccionController();
     FuenteController fuenteController = new FuenteController();
     EstadisticaController estadisticaController = new EstadisticaController();
-    UserController userController = new UserController(); // <-- El nuevo
+    UserController userController = new UserController();
 
-    // --- 3. RUTAS DE AUTENTICACIÓN Y USUARIOS ---
+    app.before(ctx -> {
+      Long id = ctx.sessionAttribute("usuario_id");
+
+      if (id != null) {
+        ctx.sessionAttribute("estaLogueado", true);
+        ctx.sessionAttribute("nombreUsuario", ctx.sessionAttribute("usuario_nombre"));
+
+        Rol rol = ctx.sessionAttribute("usuario_rol");
+        ctx.sessionAttribute("rolUsuario", rol);
+        ctx.sessionAttribute("esAdmin", Rol.ADMINISTRADOR.equals(rol));
+        ctx.sessionAttribute("esUsuario", Rol.CONTRIBUYENTE.equals(rol));
+      } else {
+        ctx.sessionAttribute("estaLogueado", false);
+      }
+    });
+
+
     app.post("/login", userController::login);
     app.post("/logout", userController::logout);
-    app.post("/usuarios", userController::crearUsuario);
-
+    app.post("/usuarios", userController::register);
+    app.get("/usuarios", ctx -> ctx.json(userController.findAll()));
+    app.post("/usuarios/administrador", userController::registerAdmin);
 
     // --- 4. PROTECCIÓN DE RUTAS (app.before) ---
     app.before(
         "/colecciones", ctx -> {
           if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol("administrador").handle(ctx);
+            tieneRol(Rol.ADMINISTRADOR.toString()).handle(ctx);
           }
         }
     );
@@ -64,7 +82,7 @@ public class Router {
     app.before(
         "/solicitudes", ctx -> {
           if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol("administrador").handle(ctx);
+            tieneRol(Rol.ADMINISTRADOR.toString()).handle(ctx);
           }
         }
     );
@@ -73,7 +91,7 @@ public class Router {
     app.before(
         "/fuentes", ctx -> {
           if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol("administrador").handle(ctx);
+            tieneRol(Rol.ADMINISTRADOR.toString()).handle(ctx);
           }
         }
     );
@@ -82,7 +100,7 @@ public class Router {
     app.before(
         "/hechos/{id}", ctx -> {
           if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol("administrador").handle(ctx);
+            tieneRol(Rol.ADMINISTRADOR.toString()).handle(ctx);
           }
         }
     );
@@ -92,27 +110,24 @@ public class Router {
     app.before(
         "/estadisticas", ctx -> {
           if (!"OPTIONS".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol("administrador").handle(ctx);
+            tieneRol(Rol.ADMINISTRADOR.toString()).handle(ctx);
           }
         }
     );
 
     app.get(
         "/", ctx -> {
-          // A. Buscamos todos los hechos
-          // Asegúrate de que tu repositorio tenga un método que devuelva List<Hecho>
-          // Si tu método se llama 'buscarTodos' o 'all', úsalo aquí.
           List<Hecho> hechos = hechoController.findAll();
-
-          // B. Convertimos a JSON String para que JS lo entienda
           String hechosJson = mapper.writeValueAsString(hechos);
 
-          // C. Preparamos el modelo de datos para la vista
           Map<String, Object> model = new HashMap<>();
           model.put("hechosJson", hechosJson);
+          model.put("estaLogueado", ctx.sessionAttribute("estaLogueado"));
+          model.put("nombreUsuario", ctx.sessionAttribute("nombreUsuario"));
+          model.put("rolUsuario", ctx.sessionAttribute("rolUsuario"));
+          model.put("esAdmin", ctx.sessionAttribute("esAdmin"));
+          model.put("esUsuario", ctx.sessionAttribute("esUsuario"));
 
-          // D. Renderizamos la plantilla
-          // Asegúrate de guardar el HTML que te pasé antes en: src/main/resources/templates/index.hbs
           ctx.render("index.hbs", model);
         }
     );
@@ -154,16 +169,22 @@ public class Router {
 
     app.get(
         "/auth/register", ctx -> {
+          ctx.render("register.hbs");
         }
     );
 
     app.get(
         "/auth/login", ctx -> {
+          ctx.render("login.hbs");
         }
     );
 
     app.get(
         "/hechos/nuevo", ctx -> {
+          if (ctx.sessionAttribute("usuario_id") == null) {
+            ctx.redirect("/login");
+            return;
+          }
           ctx.render("hecho-nuevo.hbs");
         }
     );

@@ -16,6 +16,7 @@ import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLectorCsv;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
+import ar.edu.utn.frba.dds.model.usuario.Rol;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.AlgoritmoRepository;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
@@ -113,12 +114,22 @@ public class Bootstrap implements WithSimplePersistenceUnit {
       ColeccionRepository repoColeccion = new ColeccionRepository();
       repoColeccion.save(coleccion);
       UserRepository.instance()
-                    .guardar(new Usuario("admin1@mock.com", "admin123", "Administrador"));
+                    .guardar(new Usuario(
+                        "admin1@mock.com",
+                        "administrador",
+                        "admin123",
+                        Rol.ADMINISTRADOR
+                    ));
       EstadisticaRepository repoEstadisticas = EstadisticaRepository.instance();
       repoEstadisticas.save(new Estadistica("Robos", 64L, "CATEGORIA CON MAS HECHOS", "Robos"));
       repoEstadisticas.save(new Estadistica("Obras", 28L, "CATEGORIA CON MAS HECHOS", "Obras"));
       repoEstadisticas.save(new Estadistica("Buenos Aires", 43L, "PROVINCIA CON MAS HECHOS", null));
-      repoEstadisticas.save(new Estadistica("15", 18L, "HORA CON MAS HECHOS DE UNA CATEGORIA", "Robos"));
+      repoEstadisticas.save(new Estadistica(
+          "15",
+          18L,
+          "HORA CON MAS HECHOS DE UNA CATEGORIA",
+          "Robos"
+      ));
       repoEstadisticas.save(new Estadistica("Spam", 37L, "CANTIDAD DE SOLICITUDES SPAM", null));
       SolicitudesRepository repoSolicitudes = SolicitudesRepository.instance();
       String motivoLargo1 = "x".repeat(501);

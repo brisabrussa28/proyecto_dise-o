@@ -1,48 +1,58 @@
 package ar.edu.utn.frba.dds.controller;
 
-import ar.edu.utn.frba.dds.dto.LoginDTO;
+import ar.edu.utn.frba.dds.model.usuario.Rol;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.UserRepository;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import javax.persistence.PersistenceException;
+import org.apache.commons.codec.digest.DigestUtils;
 
 public class UserController {
-
-  private final UserRepository userRepo;
+  private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
   public UserController() {
-    this.userRepo = UserRepository.instance();
   }
 
   /**
    * Maneja el endpoint de Login (POST /login)
    */
   public void login(Context ctx) {
-    LoginDTO loginData = ctx.bodyAsClass(LoginDTO.class);
+    String email = ctx.formParam("email");
+    String password = ctx.formParam("password");
+    Map<String, Object> model = new HashMap<>();
+    model.put("email", email);
 
-    Usuario usuario = userRepo.findByEmail(loginData.getEmail());
-
-    if (usuario == null) {
-      ctx.status(HttpStatus.UNAUTHORIZED)
-         .result("Email o password incorrectos");
+    if (esVacio(email) || esVacio(password)) {
+      renderizarLoginConError(ctx, model, "Ingrese usuario y contraseña.");
       return;
     }
 
-    // Comparamos el password
-    // En un proyecto real, el password estaría hasheado
-    if (usuario.chequearPassword(loginData.getPassword())) {
+    try {
+      Usuario usuario = UserRepository.instance()
+                                      .findByEmail(email);
 
-      // ¡Login exitoso! Guardamos los datos en la SESIÓN.
-      ctx.sessionAttribute("usuarioLogueado", usuario.getEmail());
-      ctx.sessionAttribute("rol", usuario.getRol());
+      if (usuario == null || !DigestUtils.sha256Hex(password)
+                                         .equals(usuario.getPassword())) {
+        renderizarLoginConError(ctx, model, "Usuario o contraseña incorrectos.");
+        System.out.println(DigestUtils.sha256Hex(password) + "   " + usuario.getPassword());
+        return;
+      }
 
-      ctx.status(HttpStatus.OK)
-         .result("Login exitoso. Rol: " + usuario.getRol());
-    } else {
-      // Password incorrecto
-      ctx.status(HttpStatus.UNAUTHORIZED)
-         .result("Email o password incorrectos");
+      ctx.sessionAttribute("usuario_id", usuario.getId());
+      ctx.sessionAttribute("usuario_nombre", usuario.getUserName());
+      ctx.sessionAttribute("usuario_rol", usuario.getRol());
+      System.out.println("DEBUG: Sesión creada para ID: " + ctx.sessionAttribute("usuario_id")); // <--- AGREGA ESTO
+      ctx.redirect("/");
+    } catch (Exception e) {
+      e.printStackTrace();
+      renderizarLoginConError(ctx, model, "Error al iniciar sesión.");
     }
+
   }
 
   /**
@@ -51,46 +61,137 @@ public class UserController {
   public void logout(Context ctx) {
     ctx.req()
        .getSession()
-       .invalidate(); // Mata la sesión
-    ctx.status(HttpStatus.OK)
-       .result("Sesión cerrada");
+       .invalidate();
+    ctx.redirect("/");
   }
 
   /**
    * Maneja el endpoint de Creación de Usuario (POST /usuarios)
    */
-  public void crearUsuario(Context ctx) {
-    LoginDTO crearData = ctx.bodyAsClass(LoginDTO.class); // Reutilizamos LoginDTO
+  public void register(Context ctx) {
+    String email = ctx.formParam("email");
+    String password = ctx.formParam("password");
+    String repeatPassword = ctx.formParam("repetir_password");
+    String userName = ctx.formParam("username");
 
-    // Validaciones
-    if (crearData.getEmail() == null || crearData.getPassword() == null) {
-      ctx.status(HttpStatus.BAD_REQUEST)
-         .result("Faltan email o password");
-      return;
-    }
+    Map<String, Object> model = new HashMap<>();
+    model.put("nombre", userName);
+    model.put("email", email);
 
-    if (userRepo.emailExists(crearData.getEmail())) {
+
+    if (UserRepository.instance()
+                      .emailExists(email)) {
       ctx.status(HttpStatus.CONFLICT)
          .result("El email ya está en uso"); // 409 Conflict
       return;
     }
+    if (!EMAIL_PATTERN.matcher(email)
+                      .matches()) {
+      renderizarRegisterConError(ctx, model, "El formato del email no es válido.");
+      return;
+    }
+    if (!password.equals(repeatPassword)) {
+      renderizarRegisterConError(ctx, model, "Las contraseñas no coinciden.");
+      return;
+    }
 
-    // --- Lógica para hashear el password iría aquí ---
-    // String passwordHasheado = BCrypt.hashpw(crearData.getPassword(), BCrypt.gensalt());
-    // Por ahora, lo guardamos en texto plano (NO HACER EN PRODUCCIÓN)
-    String passwordPlano = crearData.getPassword();
-
-    // Asignamos rol "user" por defecto.
+    // Asignamos rol "Contribuyente" por defecto.
     // Podrías pasar el rol en el DTO si quisieras.
-    Usuario nuevoUsuario = new Usuario(crearData.getEmail(), passwordPlano, "user");
+    // Se hashea la password cuando se instancia al usuario
+    Usuario nuevoUsuario = new Usuario(
+        email,
+        userName,
+        password,
+        Rol.CONTRIBUYENTE
+    );
 
     try {
-      userRepo.guardar(nuevoUsuario);
-      ctx.status(HttpStatus.CREATED)
-         .json(nuevoUsuario); // Devolvemos el usuario creado (sin el pass)
+      UserRepository.instance()
+                    .guardar(nuevoUsuario);
+      ctx.sessionAttribute("usuario_id", nuevoUsuario.getId());
+      ctx.sessionAttribute("usuario_nombre", nuevoUsuario.getUserName());
+      ctx.sessionAttribute("usuario_rol", nuevoUsuario.getRol());
+      ctx.redirect("/");
+    } catch (PersistenceException e) {
+      e.printStackTrace();
+      renderizarRegisterConError(ctx, model, "Error: El usuario o email ya existe.");
     } catch (Exception e) {
-      ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-         .result("Error al guardar usuario: " + e.getMessage());
+      e.printStackTrace();
+      renderizarRegisterConError(ctx, model, "Ocurrió un error inesperado.");
     }
+
+  }
+
+  public void registerAdmin(Context ctx) {
+    String email = ctx.formParam("email");
+    String password = ctx.formParam("password");
+    String repeatPassword = ctx.formParam("repetir_password");
+    String userName = ctx.formParam("username");
+
+    Map<String, Object> model = new HashMap<>();
+    model.put("nombre", userName);
+    model.put("email", email);
+
+
+    if (UserRepository.instance()
+                      .emailExists(email)) {
+      ctx.status(HttpStatus.CONFLICT)
+         .result("El email ya está en uso"); // 409 Conflict
+      return;
+    }
+    if (!EMAIL_PATTERN.matcher(email)
+                      .matches()) {
+      renderizarRegisterConError(ctx, model, "El formato del email no es válido.");
+      return;
+    }
+    if (!password.equals(repeatPassword)) {
+      renderizarRegisterConError(ctx, model, "Las contraseñas no coinciden.");
+      return;
+    }
+
+    // Asignamos rol "Contribuyente" por defecto.
+    // Podrías pasar el rol en el DTO si quisieras.
+    // Se hashea la password cuando se instancia al usuario
+    Usuario nuevoUsuario = new Usuario(
+        email,
+        userName,
+        password,
+        Rol.ADMINISTRADOR
+    );
+
+    try {
+      UserRepository.instance()
+                    .guardar(nuevoUsuario);
+      ctx.sessionAttribute("usuario_id", nuevoUsuario.getId());
+      ctx.sessionAttribute("usuario_nombre", nuevoUsuario.getUserName());
+      ctx.sessionAttribute("usuario_rol", nuevoUsuario.getRol());
+      ctx.redirect("/");
+    } catch (PersistenceException e) {
+      renderizarRegisterConError(ctx, model, "Error: El usuario o email ya existe.");
+    } catch (Exception e) {
+      renderizarRegisterConError(ctx, model, "Ocurrió un error inesperado.");
+    }
+
+  }
+
+  public List<Usuario> findAll() {
+    return UserRepository.instance()
+                         .findAll();
+  }
+
+
+  private boolean esVacio(String texto) {
+    return texto == null || texto.trim()
+                                 .isEmpty();
+  }
+
+  private void renderizarRegisterConError(Context ctx, Map<String, Object> model, String error) {
+    model.put("error", error);
+    ctx.render("register.hbs", model);
+  }
+
+  private void renderizarLoginConError(Context ctx, Map<String, Object> model, String error) {
+    model.put("error", error);
+    ctx.render("login.hbs", model);
   }
 }

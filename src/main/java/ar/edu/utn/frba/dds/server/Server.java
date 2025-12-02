@@ -17,29 +17,16 @@ public class Server {
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     mapper.registerModule(new Jdk8Module());
     Javalin app = Javalin.create(javalinConfig -> {
-      // Configurar Jackson para JSON
       javalinConfig.jsonMapper(new JavalinJackson());
-
-      // Configurar motor de plantillas Handlebars
       javalinConfig.fileRenderer(new JavalinRenderer().register("hbs", new JavalinHandlebars()));
-
-      // Configurar archivos estáticos
       javalinConfig.staticFiles.add("/public");
-
-      // Configurar CORS
       javalinConfig.bundledPlugins.enableCors(cors -> {
         cors.addRule(it -> {
           it.allowHost("http://localhost:3000");
           it.allowCredentials = true;
         });
       });
-
-      // Habilitar sesiones (esto es lo que faltaba)
-      javalinConfig.jetty.modifyServletContextHandler(handler -> {
-        handler.setSessionHandler(new org.eclipse.jetty.server.session.SessionHandler());
-      });
     });
-
     // Configurar rutas
     new Router().configure(app, mapper);
 
