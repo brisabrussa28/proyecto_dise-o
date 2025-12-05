@@ -64,4 +64,8 @@ public class UserRepository {
     return em.createQuery("SELECT u FROM Usuario u", Usuario.class)
              .getResultList();
   }
+
+  public Usuario findById(Long id) {
+    return em.find(Usuario.class, id);
+  }
 }

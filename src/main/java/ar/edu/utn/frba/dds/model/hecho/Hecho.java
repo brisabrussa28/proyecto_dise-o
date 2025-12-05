@@ -3,6 +3,8 @@ package ar.edu.utn.frba.dds.model.hecho;
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.usuario.Usuario;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
@@ -68,11 +72,16 @@ public class Hecho {
   private String hecho_provincia;
 
   @ElementCollection(fetch = FetchType.LAZY)
-      @CollectionTable(
-          name = "hecho_foto",
-          joinColumns = @JoinColumn(name = "hecho_id")
-      )
+  @CollectionTable(
+      name = "hecho_foto",
+      joinColumns = @JoinColumn(name = "hecho_id")
+  )
   List<Multimedia> fotos;
+
+  @ManyToOne
+  @JoinColumn(name = "usuario_id")
+  @JsonIgnore
+  private Usuario hecho_autor;
 
   /**
    * Constructor para un Hecho.
@@ -109,7 +118,8 @@ public class Hecho {
       LocalDateTime fechaCarga,
       Origen fuenteOrigen,
       List<Etiqueta> etiquetas,
-      List<Multimedia> fotos
+      List<Multimedia> fotos,
+      Usuario hecho_autor
   ) {
     this.hecho_titulo = titulo;
     this.hecho_descripcion = descripcion;
@@ -123,32 +133,7 @@ public class Hecho {
     this.hecho_provincia = provincia;
     this.estado = Estado.ORIGINAL;
     this.fotos = fotos;
-  }
-
-  public Hecho(
-      String titulo,
-      String descripcion,
-      String categoria,
-      String direccion,
-      String provincia,
-      PuntoGeografico ubicacion,
-      LocalDateTime fechaSuceso,
-      LocalDateTime fechaCarga,
-      Origen fuenteOrigen,
-      List<Etiqueta> etiquetas
-  ) {
-    this.hecho_titulo = titulo;
-    this.hecho_descripcion = descripcion;
-    this.hecho_categoria = categoria;
-    this.hecho_ubicacion = ubicacion;
-    this.hecho_direccion = direccion;
-    this.hecho_fecha_suceso = fechaSuceso;
-    this.hecho_fecha_carga = fechaCarga;
-    this.fuenteOrigen = fuenteOrigen;
-    this.etiquetas = etiquetas;
-    this.hecho_provincia = provincia;
-    this.estado = Estado.ORIGINAL;
-    this.fotos = new ArrayList<>();
+    this.hecho_autor = hecho_autor;
   }
 
 
@@ -325,9 +310,11 @@ public class Hecho {
    *
    * @return true si el hecho es editable por el usuario, false en caso contrario
    */
-  public boolean esEditable() {
+  public boolean esEditable(Usuario usuarioEditor) {
     return LocalDateTime.now()
-                        .isBefore(hecho_fecha_carga.plusWeeks(1));
+                        .isBefore(hecho_fecha_carga.plusWeeks(1)) && usuarioEditor != null && this.hecho_autor.getId()
+                                                                                                              .equals(
+                                                                                                                  usuarioEditor.getId());
   }
 
   @Override

@@ -193,6 +193,10 @@ public class UserController {
                          .findAll();
   }
 
+  public Usuario finById(Long id) {
+    return UserRepository.instance()
+                         .findById(id);
+  }
 
   private boolean esVacio(String texto) {
     return texto == null || texto.trim()

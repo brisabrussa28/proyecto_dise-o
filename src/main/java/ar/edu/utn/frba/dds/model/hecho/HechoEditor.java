@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds.model.hecho;
 
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -30,8 +31,8 @@ public class HechoEditor {
    * @param hechoAEditar La instancia de Hecho que se va a modificar.
    * @throws IllegalStateException si el Hecho ya no es editable.
    */
-  public HechoEditor(Hecho hechoAEditar) {
-    if (!hechoAEditar.esEditable()) {
+  public HechoEditor(Hecho hechoAEditar, Usuario usuarioEditor) {
+    if (!hechoAEditar.esEditable(usuarioEditor)) {
       throw new IllegalStateException(
           "El hecho ya no puede ser editado. Pasó más de una semana desde su carga.");
     }

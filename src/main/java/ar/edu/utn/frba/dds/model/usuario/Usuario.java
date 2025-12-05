@@ -1,5 +1,9 @@
 package ar.edu.utn.frba.dds.model.usuario;
 
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -7,6 +11,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -31,6 +37,8 @@ public class Usuario {
   @Column(name = "usuario_rol", nullable = false)
   private Rol rol;
 
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "hecho_autor")
+  private List<Hecho> hechos = new ArrayList<>();
 
   public Usuario() {
   }
@@ -72,6 +80,14 @@ public class Usuario {
 
   public void setRol(Rol rol) {
     this.rol = rol;
+  }
+
+  public void agregarHecho(Hecho hecho) {
+    this.hechos.add(hecho);
+  }
+
+  public List<Hecho> getHechos() {
+    return hechos;
   }
 
   public boolean chequearPassword(String passwordIntento) {

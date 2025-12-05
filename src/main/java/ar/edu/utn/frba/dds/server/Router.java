@@ -22,6 +22,7 @@ import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.model.usuario.Rol;
+import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.hsqldb.rights.User;
 
 public class Router {
 
@@ -207,6 +209,7 @@ public class Router {
             String direccion = ctx.formParam("direccion");
             String provincia = ctx.formParam("provincia");
             String etiquteas = ctx.formParam("etiquetas");
+            Long userId = ctx.sessionAttribute("usuario_id");
 
             List<Etiqueta> listaEtiquetas = new ArrayList<>();
             if (etiquteas != null && !etiquteas.isBlank()) {
@@ -240,17 +243,20 @@ public class Router {
               listaFotos.add(foto);
             }
 
-            Hecho nuevoHecho = new Hecho();
-            nuevoHecho.setTitulo(titulo);
-            nuevoHecho.setDescripcion(descripcion);
-            nuevoHecho.setCategoria(categoria);
-            nuevoHecho.setDireccion(direccion);
-            nuevoHecho.setProvincia(provincia);
-            nuevoHecho.setFechasuceso(fechaSuceso);
-            nuevoHecho.setOrigen(origen);
-            nuevoHecho.setUbicacion(ubicacion);
-            nuevoHecho.setEtiquetas(listaEtiquetas);
-            nuevoHecho.setFotos(listaFotos);
+            Hecho nuevoHecho = new Hecho(
+                titulo,
+                descripcion,
+                categoria,
+                direccion,
+                provincia,
+                ubicacion,
+                fechaSuceso,
+                LocalDateTime.now(),
+                origen,
+                listaEtiquetas,
+                listaFotos,
+                userController.finById(userId)
+            );
 
             Hecho hechoGuardado = hechoController.subirHecho(nuevoHecho);
 
@@ -272,10 +278,12 @@ public class Router {
     app.put(
         "/hechos/{id}", context -> {
           Long idABuscar = Long.parseLong(context.pathParam("id"));
+          Long userId = context.sessionAttribute("usuario_id");
           HechoDTO hechoModificado = context.bodyAsClass(HechoDTO.class);
           try {
+            Usuario usuarioEditor = userController.finById(userId);
             Hecho hechoOriginal = hechoController.findById(idABuscar);
-            hechoController.modificarHecho(hechoOriginal, hechoModificado);
+            hechoController.modificarHecho(hechoOriginal, hechoModificado, usuarioEditor);
             context.json(hechoOriginal);
           } catch (RuntimeException e) {
             context.status(400);

@@ -15,6 +15,7 @@ import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -196,6 +197,7 @@ public class HechoTest {
   public void esEditableAntesDeUnaSemana() {
     LocalDateTime hace3Dias = LocalDateTime.now()
                                            .minusDays(3);
+    Usuario user = new Usuario();
     Hecho hecho = new HechoBuilder()
         .conTitulo("titulo")
         .conDescripcion("desc")
@@ -206,15 +208,17 @@ public class HechoTest {
         .conFechaSuceso(hace3Dias)
         .conFechaCarga(hace3Dias)
         .conFuenteOrigen(Origen.DATASET)
+        .conCreador(user)
         .build();
 
-    assertTrue(hecho.esEditable(), "El hecho debería ser editable antes de una semana");
+    assertTrue(hecho.esEditable(user), "El hecho debería ser editable antes de una semana");
   }
 
   @Test
   public void noEsEditablePasadaUnaSemana() {
     LocalDateTime hace10Dias = LocalDateTime.now()
                                             .minusDays(10);
+    Usuario user = new Usuario();
     Hecho hecho = new HechoBuilder()
         .conTitulo("titulo")
         .conDescripcion("desc")
@@ -225,9 +229,10 @@ public class HechoTest {
         .conFechaSuceso(hace10Dias)
         .conFechaCarga(hace10Dias)
         .conFuenteOrigen(Origen.DATASET)
+        .conCreador(user)
         .build();
 
-    assertFalse(hecho.esEditable(), "El hecho NO debería ser editable después de una semana");
+    assertFalse(hecho.esEditable(user), "El hecho NO debería ser editable después de una semana");
   }
 }
 

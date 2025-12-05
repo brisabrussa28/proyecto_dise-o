@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds.controller;
 
 import ar.edu.utn.frba.dds.dto.HechoDTO;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,8 +31,8 @@ public class HechoController {
                           .findAll();
   }
 
-  public Hecho modificarHecho(Hecho hechoOriginal, HechoDTO hechoModificado) {
-    if (!hechoOriginal.esEditable()) {
+  public Hecho modificarHecho(Hecho hechoOriginal, HechoDTO hechoModificado, Usuario usuarioEditor) {
+    if (!hechoOriginal.esEditable(usuarioEditor)) {
       throw new RuntimeException("EL HECHO SE ENCUENTRA FUERA DE RANGO PARA SER EDITADO");
     }
     if (hechoModificado.getTitulo() != null) {

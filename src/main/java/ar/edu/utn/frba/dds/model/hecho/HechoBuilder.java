@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.model.hecho;
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +25,7 @@ public class HechoBuilder {
   private Origen fuenteOrigen;
   private List<Etiqueta> etiquetas = new ArrayList<>();
   private List<Multimedia> fotos = new ArrayList<>();
+  private Usuario autor;
 
   public HechoBuilder copiar(Hecho original) {
     this.titulo = original.getTitulo();
@@ -36,7 +38,7 @@ public class HechoBuilder {
     this.fechaCarga = original.getFechacarga();
     this.fuenteOrigen = original.getOrigen();
     this.etiquetas = new ArrayList<>(original.getEtiquetas());
-//    this.fotos = new ArrayList<>(original.getFotos());
+    this.fotos = new ArrayList<>(original.getFotos());
     return this;
   }
 
@@ -109,6 +111,13 @@ public class HechoBuilder {
     return this;
   }
 
+  public HechoBuilder conCreador(Usuario autor) {
+    if (autor != null) {
+      this.autor = autor;
+    }
+    return this;
+  }
+
   /**
    * Construye y devuelve una instancia de Hecho con los datos proporcionados.
    *
@@ -128,7 +137,8 @@ public class HechoBuilder {
         fechaCarga,
         fuenteOrigen,
         etiquetas,
-        fotos
+        fotos,
+        autor
     );
   }
 
