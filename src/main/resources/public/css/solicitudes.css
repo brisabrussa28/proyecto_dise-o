@@ -1,0 +1,19 @@
+.boton {
+    color: white;
+    border-radius: 10px;
+    background-color: white;
+    width: 35px;
+    height: 35px;
+    text-align: center;
+}
+
+.principal {
+    font-size: 27px;
+    color: black;
+    font-weight: 600;
+}
+
+.descripcion-pre-formateada {
+    white-space: pre-wrap; /* Esta es la propiedad clave */
+    word-wrap: break-word; /* Ayuda a romper palabras muy largas si es necesario */
+}

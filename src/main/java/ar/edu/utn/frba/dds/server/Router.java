@@ -452,10 +452,14 @@ public class Router {
     );
 
     app.get(
-        "/solicitudes", ctx -> {
+        "/solicitudes",
+        ctx -> {
           List<Solicitud> pendientes = SolicitudesRepository.instance()
                                                             .obtenerPorEstado(EstadoSolicitud.PENDIENTE);
-          ctx.json(pendientes);
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("solicitudes", pendientes);
+
+          ctx.render("solicitudes.hbs", model);
         }
     );
 

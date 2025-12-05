@@ -13,6 +13,9 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
+    <link rel="stylesheet" href="/css/solicitudes.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
     <style>
         body, html {
             height: 100%;
@@ -28,7 +31,7 @@
 <body>
 
 <nav class="navbar navbar-expand navbar-dark bg-dark px-3 py-2 position-relative w-100"
-     style="flex-shrink: 0;">
+     style="background: linear-gradient(90deg, black 0%, #005baa 30%, #5287a5 50%, #005baa 70%, black 100%); height: 56px; color: white; font-size: 34px; padding-left: 20px; flex-shrink: 0;">
 
     <div class="navbar-nav">
         <a href="{{#if estaLogueado}}/hechos/nuevo{{else}}/auth/login?redirect=/hechos/nuevo{{/if}}"
