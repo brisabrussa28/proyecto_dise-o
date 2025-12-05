@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.javalin.Javalin;
+import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JavalinJackson;
 
 public class Server {
@@ -19,7 +20,7 @@ public class Server {
     Javalin app = Javalin.create(javalinConfig -> {
       javalinConfig.jsonMapper(new JavalinJackson());
       javalinConfig.fileRenderer(new JavalinRenderer().register("hbs", new JavalinHandlebars()));
-      javalinConfig.staticFiles.add("/public");
+      javalinConfig.staticFiles.add("/public", Location.CLASSPATH);
       javalinConfig.bundledPlugins.enableCors(cors -> {
         cors.addRule(it -> {
           it.allowHost("http://localhost:3000");

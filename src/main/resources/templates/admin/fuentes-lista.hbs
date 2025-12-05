@@ -1,0 +1,107 @@
+{{#partial "nav_izquierda"}}
+    <a href="/admin/dashboard" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+       title="Volver al Mapa">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="d-none d-sm-block">Volver</span>
+    </a>
+{{/partial}}
+
+
+{{#partial "contenido"}}
+    <div class="container py-4">
+
+        <h3 class="mb-4"><i class="fa-solid fa-server me-2"></i>Gestión de Fuentes</h3>
+
+        <div class="row">
+
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white fw-bold">Nueva Fuente</div>
+                    <div class="card-body">
+
+                        <form action="/admin/fuentes" method="POST">
+
+                            <div class="mb-3">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" name="nombre" class="form-control"
+                                       placeholder="Ej: Noticias Globales" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Tipo de Fuente</label>
+                                <select name="tipo" id="selectorTipo" class="form-select" onchange="mostrarCampos()">
+                                    <option value="ESTATICA">Estática (Manual)</option>
+                                    <option value="API">Externa (API REST)</option>
+                                    <option value="AGREGACION">Agregación (Grupo)</option>
+                                </select>
+                            </div>
+
+                            <div id="camposApi" class="d-none bg-light p-2 rounded mb-3 border">
+                                <small class="text-muted d-block mb-2 fw-bold">Configuración API</small>
+                                <div class="mb-2">
+                                    <input type="text" name="url" class="form-control form-control-sm"
+                                           placeholder="URL Endpoint (https://...)">
+                                </div>
+                                <div class="mb-2">
+                                    <input type="text" name="token" class="form-control form-control-sm"
+                                           placeholder="Token (Opcional)">
+                                </div>
+                            </div>
+
+                            <div id="camposAgregacion" class="d-none bg-light p-2 rounded mb-3 border">
+                                <small class="text-muted">Las fuentes hijas se agregan editando la fuente luego de
+                                    crearla.</small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Crear Fuente</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            {{#each fuentes}}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">{{this.nombre}}</h6>
+
+                                        <span class="badge bg-secondary"
+                                              style="font-size: 0.7rem">ID: {{this.id}}</span>
+                                    </div>
+
+                                    <div class="btn-group">
+                                        <a href="/admin/fuentes/{{this.id}}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa-solid fa-gear"></i> Configurar
+                                        </a>
+                                    </div>
+                                </li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function mostrarCampos() {
+            const tipo = document.getElementById('selectorTipo').value;
+
+            // Ocultar todos primero
+            document.getElementById('camposApi').classList.add('d-none');
+            document.getElementById('camposAgregacion').classList.add('d-none');
+
+            // Mostrar el seleccionado
+            if (tipo === 'API') {
+                document.getElementById('camposApi').classList.remove('d-none');
+            } else if (tipo === 'AGREGACION') {
+                document.getElementById('camposAgregacion').classList.remove('d-none');
+            }
+        }
+    </script>
+{{/partial}}
+{{> templates/layout}}

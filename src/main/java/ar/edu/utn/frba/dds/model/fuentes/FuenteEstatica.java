@@ -19,9 +19,6 @@ import javax.persistence.Transient;
 @DiscriminatorValue("ESTATICA")
 public class FuenteEstatica extends FuenteConHechos {
 
-  @Transient
-  @JsonProperty("tipo_fuente")
-  private String tipo_fuente;
 
   private String fuente_ruta_archivo;
 
@@ -29,13 +26,12 @@ public class FuenteEstatica extends FuenteConHechos {
   @Transient
   private ConfiguracionLector fuente_configuracion_lector;
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   @JoinColumn(name = "hecho_fuente")
-  private final List<Hecho> hechosPersistidos = new ArrayList<>();
+  private List<Hecho> hechosPersistidos = new ArrayList<>();
 
-  protected FuenteEstatica() {
+  public FuenteEstatica() {
     super();
-    this.tipo_fuente = "ESTATICA";
   }
 
   public FuenteEstatica(String nombre, String fuente_ruta_archivo, ConfiguracionLector configLector) {

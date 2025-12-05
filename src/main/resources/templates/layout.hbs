@@ -31,13 +31,17 @@
      style="flex-shrink: 0;">
 
     <div class="navbar-nav">
-        <a href="{{#if estaLogueado}}/hechos/nuevo{{else}}/auth/login?redirect=/hechos/nuevo{{/if}}"
-           class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
-           title="{{#unless estaLogueado}}Debes iniciar sesión para crear un reporte{{/unless}}">
 
-            <i class="fa-solid fa-plus"></i>
-            <span class="d-none d-sm-block">Nuevo Hecho</span>
-        </a>
+        {{#block "nav_izquierda"}}
+            <a href="{{#if estaLogueado}}/hechos/nuevo{{else}}/auth/login?redirect=/hechos/nuevo{{/if}}"
+               class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+               title="{{#unless estaLogueado}}Debes iniciar sesión para crear un hecho{{/unless}}">
+
+                <i class="fa-solid fa-plus"></i>
+                <span class="d-none d-sm-block">Nuevo Hecho</span>
+            </a>
+        {{/block}}
+
     </div>
 
     <a class="navbar-brand position-absolute top-50 start-50 translate-middle d-flex align-items-center"
@@ -75,7 +79,7 @@
 
                     {{#if esAdmin}}
                         <li><a class="dropdown-item" href="/admin/dashboard">
-                            <i class="fa-solid fa-gauge-high me-2 text-danger"></i>Panel de Admin
+                            <i class="fa-solid fa-gauge-high me-2"></i>Panel de Control
                         </a></li>
                     {{/if}}
                     {{#if esUsuario}}

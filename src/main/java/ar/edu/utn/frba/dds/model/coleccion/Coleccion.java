@@ -6,13 +6,16 @@ import ar.edu.utn.frba.dds.model.filtro.condiciones.Condicion;
 import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
@@ -41,12 +44,15 @@ public class Coleccion {
   private String coleccion_descripcion;
   private String coleccion_categoria;
 
-  @ManyToOne
-  @JoinColumn(name = "coleccion_algoritmo")
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "algoritmo_id")
   private AlgoritmoDeConsenso coleccion_algoritmo;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private Condicion coleccion_condicion;
+
+  @ManyToMany
+  private List<Hecho> hechos = new ArrayList<>();
 
   // --- Atributos Transitorios ---
   @Transient

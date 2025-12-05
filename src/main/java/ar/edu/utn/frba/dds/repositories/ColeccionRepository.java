@@ -14,13 +14,19 @@ public class ColeccionRepository {
     return INSTANCE;
   }
 
+  // java
   public void save(Coleccion coleccion) {
     DBUtils.comenzarTransaccion(em);
+
     coleccion.getHechosConsensuados()
-             .forEach(hecho -> {
-               DBUtils.enriquecerHecho(hecho);
-             });
-    em.persist(coleccion);
+             .forEach(DBUtils::enriquecerHecho);
+
+    if (coleccion.getId() == null || findById(coleccion.getId()) == null) {
+      em.persist(coleccion);
+    } else {
+      em.merge(coleccion);
+    }
+
     DBUtils.commit(em);
   }
 
@@ -38,4 +44,10 @@ public class ColeccionRepository {
     return em.createQuery("select distinct c.coleccion_categoria from Coleccion c", String.class)
              .getResultList();
   }
+
+  public Long countAll() {
+    return em.createQuery("SELECT COUNT(DISTINCT c.id) FROM Coleccion c", Long.class)
+             .getSingleResult();
+  }
+
 }

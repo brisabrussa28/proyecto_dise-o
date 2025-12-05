@@ -98,10 +98,9 @@ public class SolicitudesRepository {
    *
    * @return La cantidad total de solicitudes.
    */
-  public int cantidadTotal() {
-    Long count = em.createQuery("SELECT COUNT(s) FROM Solicitud s", Long.class)
-                   .getSingleResult();
-    return count.intValue();
+  public Long cantidadTotal() {
+    return em.createQuery("SELECT COUNT(s) FROM Solicitud s", Long.class)
+             .getSingleResult();
   }
 
   public void aceptarSolicitud(Solicitud solicitud) {

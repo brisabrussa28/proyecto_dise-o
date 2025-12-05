@@ -23,9 +23,6 @@ public abstract class Fuente {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long fuente_id;
 
-  @Transient
-  private String tipo_fuente;
-
   protected String fuente_nombre;
 
   protected Fuente() {
@@ -47,5 +44,9 @@ public abstract class Fuente {
 
   public Long getId() {
     return this.fuente_id;
+  }
+
+  public void setNombre(String nombre) {
+    this.fuente_nombre = nombre;
   }
 }

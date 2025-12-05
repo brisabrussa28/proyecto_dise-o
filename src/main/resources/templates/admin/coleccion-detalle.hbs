@@ -1,0 +1,71 @@
+{{#partial "contenido"}}
+    <div class="container py-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>
+                <i class="fa-solid fa-folder-open text-warning me-2"></i>
+                Colección: <strong>{{coleccion.nombre}}</strong>
+            </h3>
+            <a href="/admin/colecciones" class="btn btn-outline-secondary btn-sm">Volver</a>
+        </div>
+
+        <div class="row">
+
+            <div class="col-md-7">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white fw-bold">Hechos en esta colección</div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            {{#each coleccion.hechos}}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-bold">{{this.titulo}}</span>
+                                        <div class="small text-muted">{{this.fecha}}</div>
+                                    </div>
+
+                                    <form action="/admin/colecciones/{{../coleccion.id}}/quitar-hecho" method="POST"
+                                          class="m-0">
+                                        <input type="hidden" name="hecho_id" value="{{this.id}}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Quitar">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </li>
+                            {{else}}
+                                <li class="list-group-item text-center text-muted py-4">Esta colección está vacía.</li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card shadow-sm bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Agregar Hecho</h5>
+                        <p class="small text-muted">Selecciona un hecho existente para vincularlo.</p>
+
+                        <form action="/admin/colecciones/{{coleccion.id}}/agregar-hecho" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Buscar Hecho</label>
+                                <input class="form-control" list="datalistOptions" name="hecho_id_temp"
+                                       placeholder="Escribe para buscar..." id="buscadorHechos">
+
+                                <select name="hecho_id" class="form-select mt-2" required size="5">
+                                    {{#each hechosDisponibles}}
+                                        <option value="{{this.id}}">{{this.titulo}} ({{this.categoria}})</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fa-solid fa-plus me-2"></i> Agregar a Colección
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{{/partial}}
+{{> templates/layout}}

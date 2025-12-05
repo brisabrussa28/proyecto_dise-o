@@ -9,6 +9,8 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
@@ -19,25 +21,23 @@ import javax.persistence.Transient;
 @Entity
 @DiscriminatorValue("AGREGACION")
 public class FuenteDeAgregacion extends Fuente {
-
-  @Transient
-  @JsonProperty("tipo_fuente")
-  private String tipo_fuente;
-
   /**
    * Relación con las fuentes que se van a agregar.
    * LAZY se usa para que las fuentes no se carguen de la BD hasta que se necesiten.
    */
-  @OneToMany(fetch = FetchType.LAZY)
-  @JoinColumn(name = "fuente_fuente_cargada")
+  @ManyToMany
+  @JoinTable(
+      name = "fuente_agregacion",
+      joinColumns = @JoinColumn(name = "padre_id"),
+      inverseJoinColumns = @JoinColumn(name = "hijo_id")
+  )
   private List<Fuente> fuentesCargadas = new ArrayList<>();
 
   /**
    * Constructor vacío requerido por JPA.
    */
-  protected FuenteDeAgregacion() {
+  public FuenteDeAgregacion() {
     super();
-    this.tipo_fuente = "AGREGACION";
   }
 
   public FuenteDeAgregacion(String nombre) {

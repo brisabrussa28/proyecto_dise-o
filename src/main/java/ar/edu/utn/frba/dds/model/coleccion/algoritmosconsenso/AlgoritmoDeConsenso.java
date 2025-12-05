@@ -16,6 +16,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -28,7 +30,8 @@ public abstract class AlgoritmoDeConsenso {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long algoritmo_id;
 
-  @Transient
+  @OneToMany
+  @JoinColumn(name = "hecho_id")
   private List<Hecho> hechosConsensuados = new ArrayList<>();
 
   // TODO: Revisar como se comporta el sistema si no hay fuentes

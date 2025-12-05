@@ -3,9 +3,11 @@ package ar.edu.utn.frba.dds.model.fuentes;
 import ar.edu.utn.frba.dds.model.fuentes.apis.FuenteAdapter;
 import ar.edu.utn.frba.dds.model.fuentes.apis.configuracion.ConfiguracionAdapter;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ch.qos.logback.core.net.server.Client;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Collections;
 import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.PostLoad;
@@ -15,22 +17,19 @@ import javax.persistence.Transient;
 @DiscriminatorValue("API_EXTERNA")
 public class FuenteExternaAPI extends FuenteDeCopiaLocal {
 
-
-  @Transient
-  @JsonProperty("tipo_fuente")
-  private String tipo_fuente;
-
   @Transient
   private FuenteAdapter adaptador;
+
+  @Column(name = "api_url")
+  private String urlBase;
 
   //  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   //  @JoinColumn(name = "fuente_configuracion_adapter")
   @Transient
   private ConfiguracionAdapter configuracionAdapter;
 
-  protected FuenteExternaAPI() {
+  public FuenteExternaAPI() {
     super();
-    this.tipo_fuente = "API_EXTERNA";
   }
 
   public FuenteExternaAPI(String nombre, ConfiguracionAdapter configAdapter) {
@@ -72,5 +71,9 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
       // Devolvemos una lista vacía para no borrar la copia local si la API falla.
       return Collections.emptyList();
     }
+  }
+
+  public void setUrlBase(String urlBase) {
+    this.urlBase = urlBase;
   }
 }

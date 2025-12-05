@@ -52,4 +52,10 @@ public class HechoRepository {
     return em.createNativeQuery("SELECT DISTINCT etiqueta_nombre FROM hecho_etiquetas")
              .getResultList();
   }
+
+  public Long countAll() {
+    return em.createQuery("SELECT COUNT(DISTINCT h.id) FROM Hecho h", Long.class)
+             .getSingleResult();
+  }
+
 }

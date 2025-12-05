@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.server;
 
+import ar.edu.utn.frba.dds.controller.AdminController;
 import ar.edu.utn.frba.dds.controller.ColeccionController;
 import ar.edu.utn.frba.dds.controller.EstadisticaController;
 import ar.edu.utn.frba.dds.controller.FuenteController;
@@ -48,6 +49,7 @@ public class Router {
     FuenteController fuenteController = new FuenteController();
     EstadisticaController estadisticaController = new EstadisticaController();
     UserController userController = new UserController();
+    AdminController adminController = new AdminController();
 
     app.before(ctx -> {
       Long id = ctx.sessionAttribute("usuario_id");
@@ -69,6 +71,14 @@ public class Router {
       }
     });
 
+    app.before(
+        "/admin/*", ctx -> {
+          Rol rol = ctx.sessionAttribute("usuario_rol");
+          if (rol != Rol.ADMINISTRADOR) {
+            ctx.redirect("/");
+          }
+        }
+    );
 
     app.post("/login", userController::login);
     app.post("/logout", userController::logout);
@@ -130,6 +140,31 @@ public class Router {
           model.put("hechosJson", hechosJson);
 
           ctx.render("index.hbs", model);
+        }
+    );
+
+    app.get(
+        "/admin/dashboard", ctx -> {
+          adminController.mostrarDashboard(ctx, modeloConSesion(ctx));
+        }
+    );
+
+    app.get(
+        "/admin/colecciones", context -> {
+          adminController.listarColecciones(context, modeloConSesion(context));
+        }
+    );
+    app.get(
+        "/admin/colecciones/{id}", ctx -> {
+          adminController.editarColeccion(ctx, modeloConSesion(ctx));
+        }
+    ); // Vista Detalle
+    app.post("/admin/colecciones", adminController::crearColeccion);
+    app.post("/admin/colecciones/{id}/agregar-hecho", adminController::agregarHechoAColeccion);
+    app.post("/admin/colecciones/{id}/quitar-hecho", adminController::removerHechoDeColeccion);
+    app.get(
+        "/admin/fuentes", ctx -> {
+          adminController.listarFuentes(ctx, modeloConSesion(ctx));
         }
     );
 
@@ -202,7 +237,6 @@ public class Router {
     app.post(
         "/hechos", ctx -> {
           try {
-            // A. EXTRAER DATOS SIMPLES (Strings, Enums, Fechas)
             String titulo = ctx.formParam("titulo");
             String descripcion = ctx.formParam("descripcion");
             String categoria = ctx.formParam("categoria");
@@ -213,11 +247,9 @@ public class Router {
 
             List<Etiqueta> listaEtiquetas = new ArrayList<>();
             if (etiquteas != null && !etiquteas.isBlank()) {
-              // 2. Separar por comas y crear objetos
               String[] tagsArray = etiquteas.split(",");
 
               for (String tagNombre : tagsArray) {
-                // .trim() quita los espacios en blanco alrededor (ej: " Violencia " -> "Violencia")
                 Etiqueta nuevaEtiqueta = new Etiqueta(tagNombre.trim());
                 listaEtiquetas.add(nuevaEtiqueta);
               }
@@ -488,5 +520,4 @@ public class Router {
     model.put("esUsuario", ctx.sessionAttribute("esUsuario"));
     return model;
   }
-
 }
