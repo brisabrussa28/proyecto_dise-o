@@ -14,6 +14,7 @@
 }
 
 .descripcion-pre-formateada {
-    white-space: pre-wrap; /* Esta es la propiedad clave */
+    white-space: collapse;
+    padding-top: 4px;
     word-wrap: break-word; /* Ayuda a romper palabras muy largas si es necesario */
 }

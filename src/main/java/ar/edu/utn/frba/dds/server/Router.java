@@ -435,6 +435,11 @@ public class Router {
           var todas = estadisticaController.getEstadisticas();
           ctx.json(todas);
           ctx.status(200);
+
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("estadisticas", todas);
+
+          ctx.render("estadisticas.hbs", model);
         }
     );
 

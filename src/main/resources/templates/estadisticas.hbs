@@ -1,0 +1,227 @@
+{{#partial "contenido"}}
+
+    <body class="principal" style="background-color: white;">
+    <h1 style="font-weight: 700; font-size: 32px; color: black; padding-left: 8px; padding-top: 10px;">Estadísticas</h1>
+    <div class="d-flex flex-column align-items-center" style="padding: 10px; gap: 27px;">
+        <div class="d-flex flex-row align-items-center" style="gap: 27px;">
+            <div class="d-flex flex-column align-items-center stats_recuadro">
+                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Hechos totales</h1>
+                <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">1245</h2>
+            </div>
+            <div class="d-flex flex-column align-items-center stats_recuadro">
+                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Solicitudes Pendientes</h1>
+                <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">12</h2>
+            </div>
+            <div class="d-flex flex-column align-items-center stats_recuadro">
+                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Solicitudes Spam</h1>
+                <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">12</h2>
+            </div>
+            <div class="d-flex flex-column align-items-center stats_recuadro">
+                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Contribuyentes Activos</h1>
+                <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">76</h2>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column"
+             style="padding-top: 25px; gap: 35px; border-top: solid 3px #005baa; width: 94vw;">
+            <div class="accordion" id="accordionExample" style="width: 94vw;">
+                <div class="accordion-item" style="padding-bottom: 50px;">
+                    <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseOne" style="font-size: 25px;">
+                            <strong>Estadísticas de Hechos</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show"
+                         aria-labelledby="panelsStayOpen-headingOne">
+                        <div class="accordion-body">
+                            <div class="d-flex flex-row align-items-center"
+                                 style="gap: 80px; justify-content: space-between">
+                                <div class="d-flex flex-column align-items-center" style="gap: 20px;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Filtrar por:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar filtro</option>
+                                            <option value="1">Provincia</option>
+                                            <option value="2">Hora</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Categoría:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar categoría</option>
+                                            <option value="1">Opción uno</option>
+                                            <option value="2">Opción dos</option>
+                                            <option value="3">Todas</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-column align-items-center">
+                                    <h5>Actualizado por última vez hace 1 minutos</h5>
+                                    <div class="d-flex flex-column align-items-center stats_grafico">
+                                        lineas jaja
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item" style="padding-bottom: 50px;">
+                    <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseTwo" style="font-size: 25px;">
+                            <strong>Estadísticas de Hechos Reportados</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse show"
+                         aria-labelledby="panelsStayOpen-headingTwo">
+                        <div class="accordion-body">
+                            <div class="d-flex flex-row align-items-center"
+                                 style="gap: 80px; justify-content: space-between">
+                                <div class="d-flex flex-column align-items-center" style="gap: 20px;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Filtrar por:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar filtro</option>
+                                            <option value="1">Provincia</option>
+                                            <option value="2">Hora</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Categoría:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar categoría</option>
+                                            <option value="1">Opción uno</option>
+                                            <option value="2">Opción dos</option>
+                                            <option value="3">Todas</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column align-items-center">
+                                    <h5>Actualizado por última vez hace 4 minutos</h5>
+                                    <div class="d-flex flex-column align-items-center stats_grafico">
+                                        lineas jaja
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item" style="padding-bottom: 50px;">
+                    <h2 class="accordion-header" id="panelsStayOpen-headingThree">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseThree" style="font-size: 25px;">
+                            <strong>Estadísticas de Hechos según su Categoría</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse show"
+                         aria-labelledby="panelsStayOpen-headingThree">
+                        <div class="accordion-body">
+                            <div class="d-flex flex-row align-items-center"
+                                 style="gap: 80px; justify-content: space-between">
+                                <div class="d-flex flex-column align-items-center" style="gap: 20px;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Obtener Top:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar top</option>
+                                            <option value="1">1</option>
+                                            <option value="2">3</option>
+                                            <option value="3">5</option>
+                                            <option value="4">10</option>
+                                            <option value="5">50</option>
+                                            <option value="6">100</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Ordenar por:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar orden</option>
+                                            <option value="1">Mayor</option>
+                                            <option value="2">Menor</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-column align-items-center">
+                                    <h5>Actualizado por última vez hace 55 minutos</h5>
+                                    <div class="d-flex flex-column align-items-center stats_grafico_dos">
+                                        lineas jaja
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item" style="padding-bottom: 50px;">
+                    <h2 class="accordion-header" id="panelsStayOpen-headingFour">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseFour" style="font-size: 25px;">
+                            <strong>Estadísticas de Hechos Reportados según su Categoría</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseFour" class="accordion-collapse collapse show"
+                         aria-labelledby="panelsStayOpen-headingFour">
+                        <div class="accordion-body">
+                            <div class="d-flex flex-row align-items-center"
+                                 style="gap: 80px; justify-content: space-between">
+                                <div class="d-flex flex-column align-items-center" style="gap: 20px;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Obtener Top:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar top</option>
+                                            <option value="1">1</option>
+                                            <option value="2">3</option>
+                                            <option value="3">5</option>
+                                            <option value="4">10</option>
+                                            <option value="5">50</option>
+                                            <option value="6">100</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Ordenar por:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar orden</option>
+                                            <option value="1">Mayor</option>
+                                            <option value="2">Menor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column align-items-center">
+                                    <h5>Actualizado por última vez hace 10 minutos</h5>
+                                    <div class="d-flex flex-column align-items-center stats_grafico_dos">
+                                        lineas jaja
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </body>
+
+{{/partial}}
+
+{{> templates/layout}}
