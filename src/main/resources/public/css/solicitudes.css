@@ -1,5 +1,4 @@
 .boton {
-    color: white;
     border-radius: 10px;
     background-color: white;
     width: 35px;
@@ -7,8 +6,8 @@
     text-align: center;
 }
 
-.principal {
-    font-size: 27px;
+.general {
+    font-size: 32px;
     color: black;
     font-weight: 600;
 }
@@ -28,4 +27,14 @@
 [class^="bi-"]::before {
   line-height: 0;
   font-size: 35px;
+}
+
+.btn-outline-success {
+    --bs-btn-color: rgb(0, 192, 0);
+    --bs-btn-hover-bg: rgb(0, 192, 0);
+}
+
+.btn-danger {
+    --bs-btn-color: red;
+    --bs-btn-hover-bg: red;
 }

@@ -1,19 +1,19 @@
 {{#partial "contenido"}}
-    <body class="principal" style="background-color: white;">
+    <body class="general" style="background-color: white;">
     <h1 style="font-weight: 700; font-size: 32px; color: black; padding-left: 8px; padding-top: 10px;">Solicitudes Pendientes</h1>
 
     <div class="d-flex flex-column align-items-center" style="padding: 20px; gap: 40px; filter: drop-shadow(6px 6px 15px rgba(0, 0, 0, 0.360));">
 
         {{#each solicitudes}}
             <div class="d-flex flex-column" style="border-top: 10px solid #005baa; min-width: 78vw; background-color: white;
-        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%); ">
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%); " id="{{this.id}}">
                 <div class="d-flex flex-row" style="justify-content: space-between; flex-wrap: wrap; padding-left: 10px; font-weight: bold;">
                     S-{{this.id}}
                     <div class="d-flex flex-row" style="padding-right: 20px; padding-top: 10px; gap: 20px;">
-                        <button class="boton" style="border: 3px solid rgb(0, 192, 0); color: rgb(0, 192, 0); background-color: white;">
+                        <button class="boton btn btn-outline-success" style="border: 3px solid rgb(0, 192, 0);" onclick="aceptarSolicitud('{{this.id}}')">
                             <i class="bi bi-check-lg d-flex align-items-center justify-content-center"></i>
                         </button>
-                        <button class="boton" style="border: 3px solid red; color: red; background-color: white;" onclick="delete">
+                        <button class="boton btn btn-danger" style="border: 3px solid red;" onclick="eliminarSolicitud('{{this.id}}')">
                             <i class="bi-x d-flex align-items-center justify-content-center"></i>
                         </button>
                     </div>
@@ -45,6 +45,31 @@
     </div>
     </body>
 
+    <script>
+        function eliminarSolicitud(idDelElemento) {
+          const solicitudAEliminar = document.getElementById(idDelElemento);
+
+          if (solicitudAEliminar){
+            solicitudAEliminar.remove();
+            console.log("Elemento con ID" + idDelElemento + " eliminado.");
+          }
+          else {
+            console.log("No se encontró la solicitud a eliminar.");
+          }
+        }
+
+        function aceptarSolicitud(idDelElemento) {
+          const solicitudAEliminar = document.getElementById(idDelElemento);
+
+          if (solicitudAEliminar){
+            solicitudAEliminar.remove();
+            console.log("Elemento con ID" + idDelElemento + " eliminado.");
+          }
+          else {
+            console.log("No se encontró la solicitud a eliminar.");
+          }
+        }
+    </script>
 {{/partial}}
 
 {{> templates/layout}}
