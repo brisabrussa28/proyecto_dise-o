@@ -77,7 +77,7 @@ public class Router {
     app.before(
         "/colecciones", ctx -> {
           if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol(Rol.ADMINISTRADOR.toString()).handle(ctx);
+            tieneRol(Rol.ADMINISTRADOR).handle(ctx);
           }
         }
     );
@@ -86,7 +86,7 @@ public class Router {
     app.before(
         "/solicitudes", ctx -> {
           if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol(Rol.ADMINISTRADOR.toString()).handle(ctx);
+            tieneRol(Rol.ADMINISTRADOR).handle(ctx);
           }
         }
     );
@@ -95,7 +95,7 @@ public class Router {
     app.before(
         "/fuentes", ctx -> {
           if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol(Rol.ADMINISTRADOR.toString()).handle(ctx);
+            tieneRol(Rol.ADMINISTRADOR).handle(ctx);
           }
         }
     );
@@ -104,7 +104,7 @@ public class Router {
     app.before(
         "/hechos/{id}", ctx -> {
           if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol(Rol.ADMINISTRADOR.toString()).handle(ctx);
+            tieneRol(Rol.ADMINISTRADOR).handle(ctx);
           }
         }
     );
@@ -114,7 +114,7 @@ public class Router {
     app.before(
         "/estadisticas", ctx -> {
           if (!"OPTIONS".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol(Rol.ADMINISTRADOR.toString()).handle(ctx);
+            tieneRol(Rol.ADMINISTRADOR).handle(ctx);
           }
         }
     );
@@ -470,12 +470,13 @@ public class Router {
 
   }
 
-  private Handler tieneRol(String rol) {
+  private Handler tieneRol(Rol rol) {
     return ctx -> {
-      String rolEnSesion = ctx.sessionAttribute("rol");
+      Rol rolEnSesion = ctx.sessionAttribute("usuario_rol");
+      System.out.println(rolEnSesion);
 
-      if (rolEnSesion == null || !rolEnSesion.equalsIgnoreCase(rol)) {
-        throw new io.javalin.http.ForbiddenResponse("-- ACCESO DENEGADO: SE REQUIERE EL ROL " + rol.toUpperCase() + " --");
+      if (rolEnSesion == null || !rolEnSesion.equals(rol)) {
+        throw new io.javalin.http.ForbiddenResponse("-- ACCESO DENEGADO: SE REQUIERE EL ROL " + rol.toString().toUpperCase() + " --");
       }
     };
   }
