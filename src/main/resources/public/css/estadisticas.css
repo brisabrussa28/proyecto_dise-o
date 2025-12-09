@@ -36,13 +36,6 @@ img {
     gap: 0px;
     width: 69vw;
     height: 13vw;
-    color: white;
-    background-color: #f0f0f0;
-
-    /* Crea las líneas horizontales y verticales que se repiten */
-    background-image:
-        repeating-linear-gradient(0deg, transparent, transparent 19px, #ccc 19px, #ccc 20px), /* Lineas horizontales */
-        repeating-linear-gradient(90deg, transparent, transparent 19px, #ccc 19px, #ccc 20px); /* Lineas verticales */
 }
 
 
@@ -51,13 +44,24 @@ img {
     border: 2px solid #005baa;
     padding: 0px;
     gap: 0px;
-    width: 69vw;
-    height: 30vw;
-    color: white;
-    background-color: #f0f0f0;
+}
 
-    /* Crea las líneas horizontales y verticales que se repiten */
-    background-image:
-        repeating-linear-gradient(0deg, transparent, transparent 19px, #ccc 19px, #ccc 20px), /* Lineas horizontales */
-        repeating-linear-gradient(90deg, transparent, transparent 19px, #ccc 19px, #ccc 20px); /* Lineas verticales */
+#myBarChart {
+    width: 72vw !important;
+    height: 14vw !important;
+}
+
+#myBarChart-2 {
+    width: 72vw !important;
+    height: 14vw !important;
+}
+
+#myBarChart-3 {
+    width: 69vw !important;
+    height: 30vw !important;
+}
+
+#myBarChart-4 {
+    width: 69vw !important;
+    height: 30vw !important;
 }
