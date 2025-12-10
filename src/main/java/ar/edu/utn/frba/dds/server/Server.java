@@ -36,7 +36,7 @@ public class Server {
     new Router().configure(app, mapper);
 
     // Cargar datos iniciales (Bootstrap)
-    new Bootstrap().init();
+    //new Bootstrap().init();
 
     // Iniciar el servidor
     System.out.println("Iniciando servidor en http://localhost:9001");
