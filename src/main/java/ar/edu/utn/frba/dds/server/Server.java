@@ -9,10 +9,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JavalinJackson;
+import java.util.TimeZone;
 
 public class Server {
 
   public static void main(String[] args) {
+
+    TimeZone.setDefault(TimeZone.getTimeZone("America/Argentina/Buenos_Aires"));
+
     ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule());
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
