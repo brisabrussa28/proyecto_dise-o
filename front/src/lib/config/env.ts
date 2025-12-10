@@ -8,9 +8,9 @@ export const ENDPOINT_AUTH_REGISTER = process.env.NEXT_PUBLIC_ENDPOINT_AUTH_REGI
 export const ENDPOINT_CATEGORIAS = process.env.NEXT_PUBLIC_ENDPOINT_CATEGORIAS || "/categorias";
 export const ENDPOINT_FUENTES = process.env.NEXT_PUBLIC_ENDPOINT_FUENTES || "/fuentes";
 export const ENDPOINT_HECHOS = process.env.NEXT_PUBLIC_ENDPOINT_HECHOS || "/hechos";
-export const ENDPOINT_SOLICITUDES = process.env.NEXT_PUBLIC_ENDPOINT_SOLICITUDES || "/solicitudes";
+export const ENDPOINT_SOLICITUDES = process.env.NEXT_PUBLIC_ENDPOINT_SOLICITUDES || "/admin/solicitudes";
 export const ENDPOINT_COLECCIONES = process.env.NEXT_PUBLIC_ENDPOINT_COLECCIONES || "/colecciones";
-export const ENDPOINT_ESTADISTICAS = process.env.NEXT_PUBLIC_ENDPOINT_ESTADISTICAS || "/estadisticas";
+export const ENDPOINT_ESTADISTICAS = process.env.NEXT_PUBLIC_ENDPOINT_ESTADISTICAS || "/admin/estadisticas";
 
 export const TOKEN_STORAGE_KEY = "metamapa-token";
 export const REFRESH_TOKEN_STORAGE_KEY = "metamapa-refresh-token";

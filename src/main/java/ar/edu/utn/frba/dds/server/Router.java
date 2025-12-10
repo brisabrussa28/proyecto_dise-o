@@ -96,7 +96,7 @@ public class Router {
 
     // Protegemos la ACEPTACIÓN/RECHAZO de solicitudes
     app.before(
-        "/solicitudes", ctx -> {
+        "/admin/solicitudes", ctx -> {
           if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
             tieneRol(Rol.ADMINISTRADOR).handle(ctx);
           }
@@ -105,7 +105,7 @@ public class Router {
 
     // Protegemos la CREACIÓN de fuentes
     app.before(
-        "/fuentes", ctx -> {
+        "/admin/fuentes", ctx -> {
           if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
             tieneRol(Rol.ADMINISTRADOR).handle(ctx);
           }
@@ -124,7 +124,7 @@ public class Router {
 
     // Protegemos TODAS las rutas de /estadisticas
     app.before(
-        "/estadisticas", ctx -> {
+        "/admin/estadisticas", ctx -> {
           if (!"OPTIONS".equalsIgnoreCase(String.valueOf(ctx.method()))) {
             tieneRol(Rol.ADMINISTRADOR).handle(ctx);
           }
@@ -361,7 +361,7 @@ public class Router {
     );
 
     app.put(
-        "/solicitudes", ctx -> {
+        "/admin/solicitudes", ctx -> {
           String idParam = ctx.queryParam("id");
           String aceptadaParam = ctx.queryParam("aceptada");
 
@@ -471,7 +471,7 @@ public class Router {
     );
 
     app.get(
-        "/estadisticas/", ctx -> {
+        "/admin/estadisticas/", ctx -> {
           var todas = estadisticaController.getEstadisticas();
           ctx.json(todas);
           ctx.status(200);
@@ -484,7 +484,7 @@ public class Router {
     );
 
     app.post(
-        "/estadisticas", ctx -> {
+        "/admin/estadisticas", ctx -> {
           try {
             var stat = estadisticaController.calcularEstadistica(ctx.bodyAsClass(EstadisticaDTO.class));
             ctx.status(200);
@@ -497,7 +497,7 @@ public class Router {
     );
 
     app.get(
-        "/solicitudes",
+        "/admin/solicitudes",
         ctx -> {
           List<Solicitud> pendientes = SolicitudesRepository.instance()
                                                             .obtenerPorEstado(EstadoSolicitud.PENDIENTE);
