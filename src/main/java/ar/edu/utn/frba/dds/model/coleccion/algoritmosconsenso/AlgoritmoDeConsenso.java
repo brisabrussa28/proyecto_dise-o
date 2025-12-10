@@ -31,7 +31,7 @@ public abstract class AlgoritmoDeConsenso {
   Long algoritmo_id;
 
   @OneToMany
-  @JoinColumn(name = "hecho_id")
+  @JoinColumn(name = "algoritmo_id")
   private List<Hecho> hechosConsensuados = new ArrayList<>();
 
   // TODO: Revisar como se comporta el sistema si no hay fuentes
