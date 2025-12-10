@@ -41,10 +41,6 @@ public class Bootstrap implements WithSimplePersistenceUnit {
   }
 
   public void init() {
-    //    HechoRepository hechoRepo = new HechoRepository();
-    //    FuenteRepository fuenteRepo = new FuenteRepository();
-    //    SolicitudesRepository solicitudRepo = new SolicitudesRepository();
-
     withTransaction(() -> {
       LocalDateTime hora = LocalDateTime.now();
       PuntoGeografico ubicacion = new PuntoGeografico(-34.68415120338135, -58.58712709338028);
@@ -84,7 +80,7 @@ public class Bootstrap implements WithSimplePersistenceUnit {
           CampoHecho.DIRECCION, List.of("direccion"),
           CampoHecho.PROVINCIA, List.of("provincia")
       ));
-      // HechoFilaConverter converter = new HechoFilaConverter("dd/MM/yyyy", mapeoColumnas);
+
       var fuenteCsv = new FuenteEstatica(
           "Una fuente estatica",
           "src/main/resources/csvs/ejemplo.csv",
@@ -93,13 +89,15 @@ public class Bootstrap implements WithSimplePersistenceUnit {
       fuente.agregarHecho(hecho1);
       fuente.agregarHecho(hecho2);
       fuente.agregarHecho(hecho3);
+
       FuenteRepository repoFuentes = new FuenteRepository();
       repoFuentes.save(fuente);
       repoFuentes.save(fuenteCsv);
-      var solicitudes = new SolicitudesRepository();
+
       var calculadora = new CentralDeEstadisticas();
       Exportador<Estadistica> exportadorCsv = new ExportadorCSV<>(new ModoSobrescribir());
       calculadora.setExportador(exportadorCsv);
+
       var algoritmo = new Absoluta();
       var coleccion = new Coleccion(
           "Coleccion de Hechos",
@@ -109,10 +107,12 @@ public class Bootstrap implements WithSimplePersistenceUnit {
           algoritmo
       );
       coleccion.setAlgoritmoDeConsenso(algoritmo);
-      AlgoritmoRepository algoritmoRepository = new AlgoritmoRepository();
-      algoritmoRepository.save(algoritmo);
+
+      // CORRECCIÓN 1: No guardamos el algoritmo manualmente.
+      // Dejamos que el guardado de la colección lo haga en cascada.
       ColeccionRepository repoColeccion = new ColeccionRepository();
       repoColeccion.save(coleccion);
+
       UserRepository.instance()
                     .guardar(new Usuario(
                         "admin1@mock.com",
@@ -120,6 +120,7 @@ public class Bootstrap implements WithSimplePersistenceUnit {
                         "admin123",
                         Rol.ADMINISTRADOR
                     ));
+
       EstadisticaRepository repoEstadisticas = EstadisticaRepository.instance();
       repoEstadisticas.save(new Estadistica("Robos", 64L, "CATEGORIA CON MAS HECHOS", "Robos"));
       repoEstadisticas.save(new Estadistica("Obras", 28L, "CATEGORIA CON MAS HECHOS", "Obras"));
@@ -131,14 +132,15 @@ public class Bootstrap implements WithSimplePersistenceUnit {
           "Robos"
       ));
       repoEstadisticas.save(new Estadistica("Spam", 37L, "CANTIDAD DE SOLICITUDES SPAM", null));
-      SolicitudesRepository repoSolicitudes = SolicitudesRepository.instance();
-      String motivoLargo1 = "x".repeat(501);
-      String motivoLargo2 = "x".repeat(503);
-      System.out.println("Motivo 1 length: " + motivoLargo1.length());
-      System.out.println("Motivo 2 length: " + motivoLargo2.length());
-      repoSolicitudes.guardar(new Solicitud(hecho1, motivoLargo1));
-      repoSolicitudes.guardar(new Solicitud(hecho2, motivoLargo2));
-    });
 
+      SolicitudesRepository repoSolicitudes = SolicitudesRepository.instance();
+
+      // CORRECCIÓN 2: Generamos un string de 600 caracteres.
+      // Tu sistema valida que sea > 500 y < 1024, así que esto pasará.
+      String motivoValido = "x".repeat(600);
+
+      repoSolicitudes.guardar(new Solicitud(hecho1, motivoValido));
+      repoSolicitudes.guardar(new Solicitud(hecho2, motivoValido));
+    });
   }
 }
