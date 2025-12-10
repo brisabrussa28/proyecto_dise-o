@@ -52,6 +52,7 @@ public class CentralDeEstadisticas {
                                                       .orElse(null);
   }
 
+  //------------------------------------CANTIDAD DE HECHOS POR CATEGORIA
   public List<Estadistica> hechosPorCategoria(List<Coleccion> colecciones) {
     List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
     return todosLosHechos.stream()
@@ -73,6 +74,7 @@ public class CentralDeEstadisticas {
                                           .orElse(null);
   }
 
+  //------------------------------------CANTIDAD DE HECHOS POR PROVINCIA SEGUN CATEGORIA
   public List<Estadistica> hechosPorProvinciaSegunCategoria(List<Coleccion> colecciones, String categoria) {
     List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
     return todosLosHechos.stream()
@@ -97,6 +99,7 @@ public class CentralDeEstadisticas {
                                                                    .orElse(null);
   }
 
+  //------------------------------------CANTIDAD DE HECHOS POR HORA SEGUN CATEGORIA
   public List<Estadistica> hechosPorHora(List<Coleccion> colecciones, String categoria) {
     List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
     return todosLosHechos.stream()
@@ -127,6 +130,7 @@ public class CentralDeEstadisticas {
                                                 .orElse(null);
   }
 
+  //------------------------------------CANTIDAD DE SOLICITUDES SPAM
   public Estadistica cantidadDeSolicitudesSpam() {
     validarGestorConfigurado();
     return new Estadistica(null, gestor.cantidadDeSpamDetectado(), "CANTIDAD DE SOLICITUDES SPAM", null);
