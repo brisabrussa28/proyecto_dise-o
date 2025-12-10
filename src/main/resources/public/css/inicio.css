@@ -1,0 +1,15 @@
+.search-controls-overlay {
+    position: absolute;
+    top: 15px;
+    left: 50vw;
+    transform: translateX(-50%);
+    /* Profundidad: Asegura que esté por encima del mapa */
+    z-index: 1000;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 5px;
+}
+
+.leaflet-top .leaflet-control {
+  margin-top: 80vh;
+}

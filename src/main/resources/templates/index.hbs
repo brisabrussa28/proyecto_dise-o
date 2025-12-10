@@ -1,5 +1,21 @@
 {{#partial "contenido"}}
-    <div id="map-container" style="height: 100%; width: 100%;"></div>
+    <div id="map-container" style="height: 100%; width: 100%; position: relative;">
+
+        <div class="search-controls-overlay">
+            <div class="d-flex gap-2">
+                <button class="btn btn-warning" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFiltros" aria-controls="offcanvasFiltros">
+                    Filtros
+                    <i class="bi bi-list"></i>
+                </button>
+                <input class="form-control mr-sm-2 shadow-sm" type="search" placeholder="Search" aria-label="Search" style="width: 37vw;">
+            </div>
+        </div>
+
+        <!-- El mapa real se inicializará aquí -->
+        <div id="map" style="height: 100%; width: 100%;"></div>
+
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const hechosData = {{{hechosJson}}};

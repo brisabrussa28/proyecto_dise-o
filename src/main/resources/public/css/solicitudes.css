@@ -1,0 +1,38 @@
+.boton {
+    border-radius: 10px;
+    background-color: white;
+    width: 35px;
+    height: 35px;
+    text-align: center;
+}
+
+.general {
+    font-size: 32px;
+    color: black;
+    font-weight: 600;
+}
+
+.descripcion-pre-formateada {
+    white-space: collapse;
+    padding-top: 4px;
+    word-wrap: break-word; /* Ayuda a romper palabras muy largas si es necesario */
+}
+
+[class^="bi-"]::before {
+  line-height: 0;
+  font-size: 35px;
+}
+
+.btn-outline-success {
+    --bs-btn-color: rgb(0, 192, 0);
+    --bs-btn-hover-bg: rgb(0, 192, 0);
+    --bs-btn-font-size: 30px;
+    --bs-btn-padding-x: 2px;
+    --bs-btn-padding-y: 0px;
+    padding-right: 4px;
+}
+
+.btn-danger {
+    --bs-btn-color: red;
+    --bs-btn-hover-bg: red;
+}

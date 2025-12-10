@@ -1,0 +1,560 @@
+{{#partial "contenido"}}
+
+    <body class="principal" style="background-color: white;">
+    <h1 style="font-weight: 700; font-size: 32px; color: black; padding-left: 8px; padding-top: 10px;">Estadísticas</h1>
+    <div class="d-flex flex-column align-items-center" style="padding: 10px; gap: 27px;">
+        <div class="d-flex flex-row align-items-center" style="gap: 27px;">
+            <div class="d-flex flex-column align-items-center stats_recuadro">
+                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Hechos totales</h1>
+                <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">1245</h2>
+            </div>
+            <div class="d-flex flex-column align-items-center stats_recuadro">
+                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Solicitudes Pendientes</h1>
+                <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">12</h2>
+            </div>
+            <div class="d-flex flex-column align-items-center stats_recuadro">
+                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Solicitudes Spam</h1>
+                <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">12</h2>
+            </div>
+            <div class="d-flex flex-column align-items-center stats_recuadro">
+                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Contribuyentes Activos</h1>
+                <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">76</h2>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column"
+             style="padding-top: 25px; gap: 35px; border-top: solid 3px #005baa; width: 94vw;">
+            <div class="accordion" id="accordionExample" style="width: 94vw;">
+                <div class="accordion-item" style="padding-bottom: 4vh;">
+                    <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                        <button class="accordion-button btn btn-light btn-white-to-gray bot-stats" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseOne" style="font-size: 25px;">
+                            <strong>Estadísticas de Hechos</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show"
+                         aria-labelledby="panelsStayOpen-headingOne">
+                        <div class="accordion-body">
+                            <div class="d-flex flex-row align-items-center"
+                                 style="gap: 80px; justify-content: space-between">
+                                <div class="d-flex flex-column align-items-center" style="gap: 20px;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Filtrar por:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar filtro</option>
+                                            <option value="1">Provincia</option>
+                                            <option value="2">Hora</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Categoría:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar categoría</option>
+                                            <option value="1">Opción uno</option>
+                                            <option value="2">Opción dos</option>
+                                            <option value="3">Todas</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-column align-items-center">
+                                    <h5>Actualizado por última vez hace 1 minuto</h5>
+                                            <canvas id="myBarChart" class="stats_grafico" height="13vw" width="69vw"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item" style="padding-bottom: 4vh;">
+                    <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+                        <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseTwo" style="font-size: 25px;">
+                            <strong>Estadísticas de Hechos Reportados</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
+                         aria-labelledby="panelsStayOpen-headingTwo">
+                        <div class="accordion-body">
+                            <div class="d-flex flex-row align-items-center"
+                                 style="gap: 80px; justify-content: space-between">
+                                <div class="d-flex flex-column align-items-center" style="gap: 20px;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Filtrar por:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar filtro</option>
+                                            <option value="1">Provincia</option>
+                                            <option value="2">Hora</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Categoría:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar categoría</option>
+                                            <option value="1">Opción uno</option>
+                                            <option value="2">Opción dos</option>
+                                            <option value="3">Todas</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column align-items-center">
+                                    <h5>Actualizado por última vez hace 4 minutos</h5>
+                                    <canvas id="myBarChart-2" class="stats_grafico" height="13vw" width="69vw"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item" style="padding-bottom: 4vh;">
+                    <h2 class="accordion-header" id="panelsStayOpen-headingThree">
+                        <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseThree" style="font-size: 25px;">
+                            <strong>Estadísticas de Hechos según su Categoría</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse"
+                         aria-labelledby="panelsStayOpen-headingThree">
+                        <div class="accordion-body">
+                            <div class="d-flex flex-row align-items-center"
+                                 style="gap: 80px; justify-content: space-between">
+                                <div class="d-flex flex-column align-items-center" style="gap: 20px;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Obtener Top:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar top</option>
+                                            <option value="1">1</option>
+                                            <option value="2">3</option>
+                                            <option value="3">5</option>
+                                            <option value="4">10</option>
+                                            <option value="5">50</option>
+                                            <option value="6">100</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Ordenar por:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar orden</option>
+                                            <option value="1">Mayor</option>
+                                            <option value="2">Menor</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-column align-items-center">
+                                    <h5>Actualizado por última vez hace 55 minutos</h5>
+                                    <canvas id="myBarChart-3" class="stats_grafico_dos" height="30vw" width="69vw"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item" style="padding-bottom: 4vh;">
+                    <h2 class="accordion-header" id="panelsStayOpen-headingFour">
+                        <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseFour" style="font-size: 25px;">
+                            <strong>Estadísticas de Hechos Reportados según su Categoría</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseFour" class="accordion-collapse collapse"
+                         aria-labelledby="panelsStayOpen-headingFour">
+                        <div class="accordion-body">
+                            <div class="d-flex flex-row align-items-center"
+                                 style="gap: 80px; justify-content: space-between">
+                                <div class="d-flex flex-column align-items-center" style="gap: 20px;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Obtener Top:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar top</option>
+                                            <option value="1">1</option>
+                                            <option value="2">3</option>
+                                            <option value="3">5</option>
+                                            <option value="4">10</option>
+                                            <option value="5">50</option>
+                                            <option value="6">100</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h5>Ordenar por:</h5>
+                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                                style="width: 15vw; max-width: 220px;">
+                                            <option selected>Seleccionar orden</option>
+                                            <option value="1">Mayor</option>
+                                            <option value="2">Menor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column align-items-center">
+                                    <h5>Actualizado por última vez hace 10 minutos</h5>
+                                    <canvas id="myBarChart-4" class="stats_grafico_dos" height="30vw" width="69vw"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+    <script>
+        // 1. Obtén el contexto del canvas
+        const ctx = document.getElementById('myBarChart').getContext('2d');
+
+        // 2. Crea el nuevo gráfico
+        new Chart(ctx, {
+            type: 'bar', // Tipo de gráfico: barras
+
+            // Datos del gráfico
+            data: {
+                labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles'],
+                datasets: [{
+                    label: 'Ventas Semanales',
+                    // DATOS AGREGADOS AQUÍ:
+                    data: [12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+
+            // Opciones de configuración (título, escalas, etc.)
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // 1. Obtén el contexto del canvas
+        const ctx_2 = document.getElementById('myBarChart-2').getContext('2d');
+
+        // 2. Crea el nuevo gráfico
+        new Chart(ctx_2, {
+            type: 'bar', // Tipo de gráfico: barras
+
+            // Datos del gráfico
+            data: {
+                labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles'],
+                datasets: [{
+                    label: 'Ventas Semanales',
+                    // DATOS AGREGADOS AQUÍ:
+                    data: [12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+
+            // Opciones de configuración (título, escalas, etc.)
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // 1. Obtén el contexto del canvas
+        const ctx_3 = document.getElementById('myBarChart-3').getContext('2d');
+
+        // 2. Crea el nuevo gráfico
+        new Chart(ctx_3, {
+            type: 'bar', // Tipo de gráfico: barras
+
+            // Datos del gráfico
+            data: {
+                labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles'],
+                datasets: [{
+                    label: 'Ventas Semanales',
+                    // DATOS AGREGADOS AQUÍ:
+                    data: [12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+
+            options: {
+            // *** AÑADE ESTA LÍNEA CLAVE ***
+            indexAxis: 'y', // 'y' para horizontal, 'x' para vertical (vertical es el valor por defecto)
+
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                // Ahora el eje X será el que comience en cero, no el Y
+                x: {
+                    beginAtZero: true
+                }
+            }
+        }
+        });
+
+        // 1. Obtén el contexto del canvas
+        const ctx_4 = document.getElementById('myBarChart-4').getContext('2d');
+
+        // 2. Crea el nuevo gráfico
+        new Chart(ctx_4, {
+            type: 'bar', // Tipo de gráfico: barras
+
+            // Datos del gráfico
+            data: {
+                labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles'],
+                datasets: [{
+                    label: 'Ventas Semanales',
+                    // DATOS AGREGADOS AQUÍ:
+                    data: [12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(100, 100, 100, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 100, 100, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+
+            // Opciones de configuración (título, escalas, etc.)
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
+
+{{/partial}}
+
+{{> templates/layout}}

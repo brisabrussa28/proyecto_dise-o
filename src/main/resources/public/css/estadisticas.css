@@ -1,0 +1,66 @@
+.principal {
+    font-size: 40px;
+    color: black;
+    font-weight: 600;
+}
+
+.bot-stats {
+    background-color: transparent;
+    height: 40px;
+    text-align: center;
+    border: none;
+}
+
+img {
+    vertical-align: sub;
+}
+
+.stats_recuadro{
+    border-radius: 15px;
+    border: 3px solid #005baa;
+    padding: 0px;
+    gap: 0px;
+    width: 18.6vw;
+    height: 31vh;
+    color: white;
+    max-width: 580px;
+    max-height: 10vh;
+}
+
+
+.stats_grafico{
+    border-radius: 15px;
+    border: 2px solid #005baa;
+    padding: 0px;
+    gap: 0px;
+    width: 69vw;
+    height: 13vw;
+}
+
+
+.stats_grafico_dos{
+    border-radius: 15px;
+    border: 2px solid #005baa;
+    padding: 0px;
+    gap: 0px;
+}
+
+#myBarChart {
+    width: 72vw !important;
+    height: 14vw !important;
+}
+
+#myBarChart-2 {
+    width: 72vw !important;
+    height: 14vw !important;
+}
+
+#myBarChart-3 {
+    width: 69vw !important;
+    height: 30vw !important;
+}
+
+#myBarChart-4 {
+    width: 69vw !important;
+    height: 30vw !important;
+}
