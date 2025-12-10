@@ -4,9 +4,8 @@
     font-weight: 600;
 }
 
-button {
+.bot-stats {
     background-color: transparent;
-    width: 100px;
     height: 40px;
     text-align: center;
     border: none;

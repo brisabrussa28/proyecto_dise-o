@@ -18,12 +18,6 @@
     word-wrap: break-word; /* Ayuda a romper palabras muy largas si es necesario */
 }
 
-.bi::before {
-  line-height: 0;
-  font-size: 30px;
-  padding-right: 2px;
-}
-
 [class^="bi-"]::before {
   line-height: 0;
   font-size: 35px;
@@ -32,6 +26,10 @@
 .btn-outline-success {
     --bs-btn-color: rgb(0, 192, 0);
     --bs-btn-hover-bg: rgb(0, 192, 0);
+    --bs-btn-font-size: 30px;
+    --bs-btn-padding-x: 2px;
+    --bs-btn-padding-y: 0px;
+    padding-right: 4px;
 }
 
 .btn-danger {
