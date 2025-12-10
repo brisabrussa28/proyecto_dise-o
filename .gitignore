@@ -44,5 +44,5 @@ dinamica.json
 /.settings/org.eclipse.core.resources.prefs
 /.settings/org.eclipse.jdt.apt.core.prefs
 /.settings/org.eclipse.m2e.core.prefs
-/src/main/java/ar/edu/utn/frba/dds/front/.next/
-/src/main/java/ar/edu/utn/frba/dds/front/node_modules/
+/front/.next/
+/front/node_modules/
