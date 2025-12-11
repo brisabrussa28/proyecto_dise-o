@@ -5,8 +5,10 @@ import ar.edu.utn.frba.dds.model.hecho.EnriquecedorDeHechos;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -21,7 +23,7 @@ public abstract class FuenteConHechos extends Fuente {
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   @JoinColumn(name = "hecho_fuente")
-  protected List<Hecho> hechos = new ArrayList<>();
+  protected Set<Hecho> hechos = new HashSet<>();
 
   protected FuenteConHechos() {
     super();
@@ -37,7 +39,7 @@ public abstract class FuenteConHechos extends Fuente {
    */
   @Override
   public List<Hecho> getHechos() {
-    return Collections.unmodifiableList(this.hechos);
+    return Collections.unmodifiableList(new ArrayList<>(this.hechos));
   }
 
   /**
@@ -53,12 +55,16 @@ public abstract class FuenteConHechos extends Fuente {
 
     // Llama al método no bloqueante y define un callback (thenAccept)
     // para actualizar la lista de la fuente con el nuevo resultado cuando el trabajo termine.
-    enriquecedor.completarAsincrono(this.hechos)
+    enriquecedor.completarAsincrono(new ArrayList<>(this.hechos))
                 .thenAccept(hechosEnriquecidos -> {
                   // Este bloque se ejecuta en un hilo de fondo cuando la API responde.
                   this.hechos.clear();
                   this.hechos.addAll(hechosEnriquecidos);
                   System.out.println("Enriquecimiento en segundo plano completado para la fuente: " + this.getNombre());
                 });
+  }
+
+  public void agregarHecho(Hecho hecho) {
+    this.hechos.add(hecho);
   }
 }

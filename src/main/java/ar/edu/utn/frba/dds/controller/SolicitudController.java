@@ -32,4 +32,9 @@ public class SolicitudController {
     SolicitudesRepository.instance()
                          .rechazarSolicitud(solicitud);
   }
+
+  public Long countAll() {
+    return SolicitudesRepository.instance()
+                                .cantidadTotal();
+  }
 }

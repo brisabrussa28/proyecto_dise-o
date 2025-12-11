@@ -160,6 +160,9 @@ public class Router {
     app.post("/admin/colecciones/{id}/agregarHecho", adminController::agregarHechoAColeccion);
     app.post("/admin/colecciones/{id}/quitarHecho", adminController::removerHechoDeColeccion);
     app.post("/admin/fuentes", ctx -> adminController.crearFuente(ctx));
+    app.post(
+        "/admin/colecciones/{id}/configurar", adminController::configurarColeccion);
+
 
     app.get(
         "/admin/fuentes", ctx -> {

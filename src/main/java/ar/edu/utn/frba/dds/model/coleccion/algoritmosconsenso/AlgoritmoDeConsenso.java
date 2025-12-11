@@ -93,6 +93,5 @@ public abstract class AlgoritmoDeConsenso {
     return Collections.unmodifiableList(hechosConsensuados);
   }
 
-
   protected abstract boolean esConsensuado(Hecho hecho, List<Set<Hecho>> hechosDeFuentes);
 }

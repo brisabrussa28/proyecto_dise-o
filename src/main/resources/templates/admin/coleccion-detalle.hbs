@@ -1,7 +1,8 @@
 {{#partial "nav_izquierda"}}
-    <a href="/admin/dashboard" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
+    <a href="/admin/colecciones"
+       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
         <i class="fa-solid fa-arrow-left"></i>
-        <span class="d-none d-sm-block">Volver al Panel</span>
+        <span class="d-none d-sm-block">Volver al listado</span>
     </a>
 {{/partial}}
 
@@ -11,68 +12,89 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h3><i class="fa-solid fa-folder-open text-warning me-2"></i>Colección:
-                    <strong>{{coleccion.nombre}}</strong></h3>
+                    <strong>{{coleccion.titulo}}</strong></h3>
                 <span class="badge bg-secondary">{{coleccion.categoria}}</span>
                 <span class="text-muted ms-2 small">{{coleccion.descripcion}}</span>
             </div>
-            <a href="/admin/colecciones" class="btn btn-outline-secondary btn-sm">Volver al
-                Listado</a>
         </div>
 
         <div class="card shadow-sm mb-4 border-primary">
             <div class="card-header bg-primary text-white fw-bold">
-                <i class="fa-solid fa-sliders me-2"></i>Configuración de la Tubería
+                <i class="fa-solid fa-sliders me-2"></i>Configuración de la Coleccion
             </div>
             <div class="card-body bg-light">
-                <form action="/admin/colecciones/{{coleccion.id}}/configurar" method="POST"
-                      class="row g-3">
+                <form action="/admin/colecciones/{{coleccion.id}}/configurar" method="POST" class="row g-3">
+
+                    <div class="col-12 border-bottom pb-3 mb-3">
+                        <h6 class="text-primary fw-bold"><i class="fa-solid fa-pen-to-square me-1"></i>Datos Generales
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Título</label>
+                                <input type="text" name="titulo" class="form-control" value="{{coleccion.titulo}}"
+                                       required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Categoría</label>
+                                <input type="text" name="categoria" class="form-control" value="{{coleccion.categoria}}"
+                                       required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Descripción</label>
+                                <textarea name="descripcion" class="form-control" rows="2"
+                                          required>{{coleccion.descripcion}}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <h6 class="text-primary fw-bold"><i class="fa-solid fa-gears me-1"></i>Fuente y consenso</h6>
+                    </div>
 
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">Fuente de Datos (Input)</label>
+                        <label class="form-label fw-bold small">Fuente de Datos</label>
                         <div class="input-group">
-                            <span class="input-group-text"><i
-                                    class="fa-solid fa-database"></i></span>
+                            <span class="input-group-text"><i class="fa-solid fa-database"></i></span>
                             <select name="fuente_id" class="form-select" required>
-                                <option value="" disabled
-                                        {{#unless coleccion.fuente}}selected{{/unless}}>Seleccionar
-                                    Fuente...
-                                </option>
-                                {{#each fuentesDisponibles}}
-                                    <option value="{{this.id}}"
-                                            {{#if (eq this.id ../coleccion.fuente.id)}}selected{{/if}}>
-                                        {{this.nombre}} ({{this.tipo_fuente}})
+                                {{#if coleccion.fuente}}
+                                    <option value="{{coleccion.fuente.id}}" selected>{{coleccion.fuente.nombre}}
                                     </option>
+                                {{else}}
+                                    <option value="" selected disabled>Seleccionar...</option>
+                                {{/if}}
+
+                                {{#each fuentesDisponibles}}
+                                    {{#unless (eq this.id ../coleccion.fuente.id)}}
+                                        <option value="{{this.id}}">{{this.nombre}}</option>
+                                    {{/unless}}
                                 {{/each}}
                             </select>
                         </div>
-                        <div class="form-text">La fuente provee los hechos crudos a procesar.</div>
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Algoritmo de Consenso</label>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">Algoritmo de Consenso</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fa-solid fa-filter"></i></span>
                             <select name="algoritmo_tipo" class="form-select" required>
-                                <option value="Absoluta"
-                                        {{#if (eq algoritmoActual "Absoluta")}}selected{{/if}}>
+                                <option value="Absoluta" {{#if (eq algoritmoActual "Absoluta")}}selected{{/if}}>
                                     Absoluta
                                 </option>
-                                <option value="May_simple"
-                                        {{#if (eq algoritmoActual "May_simple")}}selected{{/if}}>
+                                <option value="May_simple" {{#if (eq algoritmoActual "May_simple")}}selected{{/if}}>
                                     Mayoría Simple
                                 </option>
                                 <option value="Mult_menciones"
-                                        {{#if (eq algoritmoActual "Mult_menciones")}}selected{{/if}}>
-                                    Múltiples Menciones
+                                        {{#if (eq algoritmoActual "Mult_menciones")}}selected{{/if}}>Múltiples Menciones
                                 </option>
                             </select>
                         </div>
-                        <div class="form-text">Regla para validar la veracidad.</div>
                     </div>
 
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-success w-100 fw-bold">
-                            <i class="fa-solid fa-floppy-disk me-2"></i>Guardar
+                    <div class="col-12 mt-4 text-end">
+                        <button type="submit" class="btn btn-success px-4 fw-bold">
+                            <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Cambios
                         </button>
                     </div>
                 </form>
@@ -83,8 +105,9 @@
             <div class="col-md-12">
                 <div class="card shadow-sm">
                     <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
-                        <span>Hechos Consensuados / Procesados</span>
-                        <span class="badge bg-secondary">{{coleccion.hechos.size}} items</span>
+                        <span>Hechos Consensuados</span>
+                        <span class="badge bg-secondary">{{coleccion.hechos.size}}
+                            items</span>
                     </div>
                     <div class="card-body p-0">
                         <ul class="list-group list-group-flush">
@@ -92,7 +115,7 @@
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
                                         <span class="fw-bold">{{this.titulo}}</span>
-                                        <div class="small text-muted">{{this.fecha}}</div>
+                                        <div class="small text-muted">{{this.descripcion}}</div>
                                     </div>
                                 </li>
                             {{else}}
