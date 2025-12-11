@@ -4,8 +4,6 @@ import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.model.hecho.Estado;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,10 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -29,12 +24,6 @@ public abstract class AlgoritmoDeConsenso {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long algoritmo_id;
-
-  @OneToMany
-  @JoinColumn(name = "algoritmo_id")
-  private List<Hecho> hechosConsensuados = new ArrayList<>();
-
-  // TODO: Revisar como se comporta el sistema si no hay fuentes
 
   public List<Hecho> listaDeHechosConsensuados(
       List<Hecho> listaDeHechos,
@@ -50,11 +39,7 @@ public abstract class AlgoritmoDeConsenso {
   }
 
   /**
-   * Mét0do auxiliar para obtener la lista de fuentes subyacentes.
-   * Si la fuente principal es un agregador, devuelve las fuentes que lo componen.
-   * Si es una fuente simple, la devuelve en una lista unitaria.
-   *
-   * @return La lista de fuentes base.
+   * Método auxiliar para obtener la lista de fuentes subyacentes.
    */
   List<Fuente> obtenerFuentesDelNodo(Fuente fuente) {
     if (fuente instanceof FuenteDeAgregacion agregador) {
@@ -65,32 +50,17 @@ public abstract class AlgoritmoDeConsenso {
   }
 
   /**
-   * Obtiene la lista de hechos de cada fuente, excluyendo los eliminados,
-   * y la convierte a un Set.
+   * Obtiene la lista de hechos de cada fuente, excluyendo los eliminados.
    */
   List<Set<Hecho>> obtenerListasDeHechos(List<Fuente> fuentes) {
     return fuentes.stream()
                   .map(fuente ->
                            fuente.getHechos()
                                  .stream()
-                                 .filter(hecho -> hecho.getEstado() != Estado.ELIMINADO) //filtra eliminados
+                                 .filter(hecho -> hecho.getEstado() != Estado.ELIMINADO)
                                  .collect(Collectors.toSet())
                   )
                   .toList();
-  }
-
-  /**
-   * Recalcula y actualiza la lista interna de hechos consensuados.
-   *
-   * @param hechosColeccion hechos de la coleccion que aplica al algoriitmo
-   * @param fuentes         Lista de fuentes sobre la cual se aplica el algoritmo
-   */
-  public void recalcularHechosConsensuados(List<Hecho> hechosColeccion, List<Fuente> fuentes) {
-    this.hechosConsensuados = this.listaDeHechosConsensuados(hechosColeccion, fuentes);
-  }
-
-  public List<Hecho> getHechosConsensuados() {
-    return Collections.unmodifiableList(hechosConsensuados);
   }
 
   protected abstract boolean esConsensuado(Hecho hecho, List<Set<Hecho>> hechosDeFuentes);

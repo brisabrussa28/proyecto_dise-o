@@ -51,6 +51,7 @@ public class AlgoritmoDeConsensoTest {
   /**
    * Método de ayuda para crear una FuenteDeAgregacion con fuentes mockeadas.
    */
+  @SafeVarargs
   private FuenteDeAgregacion crearAgregadorConFuentes(List<Hecho>... listasDeHechos) {
     FuenteDeAgregacion agregador = new FuenteDeAgregacion("AgregadorDeTest");
 
@@ -73,7 +74,9 @@ public class AlgoritmoDeConsensoTest {
 
     Coleccion coleccion = new Coleccion(
         "AbsolutaOk", agregador, "Desc", "Categoria", absoluta);
-    coleccion.setAlgoritmoDeConsenso(absoluta);
+
+    // Al llamar a recalcular, la colección delega en el algoritmo stateless
+    // y guarda el resultado internamente.
     coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
 
@@ -93,7 +96,7 @@ public class AlgoritmoDeConsensoTest {
 
     Coleccion coleccion = new Coleccion(
         "AbsolutaNoOk", agregador, "Desc", "Categoria", absoluta);
-    coleccion.setAlgoritmoDeConsenso(absoluta);
+
     coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
 
@@ -113,7 +116,7 @@ public class AlgoritmoDeConsensoTest {
 
     Coleccion coleccion = new Coleccion(
         "MayoriaOk", agregador, "Desc", "Categoria", mayoriaSimple);
-    coleccion.setAlgoritmoDeConsenso(mayoriaSimple);
+
     coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
 
@@ -132,7 +135,7 @@ public class AlgoritmoDeConsensoTest {
 
     Coleccion coleccion = new Coleccion(
         "MayoriaNoOk", agregador, "Desc", "Categoria", mayoriaSimple);
-    coleccion.setAlgoritmoDeConsenso(mayoriaSimple);
+
     coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
 
@@ -150,7 +153,7 @@ public class AlgoritmoDeConsensoTest {
 
     Coleccion coleccion = new Coleccion(
         "MultiplesOk", agregador, "Desc", "Categoria", multiplesMenciones);
-    coleccion.setAlgoritmoDeConsenso(multiplesMenciones);
+
     coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
 
@@ -168,7 +171,7 @@ public class AlgoritmoDeConsensoTest {
 
     Coleccion coleccion = new Coleccion(
         "MultiplesNoOk", agregador, "Desc", "Categoria", multiplesMenciones);
-    coleccion.setAlgoritmoDeConsenso(multiplesMenciones);
+
     coleccion.recalcularHechosConsensuados(filtroExcluyente, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
 
@@ -196,7 +199,7 @@ public class AlgoritmoDeConsensoTest {
 
     Coleccion coleccion = new Coleccion(
         "EliminadoNoConsensuado", agregador, "Desc", "Categoria", absoluta);
-    coleccion.setAlgoritmoDeConsenso(absoluta);
+
     // Usamos el mock local en lugar del filtro global
     coleccion.recalcularHechosConsensuados(filtroDeEliminados, agregador.getFuentesCargadas());
     List<Hecho> result = coleccion.getHechosConsensuados();
@@ -205,4 +208,3 @@ public class AlgoritmoDeConsensoTest {
     assertEquals(0, result.size());
   }
 }
-

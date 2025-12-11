@@ -108,8 +108,15 @@ public class Coleccion {
    * @param filtroExcluyente Un filtro (ej. de hechos eliminados) que se aplica ANTES del filtro propio.
    */
   public void recalcularHechosConsensuados(Filtro filtroExcluyente, List<Fuente> fuentes) {
-    List<Hecho> hechosFiltrados = this.obtenerHechosFiltrados(filtroExcluyente);
-    this.coleccion_algoritmo.recalcularHechosConsensuados(hechosFiltrados, fuentes);
+    // 1. Filtramos primero (ej: sacar eliminados)
+    List<Hecho> hechosParaAnalizar = this.obtenerHechosFiltrados(filtroExcluyente);
+
+    // 2. Le preguntamos al algoritmo cuáles pasan el consenso
+    List<Hecho> aprobados = this.coleccion_algoritmo.listaDeHechosConsensuados(hechosParaAnalizar, fuentes);
+
+    // 3. Actualizamos NUESTRA lista persistente
+    this.hechos.clear();
+    this.hechos.addAll(aprobados);
   }
 
   /**
@@ -195,7 +202,8 @@ public class Coleccion {
    * @return Una lista de solo lectura de los hechos consensuados.
    */
   public List<Hecho> getHechosConsensuados() {
-    return coleccion_algoritmo.getHechosConsensuados();
+    // CORRECCIÓN: Devolvemos directamente los hechos que la Coleccion tiene guardados.
+    return new ArrayList<>(this.hechos);
   }
 
   public String getTitulo() {

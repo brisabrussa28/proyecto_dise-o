@@ -23,11 +23,8 @@ import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.persistence.EntityManager;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
@@ -46,17 +43,8 @@ public class ColeccionTest {
     filtroExcluyenteVacio = new Filtro(new CondicionTrue());
   }
 
-  /**
-   * Se agrega un método de limpieza para garantizar el aislamiento entre tests,
-   * especialmente si alguno interactúa con la base de datos.
-   */
-  @AfterEach
-  public void tearDown() {
-    EntityManager em = DBUtils.getEntityManager();
-    DBUtils.comenzarTransaccion(em);
-    em.createQuery("DELETE FROM Solicitud").executeUpdate();
-    DBUtils.commit(em);
-  }
+  // NOTA: Se eliminó el tearDown() con DBUtils porque estos son tests unitarios (con mocks)
+  // y no tocan la base de datos real.
 
   // Método auxiliar para crear Hechos válidos y completos.
   private Hecho crearHechoCompleto(String titulo) {
@@ -130,7 +118,6 @@ public class ColeccionTest {
     // Act: Se crea manualmente un filtro que excluye un hecho específico.
     Filtro filtroDeExclusionReal = new Filtro(new CondicionPredicado(h -> !h.equals(hechoAExcluir)));
 
-
     // Assert: Se verifica que la colección aplica correctamente el filtro externo.
     assertTrue(coleccion.contieneHechoFiltrado(hechoAIncluir, filtroDeExclusionReal));
     assertFalse(coleccion.contieneHechoFiltrado(hechoAExcluir, filtroDeExclusionReal));
@@ -180,4 +167,3 @@ public class ColeccionTest {
     assertEquals(2, coleccion.obtenerHechosFiltrados(filtroExcluyenteVacio).size());
   }
 }
-
