@@ -1,0 +1,28 @@
+[
+  {
+    "hecho_titulo": "Árbol Caído",
+    "hecho_descripcion": "Un árbol bloquea la vereda tras la tormenta de anoche.",
+    "hecho_categoria": "Naturaleza",
+    "hecho_fecha_suceso": "2025-12-09T08:00:00",
+    "hecho_direccion": "Plaza de Mayo",
+    "hecho_estado": "ORIGINAL",
+    "hecho_provincia": "CABA",
+    "hecho_ubicacion": {
+      "latitud": -34.6083,
+      "longitud": -58.3712
+    }
+  },
+  {
+    "hecho_titulo": "Inundación callejera",
+    "hecho_descripcion": "Bocas de tormenta tapadas provocan acumulación de agua.",
+    "hecho_categoria": "Infraestructura",
+    "hecho_fecha_suceso": "2025-12-11T14:30:00",
+    "hecho_direccion": "Cabildo y Juramento",
+    "hecho_estado": "ORIGINAL",
+    "hecho_provincia": "CABA",
+    "hecho_ubicacion": {
+      "latitud": -34.5615,
+      "longitud": -58.4565
+    }
+  }
+]
