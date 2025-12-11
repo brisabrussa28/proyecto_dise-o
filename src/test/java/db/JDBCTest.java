@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test;
  * Tests que verifican la correcta persistencia de diferentes entidades del dominio.
  * Hereda de PersistenceTests para obtener el manejo de transacciones y la configuración de la BD.
  */
-public class JDBCTest {
+public class JDBCTest extends PersistenceTests { // Aseguramos que herede de PersistenceTests
   private ColeccionRepository repoColeccion = new ColeccionRepository();
   private HechoRepository hechoRepo = new HechoRepository();
   private FuenteRepository fuenteRepo = new FuenteRepository();
@@ -105,7 +105,9 @@ public class JDBCTest {
     );
 
     coleccion.setAlgoritmoDeConsenso(algoritmo);
-    algoritmoRepository.save(algoritmo);
+    // FIX: Eliminada la llamada explícita a algoritmoRepository.save(algoritmo)
+    // para evitar 'PersistentObjectException: detached entity passed to persist'
+    // Hibernate manejará la persistencia a través de la Coleccion.
     repoColeccion.save(coleccion);
   }
 
@@ -152,6 +154,7 @@ public class JDBCTest {
     );
     var multiplesMenciones = new MultiplesMenciones();
     coleccionBonaerense.setAlgoritmoDeConsenso(multiplesMenciones);
+    // Aquí sí lo guardamos porque no es parte del setUp general y es una instancia nueva
     algoritmoRepository.save(multiplesMenciones);
     repoColeccion.save(coleccionBonaerense);
     var id = coleccionBonaerense.getId();

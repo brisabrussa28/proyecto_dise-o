@@ -18,6 +18,7 @@ import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 
 public class HechoTest {
@@ -195,9 +196,10 @@ public class HechoTest {
 
   @Test
   public void esEditableAntesDeUnaSemana() {
-    LocalDateTime hace3Dias = LocalDateTime.now()
-                                           .minusDays(3);
+    LocalDateTime hace3Dias = LocalDateTime.now().minusDays(3);
     Usuario user = new Usuario();
+    asignarId(user, 1L); // FIX: Asignamos ID para evitar NPE
+
     Hecho hecho = new HechoBuilder()
         .conTitulo("titulo")
         .conDescripcion("desc")
@@ -216,9 +218,10 @@ public class HechoTest {
 
   @Test
   public void noEsEditablePasadaUnaSemana() {
-    LocalDateTime hace10Dias = LocalDateTime.now()
-                                            .minusDays(10);
+    LocalDateTime hace10Dias = LocalDateTime.now().minusDays(10);
     Usuario user = new Usuario();
+    asignarId(user, 1L); // FIX: Asignamos ID para evitar NPE
+
     Hecho hecho = new HechoBuilder()
         .conTitulo("titulo")
         .conDescripcion("desc")
@@ -234,5 +237,15 @@ public class HechoTest {
 
     assertFalse(hecho.esEditable(user), "El hecho NO debería ser editable después de una semana");
   }
-}
 
+  // Helper para asignar ID privado sin modificar la clase Usuario
+  private void asignarId(Usuario usuario, Long id) {
+    try {
+      Field idField = Usuario.class.getDeclaredField("id");
+      idField.setAccessible(true);
+      idField.set(usuario, id);
+    } catch (Exception e) {
+      throw new RuntimeException("No se pudo asignar ID al usuario mock", e);
+    }
+  }
+}
