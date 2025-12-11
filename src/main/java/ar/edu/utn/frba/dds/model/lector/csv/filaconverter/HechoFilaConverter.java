@@ -5,7 +5,6 @@ import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
-import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,7 +32,6 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
 
   private final String dateFormatStr;
   private final Map<String, List<String>> mapeoColumnas;
-  private final SimpleDateFormat dateFormat;
 
   /**
    * Constructor que recibe la configuración necesaria para la conversión.
@@ -47,7 +45,6 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
           "El formato de fecha y el mapeo de columnas son obligatorios.");
     }
     this.dateFormatStr = formatoFecha;
-    this.dateFormat = new SimpleDateFormat(formatoFecha);
     this.mapeoColumnas = new HashMap<>(mapeoColumnas);
   }
 
@@ -213,13 +210,28 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
       return null;
     }
     valor = valor.trim();
-    try {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(this.dateFormatStr);
-      return LocalDateTime.parse(valor, formatter);
-    } catch (DateTimeException e) {
-      logger.warning("Error al parsear fecha: '" + valor + "' con formato '" + this.dateFormatStr + "'" + e.getMessage());
-      return null;
+
+    // Lista de formatos a probar en orden
+    List<String> formatosPosibles = List.of(
+        this.dateFormatStr,           // El formato configurado
+        "dd/MM/yyyy HH:mm",          // Formato con hora:minuto
+        "dd/MM/yyyy HH:mm:ss",       // Formato con hora:minuto:segundo
+        "yyyy-MM-dd'T'HH:mm:ss",     // ISO 8601
+        "yyyy-MM-dd HH:mm",          // Formato alternativo
+        "dd/MM/yyyy"                 // Solo fecha
+    );
+
+    for (String formato : formatosPosibles) {
+      try {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formato);
+        return LocalDateTime.parse(valor, formatter);
+      } catch (DateTimeException e) {
+        // Continuar con el siguiente formato
+      }
     }
+
+    logger.warning("Error al parsear fecha: '" + valor + "'. No coincide con ningún formato conocido.");
+    return null;
   }
 
   /**

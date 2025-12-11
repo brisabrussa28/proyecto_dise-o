@@ -10,6 +10,7 @@ import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.model.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.lector.Lector;
 import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLector;
 import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLectorCsv;
@@ -161,7 +162,7 @@ public class AdminController {
     if (fileName.toLowerCase()
                 .endsWith(".csv")) {
 
-      String formatoPolimorfico = "[yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS]" + "[yyyy-MM-dd'T'HH:mm:ss]" + "[yyyy-MM-dd HH:mm]" + "[yyyy-MM-dd]" + "[dd/MM/yyyy]";
+      String formatoPolimorfico = "[yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS]" + "[yyyy-MM-dd'T'HH:mm:ss]" + "[yyyy-MM-dd HH:mm]" + "[yyyy-MM-dd]" + "[dd/MM/yyyy]" + "[dd/MM/yyyy HH:mm]";
       return new ConfiguracionLectorCsv(
           ',',
           formatoPolimorfico,
@@ -176,15 +177,24 @@ public class AdminController {
 
   private Map<String, List<String>> crearMapeoColumnas() {
     Map<String, List<String>> mapeoColumnas = convertirMapeoAString(Map.of(
-        CampoHecho.TITULO, List.of("titulo", "TITULO"),
-        CampoHecho.DESCRIPCION, List.of("descripcion", "DESCRIPCION"),
-        CampoHecho.LATITUD, List.of("latitud", "LATITUD"),
-        CampoHecho.LONGITUD, List.of("longitud", "LONGITUD"),
-        CampoHecho.FECHA_SUCESO, List.of("fechaSuceso", "FECHASUCESO"),
-        CampoHecho.CATEGORIA, List.of("categoria", "CATEGORIA"),
-        CampoHecho.DIRECCION, List.of("direccion", "DIRECCION"),
-        CampoHecho.PROVINCIA, List.of("provincia", "PROVINCIA"),
-        CampoHecho.ETIQUETAS, List.of("etiquetas", "ETIQUETAS")
+        CampoHecho.TITULO,
+        List.of("titulo", "TITULO", "hecho_titulo"),
+        CampoHecho.DESCRIPCION,
+        List.of("descripcion", "DESCRIPCION", "hecho_descripcion"),
+        CampoHecho.LATITUD,
+        List.of("latitud", "LATITUD"),
+        CampoHecho.LONGITUD,
+        List.of("longitud", "LONGITUD"),
+        CampoHecho.FECHA_SUCESO,
+        List.of("fechaSuceso", "FECHASUCESO", "hecho_fecha_suceso"),
+        CampoHecho.CATEGORIA,
+        List.of("categoria", "CATEGORIA", "hecho_categoria"),
+        CampoHecho.DIRECCION,
+        List.of("direccion", "DIRECCION", "hecho_ubicacion", "hecho_direccion"),
+        CampoHecho.PROVINCIA,
+        List.of("provincia", "PROVINCIA", "hecho_provincia"),
+        CampoHecho.ETIQUETAS,
+        List.of("etiquetas", "ETIQUETAS", "hecho_etiquetas")
     ));
     return mapeoColumnas;
   }
@@ -202,6 +212,11 @@ public class AdminController {
         ConfiguracionLector configLector = determinarConfig(archivo.filename());
         Lector<Hecho> lector = configLector.build(Hecho.class);
         List<Hecho> hechosImportados = lector.importar(archivo.content());
+        hechosImportados.forEach(hecho -> {
+          if (hecho.getOrigen() == null) {
+            hecho.setOrigen(Origen.DATASET);
+          }
+        });
         System.out.println(hechosImportados);
         return new FuenteEstatica(nombreFuente, hechosImportados);
       case "API":
