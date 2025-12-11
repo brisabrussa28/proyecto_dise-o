@@ -64,3 +64,10 @@ img {
     width: 69vw !important;
     height: 30vw !important;
 }
+
+.btn-info {
+    margin-top: 1%;
+    margin-left: 87%;
+    margin-bottom: -2%;
+    font-size: 18px;
+}
