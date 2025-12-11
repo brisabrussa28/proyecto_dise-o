@@ -1,7 +1,16 @@
+{{#partial "nav_izquierda"}}
+    <a href="/admin/dashboard" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+       title="Volver al panel">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="d-none d-sm-block">Volver</span>
+    </a>
+{{/partial}}
+
 {{#partial "contenido"}}
 
     <body class="principal" style="background-color: white;">
-    <h1 style="font-weight: 700; font-size: 32px; color: black; padding-left: 8px; padding-top: 10px;">Estadísticas</h1>
+    <h1 style="font-weight: 700; font-size: 32px; color: black; padding-left: 8px; padding-top: 10px;">
+        Estadísticas</h1>
     <div class="d-flex flex-column align-items-center" style="padding: 10px; gap: 27px;">
         <div class="d-flex flex-row align-items-center" style="gap: 27px;">
             <div class="d-flex flex-column align-items-center stats_recuadro">
@@ -9,15 +18,18 @@
                 <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">1245</h2>
             </div>
             <div class="d-flex flex-column align-items-center stats_recuadro">
-                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Solicitudes Pendientes</h1>
+                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Solicitudes
+                    Pendientes</h1>
                 <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">12</h2>
             </div>
             <div class="d-flex flex-column align-items-center stats_recuadro">
-                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Solicitudes Spam</h1>
+                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Solicitudes
+                    Spam</h1>
                 <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">12</h2>
             </div>
             <div class="d-flex flex-column align-items-center stats_recuadro">
-                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Contribuyentes Activos</h1>
+                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Contribuyentes
+                    Activos</h1>
                 <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">76</h2>
             </div>
         </div>
@@ -27,7 +39,8 @@
             <div class="accordion" id="accordionExample" style="width: 94vw;">
                 <div class="accordion-item" style="padding-bottom: 4vh;">
                     <h2 class="accordion-header" id="panelsStayOpen-headingOne">
-                        <button class="accordion-button btn btn-light btn-white-to-gray bot-stats" type="button" data-bs-toggle="collapse"
+                        <button class="accordion-button btn btn-light btn-white-to-gray bot-stats"
+                                type="button" data-bs-toggle="collapse"
                                 data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
                                 aria-controls="panelsStayOpen-collapseOne" style="font-size: 25px;">
                             <strong>Estadísticas de Hechos</strong>
@@ -38,10 +51,12 @@
                         <div class="accordion-body">
                             <div class="d-flex flex-row align-items-center"
                                  style="gap: 80px; justify-content: space-between">
-                                <div class="d-flex flex-column align-items-center" style="gap: 20px;">
+                                <div class="d-flex flex-column align-items-center"
+                                     style="gap: 20px;">
                                     <div class="d-flex flex-column align-items-center">
                                         <h5>Filtrar por:</h5>
-                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                        <select class="form-select"
+                                                aria-label="Menú de selección de ejemplo"
                                                 style="width: 15vw; max-width: 220px;">
                                             <option selected>Seleccionar filtro</option>
                                             <option value="1">Provincia</option>
@@ -51,7 +66,8 @@
 
                                     <div class="d-flex flex-column align-items-center">
                                         <h5>Categoría:</h5>
-                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                        <select class="form-select"
+                                                aria-label="Menú de selección de ejemplo"
                                                 style="width: 15vw; max-width: 220px;">
                                             <option selected>Seleccionar categoría</option>
                                             <option value="1">Opción uno</option>
@@ -63,7 +79,8 @@
 
                                 <div class="d-flex flex-column align-items-center">
                                     <h5>Actualizado por última vez hace 1 minuto</h5>
-                                            <canvas id="myBarChart" class="stats_grafico" height="13vw" width="69vw"></canvas>
+                                    <canvas id="myBarChart" class="stats_grafico" height="13vw"
+                                            width="69vw"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -72,7 +89,8 @@
 
                 <div class="accordion-item" style="padding-bottom: 4vh;">
                     <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
-                        <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats" type="button" data-bs-toggle="collapse"
+                        <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats"
+                                type="button" data-bs-toggle="collapse"
                                 data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="true"
                                 aria-controls="panelsStayOpen-collapseTwo" style="font-size: 25px;">
                             <strong>Estadísticas de Hechos Reportados</strong>
@@ -83,10 +101,12 @@
                         <div class="accordion-body">
                             <div class="d-flex flex-row align-items-center"
                                  style="gap: 80px; justify-content: space-between">
-                                <div class="d-flex flex-column align-items-center" style="gap: 20px;">
+                                <div class="d-flex flex-column align-items-center"
+                                     style="gap: 20px;">
                                     <div class="d-flex flex-column align-items-center">
                                         <h5>Filtrar por:</h5>
-                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                        <select class="form-select"
+                                                aria-label="Menú de selección de ejemplo"
                                                 style="width: 15vw; max-width: 220px;">
                                             <option selected>Seleccionar filtro</option>
                                             <option value="1">Provincia</option>
@@ -96,7 +116,8 @@
 
                                     <div class="d-flex flex-column align-items-center">
                                         <h5>Categoría:</h5>
-                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                        <select class="form-select"
+                                                aria-label="Menú de selección de ejemplo"
                                                 style="width: 15vw; max-width: 220px;">
                                             <option selected>Seleccionar categoría</option>
                                             <option value="1">Opción uno</option>
@@ -107,7 +128,8 @@
                                 </div>
                                 <div class="d-flex flex-column align-items-center">
                                     <h5>Actualizado por última vez hace 4 minutos</h5>
-                                    <canvas id="myBarChart-2" class="stats_grafico" height="13vw" width="69vw"></canvas>
+                                    <canvas id="myBarChart-2" class="stats_grafico" height="13vw"
+                                            width="69vw"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -115,9 +137,11 @@
                 </div>
                 <div class="accordion-item" style="padding-bottom: 4vh;">
                     <h2 class="accordion-header" id="panelsStayOpen-headingThree">
-                        <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats" type="button" data-bs-toggle="collapse"
+                        <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats"
+                                type="button" data-bs-toggle="collapse"
                                 data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="true"
-                                aria-controls="panelsStayOpen-collapseThree" style="font-size: 25px;">
+                                aria-controls="panelsStayOpen-collapseThree"
+                                style="font-size: 25px;">
                             <strong>Estadísticas de Hechos según su Categoría</strong>
                         </button>
                     </h2>
@@ -126,10 +150,12 @@
                         <div class="accordion-body">
                             <div class="d-flex flex-row align-items-center"
                                  style="gap: 80px; justify-content: space-between">
-                                <div class="d-flex flex-column align-items-center" style="gap: 20px;">
+                                <div class="d-flex flex-column align-items-center"
+                                     style="gap: 20px;">
                                     <div class="d-flex flex-column align-items-center">
                                         <h5>Obtener Top:</h5>
-                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                        <select class="form-select"
+                                                aria-label="Menú de selección de ejemplo"
                                                 style="width: 15vw; max-width: 220px;">
                                             <option selected>Seleccionar top</option>
                                             <option value="1">1</option>
@@ -143,7 +169,8 @@
 
                                     <div class="d-flex flex-column align-items-center">
                                         <h5>Ordenar por:</h5>
-                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                        <select class="form-select"
+                                                aria-label="Menú de selección de ejemplo"
                                                 style="width: 15vw; max-width: 220px;">
                                             <option selected>Seleccionar orden</option>
                                             <option value="1">Mayor</option>
@@ -154,7 +181,8 @@
 
                                 <div class="d-flex flex-column align-items-center">
                                     <h5>Actualizado por última vez hace 55 minutos</h5>
-                                    <canvas id="myBarChart-3" class="stats_grafico_dos" height="30vw" width="69vw"></canvas>
+                                    <canvas id="myBarChart-3" class="stats_grafico_dos"
+                                            height="30vw" width="69vw"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -163,9 +191,11 @@
 
                 <div class="accordion-item" style="padding-bottom: 4vh;">
                     <h2 class="accordion-header" id="panelsStayOpen-headingFour">
-                        <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats" type="button" data-bs-toggle="collapse"
+                        <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats"
+                                type="button" data-bs-toggle="collapse"
                                 data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="true"
-                                aria-controls="panelsStayOpen-collapseFour" style="font-size: 25px;">
+                                aria-controls="panelsStayOpen-collapseFour"
+                                style="font-size: 25px;">
                             <strong>Estadísticas de Hechos Reportados según su Categoría</strong>
                         </button>
                     </h2>
@@ -174,10 +204,12 @@
                         <div class="accordion-body">
                             <div class="d-flex flex-row align-items-center"
                                  style="gap: 80px; justify-content: space-between">
-                                <div class="d-flex flex-column align-items-center" style="gap: 20px;">
+                                <div class="d-flex flex-column align-items-center"
+                                     style="gap: 20px;">
                                     <div class="d-flex flex-column align-items-center">
                                         <h5>Obtener Top:</h5>
-                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                        <select class="form-select"
+                                                aria-label="Menú de selección de ejemplo"
                                                 style="width: 15vw; max-width: 220px;">
                                             <option selected>Seleccionar top</option>
                                             <option value="1">1</option>
@@ -191,7 +223,8 @@
 
                                     <div class="d-flex flex-column align-items-center">
                                         <h5>Ordenar por:</h5>
-                                        <select class="form-select" aria-label="Menú de selección de ejemplo"
+                                        <select class="form-select"
+                                                aria-label="Menú de selección de ejemplo"
                                                 style="width: 15vw; max-width: 220px;">
                                             <option selected>Seleccionar orden</option>
                                             <option value="1">Mayor</option>
@@ -201,7 +234,8 @@
                                 </div>
                                 <div class="d-flex flex-column align-items-center">
                                     <h5>Actualizado por última vez hace 10 minutos</h5>
-                                    <canvas id="myBarChart-4" class="stats_grafico_dos" height="30vw" width="69vw"></canvas>
+                                    <canvas id="myBarChart-4" class="stats_grafico_dos"
+                                            height="30vw" width="69vw"></canvas>
                                 </div>
                             </div>
                         </div>

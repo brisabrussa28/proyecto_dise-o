@@ -18,7 +18,6 @@ import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLectorCsv;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.model.usuario.Rol;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
-import ar.edu.utn.frba.dds.repositories.AlgoritmoRepository;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.EstadisticaRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
@@ -83,7 +82,6 @@ public class Bootstrap implements WithSimplePersistenceUnit {
 
       var fuenteCsv = new FuenteEstatica(
           "Una fuente estatica",
-          "src/main/resources/csvs/ejemplo.csv",
           new ConfiguracionLectorCsv(',', "dd/MM/yyyy", mapeoColumnas)
       );
       fuente.agregarHecho(hecho1);

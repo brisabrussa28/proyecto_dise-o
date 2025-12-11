@@ -1,19 +1,35 @@
+{{#partial "nav_izquierda"}}
+    <a href="/admin/dashboard" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+       title="Volver al panel">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="d-none d-sm-block">Volver</span>
+    </a>
+{{/partial}}
+
 {{#partial "contenido"}}
     <body class="general" style="background-color: white;">
-    <h1 style="font-weight: 700; font-size: 32px; color: black; padding-left: 8px; padding-top: 10px;">Solicitudes Pendientes</h1>
+    <h1 style="font-weight: 700; font-size: 32px; color: black; padding-left: 8px; padding-top: 10px;">
+        Solicitudes Pendientes</h1>
 
-    <div class="d-flex flex-column align-items-center" style="padding: 20px; gap: 40px; filter: drop-shadow(6px 6px 15px rgba(0, 0, 0, 0.360));">
+    <div class="d-flex flex-column align-items-center"
+         style="padding: 20px; gap: 40px; filter: drop-shadow(6px 6px 15px rgba(0, 0, 0, 0.360));">
 
         {{#each solicitudes}}
             <div class="d-flex flex-column" style="border-top: 10px solid #005baa; min-width: 78vw; background-color: white;
-        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%); " id="{{this.id}}">
-                <div class="d-flex flex-row" style="justify-content: space-between; flex-wrap: wrap; padding-left: 10px; font-weight: bold;">
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%); "
+                 id="{{this.id}}">
+                <div class="d-flex flex-row"
+                     style="justify-content: space-between; flex-wrap: wrap; padding-left: 10px; font-weight: bold;">
                     S-{{this.id}}
-                    <div class="d-flex flex-row" style="padding-right: 20px; padding-top: 10px; gap: 20px;">
-                        <button class="boton btn btn-outline-success" style="border: 3px solid rgb(0, 192, 0);" onclick="aceptarSolicitud('{{this.id}}')">
+                    <div class="d-flex flex-row"
+                         style="padding-right: 20px; padding-top: 10px; gap: 20px;">
+                        <button class="boton btn btn-outline-success"
+                                style="border: 3px solid rgb(0, 192, 0);"
+                                onclick="aceptarSolicitud('{{this.id}}')">
                             <i class="bi bi-check-lg d-flex align-items-center justify-content-center"></i>
                         </button>
-                        <button class="boton btn btn-danger" style="border: 3px solid red;" onclick="eliminarSolicitud('{{this.id}}')">
+                        <button class="boton btn btn-danger" style="border: 3px solid red;"
+                                onclick="eliminarSolicitud('{{this.id}}')">
                             <i class="bi-x d-flex align-items-center justify-content-center"></i>
                         </button>
                     </div>
@@ -31,13 +47,15 @@
                         </strong>
                         {{this.solicitante}}
                     </div>
-                    <div class="d-flex flex-row align-items-start" style="padding-top: 30px; gap: 15px; style=font-size: 18px; font-weight:500; max-width: 67vw;">
+                    <div class="d-flex flex-row align-items-start"
+                         style="padding-top: 30px; gap: 15px; style=font-size: 18px; font-weight:500; max-width: 67vw;">
                         <strong class="me-1" style="font-size: 20px;">
                             Descripción:
                         </strong>
-                            <div class="descripcion-pre-formateada" style="font-size: 18px; font-weight:500; display: block; max-width: 60vw;">
-                                {{this.razonEliminacion}}
-                            </div>
+                        <div class="descripcion-pre-formateada"
+                             style="font-size: 18px; font-weight:500; display: block; max-width: 60vw;">
+                            {{this.razonEliminacion}}
+                        </div>
                     </div>
                 </div>
             </div>

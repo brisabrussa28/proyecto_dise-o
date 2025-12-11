@@ -44,7 +44,6 @@ public class UserController {
       if (usuario == null || !DigestUtils.sha256Hex(password)
                                          .equals(usuario.getPassword())) {
         renderizarLoginConError(ctx, model, "Usuario o contraseña incorrectos.");
-        System.out.println(DigestUtils.sha256Hex(password) + "   " + usuario.getPassword());
         return;
       }
 
@@ -124,7 +123,6 @@ public class UserController {
       ctx.sessionAttribute("usuario_rol", nuevoUsuario.getRol());
 
       String destino = (redirect != null && !redirect.isEmpty()) ? redirect : "/";
-      System.out.println(destino);
       ctx.redirect(destino);
     } catch (PersistenceException e) {
       e.printStackTrace();

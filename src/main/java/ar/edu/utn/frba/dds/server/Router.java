@@ -8,7 +8,6 @@ import ar.edu.utn.frba.dds.controller.HechoController;
 import ar.edu.utn.frba.dds.controller.HomeController;
 import ar.edu.utn.frba.dds.controller.SolicitudController;
 import ar.edu.utn.frba.dds.controller.UserController;
-import ar.edu.utn.frba.dds.dto.ColeccionDTO;
 import ar.edu.utn.frba.dds.dto.EstadisticaDTO;
 import ar.edu.utn.frba.dds.dto.HechoDTO;
 import ar.edu.utn.frba.dds.dto.SolicitudDTO;
@@ -25,7 +24,6 @@ import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.model.usuario.Rol;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
@@ -36,7 +34,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.hsqldb.rights.User;
 
 public class Router {
 
@@ -159,9 +156,11 @@ public class Router {
           adminController.editarColeccion(ctx, modeloConSesion(ctx));
         }
     ); // Vista Detalle
-    app.post("/admin/colecciones", adminController::crearColeccion);
-    app.post("/admin/colecciones/{id}/agregar-hecho", adminController::agregarHechoAColeccion);
-    app.post("/admin/colecciones/{id}/quitar-hecho", adminController::removerHechoDeColeccion);
+    app.post("/admin/colecciones", ctx -> adminController.crearColeccion(ctx));
+    app.post("/admin/colecciones/{id}/agregarHecho", adminController::agregarHechoAColeccion);
+    app.post("/admin/colecciones/{id}/quitarHecho", adminController::removerHechoDeColeccion);
+    app.post("/admin/fuentes", ctx -> adminController.crearFuente(ctx));
+
     app.get(
         "/admin/fuentes", ctx -> {
           adminController.listarFuentes(ctx, modeloConSesion(ctx));
@@ -346,20 +345,6 @@ public class Router {
         }
     );
 
-    app.post(
-        "/colecciones",
-        ctx -> {
-          try {
-            Coleccion coleccion = coleccionController.crearColeccion(ctx.bodyAsClass(ColeccionDTO.class));
-            ctx.status(201);
-            ctx.json(coleccion);
-          } catch (RuntimeException e) {
-            ctx.status(400);
-            ctx.result(e.getMessage());
-          }
-        }
-    );
-
     app.put(
         "/admin/solicitudes", ctx -> {
           String idParam = ctx.queryParam("id");
@@ -398,59 +383,6 @@ public class Router {
         "/fuentes", ctx -> {
           List<Fuente> fuentes = fuenteController.findAll();
           ctx.json(fuentes);
-        }
-    );
-
-    app.post(
-        "/fuentes", ctx -> {
-          UploadedFile csvSubido = ctx.uploadedFile("archivoCsv");
-          String nombreFuente = ctx.formParam("nombre");
-
-          if (nombreFuente == null || nombreFuente.isEmpty()) {
-            ctx.status(400)
-               .json("Error: El campo 'nombre' es requerido.");
-            return;
-          }
-
-          if (csvSubido != null) {
-            // Es una fuente estática (CSV)
-            String formatoFecha = ctx.formParam("formatoFecha");
-            String separadorStr = ctx.formParam("separador");
-            String columnasJson = ctx.formParam("columnas");
-
-            if (columnasJson == null) {
-              ctx.status(400)
-                 .json("Error: Falta aclarar columnas para la fuente estática.");
-              return;
-            }
-
-            if (formatoFecha == null || formatoFecha.isEmpty()) {
-              formatoFecha = "dd/MM/yyyy";
-            }
-
-            char separador = ',';
-            if (separadorStr != null && !separadorStr.isEmpty()) {
-              separador = separadorStr.charAt(0);
-            }
-
-            Map<String, List<String>> columnas = mapper.readValue(
-                columnasJson,
-                new TypeReference<Map<String, List<String>>>() {
-                }
-            );
-
-            ctx.json(
-                fuenteController.crearFuente(
-                    nombreFuente, csvSubido, formatoFecha, columnas, separador
-                )
-            );
-            ctx.status(201);
-
-          } else {
-            // Es una fuente dinámica
-            ctx.json(fuenteController.crearFuente(nombreFuente));
-            ctx.status(201);
-          }
         }
     );
 
@@ -513,10 +445,10 @@ public class Router {
   private Handler tieneRol(Rol rol) {
     return ctx -> {
       Rol rolEnSesion = ctx.sessionAttribute("usuario_rol");
-      System.out.println(rolEnSesion);
 
       if (rolEnSesion == null || !rolEnSesion.equals(rol)) {
-        throw new io.javalin.http.ForbiddenResponse("-- ACCESO DENEGADO: SE REQUIERE EL ROL " + rol.toString().toUpperCase() + " --");
+        throw new io.javalin.http.ForbiddenResponse("-- ACCESO DENEGADO: SE REQUIERE EL ROL " + rol.toString()
+                                                                                                   .toUpperCase() + " --");
       }
     };
   }

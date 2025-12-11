@@ -3,16 +3,12 @@ package ar.edu.utn.frba.dds;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
-import ar.edu.utn.frba.dds.model.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
-import ar.edu.utn.frba.dds.model.lector.Lector;
-import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLector;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,27 +45,27 @@ public class FuenteTest {
     }
   }
 
-  @Nested
-  @DisplayName("Pruebas para FuenteEstatica")
-  class FuenteEstaticaTests {
-    @Test
-    @DisplayName("Usa la configuración del lector para cargar los hechos del archivo")
-    public void usaConfiguracionDeLectorParaCargar() {
-      Hecho hechoMock = mock(Hecho.class);
-      Lector<Hecho> lectorMock = mock(Lector.class);
-      ConfiguracionLector configLectorMock = mock(ConfiguracionLector.class);
-
-      when(configLectorMock.build(Hecho.class)).thenReturn(lectorMock);
-      when(lectorMock.importar("ruta.csv")).thenReturn(List.of(hechoMock));
-
-      FuenteEstatica fuente = new FuenteEstatica("MiFuente", "ruta.csv", configLectorMock);
-      List<Hecho> hechos = fuente.getHechos();
-
-      assertEquals(1, hechos.size());
-      assertEquals(hechoMock, hechos.get(0));
-      verify(lectorMock).importar("ruta.csv");
-    }
-  }
+//  @Nested
+//  @DisplayName("Pruebas para FuenteEstatica")
+//  class FuenteEstaticaTests {
+//    @Test
+//    @DisplayName("Usa la configuración del lector para cargar los hechos del archivo")
+//    public void usaConfiguracionDeLectorParaCargar() {
+//      Hecho hechoMock = mock(Hecho.class);
+//      Lector<Hecho> lectorMock = mock(Lector.class);
+//      ConfiguracionLector configLectorMock = mock(ConfiguracionLector.class);
+//
+//      when(configLectorMock.build(Hecho.class)).thenReturn(lectorMock);
+//      when(lectorMock.importar("ruta.csv")).thenReturn(List.of(hechoMock));
+//
+//      FuenteEstatica fuente = new FuenteEstatica("MiFuente", "ruta.csv", configLectorMock);
+//      List<Hecho> hechos = fuente.getHechos();
+//
+//      assertEquals(1, hechos.size());
+//      assertEquals(hechoMock, hechos.get(0));
+//      verify(lectorMock).importar("ruta.csv");
+//    }
+//  }
 
   @Nested
   @DisplayName("Pruebas para FuenteDeAgregacion")

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.persistence.Transient;
 
 /**
  * Entidad de configuración para un LectorCSV.
@@ -26,7 +25,7 @@ public class ConfiguracionLectorCsv extends ConfiguracionLector {
 
   //  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 //  @JoinColumn(name = "config_lector_csv_id")
-  @Transient
+//  @Transient
   private List<MapeoCSV> mapeos = new ArrayList<>();
 
   // Constructor para JPA.

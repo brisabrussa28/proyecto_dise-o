@@ -1,19 +1,91 @@
+{{#partial "nav_izquierda"}}
+    <a href="/admin/dashboard" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="d-none d-sm-block">Volver al Panel</span>
+    </a>
+{{/partial}}
+
 {{#partial "contenido"}}
     <div class="container py-4">
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3>
-                <i class="fa-solid fa-folder-open text-warning me-2"></i>
-                Colección: <strong>{{coleccion.nombre}}</strong>
-            </h3>
-            <a href="/admin/colecciones" class="btn btn-outline-secondary btn-sm">Volver</a>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3><i class="fa-solid fa-folder-open text-warning me-2"></i>Colección:
+                    <strong>{{coleccion.nombre}}</strong></h3>
+                <span class="badge bg-secondary">{{coleccion.categoria}}</span>
+                <span class="text-muted ms-2 small">{{coleccion.descripcion}}</span>
+            </div>
+            <a href="/admin/colecciones" class="btn btn-outline-secondary btn-sm">Volver al
+                Listado</a>
+        </div>
+
+        <div class="card shadow-sm mb-4 border-primary">
+            <div class="card-header bg-primary text-white fw-bold">
+                <i class="fa-solid fa-sliders me-2"></i>Configuración de la Tubería
+            </div>
+            <div class="card-body bg-light">
+                <form action="/admin/colecciones/{{coleccion.id}}/configurar" method="POST"
+                      class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Fuente de Datos (Input)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i
+                                    class="fa-solid fa-database"></i></span>
+                            <select name="fuente_id" class="form-select" required>
+                                <option value="" disabled
+                                        {{#unless coleccion.fuente}}selected{{/unless}}>Seleccionar
+                                    Fuente...
+                                </option>
+                                {{#each fuentesDisponibles}}
+                                    <option value="{{this.id}}"
+                                            {{#if (eq this.id ../coleccion.fuente.id)}}selected{{/if}}>
+                                        {{this.nombre}} ({{this.tipo_fuente}})
+                                    </option>
+                                {{/each}}
+                            </select>
+                        </div>
+                        <div class="form-text">La fuente provee los hechos crudos a procesar.</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Algoritmo de Consenso</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-filter"></i></span>
+                            <select name="algoritmo_tipo" class="form-select" required>
+                                <option value="Absoluta"
+                                        {{#if (eq algoritmoActual "Absoluta")}}selected{{/if}}>
+                                    Absoluta
+                                </option>
+                                <option value="May_simple"
+                                        {{#if (eq algoritmoActual "May_simple")}}selected{{/if}}>
+                                    Mayoría Simple
+                                </option>
+                                <option value="Mult_menciones"
+                                        {{#if (eq algoritmoActual "Mult_menciones")}}selected{{/if}}>
+                                    Múltiples Menciones
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-text">Regla para validar la veracidad.</div>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100 fw-bold">
+                            <i class="fa-solid fa-floppy-disk me-2"></i>Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <div class="row">
-
-            <div class="col-md-7">
+            <div class="col-md-12">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-white fw-bold">Hechos en esta colección</div>
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                        <span>Hechos Consensuados / Procesados</span>
+                        <span class="badge bg-secondary">{{coleccion.hechos.size}} items</span>
+                    </div>
                     <div class="card-body p-0">
                         <ul class="list-group list-group-flush">
                             {{#each coleccion.hechos}}
@@ -22,49 +94,16 @@
                                         <span class="fw-bold">{{this.titulo}}</span>
                                         <div class="small text-muted">{{this.fecha}}</div>
                                     </div>
-
-                                    <form action="/admin/colecciones/{{../coleccion.id}}/quitar-hecho" method="POST"
-                                          class="m-0">
-                                        <input type="hidden" name="hecho_id" value="{{this.id}}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Quitar">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
                                 </li>
                             {{else}}
-                                <li class="list-group-item text-center text-muted py-4">Esta colección está vacía.</li>
+                                <li class="list-group-item text-center text-muted py-4">
+                                    No hay hechos procesados. Verifica la Fuente y el Algoritmo.
+                                </li>
                             {{/each}}
                         </ul>
                     </div>
                 </div>
             </div>
-
-            <div class="col-md-5">
-                <div class="card shadow-sm bg-light">
-                    <div class="card-body">
-                        <h5 class="card-title">Agregar Hecho</h5>
-                        <p class="small text-muted">Selecciona un hecho existente para vincularlo.</p>
-
-                        <form action="/admin/colecciones/{{coleccion.id}}/agregar-hecho" method="POST">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Buscar Hecho</label>
-                                <input class="form-control" list="datalistOptions" name="hecho_id_temp"
-                                       placeholder="Escribe para buscar..." id="buscadorHechos">
-
-                                <select name="hecho_id" class="form-select mt-2" required size="5">
-                                    {{#each hechosDisponibles}}
-                                        <option value="{{this.id}}">{{this.titulo}} ({{this.categoria}})</option>
-                                    {{/each}}
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-success w-100">
-                                <i class="fa-solid fa-plus me-2"></i> Agregar a Colección
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 {{/partial}}

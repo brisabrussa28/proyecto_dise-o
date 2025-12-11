@@ -1,21 +1,28 @@
 package ar.edu.utn.frba.dds.controller;
 
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.Absoluta;
 import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.AlgoritmoDeConsenso;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MayoriaSimple;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MultiplesMenciones;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
-import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteEstatica;
-import ar.edu.utn.frba.dds.model.fuentes.FuenteExternaAPI;
+import ar.edu.utn.frba.dds.model.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
-import ar.edu.utn.frba.dds.repositories.AlgoritmoRepository;
+import ar.edu.utn.frba.dds.model.lector.Lector;
+import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLector;
+import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLectorCsv;
+import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLectorJson;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import io.javalin.http.Context;
-import java.util.HashMap;
+import io.javalin.http.UploadedFile;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class AdminController {
   public void mostrarDashboard(Context ctx, Map<String, Object> model) {
@@ -36,7 +43,10 @@ public class AdminController {
   public void listarColecciones(Context ctx, Map<String, Object> model) {
     List<Coleccion> colecciones = ColeccionRepository.instance()
                                                      .findAll();
+    List<Fuente> fuentes = FuenteRepository.instance()
+                                           .findAll();
     model.put("colecciones", colecciones);
+    model.put("fuentes", fuentes);
     ctx.render("/admin/colecciones-lista.hbs", model);
   }
 
@@ -88,17 +98,48 @@ public class AdminController {
   }
 
   public void crearColeccion(Context ctx) {
-    String nombre = ctx.formParam("nombre");
-    String descripcion = ctx.formParam("descripcion");
-    String categoria = ctx.formParam("categoria");
-    AlgoritmoDeConsenso algoritmoDeConsenso = AlgoritmoRepository.instance()
-                                                                 .findById(Long.parseLong(ctx.formParam("algoritmo")));
-    Fuente fuente = FuenteRepository.instance()
-                                    .findById(Long.parseLong(ctx.formParam("fuente")));
-    Coleccion col = new Coleccion(nombre, fuente, descripcion, categoria, algoritmoDeConsenso);
-    ColeccionRepository.instance()
-                       .save(col);
-    ctx.redirect("/admin/colecciones");
+    try {
+      String nombre = ctx.formParam("nombre");
+      String descripcion = ctx.formParam("descripcion");
+      String categoria = ctx.formParam("categoria");
+
+      String algoTipo = ctx.formParam("algoritmo_tipo");
+      AlgoritmoDeConsenso algoritmo = null;
+      switch (algoTipo) {
+        case "Absoluta":
+          algoritmo = new Absoluta();
+          break;
+        case "May_simple":
+          algoritmo = new MayoriaSimple();
+          break;
+        case "Mult_menciones":
+          algoritmo = new MultiplesMenciones();
+          break;
+        default:
+          algoritmo = new MayoriaSimple(); // Default seguro
+      }
+
+      String modoFuente = ctx.formParam("modo_fuente");
+      Fuente fuente;
+
+      if ("nueva".equals(modoFuente)) {
+        fuente = this.nuevaFuente(ctx);
+        FuenteRepository.instance()
+                        .save(fuente);
+      } else {
+        Long fuenteId = Long.parseLong(ctx.formParam("fuente_id"));
+        fuente = FuenteRepository.instance()
+                                 .findById(fuenteId);
+      }
+
+      ColeccionRepository.instance()
+                         .save(new Coleccion(nombre, fuente, descripcion, categoria, algoritmo));
+      ctx.redirect("/admin/colecciones");
+    } catch (Exception e) {
+      e.printStackTrace();
+      ctx.status(400)
+         .result("Error al crear colección: " + e.getMessage());
+    }
   }
 
   public void listarFuentes(Context ctx, Map<String, Object> model) {
@@ -109,35 +150,74 @@ public class AdminController {
   }
 
   public void crearFuente(Context ctx) {
-    String nombre = ctx.formParam("nombre");
-    String tipo = ctx.formParam("tipo"); // "ESTATICA", "API", "AGREGACION"
+    Fuente nuevaFuente = this.nuevaFuente(ctx);
 
-    Fuente nuevaFuente = null;
-
-    switch (tipo) {
-      case "ESTATICA":
-        nuevaFuente = new FuenteEstatica();
-        // La estática nace vacía, luego le agregas hechos
-        break;
-
-      case "API":
-        FuenteExternaAPI api = new FuenteExternaAPI();
-        api.setUrlBase(ctx.formParam("url"));
-        nuevaFuente = api;
-        break;
-
-      case "AGREGACION":
-        // Podrías recibir IDs de fuentes hijas aquí, o crearla vacía
-        nuevaFuente = new FuenteDeAgregacion();
-        break;
-    }
-
-    if (nuevaFuente != null) {
-      nuevaFuente.setNombre(nombre);
-      FuenteRepository.instance()
-                      .save(nuevaFuente);
-    }
-
+    FuenteRepository.instance()
+                    .save(nuevaFuente);
     ctx.redirect("/admin/fuentes");
   }
+
+  private ConfiguracionLector determinarConfig(String fileName) {
+    if (fileName.toLowerCase()
+                .endsWith(".csv")) {
+
+      String formatoPolimorfico = "[yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS]" + "[yyyy-MM-dd'T'HH:mm:ss]" + "[yyyy-MM-dd HH:mm]" + "[yyyy-MM-dd]" + "[dd/MM/yyyy]";
+      return new ConfiguracionLectorCsv(
+          ',',
+          formatoPolimorfico,
+          this.crearMapeoColumnas()
+      );
+    } else if (fileName.toLowerCase()
+                       .endsWith(".json")) {
+      return new ConfiguracionLectorJson();
+    }
+    throw new RuntimeException("Formato de archivo no soportado: " + fileName);
+  }
+
+  private Map<String, List<String>> crearMapeoColumnas() {
+    Map<String, List<String>> mapeoColumnas = convertirMapeoAString(Map.of(
+        CampoHecho.TITULO, List.of("titulo", "TITULO"),
+        CampoHecho.DESCRIPCION, List.of("descripcion", "DESCRIPCION"),
+        CampoHecho.LATITUD, List.of("latitud", "LATITUD"),
+        CampoHecho.LONGITUD, List.of("longitud", "LONGITUD"),
+        CampoHecho.FECHA_SUCESO, List.of("fechaSuceso", "FECHASUCESO"),
+        CampoHecho.CATEGORIA, List.of("categoria", "CATEGORIA"),
+        CampoHecho.DIRECCION, List.of("direccion", "DIRECCION"),
+        CampoHecho.PROVINCIA, List.of("provincia", "PROVINCIA"),
+        CampoHecho.ETIQUETAS, List.of("etiquetas", "ETIQUETAS")
+    ));
+    return mapeoColumnas;
+  }
+
+  private Fuente nuevaFuente(Context ctx) {
+    String nombreFuente = ctx.formParam("nueva_fuente_nombre");
+    String tipoFuente = ctx.formParam("nueva_fuente_tipo");
+
+    switch (tipoFuente) {
+      case "DINAMICA":
+        return new FuenteDinamica(nombreFuente);
+      case "ESTATICA":
+        UploadedFile archivo = ctx.uploadedFile("archivo_fuente");
+
+        ConfiguracionLector configLector = determinarConfig(archivo.filename());
+        Lector<Hecho> lector = configLector.build(Hecho.class);
+        List<Hecho> hechosImportados = lector.importar(archivo.content());
+        System.out.println(hechosImportados);
+        return new FuenteEstatica(nombreFuente, hechosImportados);
+      case "API":
+        break;
+    }
+
+    throw new RuntimeException("NO HAY UN FORMATO DE FUENTE COMPATIBLE");
+  }
+
+  private Map<String, List<String>> convertirMapeoAString(Map<CampoHecho, List<String>> mapeoEnum) {
+    return mapeoEnum.entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(
+                        entry -> entry.getKey()
+                                      .name(), Map.Entry::getValue
+                    ));
+  }
+
 }

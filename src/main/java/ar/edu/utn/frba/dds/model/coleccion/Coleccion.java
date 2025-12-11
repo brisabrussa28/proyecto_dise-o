@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -45,7 +44,7 @@ public class Coleccion {
   private String coleccion_categoria;
 
   @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "algoritmo_id")
+  @JoinColumn(name = "coleccion_algoritmo")
   private AlgoritmoDeConsenso coleccion_algoritmo;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -203,6 +202,10 @@ public class Coleccion {
 
   public Filtro getFiltro() {
     return filtro;
+  }
+
+  public Fuente getFuente() {
+    return this.coleccion_fuente;
   }
 
   public Long getId() {

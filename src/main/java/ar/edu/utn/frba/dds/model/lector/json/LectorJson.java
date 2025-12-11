@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -68,6 +68,20 @@ public class LectorJson<T> implements Lector<T> {
       return new ArrayList<>();
     } catch (IOException e) {
       LOGGER.log(Level.SEVERE, "Error de I/O al cargar la copia JSON " + jsonFilePath, e);
+      return new ArrayList<>();
+    }
+  }
+
+  @Override
+  public List<T> importar(InputStream contenido) {
+    if (contenido == null) {
+      return new ArrayList<>();
+    }
+    try {
+      List<T> hechosLeidos = objectMapper.readValue(contenido, typeReference);
+      return hechosLeidos != null ? hechosLeidos : new ArrayList<>();
+    } catch (IOException e) {
+      LOGGER.log(Level.SEVERE, "Error al leer el archivo JSON", e);
       return new ArrayList<>();
     }
   }
