@@ -31,6 +31,11 @@ public class HechoController {
                           .findAll();
   }
 
+  public Long countAll() {
+    return HechoRepository.instance()
+                          .countAll();
+  }
+
   public Hecho modificarHecho(Hecho hechoOriginal, HechoDTO hechoModificado, Usuario usuarioEditor) {
     if (!hechoOriginal.esEditable(usuarioEditor)) {
       throw new RuntimeException("EL HECHO SE ENCUENTRA FUERA DE RANGO PARA SER EDITADO");

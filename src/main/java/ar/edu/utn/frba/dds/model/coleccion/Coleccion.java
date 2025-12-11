@@ -7,13 +7,18 @@ import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -50,8 +55,13 @@ public class Coleccion {
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private Condicion coleccion_condicion;
 
-  @ManyToMany
-  private List<Hecho> hechos = new ArrayList<>();
+  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  @JoinTable(
+      name = "coleccion_hecho",
+      joinColumns = @JoinColumn(name = "coleccion_id"),
+      inverseJoinColumns = @JoinColumn(name = "hecho_id")
+  )
+  private Set<Hecho> hechos = new HashSet<>();
 
   // --- Atributos Transitorios ---
   @Transient
@@ -225,11 +235,51 @@ public class Coleccion {
     this.coleccion_id = id;
   }
 
+  public void setTitulo(String titulo) {
+    this.coleccion_titulo = titulo;
+  }
+
+  public void setCategoria(String categoria) {
+    this.coleccion_categoria = categoria;
+  }
+
+  public void setDescripcion(String descripcion) {
+    this.coleccion_descripcion = descripcion;
+  }
+
   public void setFuente(Fuente fuente) {
     this.coleccion_fuente = fuente;
   }
 
   public void setAlgoritmoDeConsenso(AlgoritmoDeConsenso algoritmo) {
     this.coleccion_algoritmo = algoritmo;
+  }
+
+  /**
+   * Ejecuta el algoritmo de consenso sobre la fuente actual
+   * y actualiza la lista interna de hechos de la colección.
+   */
+  public void recalcularConsenso() {
+    if (this.coleccion_fuente == null || this.coleccion_algoritmo == null) {
+      return; // No se puede calcular sin partes
+    }
+
+    // 1. Obtener los hechos crudos de la fuente
+    List<Hecho> hechosCrudos = this.coleccion_fuente.getHechos();
+
+    // 2. Aplicar el filtro del algoritmo
+    List<Hecho> hechosFiltrados = this.coleccion_algoritmo.listaDeHechosConsensuados(
+        hechosCrudos,
+        List.of(coleccion_fuente)
+    );
+
+    // 3. Actualizar la lista persistente
+    // Usamos clear() y addAll() para no romper la referencia de Hibernate
+    this.hechos.clear();
+    this.hechos.addAll(hechosFiltrados);
+  }
+
+  public Set<Hecho> getHechos() {
+    return this.hechos;
   }
 }
