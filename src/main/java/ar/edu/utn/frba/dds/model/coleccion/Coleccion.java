@@ -43,8 +43,8 @@ public class Coleccion {
   private String coleccion_descripcion;
   private String coleccion_categoria;
 
-  @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "coleccion_algoritmo")
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "algoritmo_id")
   private AlgoritmoDeConsenso coleccion_algoritmo;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -208,6 +208,10 @@ public class Coleccion {
     return this.coleccion_fuente;
   }
 
+  public AlgoritmoDeConsenso getAlgoritmo() {
+    return this.coleccion_algoritmo;
+  }
+
   public Long getId() {
     return this.coleccion_id;
   }
@@ -219,6 +223,10 @@ public class Coleccion {
 
   public void setId(Long id) {
     this.coleccion_id = id;
+  }
+
+  public void setFuente(Fuente fuente) {
+    this.coleccion_fuente = fuente;
   }
 
   public void setAlgoritmoDeConsenso(AlgoritmoDeConsenso algoritmo) {

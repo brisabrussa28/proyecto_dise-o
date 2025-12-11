@@ -1,7 +1,8 @@
 {{#partial "nav_izquierda"}}
-    <a href="/admin/dashboard" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
+    <a href="/admin/colecciones"
+       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
         <i class="fa-solid fa-arrow-left"></i>
-        <span class="d-none d-sm-block">Volver al Panel</span>
+        <span class="d-none d-sm-block">Volver al listado</span>
     </a>
 {{/partial}}
 
@@ -11,17 +12,15 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h3><i class="fa-solid fa-folder-open text-warning me-2"></i>Colección:
-                    <strong>{{coleccion.nombre}}</strong></h3>
+                    <strong>{{coleccion.titulo}}</strong></h3>
                 <span class="badge bg-secondary">{{coleccion.categoria}}</span>
                 <span class="text-muted ms-2 small">{{coleccion.descripcion}}</span>
             </div>
-            <a href="/admin/colecciones" class="btn btn-outline-secondary btn-sm">Volver al
-                Listado</a>
         </div>
 
         <div class="card shadow-sm mb-4 border-primary">
             <div class="card-header bg-primary text-white fw-bold">
-                <i class="fa-solid fa-sliders me-2"></i>Configuración de la Tubería
+                <i class="fa-solid fa-sliders me-2"></i>Configuración de la Coleccion
             </div>
             <div class="card-body bg-light">
                 <form action="/admin/colecciones/{{coleccion.id}}/configurar" method="POST"
@@ -40,7 +39,7 @@
                                 {{#each fuentesDisponibles}}
                                     <option value="{{this.id}}"
                                             {{#if (eq this.id ../coleccion.fuente.id)}}selected{{/if}}>
-                                        {{this.nombre}} ({{this.tipo_fuente}})
+                                        {{this.nombre}}
                                     </option>
                                 {{/each}}
                             </select>
@@ -83,16 +82,17 @@
             <div class="col-md-12">
                 <div class="card shadow-sm">
                     <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
-                        <span>Hechos Consensuados / Procesados</span>
-                        <span class="badge bg-secondary">{{coleccion.hechos.size}} items</span>
+                        <span>Hechos Consensuados</span>
+                        <span class="badge bg-secondary">{{coleccion.hechosConsensuados.size}}
+                            items</span>
                     </div>
                     <div class="card-body p-0">
                         <ul class="list-group list-group-flush">
-                            {{#each coleccion.hechos}}
+                            {{#each coleccion.hechosConsensuados}}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
                                         <span class="fw-bold">{{this.titulo}}</span>
-                                        <div class="small text-muted">{{this.fecha}}</div>
+                                        <div class="small text-muted">{{this.descripcion}}</div>
                                     </div>
                                 </li>
                             {{else}}

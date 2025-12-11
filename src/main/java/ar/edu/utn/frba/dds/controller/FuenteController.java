@@ -18,10 +18,16 @@ public class FuenteController {
                            .findAll();
   }
 
-  public Fuente crearFuente(String nombre, UploadedFile archivo, String formatoFecha, Map<String, List<String>> columnas, char separador) {
+  public Fuente crearFuente(
+      String nombre,
+      UploadedFile archivo,
+      String formatoFecha,
+      Map<String, List<String>> columnas,
+      char separador
+  ) {
     InputStream contenido = archivo.content();
     HechoFilaConverter hechoFilaConverter = new HechoFilaConverter(formatoFecha, columnas);
-    LectorCSV<Hecho> lector = new LectorCSV<Hecho>(separador,hechoFilaConverter);
+    LectorCSV<Hecho> lector = new LectorCSV<Hecho>(separador, hechoFilaConverter);
     List<Hecho> hechosImportados = lector.importar(contenido);
     Fuente fuente = new FuenteEstatica(nombre, hechosImportados);
     FuenteRepository.instance()
@@ -34,5 +40,10 @@ public class FuenteController {
     FuenteRepository.instance()
                     .save(fuente);
     return fuente;
+  }
+
+  public Fuente findById(Long id) {
+    return FuenteRepository.instance()
+                           .findById(id);
   }
 }

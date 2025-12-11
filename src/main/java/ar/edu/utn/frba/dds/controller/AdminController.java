@@ -55,11 +55,11 @@ public class AdminController {
     Long id = Long.parseLong(ctx.pathParam("id"));
     Coleccion coleccion = ColeccionRepository.instance()
                                              .findById(id);
-
-    List<Hecho> hechos = HechoRepository.instance()
-                                        .findAll();
+    List<Fuente> fuentes = FuenteRepository.instance()
+                                           .findAll();
     model.put("coleccion", coleccion);
-    model.put("hechosDisponibles", hechos);
+    model.put("fuentesDisponibles", fuentes);
+
 
     ctx.render("/admin/coleccion-detalle.hbs", model);
   }
@@ -158,6 +158,53 @@ public class AdminController {
     ctx.redirect("/admin/fuentes");
   }
 
+  public void configurarColeccion(Context ctx) {
+    try {
+      Long id = Long.parseLong(ctx.pathParam("id"));
+      Coleccion col = ColeccionRepository.instance()
+                                         .findById(id);
+      // A. Actualizar FUENTE
+      String fuenteIdStr = ctx.formParam("fuente_id");
+      if (fuenteIdStr != null) {
+        Long fuenteId = Long.parseLong(fuenteIdStr);
+        Fuente nuevaFuente = FuenteRepository.instance()
+                                             .findById(fuenteId);
+        col.setFuente(nuevaFuente); // Asegúrate de tener este setter en Coleccion
+      }
+
+      // B. Actualizar ALGORITMO
+      String algoTipo = ctx.formParam("algoritmo_tipo");
+      if (algoTipo != null) {
+        AlgoritmoDeConsenso nuevoAlgo = null;
+        switch (algoTipo) {
+          case "Absoluta":
+            nuevoAlgo = new Absoluta();
+            break;
+          case "May_simple":
+            nuevoAlgo = new MayoriaSimple();
+            break;
+          case "Mult_menciones":
+            nuevoAlgo = new MultiplesMenciones();
+            break;
+        }
+        // Importante: Reemplazamos el algoritmo anterior
+        col.setAlgoritmoDeConsenso(nuevoAlgo);
+      }
+
+      // Guardamos los cambios
+      ColeccionRepository.instance()
+                         .save(col);
+
+      // Volvemos a la misma pantalla con mensaje de éxito (opcional) o redirect simple
+      ctx.redirect("/admin/colecciones/" + id);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      ctx.status(500)
+         .result("Error al actualizar colección: " + e.getMessage());
+    }
+  }
+
   private ConfiguracionLector determinarConfig(String fileName) {
     if (fileName.toLowerCase()
                 .endsWith(".csv")) {
@@ -234,5 +281,4 @@ public class AdminController {
                                       .name(), Map.Entry::getValue
                     ));
   }
-
 }
