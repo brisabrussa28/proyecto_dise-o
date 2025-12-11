@@ -84,7 +84,7 @@ public class Hecho {
   private Usuario hecho_autor;
 
   /**
-   * Constructor para un Hecho.
+   * Constructor vacio para un Hecho.
    */
   public Hecho() {
     this.hecho_fecha_carga = LocalDateTime.now();
@@ -94,18 +94,7 @@ public class Hecho {
   }
 
   /**
-   * Constructor completo.
-   *
-   * @param titulo       string
-   * @param descripcion  string
-   * @param categoria    string
-   * @param direccion    string
-   * @param provincia    string
-   * @param ubicacion    PuntoGeografico
-   * @param fechaSuceso  LocalDateTime
-   * @param fechaCarga   LocalDateTime
-   * @param fuenteOrigen Origen
-   * @param etiquetas    List
+   * Constructor completo (12 parametros).
    */
   public Hecho(
       String titulo,
@@ -134,6 +123,31 @@ public class Hecho {
     this.estado = Estado.ORIGINAL;
     this.fotos = fotos;
     this.hecho_autor = hecho_autor;
+  }
+
+  /**
+   * Constructor LEGACY para Tests (10 parametros).
+   * Mantiene compatibilidad con los tests que no envian fotos ni autor.
+   */
+  public Hecho(
+      String titulo,
+      String descripcion,
+      String categoria,
+      String direccion,
+      String provincia,
+      PuntoGeografico ubicacion,
+      LocalDateTime fechaSuceso,
+      LocalDateTime fechaCarga,
+      Origen fuenteOrigen,
+      List<Etiqueta> etiquetas
+  ) {
+    // Llamamos al constructor principal pasando listas vacias y null
+    this(
+        titulo, descripcion, categoria, direccion, provincia, ubicacion,
+        fechaSuceso, fechaCarga, fuenteOrigen, etiquetas,
+        new ArrayList<>(), // Fotos vacias
+        null               // Autor nulo
+    );
   }
 
 
