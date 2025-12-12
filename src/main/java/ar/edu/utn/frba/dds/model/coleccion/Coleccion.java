@@ -7,13 +7,11 @@ import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -55,7 +53,7 @@ public class Coleccion {
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private Condicion coleccion_condicion;
 
-  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  @ManyToMany
   @JoinTable(
       name = "coleccion_hecho",
       joinColumns = @JoinColumn(name = "coleccion_id"),
@@ -112,7 +110,10 @@ public class Coleccion {
     List<Hecho> hechosParaAnalizar = this.obtenerHechosFiltrados(filtroExcluyente);
 
     // 2. Le preguntamos al algoritmo cuáles pasan el consenso
-    List<Hecho> aprobados = this.coleccion_algoritmo.listaDeHechosConsensuados(hechosParaAnalizar, fuentes);
+    List<Hecho> aprobados = this.coleccion_algoritmo.listaDeHechosConsensuados(
+        hechosParaAnalizar,
+        fuentes
+    );
 
     // 3. Actualizamos NUESTRA lista persistente
     this.hechos.clear();

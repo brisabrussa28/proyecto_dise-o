@@ -1,15 +1,19 @@
 package ar.edu.utn.frba.dds.model.hecho;
 
+import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -22,6 +26,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
@@ -81,6 +86,10 @@ public class Hecho {
   @JoinColumn(name = "hecho_autor")
   @JsonIgnoreProperties("hechos")
   private Usuario autor;
+
+  @ManyToMany(mappedBy = "hechos")
+  @JsonIgnore
+  private Set<Coleccion> colecciones = new HashSet<>();
 
   /**
    * Constructor vacio para un Hecho.
@@ -266,6 +275,10 @@ public class Hecho {
   //  @JsonProperty("hecho_fotos")
   public List<Multimedia> getFotos() {
     return new ArrayList<>(fotos);
+  }
+
+  public Set<Coleccion> getColecciones() {
+    return this.colecciones;
   }
 
   public void agregarFoto(Multimedia foto) {
