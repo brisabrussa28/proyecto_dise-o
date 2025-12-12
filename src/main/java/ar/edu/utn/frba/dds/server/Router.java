@@ -474,11 +474,12 @@ public class Router {
   private Map<String, Object> modeloConSesion(Context ctx) {
     Map<String, Object> model = new HashMap<>();
     model.put("estaLogueado", ctx.sessionAttribute("estaLogueado"));
-    model.put("nombreUsuario", ctx.sessionAttribute("nombreUsuario"));
-    model.put("rolUsuario", ctx.sessionAttribute("rolUsuario"));
+    model.put("nombreUsuario", ctx.sessionAttribute("usuario_nombre"));
+    model.put("rolUsuario", ctx.sessionAttribute("usuario_rol"));
     model.put("esAdmin", ctx.sessionAttribute("esAdmin"));
     model.put("esUsuario", ctx.sessionAttribute("esUsuario"));
     model.put("emailUsuario", ctx.sessionAttribute("emailUsuario"));
+    model.put("usuario_id", ctx.sessionAttribute("usuario_id"));
     return model;
   }
 }

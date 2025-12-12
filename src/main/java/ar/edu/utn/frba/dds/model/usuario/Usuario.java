@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.model.usuario;
 
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -37,8 +38,8 @@ public class Usuario {
   @Column(name = "usuario_rol", nullable = false)
   private Rol rol;
 
-  @OneToMany(cascade = CascadeType.ALL, mappedBy = "hecho_autor")
-  private List<Hecho> hechos = new ArrayList<>();
+  @OneToMany(mappedBy = "autor")
+  private List<Hecho> hechos;
 
   public Usuario() {
   }

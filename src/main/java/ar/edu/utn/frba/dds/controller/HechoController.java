@@ -4,6 +4,9 @@ import ar.edu.utn.frba.dds.dto.HechoDTO;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
+import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
+import java.net.ContentHandler;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -79,5 +82,21 @@ public class HechoController {
   public List<String> getEtiquetas() {
     return HechoRepository.instance()
                           .getEtiquetas();
+  }
+
+  public void editarHecho(Context ctx) {
+    Long idHecho = Long.parseLong(ctx.pathParam("id"));
+    Long idUsuario = ctx.sessionAttribute("usuario_id");
+
+    Hecho hecho = this.findById(idHecho);
+    if (!hecho.getAutor()
+              .getId()
+              .equals(idUsuario)) {
+      ctx.status(HttpStatus.FORBIDDEN);
+    }
+  }
+
+  public void actualizarHecho(Context ctx) {
+
   }
 }
