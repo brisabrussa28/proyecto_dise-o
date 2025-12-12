@@ -54,6 +54,7 @@ public class Router {
       if (id != null) {
         ctx.sessionAttribute("estaLogueado", true);
         ctx.sessionAttribute("nombreUsuario", ctx.sessionAttribute("usuario_nombre"));
+        ctx.sessionAttribute("emailUsuario", ctx.sessionAttribute("usuario_email"));
 
         Rol rol = ctx.sessionAttribute("usuario_rol");
         ctx.sessionAttribute("rolUsuario", rol);
@@ -62,6 +63,7 @@ public class Router {
       } else {
         ctx.sessionAttribute("estaLogueado", false);
         ctx.sessionAttribute("nombreUsuario", null);
+        ctx.sessionAttribute("emailUsuario", null);
         ctx.sessionAttribute("rolUsuario", null);
         ctx.sessionAttribute("esAdmin", false);
         ctx.sessionAttribute("esUsuario", false);
@@ -443,6 +445,19 @@ public class Router {
         }
     );
 
+    app.get(
+        "/perfil", ctx -> {
+          Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
+
+          if (estaLogueado == null || !estaLogueado) {
+            ctx.redirect("/auth/login?redirect=/perfil");
+            return;
+          }
+
+          ctx.render("perfil.hbs", modeloConSesion(ctx));
+        }
+    );
+
   }
 
   private Handler tieneRol(Rol rol) {
@@ -463,6 +478,7 @@ public class Router {
     model.put("rolUsuario", ctx.sessionAttribute("rolUsuario"));
     model.put("esAdmin", ctx.sessionAttribute("esAdmin"));
     model.put("esUsuario", ctx.sessionAttribute("esUsuario"));
+    model.put("emailUsuario", ctx.sessionAttribute("emailUsuario"));
     return model;
   }
 }

@@ -13,3 +13,7 @@
 .leaflet-top .leaflet-control {
   margin-top: 80vh;
 }
+
+.leaflet-container {
+    cursor: url('../puntero-rojo.png'), auto;
+}

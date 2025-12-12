@@ -50,6 +50,7 @@ public class UserController {
       ctx.sessionAttribute("usuario_id", usuario.getId());
       ctx.sessionAttribute("usuario_nombre", usuario.getUserName());
       ctx.sessionAttribute("usuario_rol", usuario.getRol());
+      ctx.sessionAttribute("usuario_email", email);
 
       String destino = (redirect != null && !redirect.isEmpty()) ? redirect : "/";
       ctx.redirect(destino);
@@ -121,6 +122,7 @@ public class UserController {
       ctx.sessionAttribute("usuario_id", nuevoUsuario.getId());
       ctx.sessionAttribute("usuario_nombre", nuevoUsuario.getUserName());
       ctx.sessionAttribute("usuario_rol", nuevoUsuario.getRol());
+      ctx.sessionAttribute("usuario_email", email);
 
       String destino = (redirect != null && !redirect.isEmpty()) ? redirect : "/";
       ctx.redirect(destino);
@@ -177,6 +179,7 @@ public class UserController {
       ctx.sessionAttribute("usuario_id", nuevoUsuario.getId());
       ctx.sessionAttribute("usuario_nombre", nuevoUsuario.getUserName());
       ctx.sessionAttribute("usuario_rol", nuevoUsuario.getRol());
+      ctx.sessionAttribute("usuario_email", email);
       ctx.redirect("/");
     } catch (PersistenceException e) {
       renderizarRegisterConError(ctx, model, "Error: El usuario o email ya existe.");
