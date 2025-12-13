@@ -8,7 +8,8 @@
                     Filtros
                     <i class="bi bi-list"></i>
                 </button>
-                <input class="form-control mr-sm-2 shadow-sm" type="search" placeholder="Search" aria-label="Search"
+                <input class="form-control mr-sm-2 shadow-sm" type="search" placeholder="Search"
+                       aria-label="Search"
                        style="width: 37vw;">
             </div>
         </div>
@@ -59,16 +60,36 @@
 
                     // Construir HTML del autor
                     const autor = hecho.autor || hecho.hecho_autor || {};
-                    const autorNombre = autor.userName || 'Anónimo';
+                    const autorNombre = autor.userName || 'Dataset';
                     const autorId = autor.id || autor.autor_id;
-                    let autorHTML = '';
+                    let iconoHTML = '';
 
                     if (autor.foto) {
-                        autorHTML = `<img src="${autor.foto}" class="rounded-circle me-1" width="20" height="20">`;
+                        iconoHTML = `<img src="${autor.foto}" class="rounded-circle me-1" width="20" height="20">`;
                     } else {
-                        autorHTML = `<i class="fa-solid fa-user me-1"></i>`;
+                        iconoHTML = `<i class="fa-solid fa-user me-1"></i>`;
                     }
-                    autorHTML += autorNombre;
+
+
+                    if (autorNombre === 'Dataset'){
+                        autorHTML = `
+                            <span class="text-secondary fw-bold d-flex align-items-center"
+                                  style="cursor: default;">
+                               ${iconoHTML}
+                               <span>${autorNombre}</span>
+                            </span>
+                        `;
+                    } else {
+                        autorHTML = `
+                            <a href="/perfil/${autorNombre}"
+                                class="text-decoration-none text-secondary fw-bold d-flex align-items-center"
+                                title="Ver perfil"
+                                style"cursor: pointer;">
+                                ${iconoHTML}
+                                <span>${autorNombre}</span>
+                            </a>
+                        `;
+                    }
 
                     // Botón de edición (solo si es el autor)
                     let editButton = '';

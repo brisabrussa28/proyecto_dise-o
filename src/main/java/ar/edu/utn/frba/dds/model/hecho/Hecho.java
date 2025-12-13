@@ -270,6 +270,7 @@ public class Hecho {
   public Usuario getAutor() {
     return this.autor;
   }
+
   //  @JsonProperty("hecho_fotos")
   public List<Multimedia> getFotos() {
     return new ArrayList<>(fotos);
@@ -312,7 +313,7 @@ public class Hecho {
   }
 
   public void setEtiquetas(List<Etiqueta> etiquetas) {
-    this.etiquetas = new ArrayList<>(etiquetas);
+    this.etiquetas = new HashSet<>(etiquetas);
   }
 
   public void setEstado(Estado estado) {
