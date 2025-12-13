@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import javax.persistence.PersistenceException;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.hibernate.exception.ConstraintViolationException;
 
 public class UserController {
   private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
@@ -18,9 +19,6 @@ public class UserController {
   public UserController() {
   }
 
-  /**
-   * Maneja el endpoint de Login (POST /login)
-   */
   public void login(Context ctx) {
     String email = ctx.formParam("email");
     String password = ctx.formParam("password");
@@ -38,43 +36,43 @@ public class UserController {
     }
 
     try {
-      Usuario usuario = UserRepository.instance()
-                                      .findByEmail(email);
+      Usuario usuario = UserRepository.instance().findByEmail(email);
 
-      if (usuario == null || !DigestUtils.sha256Hex(password)
-                                         .equals(usuario.getPassword())) {
+      if (usuario == null || !DigestUtils.sha256Hex(password).equals(usuario.getPassword())) {
         renderizarLoginConError(ctx, model, "Usuario o contraseña incorrectos.");
         return;
       }
 
-      ctx.sessionAttribute("usuario_id", usuario.getId());
-      ctx.sessionAttribute("usuario_nombre", usuario.getUserName());
-      ctx.sessionAttribute("usuario_rol", usuario.getRol());
-      ctx.sessionAttribute("usuario_email", email);
-
+      iniciarSesion(ctx, usuario, email);
       String destino = (redirect != null && !redirect.isEmpty()) ? redirect : "/";
       ctx.redirect(destino);
+
     } catch (Exception e) {
       e.printStackTrace();
       renderizarLoginConError(ctx, model, "Error al iniciar sesión.");
     }
-
   }
 
-  /**
-   * Maneja el endpoint de Logout (POST /logout)
-   */
   public void logout(Context ctx) {
-    ctx.req()
-       .getSession()
-       .invalidate();
+    ctx.req().getSession().invalidate();
     ctx.redirect("/");
   }
 
-  /**
-   * Maneja el endpoint de Creación de Usuario (POST /usuarios)
-   */
+  // Registro normal (usuario contribuyente) -> Redirige al home
   public void register(Context ctx) {
+    procesarRegistro(ctx, Rol.CONTRIBUYENTE, true);
+  }
+
+  // Registro Admin -> Devuelve JSON/OK (No redirige)
+  public void registerAdmin(Context ctx) {
+    procesarRegistro(ctx, Rol.ADMINISTRADOR, false);
+  }
+
+  /**
+   * Lógica unificada de registro.
+   * @param redirigirAlFinal Si es true, hace redirect. Si es false, devuelve 201 OK.
+   */
+  private void procesarRegistro(Context ctx, Rol rol, boolean redirigirAlFinal) {
     String email = ctx.formParam("email");
     String password = ctx.formParam("password");
     String repeatPassword = ctx.formParam("repetir_password");
@@ -84,124 +82,82 @@ public class UserController {
     Map<String, Object> model = new HashMap<>();
     model.put("nombre", userName);
     model.put("email", email);
+    if (redirect != null) model.put("redirect", redirect);
 
-    if (redirect != null) {
-      model.put("redirect", redirect);
-    }
-
-
-    if (UserRepository.instance()
-                      .emailExists(email)) {
-      ctx.status(HttpStatus.CONFLICT)
-         .result("El email ya está en uso"); // 409 Conflict
+    // Validaciones
+    if (esVacio(email) || esVacio(userName) || esVacio(password)) {
+      manejarErrorRegistro(ctx, model, "Todos los campos son obligatorios.", redirigirAlFinal);
       return;
     }
-    if (!EMAIL_PATTERN.matcher(email)
-                      .matches()) {
-      renderizarRegisterConError(ctx, model, "El formato del email no es válido.");
+
+    if (!EMAIL_PATTERN.matcher(email).matches()) {
+      manejarErrorRegistro(ctx, model, "El email es inválido.", redirigirAlFinal);
       return;
     }
+
     if (!password.equals(repeatPassword)) {
-      renderizarRegisterConError(ctx, model, "Las contraseñas no coinciden.");
+      manejarErrorRegistro(ctx, model, "Las contraseñas no coinciden.", redirigirAlFinal);
       return;
     }
 
-    // Asignamos rol "Contribuyente" por defecto.
-    // Podrías pasar el rol en el DTO si quisieras.
-    // Se hashea la password cuando se instancia al usuario
-    Usuario nuevoUsuario = new Usuario(
-        email,
-        userName,
-        password,
-        Rol.CONTRIBUYENTE
-    );
+    if (UserRepository.instance().emailExists(email)) {
+      manejarErrorRegistro(ctx, model, "El email ya está en uso.", redirigirAlFinal);
+      return;
+    }
+
+    Usuario nuevoUsuario = new Usuario(email, userName, password, rol);
 
     try {
-      UserRepository.instance()
-                    .guardar(nuevoUsuario);
-      ctx.sessionAttribute("usuario_id", nuevoUsuario.getId());
-      ctx.sessionAttribute("usuario_nombre", nuevoUsuario.getUserName());
-      ctx.sessionAttribute("usuario_rol", nuevoUsuario.getRol());
-      ctx.sessionAttribute("usuario_email", email);
+      UserRepository.instance().guardar(nuevoUsuario);
 
-      String destino = (redirect != null && !redirect.isEmpty()) ? redirect : "/";
-      ctx.redirect(destino);
+
+      if (redirigirAlFinal) {
+        iniciarSesion(ctx, nuevoUsuario, email);
+        String destino = (redirect != null && !redirect.isEmpty()) ? redirect : "/";
+        ctx.redirect(destino);
+      } else {
+        // Respuesta API para creación de admin
+        ctx.status(HttpStatus.CREATED).json(Map.of("message", "Admin creado con éxito", "id", nuevoUsuario.getId()));
+      }
+
     } catch (PersistenceException e) {
-      e.printStackTrace();
-      renderizarRegisterConError(ctx, model, "Error: El usuario o email ya existe.");
+      if (e.getCause() instanceof ConstraintViolationException) {
+        manejarErrorRegistro(ctx, model, "Error: El usuario '" + userName + "' o el email ya existe.", redirigirAlFinal);
+      } else {
+        e.printStackTrace();
+        manejarErrorRegistro(ctx, model, "Error de base de datos.", redirigirAlFinal);
+      }
     } catch (Exception e) {
       e.printStackTrace();
-      renderizarRegisterConError(ctx, model, "Ocurrió un error inesperado.");
+      manejarErrorRegistro(ctx, model, "Error inesperado: " + e.getMessage(), redirigirAlFinal);
     }
-
   }
 
-  public void registerAdmin(Context ctx) {
-    String email = ctx.formParam("email");
-    String password = ctx.formParam("password");
-    String repeatPassword = ctx.formParam("repetir_password");
-    String userName = ctx.formParam("username");
-
-    Map<String, Object> model = new HashMap<>();
-    model.put("nombre", userName);
-    model.put("email", email);
-
-
-    if (UserRepository.instance()
-                      .emailExists(email)) {
-      ctx.status(HttpStatus.CONFLICT)
-         .result("El email ya está en uso"); // 409 Conflict
-      return;
+  private void manejarErrorRegistro(Context ctx, Map<String, Object> model, String error, boolean esWeb) {
+    if (esWeb) {
+      renderizarRegisterConError(ctx, model, error);
+    } else {
+      ctx.status(HttpStatus.BAD_REQUEST).json(Map.of("error", error));
     }
-    if (!EMAIL_PATTERN.matcher(email)
-                      .matches()) {
-      renderizarRegisterConError(ctx, model, "El formato del email no es válido.");
-      return;
-    }
-    if (!password.equals(repeatPassword)) {
-      renderizarRegisterConError(ctx, model, "Las contraseñas no coinciden.");
-      return;
-    }
+  }
 
-    // Asignamos rol "Contribuyente" por defecto.
-    // Podrías pasar el rol en el DTO si quisieras.
-    // Se hashea la password cuando se instancia al usuario
-    Usuario nuevoUsuario = new Usuario(
-        email,
-        userName,
-        password,
-        Rol.ADMINISTRADOR
-    );
-
-    try {
-      UserRepository.instance()
-                    .guardar(nuevoUsuario);
-      ctx.sessionAttribute("usuario_id", nuevoUsuario.getId());
-      ctx.sessionAttribute("usuario_nombre", nuevoUsuario.getUserName());
-      ctx.sessionAttribute("usuario_rol", nuevoUsuario.getRol());
-      ctx.sessionAttribute("usuario_email", email);
-      ctx.redirect("/");
-    } catch (PersistenceException e) {
-      renderizarRegisterConError(ctx, model, "Error: El usuario o email ya existe.");
-    } catch (Exception e) {
-      renderizarRegisterConError(ctx, model, "Ocurrió un error inesperado.");
-    }
-
+  private void iniciarSesion(Context ctx, Usuario usuario, String email) {
+    ctx.sessionAttribute("usuario_id", usuario.getId());
+    ctx.sessionAttribute("usuario_nombre", usuario.getUserName());
+    ctx.sessionAttribute("usuario_rol", usuario.getRol());
+    ctx.sessionAttribute("usuario_email", email);
   }
 
   public List<Usuario> findAll() {
-    return UserRepository.instance()
-                         .findAll();
+    return UserRepository.instance().findAll();
   }
 
   public Usuario finById(Long id) {
-    return UserRepository.instance()
-                         .findById(id);
+    return UserRepository.instance().findById(id);
   }
 
   private boolean esVacio(String texto) {
-    return texto == null || texto.trim()
-                                 .isEmpty();
+    return texto == null || texto.trim().isEmpty();
   }
 
   private void renderizarRegisterConError(Context ctx, Map<String, Object> model, String error) {
@@ -215,25 +171,19 @@ public class UserController {
   }
 
   public void mostrarLogin(Context ctx) {
-    String redirect = ctx.queryParam("redirect");
-
-    Map<String, Object> model = new HashMap<>();
-
-    if (redirect != null && !redirect.isEmpty()) {
-      model.put("redirect", redirect);
-    }
-
-    ctx.render("login.hbs", model);
+    mostrarVistaAutenticacion(ctx, "login.hbs");
   }
 
   public void mostrarRegistro(Context ctx) {
+    mostrarVistaAutenticacion(ctx, "register.hbs");
+  }
+
+  private void mostrarVistaAutenticacion(Context ctx, String vista) {
     String redirect = ctx.queryParam("redirect");
     Map<String, Object> model = new HashMap<>();
-
     if (redirect != null && !redirect.isEmpty()) {
       model.put("redirect", redirect);
     }
-
-    ctx.render("register.hbs", model);
+    ctx.render(vista, model);
   }
 }

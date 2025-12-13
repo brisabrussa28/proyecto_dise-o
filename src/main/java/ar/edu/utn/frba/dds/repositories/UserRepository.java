@@ -4,7 +4,10 @@ import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
+import org.hibernate.exception.ConstraintViolationException;
 
 /**
  * Repositorio de Usuarios. Maneja la persistencia.
@@ -19,18 +22,37 @@ public class UserRepository {
   }
 
   /**
-   * Guarda un nuevo usuario.
+   * Guarda un nuevo usuario o actualiza uno existente.
+   * Lanza una excepción si el usuario ya existe (por unique constraints).
    *
    * @param usuario El usuario a persistir.
+   * @throws PersistenceException Si ocurre un error al guardar (ej: duplicado).
    */
   public void guardar(Usuario usuario) {
-    DBUtils.comenzarTransaccion(em);
+    EntityTransaction tx = em.getTransaction();
     try {
-      em.persist(usuario);
-      DBUtils.commit(em);
+      if (!tx.isActive()) {
+        tx.begin();
+      }
+
+      if (usuario.getId() == null) {
+        em.persist(usuario);
+      } else {
+        em.merge(usuario);
+      }
+
+      tx.commit();
     } catch (Exception e) {
-      DBUtils.rollback(em);
-      throw new RuntimeException("Error al guardar el usuario: " + e.getMessage(), e);
+      if (tx != null && tx.isActive()) {
+        tx.rollback();
+      }
+
+      Throwable cause = e.getCause();
+      if (cause instanceof ConstraintViolationException) {
+        throw new PersistenceException("El usuario o email ya existe en la base de datos.", e);
+      }
+
+      throw new PersistenceException("Error al guardar el usuario: " + e.getMessage(), e);
     }
   }
 
@@ -46,7 +68,7 @@ public class UserRepository {
                .setParameter("email", email)
                .getSingleResult();
     } catch (NoResultException e) {
-      return null; // No se encontró el usuario
+      return null;
     }
   }
 

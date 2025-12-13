@@ -8,8 +8,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -42,8 +44,8 @@ public class Hecho {
   @Column(name = "hecho_id")
   Long id;
 
-  @ElementCollection
-  private List<Etiqueta> etiquetas = new ArrayList<>();
+  @ElementCollection(fetch = FetchType.EAGER)
+  private Set<Etiqueta> etiquetas = new HashSet<>();
 
   private LocalDateTime hecho_fecha_carga;
 
@@ -71,7 +73,7 @@ public class Hecho {
 
   private String hecho_provincia;
 
-  @ElementCollection(fetch = FetchType.LAZY)
+  @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
       name = "hecho_foto",
       joinColumns = @JoinColumn(name = "hecho_id")
@@ -89,7 +91,7 @@ public class Hecho {
   public Hecho() {
     this.hecho_fecha_carga = LocalDateTime.now();
     this.estado = Estado.ORIGINAL;
-    this.etiquetas = new ArrayList<>();
+    this.etiquetas = new HashSet<>();
     this.fotos = new ArrayList<>();
   }
 
@@ -118,16 +120,15 @@ public class Hecho {
     this.hecho_fecha_suceso = fechaSuceso;
     this.hecho_fecha_carga = fechaCarga;
     this.fuenteOrigen = fuenteOrigen;
-    this.etiquetas = etiquetas;
+    this.etiquetas = etiquetas != null ? new HashSet<>(etiquetas) : new HashSet<>();
     this.hecho_provincia = provincia;
     this.estado = Estado.ORIGINAL;
-    this.fotos = fotos;
+    this.fotos = fotos != null ? fotos : new ArrayList<>();
     this.hecho_autor = hecho_autor;
   }
 
   /**
    * Constructor LEGACY para Tests (10 parametros).
-   * Mantiene compatibilidad con los tests que no envian fotos ni autor.
    */
   public Hecho(
       String titulo,
@@ -141,12 +142,11 @@ public class Hecho {
       Origen fuenteOrigen,
       List<Etiqueta> etiquetas
   ) {
-    // Llamamos al constructor principal pasando listas vacias y null
     this(
         titulo, descripcion, categoria, direccion, provincia, ubicacion,
         fechaSuceso, fechaCarga, fuenteOrigen, etiquetas,
-        new ArrayList<>(), // Fotos vacias
-        null               // Autor nulo
+        new ArrayList<>(),
+        null
     );
   }
 
@@ -294,7 +294,7 @@ public class Hecho {
   }
 
   public void setEtiquetas(List<Etiqueta> etiquetas) {
-    this.etiquetas = new ArrayList<>(etiquetas);
+    this.etiquetas = etiquetas != null ? new HashSet<>(etiquetas) : new HashSet<>();
   }
 
   public void setEstado(Estado estado) {
@@ -315,7 +315,7 @@ public class Hecho {
   }
 
   public void setFotos(List<Multimedia> fotos) {
-    this.fotos = new ArrayList<>(fotos);
+    this.fotos = fotos != null ? new ArrayList<>(fotos) : new ArrayList<>();
   }
 
   /**
