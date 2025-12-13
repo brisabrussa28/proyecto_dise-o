@@ -2,7 +2,6 @@ package ar.edu.utn.frba.dds.server.templates;
 
 
 import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
 import io.javalin.http.Context;
@@ -33,6 +32,15 @@ public class JavalinHandlebars implements FileRenderer {
             }
             return a.toString()
                     .equals(b.toString());
+          }
+      );
+      handlebars.registerHelper(
+          "gt", (Object a, Options options) -> {
+            Object b = options.param(0);
+            if (a instanceof Number && b instanceof Number) {
+              return ((Number) a).doubleValue() > ((Number) b).doubleValue();
+            }
+            return false;
           }
       );
       template = handlebars.compile("templates/" + path.replace(".hbs", ""));

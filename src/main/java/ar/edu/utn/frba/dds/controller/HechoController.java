@@ -7,6 +7,7 @@ import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.http.NotFoundResponse;
 import io.javalin.http.UploadedFile;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -231,5 +232,32 @@ public class HechoController {
     } else {
       ctx.status(404);
     }
+  }
+
+  public void verHecho(Context ctx, Map<String, Object> model) {
+    Long idHecho = Long.parseLong(ctx.pathParam("id"));
+    Hecho hecho = findById(idHecho);
+    if (hecho == null) {
+      throw new NotFoundResponse("Hecho no encontrado");
+    }
+
+    model.put("hecho", hecho);
+
+    Long usuarioId = ctx.sessionAttribute("usuario_id");
+    boolean esPropietario = hecho.getAutor() != null && hecho.getAutor()
+                                                             .getId()
+                                                             .equals(usuarioId);
+    model.put("esPropietario", esPropietario);
+
+    if (hecho.getFechasuceso() != null) {
+      java.time.format.DateTimeFormatter formatter =
+          java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+      model.put("fechaFormateada",
+                hecho.getFechasuceso()
+                     .format(formatter)
+      );
+    }
+
+    ctx.render("hecho-detail.hbs", model);
   }
 }

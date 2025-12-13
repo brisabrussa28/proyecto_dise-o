@@ -1,0 +1,179 @@
+{{#partial "nav_izquierda"}}
+    <a href="/" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+       title="Volver al Mapa">
+        <i class="fa-regular fa-map"></i>
+        <span class="d-none d-sm-block">Volver al Mapa</span>
+    </a>
+{{/partial}}
+
+<style>
+    .carousel-control-prev,
+    .carousel-control-next {
+        background-color: rgba(0, 0, 0, 0.3);
+        width: 5%;
+    }
+
+    .carousel-control-prev:hover,
+    .carousel-control-next:hover {
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+</style>
+
+{{#partial "contenido"}}
+    <div class="container py-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="badge bg-primary fs-6">{{hecho.categoria}}</span>
+            <div class="d-flex gap-2">
+                {{#if esPropietario}}
+                    <a href="/hechos/{{hecho.id}}/editar" class="btn btn-warning btn-sm">
+                        <i class="fa-solid fa-pen"></i> Editar
+                    </a>
+                {{/if}}
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col-lg-8">
+
+                <h2 class="fw-bold mb-3">{{hecho.titulo}}</h2>
+
+                {{#if hecho.fotos}}
+                    <div id="carouselHecho"
+                         class="carousel slide mb-4 shadow-sm rounded overflow-hidden"
+                         data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {{#each hecho.fotos}}
+                                <div class="carousel-item {{#if @first}}active{{/if}}">
+                                    <img src="/hechos/{{../hecho.id}}/fotos/{{@index}}"
+                                         class="d-block w-100"
+                                         style="height: 400px; object-fit: scale-down;"
+                                         alt="Foto del suceso">
+                                </div>
+                            {{/each}}
+                        </div>
+
+                        {{#if (gt hecho.fotos.size 1)}}
+                            <button class="carousel-control-prev" type="button"
+                                    data-bs-target="#carouselHecho" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Anterior</span>
+                            </button>
+                            <button class="carousel-control-next" type="button"
+                                    data-bs-target="#carouselHecho" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Siguiente</span>
+                            </button>
+                        {{/if}}
+                    </div>
+                {{else}}
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center mb-4"
+                         style="height: 200px;">
+                        <span class="text-muted"><i class="fa-regular fa-image fa-2x"></i><br>Sin imágenes</span>
+                    </div>
+                {{/if}}
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">Descripción de los hechos</h5>
+                        <p class="card-text text-secondary"
+                           style="white-space: pre-line;">{{hecho.descripcion}}</p>
+
+                        <hr>
+
+                        <div class="d-flex align-items-center gap-2 mt-3">
+                            <i class="fa-solid fa-tags text-muted"></i>
+                            {{#each hecho.etiquetas}}
+                                <span class="badge bg-light text-dark border">{{this.nombre}}</span>
+                            {{/each}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white fw-bold">
+                        Información del Reporte
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-secondary rounded-circle d-flex justify-content-center align-items-center text-white me-3"
+                                 style="width: 50px; height: 50px; font-size: 1.5rem;">
+                                {{#if hecho.autor.foto}}
+                                    <img src="{{hecho.autor.foto}}"
+                                         class="rounded-circle w-100 h-100">
+                                {{else}}
+                                    <i class="fa-solid fa-user"></i>
+                                {{/if}}
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{hecho.autor.userName}}</h6>
+                                <small class="text-muted">{{hecho.autor.rol}}</small>
+                            </div>
+                            <a href="/perfiles/{{hecho.autor.userName}}" class="btn btn-outline-primary
+                            btn-sm ms-auto">
+                                Ver Perfil
+                            </a>
+                        </div>
+
+                        <ul class="list-group list-group-flush small">
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span><i class="fa-regular fa-calendar me-2"></i>Fecha Suceso</span>
+                                <strong>{{fechaFormateada}}</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span><i class="fa-solid fa-location-dot me-2"></i>Dirección</span>
+                                <span class="text-end text-truncate" style="max-width: 150px;"
+                                      title="{{hecho.direccion}}">
+                                    {{hecho.direccion}}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white fw-bold">
+                        Ubicación Exacta
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="map-detalle" style="height: 300px; width: 100%;"></div>
+                    </div>
+                    <div class="card-footer bg-white text-center">
+                        <a href="https://www.google.com/maps/search/?api=1&query={{hecho.ubicacion.latitud}}
+                        ,{{hecho.ubicacion.longitud}}"
+                        target="_blank" class="btn btn-link btn-sm text-decoration-none">
+                        <i class="fa-solid fa-map-location-dot"></i> Abrir en Google Maps
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const lat = {{hecho.ubicacion.latitud}};
+            const lng = {{hecho.ubicacion.longitud}};
+
+            // Inicializar mapa (solo lectura, sin zoom scroll para no molestar)
+            const map = L.map('map-detalle', {
+                scrollWheelZoom: false // Deshabilita zoom con rueda para mejorar UX
+            }).setView([lat, lng], 15);
+
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            // Marcador Fijo
+            L.marker([lat, lng]).addTo(map)
+             .bindPopup("<b>{{hecho.titulo}}</b><br>{{hecho.direccion}}")
+             .openPopup();
+        });
+    </script>
+{{/partial}}
+{{> templates/layout}}

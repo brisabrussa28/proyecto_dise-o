@@ -5,7 +5,6 @@ import ar.edu.utn.frba.dds.controller.ColeccionController;
 import ar.edu.utn.frba.dds.controller.EstadisticaController;
 import ar.edu.utn.frba.dds.controller.FuenteController;
 import ar.edu.utn.frba.dds.controller.HechoController;
-import ar.edu.utn.frba.dds.controller.HomeController;
 import ar.edu.utn.frba.dds.controller.SolicitudController;
 import ar.edu.utn.frba.dds.controller.UserController;
 import ar.edu.utn.frba.dds.dto.EstadisticaDTO;
@@ -37,7 +36,6 @@ public class Router {
 
   public void configure(Javalin app, ObjectMapper mapper) {
 
-    HomeController controller = new HomeController();
     HechoController hechoController = new HechoController();
     SolicitudController solicitudController = new SolicitudController();
     ColeccionController coleccionController = new ColeccionController();
@@ -226,18 +224,18 @@ public class Router {
 
     app.get("/home", ctx -> ctx.json(hechoController.findAll()));
 
-    app.get(
-        "/hechos/{id}", ctx -> {
-          Long id = Long.parseLong(ctx.pathParam("id"));
-          Hecho hecho = hechoController.findById(id);
-          if (hecho == null) {
-            ctx.status(404);
-            ctx.result("Not Found");
-          } else {
-            ctx.json(hecho);
-          }
-        }
-    );
+//    app.get(
+//        "/hechos/{id}", ctx -> {
+//          Long id = Long.parseLong(ctx.pathParam("id"));
+//          Hecho hecho = hechoController.findById(id);
+//          if (hecho == null) {
+//            ctx.status(404);
+//            ctx.result("Not Found");
+//          } else {
+//            ctx.json(hecho);
+//          }
+//        }
+//    );
 
     app.post(
         "/hechos", ctx -> {
@@ -334,6 +332,13 @@ public class Router {
         "/hechos", ctx -> {
           List<Hecho> hechos = hechoController.findAll();
           ctx.json(hechos);
+        }
+    );
+
+    app.get(
+        "/hechos/{id}", ctx -> {
+          Map<String, Object> model = modeloConSesion(ctx);
+          hechoController.verHecho(ctx, model);
         }
     );
 
