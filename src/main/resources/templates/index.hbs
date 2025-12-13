@@ -3,11 +3,13 @@
 
         <div class="search-controls-overlay">
             <div class="d-flex gap-2">
-                <button class="btn btn-warning" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFiltros" aria-controls="offcanvasFiltros">
+                <button class="btn btn-warning" type="button" data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasFiltros" aria-controls="offcanvasFiltros">
                     Filtros
                     <i class="bi bi-list"></i>
                 </button>
-                <input class="form-control mr-sm-2 shadow-sm" type="search" placeholder="Search" aria-label="Search" style="width: 37vw;">
+                <input class="form-control mr-sm-2 shadow-sm" type="search" placeholder="Search" aria-label="Search"
+                       style="width: 37vw;">
             </div>
         </div>
 
@@ -17,88 +19,113 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const hechosData = {{{hechosJson}}};
+            const currentUserId = {{#if usuario_id}}{{usuario_id}}{{else}}-1{{/if}};
 
-            const map = L.map('map-container').setView([-34.6037, -58.3816], 12);
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+            const map = L.map('map').setView([-34.6037, -58.3816], 12);
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19}).addTo(map);
 
             hechosData.forEach(hecho => {
-                const ubicacion = hecho.hecho_ubicacion; // o hecho.ubicacion si ya arreglaste el getter
+                const ubicacion = hecho.hecho_ubicacion;
 
                 if (ubicacion && ubicacion.latitud && ubicacion.longitud) {
                     let fechaTexto = "S/D";
                     let horaTexto = "";
 
                     if (hecho.hecho_fecha_suceso) {
-                        // 1. Convertir el String ISO a Objeto Date
                         const fechaObj = new Date(hecho.hecho_fecha_suceso);
-
-                        // 2. Formatear la FECHA (DD/MM/AAAA)
-                        // 'es-AR' asegura el formato día/mes/año
                         fechaTexto = fechaObj.toLocaleDateString('es-AR', {
                             year: 'numeric',
                             month: '2-digit',
                             day: '2-digit'
                         });
-
-                        // 3. Formatear la HORA (HH:MM)
                         horaTexto = fechaObj.toLocaleTimeString('es-AR', {
                             hour: '2-digit',
                             minute: '2-digit'
                         });
                     }
-                    // Lógica de imagen (con clases Bootstrap)
-                    let htmlImagen = '';
-                    // Verifica el nombre de la propiedad según tu log (hecho.fotos o hecho.hecho_fotos)
-                    const fotos = hecho.fotos || hecho.hecho_fotos;
 
+                    let htmlImagen = '';
+                    const fotos = hecho.fotos || hecho.hecho_fotos;
                     if (fotos && fotos.length > 0) {
                         htmlImagen = `
-                            <img src="/hechos/${hecho.id}/fotos/0"
-                                 class="card-img-top mb-2"
-                                 alt="Foto"
-                                 style="height: 140px; object-fit: cover;">
-                        `;
+                        <img src="/hechos/${hecho.id}/fotos/0"
+                             class="card-img-top mb-2"
+                             alt="Foto"
+                             style="height: 140px; object-fit: cover;">
+                    `;
                     }
 
-                    // 4. POPUP ESTILIZADO CON BOOTSTRAP CARDS
-                    // Usamos clases como 'card', 'card-body', 'badge', 'text-muted'
+                    // Construir HTML del autor
+                    const autor = hecho.autor || hecho.hecho_autor || {};
+                    const autorNombre = autor.userName || 'Anónimo';
+                    const autorId = autor.id || autor.autor_id;
+                    let autorHTML = '';
+
+                    if (autor.foto) {
+                        autorHTML = `<img src="${autor.foto}" class="rounded-circle me-1" width="20" height="20">`;
+                    } else {
+                        autorHTML = `<i class="fa-solid fa-user me-1"></i>`;
+                    }
+                    autorHTML += autorNombre;
+
+                    // Botón de edición (solo si es el autor)
+                    let editButton = '';
+                    if (autorId && autorId === currentUserId) {
+                        const fechaCarga = new Date(hecho.hecho_fecha_carga);
+                        const ahora = new Date();
+                        const unaSemanaEnMs = 7 * 24 * 60 * 60 * 1000; // 7 días en milisegundos
+                        const diferencia = ahora - fechaCarga;
+
+                        if(diferencia <= unaSemanaEnMs) {
+                            editButton = `
+                            <a href="/hechos/${hecho.id}/editar"
+                               class="btn btn-outline-secondary btn-sm border-0"
+                               title="Editar mi hecho" style="padding: 0">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            `;
+                        }
+                    }
+
                     const popupHTML = `
-                        <div class="card border-0" style="width: 200px;">
-                            ${htmlImagen}
-                            <div class="card-body p-0">
-                                <h6 class="card-title mb-1">${hecho.hecho_titulo}</h6>
-
-                                <h6 class="card-text small text-muted mb-1" style="line-height: 1.2;">
-                                    ${hecho.hecho_descripcion || ''}
-                                </h6>
-
-                                <h4 class="card-text small text-muted mb-1" style="line-height: 1.2;">
-                                    <i class="fa-solid fa-location-dot me-1"></i>
-                                    ${hecho.hecho_direccion ? hecho.hecho_direccion + ', ' : ''}${hecho.hecho_provincia || ''}
-                                </h4>
-
-                                <div class="text-muted small mb-2">
-                                    <i class="fa-regular fa-calendar me-1"></i> ${fechaTexto}
-                                    <span class="mx-1">|</span>
-                                    <i class="fa-regular fa-clock me-1"></i> ${horaTexto}
-                                </div>
-
-                                <span class="badge bg-primary mb-2">
-                                    ${hecho.hecho_categoria || 'Sin categoria'}
-                                </span>
-
+                    <div class="card border-0" style="width: 200px;">
+                        ${htmlImagen}
+                        <div class="card-body p-0">
+                            <h6 class="card-title mb-1">${hecho.hecho_titulo}</h6>
+                            <h6 class="card-text small text-muted mb-1" style="line-height: 1.2;">
+                                ${hecho.hecho_descripcion || ''}
+                            </h6>
+                            <h4 class="card-text small text-muted mb-1" style="line-height: 1.2;">
+                                <i class="fa-solid fa-location-dot me-1"></i>
+                                ${hecho.hecho_direccion ? hecho.hecho_direccion + ', ' : ''}${hecho.hecho_provincia || ''}
+                            </h4>
+                            <div class="text-muted small mb-2">
+                                <i class="fa-regular fa-calendar me-1"></i> ${fechaTexto}
+                                <span class="mx-1">|</span>
+                                <i class="fa-regular fa-clock me-1"></i> ${horaTexto}
                             </div>
+                            <span class="badge bg-primary mb-2">
+                                ${hecho.hecho_categoria || 'Sin categoria'}
+                            </span>
                         </div>
-                    `;
+                        <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center" style="padding: 0">
+                            <medium class="text-muted">
+                                ${autorHTML}
+                            </medium>
+                            ${editButton}
+                        </div>
+                    </div>
+                `;
 
                     L.marker([ubicacion.latitud, ubicacion.longitud])
-                        .addTo(map)
-                        .bindPopup(popupHTML);
+                            .addTo(map)
+                            .bindPopup(popupHTML);
                 }
             });
         });
     </script>
+
 {{/partial}}
 {{> templates/layout}}

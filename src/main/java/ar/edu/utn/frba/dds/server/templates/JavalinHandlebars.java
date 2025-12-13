@@ -16,24 +16,6 @@ public class JavalinHandlebars implements FileRenderer {
 
   Handlebars handlebars = new Handlebars();
 
-  public JavalinHandlebars() {
-    this.handlebars.registerHelper(
-        "eq", new Helper<Object>() {
-          @Override
-          public Object apply(Object context, Options options) {
-            Object other = options.param(0);
-            if (context == null && other == null) {
-              return true;
-            }
-            if (context == null || other == null) {
-              return false;
-            }
-            return context.equals(other);
-          }
-        }
-    );
-  }
-
   @NotNull
   @Override
   public String render(
@@ -43,6 +25,16 @@ public class JavalinHandlebars implements FileRenderer {
   ) {
     Template template = null;
     try {
+      handlebars.registerHelper(
+          "eq", (Object a, Options options) -> {
+            Object b = options.param(0);
+            if (a == null || b == null) {
+              return false;
+            }
+            return a.toString()
+                    .equals(b.toString());
+          }
+      );
       template = handlebars.compile("templates/" + path.replace(".hbs", ""));
       return template.apply(model);
     } catch (IOException e) {

@@ -15,7 +15,7 @@ import javax.persistence.Transient;
 
 @Entity
 @DiscriminatorValue("ESTATICA")
-public class FuenteEstatica extends Fuente {
+public class FuenteEstatica extends FuenteConHechos {
 
   @Transient
   private String fuente_ruta_archivo;

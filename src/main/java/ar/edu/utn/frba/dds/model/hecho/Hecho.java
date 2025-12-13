@@ -1,10 +1,12 @@
 package ar.edu.utn.frba.dds.model.hecho;
 
+import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,8 +26,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
@@ -81,9 +83,13 @@ public class Hecho {
   List<Multimedia> fotos;
 
   @ManyToOne
-  @JoinColumn(name = "usuario_id")
+  @JoinColumn(name = "hecho_autor")
+  @JsonIgnoreProperties("hechos")
+  private Usuario autor;
+
+  @ManyToMany(mappedBy = "hechos")
   @JsonIgnore
-  private Usuario hecho_autor;
+  private Set<Coleccion> colecciones = new HashSet<>();
 
   /**
    * Constructor vacio para un Hecho.
@@ -110,7 +116,7 @@ public class Hecho {
       Origen fuenteOrigen,
       List<Etiqueta> etiquetas,
       List<Multimedia> fotos,
-      Usuario hecho_autor
+      Usuario autor
   ) {
     this.hecho_titulo = titulo;
     this.hecho_descripcion = descripcion;
@@ -124,11 +130,12 @@ public class Hecho {
     this.hecho_provincia = provincia;
     this.estado = Estado.ORIGINAL;
     this.fotos = fotos != null ? fotos : new ArrayList<>();
-    this.hecho_autor = hecho_autor;
+    this.autor = autor;
   }
 
   /**
    * Constructor LEGACY para Tests (10 parametros).
+   * Mantiene compatibilidad con los tests que no envian fotos ni autor.
    */
   public Hecho(
       String titulo,
@@ -260,9 +267,20 @@ public class Hecho {
     return hecho_provincia;
   }
 
+  public Usuario getAutor() {
+    return this.autor;
+  }
   //  @JsonProperty("hecho_fotos")
   public List<Multimedia> getFotos() {
     return new ArrayList<>(fotos);
+  }
+
+  public void quitar(int indice) {
+    this.fotos.remove(indice);
+  }
+
+  public Set<Coleccion> getColecciones() {
+    return this.colecciones;
   }
 
   public void agregarFoto(Multimedia foto) {
@@ -294,7 +312,7 @@ public class Hecho {
   }
 
   public void setEtiquetas(List<Etiqueta> etiquetas) {
-    this.etiquetas = etiquetas != null ? new HashSet<>(etiquetas) : new HashSet<>();
+    this.etiquetas = new ArrayList<>(etiquetas);
   }
 
   public void setEstado(Estado estado) {
@@ -326,9 +344,9 @@ public class Hecho {
    */
   public boolean esEditable(Usuario usuarioEditor) {
     return LocalDateTime.now()
-                        .isBefore(hecho_fecha_carga.plusWeeks(1)) && usuarioEditor != null && this.hecho_autor.getId()
-                                                                                                              .equals(
-                                                                                                                  usuarioEditor.getId());
+                        .isBefore(hecho_fecha_carga.plusWeeks(1)) && usuarioEditor != null && this.autor.getId()
+                                                                                                        .equals(
+                                                                                                            usuarioEditor.getId());
   }
 
   @Override

@@ -6,13 +6,13 @@ import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 
 /**
  * Repositorio de Solicitudes. Responsable únicamente del almacenamiento
  * y recuperación de las solicitudes desde la base de datos.
  */
 public class SolicitudesRepository {
-  private final EntityManager em = DBUtils.getEntityManager();
 
   private static final SolicitudesRepository INSTANCE = new SolicitudesRepository();
 
@@ -28,15 +28,26 @@ public class SolicitudesRepository {
    * @param solicitud La entidad Solicitud a persistir.
    */
   public void guardar(Solicitud solicitud) {
+    EntityManager em = DBUtils.getEntityManager();
     DBUtils.comenzarTransaccion(em);
-    Solicitud existente = buscarPorHechoYRazon(solicitud.getHechoSolicitado(), solicitud.getRazonEliminacion());
-    if (existente != null) {
-      solicitud.setId(existente.getId());
-      em.merge(solicitud);
-    } else {
-      em.persist(solicitud);
+    Solicitud existente = buscarPorHechoYRazon(
+        solicitud.getHechoSolicitado(),
+        solicitud.getRazonEliminacion()
+    );
+    try {
+      if (existente != null) {
+        solicitud.setId(existente.getId());
+        em.merge(solicitud);
+      } else {
+        em.persist(solicitud);
+      }
+    } catch (PersistenceException e) {
+      DBUtils.rollback(em);
+      throw new RuntimeException(e.getMessage());
+    } finally {
+      DBUtils.commit(em);
+      em.close();
     }
-    DBUtils.commit(em);
   }
 
   /**
@@ -46,6 +57,7 @@ public class SolicitudesRepository {
    * @return Un Optional con la solicitud si se encuentra, o vacío si no.
    */
   public Solicitud findById(Long id) {
+    EntityManager em = DBUtils.getEntityManager();
     return em.find(Solicitud.class, id);
   }
 
@@ -57,6 +69,7 @@ public class SolicitudesRepository {
    * @return Un Optional con la solicitud si se encuentra.
    */
   public Solicitud buscarPorHechoYRazon(Hecho hecho, String razon) {
+    EntityManager em = DBUtils.getEntityManager();
     return em.createQuery(
                  "SELECT s FROM Solicitud s WHERE s.hechoSolicitado = :hecho AND s.razonEliminacion = :razon",
                  Solicitud.class
@@ -74,6 +87,7 @@ public class SolicitudesRepository {
    * @return Una lista con todas las solicitudes.
    */
   public List<Solicitud> findAll() {
+    EntityManager em = DBUtils.getEntityManager();
     return em.createQuery("SELECT s FROM Solicitud s", Solicitud.class)
              .getResultList();
   }
@@ -85,6 +99,7 @@ public class SolicitudesRepository {
    * @return Una lista de solicitudes que coinciden con el estado.
    */
   public List<Solicitud> obtenerPorEstado(EstadoSolicitud estado) {
+    EntityManager em = DBUtils.getEntityManager();
     return em.createQuery(
                  "SELECT s FROM Solicitud s WHERE s.estado = :estado",
                  Solicitud.class
@@ -99,11 +114,13 @@ public class SolicitudesRepository {
    * @return La cantidad total de solicitudes.
    */
   public Long cantidadTotal() {
+    EntityManager em = DBUtils.getEntityManager();
     return em.createQuery("SELECT COUNT(s) FROM Solicitud s", Long.class)
              .getSingleResult();
   }
 
   public void aceptarSolicitud(Solicitud solicitud) {
+    EntityManager em = DBUtils.getEntityManager();
     DBUtils.comenzarTransaccion(em);
     solicitud.aceptar();
     em.merge(solicitud);
@@ -111,9 +128,17 @@ public class SolicitudesRepository {
   }
 
   public void rechazarSolicitud(Solicitud solicitud) {
+    EntityManager em = DBUtils.getEntityManager();
     DBUtils.comenzarTransaccion(em);
     solicitud.rechazar();
-    em.merge(solicitud);
-    DBUtils.commit(em);
+    try {
+      em.merge(solicitud);
+    } catch (PersistenceException e) {
+      DBUtils.rollback(em);
+      throw new RuntimeException(e.getMessage());
+    } finally {
+      DBUtils.commit(em);
+      em.close();
+    }
   }
 }

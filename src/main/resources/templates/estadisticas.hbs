@@ -357,25 +357,30 @@
 
             // Datos del gráfico
             data: {
-                labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles'],
+                labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes', 'Miércoles'],
                 datasets: [{
                     label: 'Ventas Semanales',
                     // DATOS AGREGADOS AQUÍ:
-                    data: [12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3],
+                    data: [12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3, 5, 2, 3, 7, 12, 19, 3],
                     backgroundColor: ['rgba(255, 206, 86, 0.8)'],
                     borderColor: ['rgba(255, 206, 86, 0.8)'],
                     borderWidth: 1
                 }]
             },
 
-            // Opciones de configuración (título, escalas, etc.)
             options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+            // *** AÑADE ESTA LÍNEA CLAVE ***
+            indexAxis: 'y', // 'y' para horizontal, 'x' para vertical (vertical es el valor por defecto)
+
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                // Ahora el eje X será el que comience en cero, no el Y
+                x: {
+                    beginAtZero: true
                 }
             }
+        }
         });
     </script>
 

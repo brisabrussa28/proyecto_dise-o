@@ -13,6 +13,7 @@ import org.hibernate.exception.ConstraintViolationException;
  * Repositorio de Usuarios. Maneja la persistencia.
  */
 public class UserRepository {
+
   private final EntityManager em = DBUtils.getEntityManager();
 
   private static final UserRepository INSTANCE = new UserRepository();
@@ -23,9 +24,9 @@ public class UserRepository {
 
   /**
    * Guarda un nuevo usuario o actualiza uno existente.
-   * Lanza una excepción si el usuario ya existe (por unique constraints).
+   * Lanza una excepción específica si el usuario ya existe (por unique constraints).
    *
-   * @param usuario El usuario a persistir.
+   * @param usuario El usuario a persistir o actualizar.
    * @throws PersistenceException Si ocurre un error al guardar (ej: duplicado).
    */
   public void guardar(Usuario usuario) {
