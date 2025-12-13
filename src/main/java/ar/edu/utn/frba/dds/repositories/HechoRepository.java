@@ -48,7 +48,7 @@ public class HechoRepository {
 
   public Hecho findById(Long id) {
     EntityManager em = DBUtils.getEntityManager();
-    return em.createQuery("SELECT h FROM Hecho h JOIN FETCH h.fotos WHERE h.id = :id", Hecho.class)
+    return em.createQuery("SELECT h FROM Hecho h lEFT JOIN FETCH h.fotos WHERE h.id = :id", Hecho.class)
              .setParameter("id", id)
              .getSingleResult();
   }

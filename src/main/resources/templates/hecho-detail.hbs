@@ -23,7 +23,8 @@
     <div class="container py-5">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="badge bg-primary fs-6">{{hecho.categoria}}</span>
+            <h4>Categoria:
+                <span class="badge bg-primary fs-6">{{hecho.categoria}}</span></h4>
             <div class="d-flex gap-2">
                 {{#if esPropietario}}
                     <a href="/hechos/{{hecho.id}}/editar" class="btn btn-warning btn-sm">
@@ -80,14 +81,16 @@
                         <p class="card-text text-secondary"
                            style="white-space: pre-line;">{{hecho.descripcion}}</p>
 
-                        <hr>
 
-                        <div class="d-flex align-items-center gap-2 mt-3">
-                            <i class="fa-solid fa-tags text-muted"></i>
-                            {{#each hecho.etiquetas}}
-                                <span class="badge bg-light text-dark border">{{this.nombre}}</span>
-                            {{/each}}
-                        </div>
+                        {{# if hecho.etiquetas}}
+                            <hr>
+                            <div class="d-flex align-items-center gap-2 mt-3">
+                                <i class="fa-solid fa-tags text-muted"></i>
+                                {{#each hecho.etiquetas}}
+                                    <span class="badge bg-light text-dark border">{{this.nombre}}</span>
+                                {{/each}}
+                            </div>
+                        {{/if}}
                     </div>
                 </div>
             </div>
@@ -100,23 +103,29 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
-                            <div class="bg-secondary rounded-circle d-flex justify-content-center align-items-center text-white me-3"
-                                 style="width: 50px; height: 50px; font-size: 1.5rem;">
-                                {{#if hecho.autor.foto}}
-                                    <img src="{{hecho.autor.foto}}"
-                                         class="rounded-circle w-100 h-100">
-                                {{else}}
-                                    <i class="fa-solid fa-user"></i>
-                                {{/if}}
-                            </div>
-                            <div>
-                                <h6 class="mb-0 fw-bold">{{hecho.autor.userName}}</h6>
-                                <small class="text-muted">{{hecho.autor.rol}}</small>
-                            </div>
-                            <a href="/perfiles/{{hecho.autor.userName}}" class="btn btn-outline-primary
-                            btn-sm ms-auto">
-                                Ver Perfil
-                            </a>
+                            {{# if hecho.autor}}
+                                <div class="bg-secondary rounded-circle d-flex justify-content-center align-items-center text-white me-3"
+                                     style="width: 50px; height: 50px; font-size: 1.5rem;">
+                                    {{#if hecho.autor.foto}}
+                                        <img src="{{hecho.autor.foto}}"
+                                             class="rounded-circle w-100 h-100">
+                                    {{else}}
+                                        <i class="fa-solid fa-user"></i>
+                                    {{/if}}
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">{{hecho.autor.userName}}</h6>
+                                    <small class="text-muted">{{hecho.autor.email}}</small>
+                                </div>
+                                <a href="/perfiles/{{hecho.autor.userName}}"
+                                   class="btn btn-outline-primary btn-sm ms-auto">
+                                    Ver Perfil
+                                </a>
+                            {{else}}
+                                <div>
+                                    <h6 class="mb-0">Hecho provisto por un Dataset.</h6>
+                                </div>
+                            {{/if}}
                         </div>
 
                         <ul class="list-group list-group-flush small">
