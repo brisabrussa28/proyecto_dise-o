@@ -134,4 +134,20 @@ public class AdminController {
     // Volvemos a la misma pantalla con mensaje de éxito (opcional) o redirect simple
     ctx.redirect("/admin/colecciones/" + id);
   }
+
+  public void editarFuente(Context ctx, Map<String, Object> model) {
+    Long id = Long.parseLong(ctx.pathParam("id"));
+    Fuente fuente = fuenteController.findById(id);
+    model.put("fuente", fuente);
+
+
+    ctx.render("/admin/fuente-detalle.hbs", model);
+  }
+
+  public void configurarFuente(Context ctx) {
+    Long id = Long.parseLong(ctx.pathParam("id"));
+    Fuente fte = fuenteController.findById(id);
+
+    fte.setNombre(ctx.formParam("nombre"));
+  }
 }

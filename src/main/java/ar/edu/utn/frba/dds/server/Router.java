@@ -162,8 +162,7 @@ public class Router {
     app.post("/admin/colecciones/{id}/agregarHecho", adminController::agregarHechoAColeccion);
     app.post("/admin/colecciones/{id}/quitarHecho", adminController::removerHechoDeColeccion);
     app.post("/admin/fuentes", ctx -> adminController.crearFuente(ctx));
-    app.post(
-        "/admin/colecciones/{id}/configurar", adminController::configurarColeccion);
+    app.post("/admin/colecciones/{id}/configurar", adminController::configurarColeccion);
 
 
     app.get(
@@ -171,6 +170,13 @@ public class Router {
           adminController.listarFuentes(ctx, modeloConSesion(ctx));
         }
     );
+
+    app.get(
+        "/admin/fuentes/{id}", ctx -> {
+          adminController.editarFuente(ctx, modeloConSesion(ctx));
+        }
+    );
+    app.post("/admin/fuentes/{id}/configurar", adminController::configurarFuente);
 
     app.get(
         "/hechos/categorias", ctx -> {
