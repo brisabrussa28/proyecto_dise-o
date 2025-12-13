@@ -4,9 +4,9 @@ import ar.edu.utn.frba.dds.model.estadisticas.Estadistica;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 
 public class EstadisticaRepository {
-  private final EntityManager em = DBUtils.getEntityManager();
 
   private static final EstadisticaRepository INSTANCE = new EstadisticaRepository();
 
@@ -27,6 +27,7 @@ public class EstadisticaRepository {
 //  }
 
   public Estadistica findByNombreAndTipo(String nombre, String tipoEstadistica) {
+    EntityManager em = DBUtils.getEntityManager();
     return em.createQuery(
                  "SELECT e FROM Estadistica e WHERE e.estadistica_nombre = :nombre AND e.estadistica_tipo = :tipo",
                  Estadistica.class
@@ -40,30 +41,44 @@ public class EstadisticaRepository {
 
   // Update save method
   public void save(Estadistica estadistica) {
+    EntityManager em = DBUtils.getEntityManager();
     Estadistica existing = findByNombreAndTipo(estadistica.getNombre(), estadistica.getTipo());
     DBUtils.comenzarTransaccion(em);
-    if (existing != null) {
-      estadistica.setId(existing.getId());
-      em.merge(estadistica);
-    } else {
-      em.persist(estadistica);
+    try {
+      if (existing != null) {
+        estadistica.setId(existing.getId());
+        em.merge(estadistica);
+      } else {
+        em.persist(estadistica);
+      }
+    } catch (PersistenceException e) {
+      DBUtils.rollback(em);
+      throw new RuntimeException(e.getMessage());
+    } finally {
+      DBUtils.commit(em);
+      em.close();
     }
-    DBUtils.commit(em);
   }
 
 
   public List<Estadistica> findAll() {
+    EntityManager em = DBUtils.getEntityManager();
     return em.createQuery("SELECT e FROM Estadistica e", Estadistica.class)
              .getResultList();
 
   }
 
   public Estadistica findById(Long id) {
+    EntityManager em = DBUtils.getEntityManager();
     return em.find(Estadistica.class, id);
   }
 
   public Estadistica findByTipo(String tipo) {
-    return em.createQuery("SELECT e from Estadistica e where e.estadistica_tipo = :tipo", Estadistica.class)
+    EntityManager em = DBUtils.getEntityManager();
+    return em.createQuery(
+                 "SELECT e from Estadistica e where e.estadistica_tipo = :tipo",
+                 Estadistica.class
+             )
              .setParameter("tipo", tipo)
              .getSingleResult();
   }

@@ -5,23 +5,28 @@ import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 
 public class EtiquetaRepository {
-  private final EntityManager em = DBUtils.getEntityManager();
 
   public void save(Etiqueta etiqueta) {
+    EntityManager em = DBUtils.getEntityManager();
     DBUtils.comenzarTransaccion(em);
-    em.persist(etiqueta);
-    DBUtils.commit(em);
+    try {
+      em.persist(etiqueta);
+    } catch (PersistenceException e) {
+      DBUtils.rollback(em);
+      throw new RuntimeException(e.getMessage());
+    } finally {
+      DBUtils.commit(em);
+      em.close();
+    }
   }
 
   public List<Hecho> findAll() {
+    EntityManager em = DBUtils.getEntityManager();
     return em.createQuery("SELECT h FROM Hecho h", Hecho.class)
              .getResultList();
 
-  }
-
-  public Hecho getById(Long id) {
-    return em.find(Hecho.class, id);
   }
 }
