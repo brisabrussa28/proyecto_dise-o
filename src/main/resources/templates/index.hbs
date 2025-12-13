@@ -81,7 +81,7 @@
                         `;
                     } else {
                         autorHTML = `
-                            <a href="/perfil/${autorNombre}"
+                            <a href="/perfiles/${autorNombre}"
                                 class="text-decoration-none text-secondary fw-bold d-flex align-items-center"
                                 title="Ver perfil"
                                 style"cursor: pointer;">
@@ -111,34 +111,63 @@
                     }
 
                     const popupHTML = `
-                    <div class="card border-0" style="width: 200px;">
-                        ${htmlImagen}
-                        <div class="card-body p-0">
-                            <h6 class="card-title mb-1">${hecho.hecho_titulo}</h6>
-                            <h6 class="card-text small text-muted mb-1" style="line-height: 1.2;">
-                                ${hecho.hecho_descripcion || ''}
-                            </h6>
-                            <h4 class="card-text small text-muted mb-1" style="line-height: 1.2;">
-                                <i class="fa-solid fa-location-dot me-1"></i>
-                                ${hecho.hecho_direccion ? hecho.hecho_direccion + ', ' : ''}${hecho.hecho_provincia || ''}
-                            </h4>
-                            <div class="text-muted small mb-2">
-                                <i class="fa-regular fa-calendar me-1"></i> ${fechaTexto}
-                                <span class="mx-1">|</span>
-                                <i class="fa-regular fa-clock me-1"></i> ${horaTexto}
+                        <div class="card border-0" style="width: 220px; overflow: hidden;">
+
+                            <div class="position-relative border-bottom pb-2">
+                                ${htmlImagen ? `
+                                    <div class="mb-2" style="margin: -1px -1px 0 -1px;"> ${htmlImagen}
+                                    </div>
+                                ` : ''}
+
+                                <div class="px-2 pt-1">
+                                    <h6 class="card-title fw-bold mb-1 text-truncate" title="${hecho.hecho_titulo}">
+                                        <a href="/hechos/${hecho.id}" class="text-decoration-none text-dark stretched-link">
+                                            ${hecho.hecho_titulo}
+                                        </a>
+                                    </h6>
+                                    <p class="card-text small text-secondary mb-1"
+                                       style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">
+                                        ${hecho.hecho_descripcion || 'Sin descripción disponible.'}
+                                    </p>
+                                </div>
                             </div>
-                            <span class="badge bg-primary mb-2">
-                                ${hecho.hecho_categoria || 'Sin categoria'}
-                            </span>
+
+                            <div class="px-2 py-2 border-bottom bg-light bg-opacity-25">
+
+                                <div class="d-flex align-items-start mb-1 text-muted small">
+                                    <i class="fa-solid fa-location-dot mt-1 me-2 text-danger"></i>
+                                    <span style="line-height: 1.2;">
+                                        ${hecho.hecho_direccion ? hecho.hecho_direccion : 'Ubicación aproximada'}
+                                        ${hecho.hecho_provincia ? ', ' + hecho.hecho_provincia : ''}
+                                    </span>
+                                </div>
+
+                                <div class="d-flex align-items-center mb-2 text-muted small">
+                                    <i class="fa-regular fa-calendar me-2 text-primary"></i>
+                                    <span>${fechaTexto}</span>
+                                    ${horaTexto ? `<span class="mx-1 text-secondary">|</span> <i class="fa-regular fa-clock me-1"></i> ${horaTexto}` : ''}
+                                </div>
+
+                                <div>
+                                    <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                                        ${hecho.hecho_categoria || 'General'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center px-2 py-2">
+
+                                <div class="small text-truncate" style="max-width: 140px;">
+                                    ${autorHTML}
+                                </div>
+
+                                ${editButton ? `
+                                    <div class="ms-2">
+                                        ${editButton} </div>
+                                ` : ''}
+                            </div>
                         </div>
-                        <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center" style="padding: 0">
-                            <medium class="text-muted">
-                                ${autorHTML}
-                            </medium>
-                            ${editButton}
-                        </div>
-                    </div>
-                `;
+                    `;
 
                     L.marker([ubicacion.latitud, ubicacion.longitud])
                             .addTo(map)
