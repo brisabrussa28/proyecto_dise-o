@@ -9,9 +9,7 @@ import ar.edu.utn.frba.dds.controller.HomeController;
 import ar.edu.utn.frba.dds.controller.SolicitudController;
 import ar.edu.utn.frba.dds.controller.UserController;
 import ar.edu.utn.frba.dds.dto.EstadisticaDTO;
-import ar.edu.utn.frba.dds.dto.HechoDTO;
 import ar.edu.utn.frba.dds.dto.SolicitudDTO;
-import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
@@ -22,12 +20,12 @@ import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.model.usuario.Rol;
-import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.http.HttpStatus;
 import io.javalin.http.UploadedFile;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -85,13 +83,6 @@ public class Router {
     app.get("/usuarios", ctx -> ctx.json(userController.findAll()));
     app.post("/usuarios/administrador", userController::registerAdmin);
     // --- 4. PROTECCIÓN DE RUTAS (app.before) ---
-    app.before(
-        "/colecciones", ctx -> {
-          if ("POST".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol(Rol.ADMINISTRADOR).handle(ctx);
-          }
-        }
-    );
 
     // Protegemos la ACEPTACIÓN/RECHAZO de solicitudes
     app.before(
@@ -112,13 +103,13 @@ public class Router {
     );
 
     // Protegemos la MODIFICACIÓN de hechos
-    app.before(
-        "/hechos/{id}", ctx -> {
-          if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol(Rol.ADMINISTRADOR).handle(ctx);
-          }
-        }
-    );
+//    app.before(
+//        "/hechos/{id}", ctx -> {
+//          if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+//            tieneRol(Rol.ADMINISTRADOR).handle(ctx);
+//          }
+//        }
+//    );
 
 
     // Protegemos TODAS las rutas de /estadisticas
@@ -166,6 +157,29 @@ public class Router {
         "/admin/colecciones/{id}/configurar", adminController::configurarColeccion);
 
 
+    app.before(
+        "/hechos/{id}/editar", ctx -> {
+          Map<String, Object> model = modeloConSesion(ctx);
+          Long hechoId = Long.parseLong(ctx.pathParam("id"));
+          Hecho hecho = hechoController.findById(hechoId);
+          Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
+          if ((!hecho.getAutor()
+                     .getId()
+                     .equals(ctx.sessionAttribute("usuario_id"))) || estaLogueado == false) {
+            ctx.status(HttpStatus.FORBIDDEN);
+            ctx.redirect("/");
+          }
+        }
+    );
+    app.get(
+        "/hechos/{id}/editar", ctx -> {
+          Map<String, Object> model = modeloConSesion(ctx);
+          hechoController.editarHecho(ctx, model);
+        }
+    );
+
+    app.post("/hechos/{id}/editar", hechoController::actualizarHecho);
+
     app.get(
         "/admin/fuentes", ctx -> {
           adminController.listarFuentes(ctx, modeloConSesion(ctx));
@@ -187,25 +201,6 @@ public class Router {
         }
     );
 
-    app.get(
-        "/hechos/{id}/fotos/{indice}", ctx -> {
-          Long id = Long.parseLong(ctx.pathParam("id"));
-          int indice = Integer.parseInt(ctx.pathParam("indice"));
-
-          Hecho hecho = hechoController.findById(id);
-
-          if (hecho != null && hecho.getFotos()
-                                    .size() > indice) {
-            Multimedia foto = hecho.getFotos()
-                                   .get(indice);
-            ctx.contentType(foto.getMimetype());
-            ctx.result(foto.getDatos());
-          } else {
-            ctx.status(404)
-               .result("Foto no encontrada en DB");
-          }
-        }
-    );
 
     app.get("/auth/register", userController::mostrarRegistro);
 
@@ -311,22 +306,22 @@ public class Router {
         }
     );
 
-    app.put(
-        "/hechos/{id}", context -> {
-          Long idABuscar = Long.parseLong(context.pathParam("id"));
-          Long userId = context.sessionAttribute("usuario_id");
-          HechoDTO hechoModificado = context.bodyAsClass(HechoDTO.class);
-          try {
-            Usuario usuarioEditor = userController.finById(userId);
-            Hecho hechoOriginal = hechoController.findById(idABuscar);
-            hechoController.modificarHecho(hechoOriginal, hechoModificado, usuarioEditor);
-            context.json(hechoOriginal);
-          } catch (RuntimeException e) {
-            context.status(400);
-            context.result(e.getMessage());
-          }
-        }
-    );
+//    app.put(
+//        "/hechos/{id}", context -> {
+//          Long idABuscar = Long.parseLong(context.pathParam("id"));
+//          Long userId = context.sessionAttribute("usuario_id");
+//          HechoDTO hechoModificado = context.bodyAsClass(HechoDTO.class);
+//          try {
+//            Usuario usuarioEditor = userController.finById(userId);
+//            Hecho hechoOriginal = hechoController.findById(idABuscar);
+//            hechoController.modificarHecho(hechoOriginal, hechoModificado);
+//            context.json(hechoOriginal);
+//          } catch (RuntimeException e) {
+//            context.status(400);
+//            context.result(e.getMessage());
+//          }
+//        }
+//    );
 
 
     app.get(
@@ -335,6 +330,8 @@ public class Router {
           ctx.json(hechos);
         }
     );
+
+    app.get("/hechos/{id}/fotos/{indice}", hechoController::getFoto);
 
 
     app.post(
@@ -391,21 +388,21 @@ public class Router {
         }
     );
 
-    app.get(
-        "/colecciones", ctx -> {
-          List<Coleccion> colecciones = coleccionController.findAll();
-          ctx.json(colecciones);
-          ctx.status(200);
-        }
-    );
+//    app.get(
+//        "/colecciones", ctx -> {
+//          List<Coleccion> colecciones = coleccionController.findAll();
+//          ctx.json(colecciones);
+//          ctx.status(200);
+//        }
+//    );
 
-    app.get(
-        "/colecciones/categorias", ctx -> {
-          List<String> categorias = coleccionController.getCategorias();
-          ctx.json(categorias);
-          ctx.status(200);
-        }
-    );
+//    app.get(
+//        "/colecciones/categorias", ctx -> {
+//          List<String> categorias = coleccionController.getCategorias();
+//          ctx.json(categorias);
+//          ctx.status(200);
+//        }
+//    );
 
     app.get(
         "/admin/estadisticas/", ctx -> {

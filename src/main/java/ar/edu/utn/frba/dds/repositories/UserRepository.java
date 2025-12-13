@@ -5,12 +5,12 @@ import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
 
 /**
  * Repositorio de Usuarios. Maneja la persistencia.
  */
 public class UserRepository {
-  private final EntityManager em = DBUtils.getEntityManager();
 
   private static final UserRepository INSTANCE = new UserRepository();
 
@@ -24,13 +24,17 @@ public class UserRepository {
    * @param usuario El usuario a persistir.
    */
   public void guardar(Usuario usuario) {
+    EntityManager em = DBUtils.getEntityManager();
     DBUtils.comenzarTransaccion(em);
     try {
       em.persist(usuario);
-      DBUtils.commit(em);
-    } catch (Exception e) {
+
+    } catch (PersistenceException e) {
       DBUtils.rollback(em);
       throw new RuntimeException("Error al guardar el usuario: " + e.getMessage(), e);
+    } finally {
+      DBUtils.commit(em);
+      em.close();
     }
   }
 
@@ -41,6 +45,7 @@ public class UserRepository {
    * @return El Usuario si se encuentra, o null si no.
    */
   public Usuario findByEmail(String email) {
+    EntityManager em = DBUtils.getEntityManager();
     try {
       return em.createQuery("SELECT u FROM Usuario u WHERE u.email = :email", Usuario.class)
                .setParameter("email", email)
@@ -54,6 +59,7 @@ public class UserRepository {
    * Valida si un email ya existe.
    */
   public boolean emailExists(String email) {
+    EntityManager em = DBUtils.getEntityManager();
     Long count = em.createQuery("SELECT COUNT(u) FROM Usuario u WHERE u.email = :email", Long.class)
                    .setParameter("email", email)
                    .getSingleResult();
@@ -61,11 +67,13 @@ public class UserRepository {
   }
 
   public List<Usuario> findAll() {
+    EntityManager em = DBUtils.getEntityManager();
     return em.createQuery("SELECT u FROM Usuario u", Usuario.class)
              .getResultList();
   }
 
   public Usuario findById(Long id) {
+    EntityManager em = DBUtils.getEntityManager();
     return em.find(Usuario.class, id);
   }
 }

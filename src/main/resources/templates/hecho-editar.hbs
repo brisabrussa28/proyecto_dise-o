@@ -1,0 +1,296 @@
+{{#partial "nav_izquierda"}}
+    <a href="/" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+       title="Volver al Mapa">
+        <i class="fa-regular fa-map"></i>
+        <span class="d-none d-sm-block">Volver al Mapa</span>
+    </a>
+{{/partial}}
+
+{{#partial "contenido"}}
+    <style>
+        .img-selector {
+            cursor: pointer;
+            position: relative;
+            border: 3px solid transparent;
+            transition: all 0.2s ease-in-out;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .img-selector:hover {
+            border-color: rgba(220, 53, 69, 0.5);
+            transform: scale(1.02);
+        }
+
+        .img-selector.selected {
+            border-color: #dc3545;
+            opacity: 0.7;
+        }
+
+        .img-selector .trash-overlay {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #dc3545;
+            font-size: 2rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            padding: 10px;
+            width: 60px;
+            height: 60px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .img-selector.selected .trash-overlay {
+            display: flex;
+        }
+    </style>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="fa-regular fa-pen-to-square me-2"></i>Editar
+                            Hecho</h5>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <form action="/hechos/{{hecho.id}}/editar" method="POST"
+                              enctype="multipart/form-data">
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Titulo</label>
+                                <input type="text" class="form-control" name="titulo"
+                                       value="{{hecho.titulo}}"
+                                       placeholder="Ej: Ella uso mi cabeza como un revolver...">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Descripcion</label>
+                                <textarea class="form-control" name="descripcion"
+                                          placeholder="Incendio en Plaza Italia."
+                                          rows="3">{{hecho.descripcion}}</textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Fecha del Suceso</label>
+                                    <input type="datetime-local"
+                                           name="fechaSuceso"
+                                           class="form-control"
+                                           value="{{hecho.fechaSuceso}}"
+                                           max="{{fechaLimite}}">
+                                    <div class="form-text small text-muted">No se puede editar a una
+                                        fecha posterior a la original.
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Categoría</label>
+                                    <input type="text" name="categoria" class="form-control"
+                                           placeholder="Ej: Robos, Accidentes, etc..."
+                                           autocomplete="off"
+                                           value="{{hecho.categoria}}">
+                                </div>
+                            </div>
+
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Etiquetas</label>
+                                <input type="text" class="form-control" name="etiquetas"
+                                       value="{{etiquetasTexto}}"
+                                       placeholder="Ej: choque, demora, transito">
+                                <small class="form-text text-muted">Las etiquetas deben ir separadas
+                                    por
+                                    comas.</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Ubicación</label>
+                                <div class="input-group mb-2">
+                                    <input type="text" id="input-direccion" name="direccion"
+                                           class="form-control"
+                                           placeholder="Ej: Av. Corrientes 1234, CABA"
+                                           value="{{hecho.direccion}}">
+                                    <button type="button" class="btn btn-outline-primary"
+                                            id="btn-buscar-dir">
+                                        <i class="fa-solid fa-magnifying-glass"></i> Buscar en Mapa
+                                    </button>
+                                </div>
+
+                                <div id="map-picker"
+                                     style="height: 400px; width: 100%; border: 1px solid #ced4da; border-radius: 4px; margin-bottom: 10px;"></div>
+
+                                <div class="input-group input-group-sm mt-2">
+                                    <span class="input-group-text">Lat</span>
+                                    <input type="text" name="latitud" id="lat"
+                                           class="form-control bg-light"
+                                           value="{{hecho.ubicacion.latitud}}"
+                                           readonly required>
+                                    <span class="input-group-text">Lng</span>
+                                    <input type="text" name="longitud" id="lng"
+                                           class="form-control bg-light"
+                                           value="{{hecho.ubicacion.longitud}}"
+                                           readonly required>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="provincia" id="provincia">
+
+                            {{#if hecho.fotos}}
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Archivos multimedia</label>
+                                    <div class="row g-3">
+                                        {{#each hecho.fotos}}
+                                            <div class="col-6 col-md-3">
+                                                <div class="img-selector shadow-sm"
+                                                     onclick="toggleSeleccion(this)">
+
+                                                    <img src="/hechos/{{../hecho.id}}/fotos/{{@index}}"
+                                                         class="w-100"
+                                                         style="height: 150px; object-fit: cover; display: block;">
+
+                                                    <div class="trash-overlay">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </div>
+
+                                                    <input type="checkbox" name="fotos_borrar"
+                                                           value="{{@index}}"
+                                                           style="display: none;">
+                                                </div>
+                                            </div>
+                                        {{/each}}
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">
+                                        Haz clic en las imágenes que quieras eliminar.
+                                    </small>
+                                </div>
+                            {{/if}}
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Agregar Fotos</label>
+                                <input type="file" class="form-control" name="nuevas_fotos" multiple
+                                       accept="image/*">
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="/" class="btn btn-outline-secondary">Cancelar</a>
+                                <button type="submit" class="btn btn-primary float-end">Guardar
+                                    Cambios
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script>
+        function toggleSeleccion(elementoDiv) {
+            // 1. Alternar la clase visual 'selected' (pone el borde rojo)
+            elementoDiv.classList.toggle('selected');
+
+            // 2. Buscar el checkbox oculto dentro de este div
+            const checkbox = elementoDiv.querySelector('input[type="checkbox"]');
+
+            // 3. Cambiar su valor (true/false)
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialLat = {{#if hecho.ubicacion}}{{hecho.ubicacion.latitud}}{{else}}
+        -34.6037{{/if}}
+        const initialLng = {{#if hecho.ubicacion}}{{hecho.ubicacion.longitud}}{{else}}-583816{{/if}}
+
+        // 2. INICIALIZAR MAPA
+        const map = L.map('map-picker').setView([initialLat, initialLng], 12);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        let marker;
+
+        // Función para mover el marcador y guardar lat/lng en los inputs ocultos
+        function actualizarUbicacion(lat, lng) {
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng]).addTo(map);
+            }
+            map.setView([lat, lng], 15);
+            document.getElementById('lat').value = lat;
+            document.getElementById('lng').value = lng;
+        }
+
+        // --- NUEVO: Función para obtener dirección desde coordenadas ---
+        function obtenerDireccion(lat, lng) {
+            const inputDireccion = document.getElementById('input-direccion');
+            const inputProvincia = document.getElementById('provincia');
+
+            // 1. Feedback visual (mientras carga)
+            inputDireccion.value = "Buscando dirección...";
+            inputDireccion.style.color = "#999"; // Gris para indicar carga
+
+            // 2. Llamada a la API
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&accept-language=es&lat=${lat}&lon=${lng}`;
+
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.display_name) {
+                        // 3. Escribir la dirección real
+                        inputDireccion.value = data.address.road;
+                        inputDireccion.style.color = "#000"; // Volver a negro
+                        const prov = data.address.state;
+                        inputProvincia.value = prov;
+                    } else {
+                        inputDireccion.value = "Dirección no encontrada";
+                    }
+                })
+                .catch(err => {
+                    console.error("Error obteniendo dirección:", err);
+                    inputDireccion.value = "";
+                });
+        }
+
+        // --- EVENTOS ---
+
+        if(!isNaN(initialLat) && !isNaN(initialLng)) {
+            actualizarUbicacion(initialLat, initialLng);
+        }
+
+        // A. Clic en el mapa (Actualiza marcador Y busca dirección)
+        map.on('click', function(e) {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+
+            actualizarUbicacion(lat, lng); // Mueve el pin
+            obtenerDireccion(lat, lng);    // Actualiza la barra de texto
+        });
+
+        // B. Buscar Dirección con el botón (Actualiza marcador)
+        document.getElementById('btn-buscar-dir').addEventListener('click', () => {
+            const query = document.getElementById('input-direccion').value;
+            if (!query) return;
+
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        actualizarUbicacion(data[0].lat, data[0].lon);
+                    } else {
+                        alert("Dirección no encontrada");
+                    }
+                })
+                .catch(err => console.error("Error en geocoding", err));
+        });
+    });
+    setTimeout(() => { map.invalidateSize(); }, 200);
+    </script>
+{{/partial}}
+{{> templates/layout}}

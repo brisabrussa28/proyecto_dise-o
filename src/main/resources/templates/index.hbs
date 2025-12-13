@@ -21,7 +21,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const hechosData = {{{hechosJson}}};
-            const currentUserId = {{#if usuario_id}}{{usuario_id}}{{else}}-1{{/if}};// Asegúrate de pasar esto desde el controller
+            const currentUserId = {{#if usuario_id}}{{usuario_id}}{{else}}-1{{/if}};
 
             const map = L.map('map').setView([-34.6037, -58.3816], 12);
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19}).addTo(map);

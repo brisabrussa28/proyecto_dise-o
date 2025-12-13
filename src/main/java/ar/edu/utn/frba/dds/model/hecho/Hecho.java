@@ -277,6 +277,10 @@ public class Hecho {
     return new ArrayList<>(fotos);
   }
 
+  public void quitar(int indice) {
+    this.fotos.remove(indice);
+  }
+
   public Set<Coleccion> getColecciones() {
     return this.colecciones;
   }
