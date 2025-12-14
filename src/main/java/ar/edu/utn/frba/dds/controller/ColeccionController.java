@@ -57,6 +57,30 @@ public class ColeccionController {
     }
   }
 
+  // --- NUEVO MÉTODO PARA CALCULO MANUAL ---
+  public void calcularConsenso(Context ctx) {
+    try {
+      Long id = Long.parseLong(ctx.pathParam("id"));
+      Coleccion coleccion = this.findById(id);
+
+      if (coleccion != null) {
+        // Ejecutamos la lógica de negocio
+        coleccion.recalcularConsenso();
+
+        // Guardamos el estado actualizado (lista de hechos)
+        this.persist(coleccion);
+
+        // Volvemos a la misma página para ver los cambios
+        ctx.redirect("/admin/colecciones/" + id);
+      } else {
+        ctx.status(404).result("Colección no encontrada");
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      ctx.status(500).result("Error al calcular consenso: " + e.getMessage());
+    }
+  }
+
   public void persist(Coleccion colecccion) {
     ColeccionRepository.instance()
                        .save(colecccion);

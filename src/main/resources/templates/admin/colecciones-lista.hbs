@@ -98,14 +98,15 @@
                                         <label class="small fw-bold">Tipo de Fuente</label>
                                         <select name="nueva_fuente_tipo" id="selectorTipoFuente"
                                                 class="form-select form-select-sm"
-                                                onchange="toggleInputArchivo()">
+                                                onchange="toggleInputsFuenteNueva()">
                                             <option value="DINAMICA">Dinámica</option>
-                                            <option value="ESTATICA">Estática
-                                            </option>
+                                            <option value="ESTATICA">Estática</option>
                                             <option value="API">API Externa</option>
+                                            <option value="AGREGACION">Agregación</option>
                                         </select>
                                     </div>
 
+                                    <!-- Campo Archivo (ESTATICA) -->
                                     <div id="campo-archivo" class="d-none mt-2">
                                         <label class="small fw-bold text-primary">Archivo de
                                             Datos</label>
@@ -116,24 +117,37 @@
                                             JSON.
                                         </div>
                                     </div>
+
+                                    <!-- Campo URL (API) -->
+                                    <div id="campo-url" class="d-none mt-2">
+                                        <label class="small fw-bold text-primary">URL Endpoint</label>
+                                        <input type="text" name="url"
+                                               class="form-control form-control-sm"
+                                               placeholder="https://api.ejemplo.com/datos">
+                                    </div>
+
+                                    <!-- Campo Agregación (AGREGACION) -->
+                                    <div id="campo-agregacion" class="d-none mt-2">
+                                        <label class="small fw-bold text-primary mb-1">Fuentes a Combinar</label>
+                                        <div class="input-group input-group-sm mb-2">
+                                            <!-- Se llena vía JS llamando a /fuentes?soloSimples=true -->
+                                            <select id="selectFuenteParaAgregacion" class="form-select">
+                                                <option value="" disabled selected>Cargando fuentes...</option>
+                                            </select>
+                                            <button type="button" class="btn btn-outline-primary" onclick="agregarFuenteALista()">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                        </div>
+
+                                        <ul id="listaFuentesAgregadas" class="list-group list-group-flush mb-2 border rounded bg-white" style="min-height: 50px; max-height: 150px; overflow-y: auto;">
+                                            <li class="list-group-item text-center text-muted small fst-italic" id="placeholder-agregacion">
+                                                Lista vacía
+                                            </li>
+                                        </ul>
+                                        <!-- Contenedor inputs ocultos -->
+                                        <div id="inputsAgregacionContainer"></div>
+                                    </div>
                                 </div>
-
-                                <script>
-                                    // Lógica para mostrar/ocultar el input de archivo
-                                    function toggleInputArchivo() {
-                                        const tipo = document.getElementById('selectorTipoFuente').value;
-                                        const campoArchivo = document.getElementById('campo-archivo');
-
-                                        if (tipo === 'ESTATICA') {
-                                            campoArchivo.classList.remove('d-none');
-                                            // Hacerlo requerido si es estática para evitar errores en backend
-                                            campoArchivo.querySelector('input').required = true;
-                                        } else {
-                                            campoArchivo.classList.add('d-none');
-                                            campoArchivo.querySelector('input').required = false;
-                                        }
-                                    }
-                                </script>
                             </div>
 
                             <button type="submit" class="btn btn-warning w-100">Crear Colección
@@ -179,6 +193,33 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar fuentes filtradas para el selector de agregación
+            cargarFuentesSimplesParaAgregacion();
+        });
+
+        async function cargarFuentesSimplesParaAgregacion() {
+            const select = document.getElementById('selectFuenteParaAgregacion');
+            try {
+                // Consultamos el endpoint con el filtro
+                const response = await fetch('/fuentes?soloSimples=true');
+                if (!response.ok) throw new Error("Error en request");
+
+                const data = await response.json();
+
+                select.innerHTML = '<option value="" disabled selected>Elegir fuente...</option>';
+                data.forEach(fuente => {
+                    const option = document.createElement('option');
+                    option.value = fuente.id;
+                    option.textContent = fuente.nombre;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error cargando fuentes simples:", error);
+                select.innerHTML = '<option value="" disabled selected>Error cargando fuentes</option>';
+            }
+        }
+
         function toggleFuente(modo) {
             const panelExistente = document.getElementById('panel-fuente-existente');
             const panelNueva = document.getElementById('panel-fuente-nueva');
@@ -189,6 +230,87 @@
             } else {
                 panelExistente.classList.add('d-none');
                 panelNueva.classList.remove('d-none');
+                toggleInputsFuenteNueva(); // Ajustar inputs al mostrar
+            }
+        }
+
+        function toggleInputsFuenteNueva() {
+            const tipo = document.getElementById('selectorTipoFuente').value;
+            const campoArchivo = document.getElementById('campo-archivo');
+            const campoUrl = document.getElementById('campo-url');
+            const campoAgregacion = document.getElementById('campo-agregacion');
+
+            // Reset
+            campoArchivo.classList.add('d-none');
+            campoUrl.classList.add('d-none');
+            campoAgregacion.classList.add('d-none');
+
+            // Limpiar requeridos
+            if(campoArchivo.querySelector('input')) campoArchivo.querySelector('input').required = false;
+            if(campoUrl.querySelector('input')) campoUrl.querySelector('input').required = false;
+
+            if (tipo === 'ESTATICA') {
+                campoArchivo.classList.remove('d-none');
+                campoArchivo.querySelector('input').required = true;
+            } else if (tipo === 'API') {
+                campoUrl.classList.remove('d-none');
+                campoUrl.querySelector('input').required = true;
+            } else if (tipo === 'AGREGACION') {
+                campoAgregacion.classList.remove('d-none');
+            }
+        }
+
+        // Lógica para Agregar Fuentes en modo AGREGACION
+        function agregarFuenteALista() {
+            const select = document.getElementById('selectFuenteParaAgregacion');
+            const lista = document.getElementById('listaFuentesAgregadas');
+            const inputsContainer = document.getElementById('inputsAgregacionContainer');
+            const placeholder = document.getElementById('placeholder-agregacion');
+
+            const idFuente = select.value;
+            const nombreFuente = select.options[select.selectedIndex].text;
+
+            if (!idFuente) return;
+
+            // Validar duplicados
+            const yaExiste = document.querySelector(`input[name="fuentes_seleccionadas"][value="${idFuente}"]`);
+            if (yaExiste) {
+                alert("Fuente ya seleccionada.");
+                return;
+            }
+
+            if (placeholder) placeholder.classList.add('d-none');
+
+            // Crear Input Oculto (Mismo nombre que en FuenteController)
+            const inputHidden = document.createElement('input');
+            inputHidden.type = 'hidden';
+            inputHidden.name = 'fuentes_seleccionadas';
+            inputHidden.value = idFuente;
+            inputHidden.id = `input-fuente-agg-${idFuente}`;
+            inputsContainer.appendChild(inputHidden);
+
+            // Crear Elemento Visual
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center py-1 small';
+            li.id = `li-fuente-agg-${idFuente}`;
+            li.innerHTML = `
+                <span>${nombreFuente}</span>
+                <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="quitarFuenteAgregacion('${idFuente}')">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            `;
+            lista.appendChild(li);
+
+            select.value = "";
+        }
+
+        function quitarFuenteAgregacion(id) {
+            document.getElementById(`input-fuente-agg-${id}`)?.remove();
+            document.getElementById(`li-fuente-agg-${id}`)?.remove();
+
+            const inputsContainer = document.getElementById('inputsAgregacionContainer');
+            if (inputsContainer.children.length === 0) {
+                document.getElementById('placeholder-agregacion').classList.remove('d-none');
             }
         }
     </script>

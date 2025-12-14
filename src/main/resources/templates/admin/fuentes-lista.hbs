@@ -14,17 +14,18 @@
 
         <div class="row">
 
+            <!-- Panel de Creación -->
             <div class="col-md-4">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white fw-bold">Nueva Fuente</div>
                     <div class="card-body">
 
-                        <form action="/admin/fuentes" method="POST" enctype="multipart/form-data">
+                        <form action="/admin/fuentes" method="POST" enctype="multipart/form-data" id="formCrearFuente">
 
                             <div class="mb-3">
                                 <label class="form-label">Nombre</label>
                                 <input type="text" name="nueva_fuente_nombre" class="form-control"
-                                       placeholder="Ej: Noticias de ayer" required>
+                                       placeholder="Ej: Noticias Combinadas" required>
                             </div>
 
                             <div class="mb-3">
@@ -32,15 +33,16 @@
                                 <select name="nueva_fuente_tipo" id="selectorTipo"
                                         class="form-select"
                                         onchange="mostrarCampos()">
-                                    <option value="DINAMICA">Dinámica</option>
+                                    <option value="DINAMICA" selected>Dinámica</option>
                                     <option value="ESTATICA">Estática JSON o CSV</option>
                                     <option value="API">API Externa</option>
+                                    <option value="AGREGACION">Agregación (Combinada)</option>
                                 </select>
                             </div>
 
+                            <!-- Campos para API -->
                             <div id="camposApi" class="d-none bg-light p-2 rounded mb-3 border">
-                                <small class="text-muted d-block mb-2 fw-bold">Configuración
-                                    API</small>
+                                <small class="text-muted d-block mb-2 fw-bold">Configuración API</small>
                                 <div class="mb-2">
                                     <input type="text" name="url"
                                            class="form-control form-control-sm"
@@ -53,50 +55,103 @@
                                 </div>
                             </div>
 
-                            <div id="camposEstatica"
-                                 class="d-none bg-light p-2 rounded mb-3 border">
-                                <label class="small fw-bold text-primary">Archivo de
-                                    Datos</label>
+                            <!-- Campos para Archivo Estático -->
+                            <div id="camposEstatica" class="d-none bg-light p-2 rounded mb-3 border">
+                                <label class="small fw-bold text-primary">Archivo de Datos</label>
                                 <input type="file" name="archivo_fuente"
                                        class="form-control form-control-sm"
                                        accept=".csv, .json">
-                                <div class="form-text x-small">Formatos soportados: CSV,
-                                    JSON.
+                                <div class="form-text x-small">Formatos soportados: CSV, JSON.</div>
+                            </div>
+
+                            <!-- Campos para Agregación (NUEVO DISEÑO) -->
+                            <div id="camposAgregacion" class="d-none bg-light p-2 rounded mb-3 border">
+                                <label class="small fw-bold text-primary mb-2">Componer Agregación</label>
+
+                                <!-- Selector y Botón Agregar (Se llena vía JS con /fuentes?soloSimples=true) -->
+                                <div class="input-group input-group-sm mb-2">
+                                    <select id="selectFuenteOrigen" class="form-select">
+                                        <option value="" disabled selected>Cargando fuentes...</option>
+                                    </select>
+                                    <button type="button" class="btn btn-outline-primary" onclick="agregarFuenteALista()">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Lista visual de seleccionados -->
+                                <ul id="listaFuentesSeleccionadas" class="list-group list-group-flush mb-2 border rounded bg-white" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
+                                    <li class="list-group-item text-center text-muted small fst-italic" id="placeholder-lista">
+                                        Sin fuentes seleccionadas
+                                    </li>
+                                </ul>
+
+                                <!-- Contenedor de Inputs Ocultos (Lo que se envía al servidor) -->
+                                <div id="inputsOcultosContainer"></div>
+
+                                <div class="form-text x-small">
+                                    Agregá las fuentes que formarán parte de este grupo. No se permiten duplicados.
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-warning w-100">Crear Fuente
-                            </button>
+
+                            <button type="submit" class="btn btn-warning w-100">Crear Fuente</button>
                         </form>
                     </div>
                 </div>
             </div>
 
+            <!-- Listado de Fuentes -->
             <div class="col-md-8">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-white"><h5 class="mb-0" style="font-weight: 600;">Fuentes
-                        Existentes</h5></div>
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0" style="font-weight: 600;">Fuentes Existentes</h5>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="cargarTodasLasFuentes()" title="Refrescar lista">
+                            <i class="fa-solid fa-rotate"></i>
+                        </button>
+                    </div>
+
                     <div class="card-body p-0">
-                        <ul class="list-group list-group-flush">
+
+                        <!-- Loader -->
+                        <div id="loaderFuentes" class="text-center p-4 d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="text-muted small mt-2">Consultando endpoint...</p>
+                        </div>
+
+                        <!-- Error -->
+                        <div id="errorFuentes" class="alert alert-warning m-3 d-none align-items-center" role="alert">
+                            <div>
+                                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                <span id="msgError"></span>
+                                <div class="small mt-1 fst-italic">Mostrando lista local como respaldo.</div>
+                            </div>
+                        </div>
+
+                        <!-- Lista Dinámica (Se llena con JS vía /fuentes) -->
+                        <ul id="listaFuentesDinamica" class="list-group list-group-flush d-none">
+                            <!-- Aquí se inyectarán los items del fetch -->
+                        </ul>
+
+                        <!-- Fallback Servidor: Se muestra si el fetch falla o mientras carga si se desea -->
+                        <ul id="listaFuentesServer" class="list-group list-group-flush">
                             {{#each fuentes}}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
                                         <h5 class="mb-0" style="font-weight: 600;">{{this.nombre}}</h5>
-
-                                        <span class="badge bg-secondary"
-                                              style="font-size: 0.7rem">ID: {{this.id}}</span>
+                                        <span class="badge bg-secondary" style="font-size: 0.7rem">Tipo: {{this.tipo}} (ID: {{this.id}})</span>
                                     </div>
-
                                     <div class="btn-group">
-                                        <a href="/admin/fuentes/{{this.id}}"
-                                           class="btn btn-sm btn-outline-primary">
+                                        <a href="/admin/fuentes/{{this.id}}" class="btn btn-sm btn-outline-primary">
                                             <i class="fa-solid fa-gear"></i> Configurar
                                         </a>
                                     </div>
                                 </li>
                             {{else}}
-                                <div class="p-4 text-center text-muted">No hay fuentes.</div>
+                                <div class="p-4 text-center text-muted">No hay fuentes cargadas (Local).</div>
                             {{/each}}
                         </ul>
+
                     </div>
                 </div>
             </div>
@@ -105,18 +160,175 @@
     </div>
 
     <script>
+        // --- CONFIGURACIÓN DE ENDPOINTS ---
+        const API_ENDPOINT_TODAS = "/fuentes";
+        const API_ENDPOINT_SIMPLES = "/fuentes?soloSimples=true";
+        // ----------------------------------
+
+        // Ejecutar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            mostrarCampos();
+            cargarTodasLasFuentes();        // Lista general
+            cargarFuentesParaSelect();      // Lista para el selector de agregación
+        });
+
+        // 1. Cargar Lista General (Panel Derecho)
+        async function cargarTodasLasFuentes() {
+            const listaDinamica = document.getElementById('listaFuentesDinamica');
+            const listaServer = document.getElementById('listaFuentesServer');
+            const loader = document.getElementById('loaderFuentes');
+            const errorDiv = document.getElementById('errorFuentes');
+            const msgError = document.getElementById('msgError');
+
+            listaDinamica.classList.add('d-none');
+            listaServer.classList.add('d-none');
+            errorDiv.classList.add('d-none');
+            loader.classList.remove('d-none');
+
+            try {
+                console.log("Consultando fuentes generales a:", API_ENDPOINT_TODAS);
+                const response = await fetch(API_ENDPOINT_TODAS);
+
+                if (!response.ok) throw new Error(`Error endpoint (${response.status})`);
+
+                const data = await response.json();
+                const fuentesArray = Array.isArray(data) ? data : (data.results || []);
+
+                listaDinamica.innerHTML = '';
+
+                if (fuentesArray.length === 0) {
+                    listaDinamica.innerHTML = '<div class="p-4 text-center text-muted">No hay fuentes disponibles.</div>';
+                } else {
+                    fuentesArray.forEach(fuente => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        li.innerHTML = `
+                            <div>
+                                <h5 class="mb-0" style="font-weight: 600;">${fuente.nombre || 'Sin Nombre'}</h5>
+                                <span class="badge bg-info text-dark" style="font-size: 0.7rem">Tipo: ${fuente.tipo || 'N/A'}</span>
+                                <span class="badge bg-secondary" style="font-size: 0.7rem">ID: ${fuente.id}</span>
+                            </div>
+                            <div class="btn-group">
+                                <a href="/admin/fuentes/${fuente.id}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fa-solid fa-gear"></i> Configurar
+                                </a>
+                            </div>
+                        `;
+                        listaDinamica.appendChild(li);
+                    });
+                }
+                listaDinamica.classList.remove('d-none');
+
+            } catch (err) {
+                console.warn("Fallo en Fetch General:", err);
+                msgError.textContent = `Error cargando lista: ${err.message}`;
+                errorDiv.classList.remove('d-none');
+                errorDiv.classList.add('d-flex');
+                listaServer.classList.remove('d-none'); // Fallback
+            } finally {
+                loader.classList.add('d-none');
+            }
+        }
+
+        // 2. Cargar Selector de Agregación (Solo Simples)
+        async function cargarFuentesParaSelect() {
+            const select = document.getElementById('selectFuenteOrigen');
+
+            try {
+                console.log("Consultando fuentes simples a:", API_ENDPOINT_SIMPLES);
+                const response = await fetch(API_ENDPOINT_SIMPLES);
+
+                if (!response.ok) throw new Error("Error al obtener fuentes simples");
+
+                const data = await response.json();
+                const fuentesSimples = Array.isArray(data) ? data : (data.results || []);
+
+                // Limpiar opciones previas
+                select.innerHTML = '<option value="" disabled selected>Seleccionar fuente...</option>';
+
+                fuentesSimples.forEach(fuente => {
+                    const option = document.createElement('option');
+                    option.value = fuente.id;
+                    option.textContent = fuente.nombre || `Fuente #${fuente.id}`;
+                    select.appendChild(option);
+                });
+
+            } catch (err) {
+                console.error("Error cargando selector:", err);
+                select.innerHTML = '<option value="" disabled selected>Error cargando opciones</option>';
+            }
+        }
+
+        // --- Funciones del Formulario Original ---
+
         function mostrarCampos() {
             const tipo = document.getElementById('selectorTipo').value;
 
-            // Ocultar todos primero
             document.getElementById('camposApi').classList.add('d-none');
             document.getElementById('camposEstatica').classList.add('d-none');
+            document.getElementById('camposAgregacion').classList.add('d-none');
 
-            // Mostrar el seleccionado
             if (tipo === 'API') {
                 document.getElementById('camposApi').classList.remove('d-none');
             } else if (tipo === 'ESTATICA') {
                 document.getElementById('camposEstatica').classList.remove('d-none');
+            } else if (tipo === 'AGREGACION') {
+                document.getElementById('camposAgregacion').classList.remove('d-none');
+            }
+        }
+
+        function agregarFuenteALista() {
+            const select = document.getElementById('selectFuenteOrigen');
+            const lista = document.getElementById('listaFuentesSeleccionadas');
+            const inputsContainer = document.getElementById('inputsOcultosContainer');
+            const placeholder = document.getElementById('placeholder-lista');
+
+            const idFuente = select.value;
+            const nombreFuente = select.options[select.selectedIndex].text;
+
+            if (!idFuente) return;
+
+            const yaExiste = document.querySelector(`input[name="fuentes_seleccionadas"][value="${idFuente}"]`);
+            if (yaExiste) {
+                alert("Esa fuente ya está agregada.");
+                return;
+            }
+
+            if (placeholder) {
+                placeholder.classList.add('d-none');
+            }
+
+            const inputHidden = document.createElement('input');
+            inputHidden.type = 'hidden';
+            inputHidden.name = 'fuentes_seleccionadas';
+            inputHidden.value = idFuente;
+            inputHidden.id = `input-fuente-${idFuente}`;
+            inputsContainer.appendChild(inputHidden);
+
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center py-2';
+            li.id = `li-fuente-${idFuente}`;
+            li.innerHTML = `
+                <span class="small fw-bold">${nombreFuente}</span>
+                <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="quitarFuente('${idFuente}')">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            `;
+            lista.appendChild(li);
+
+            select.value = "";
+        }
+
+        function quitarFuente(id) {
+            const input = document.getElementById(`input-fuente-${id}`);
+            if (input) input.remove();
+
+            const li = document.getElementById(`li-fuente-${id}`);
+            if (li) li.remove();
+
+            const inputsContainer = document.getElementById('inputsOcultosContainer');
+            if (inputsContainer.children.length === 0) {
+                document.getElementById('placeholder-lista').classList.remove('d-none');
             }
         }
     </script>

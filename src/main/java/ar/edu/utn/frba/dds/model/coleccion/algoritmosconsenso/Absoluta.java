@@ -5,25 +5,17 @@ import java.util.List;
 import java.util.Set;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-/*
-* ABSOLUTA
-* si todas las fuentes del nodo contienen el mismo, se lo considera consensuado.
-*/
-
-
 
 @Entity
 @DiscriminatorValue("Absoluta")
 public class Absoluta extends AlgoritmoDeConsenso {
 
-  /**
-   * Verifica si un hecho cumple con el consenso absoluto.
-   */
   @Override
   protected boolean esConsensuado(Hecho hecho, List<Set<Hecho>> hechosDeFuentes) {
+    if (hechosDeFuentes.isEmpty()) return false;
+
+    // Usamos el nuevo método flexible
     return hechosDeFuentes.stream()
-                          .allMatch(hechos -> hechos.contains(hecho));
+                          .allMatch(setHechos -> existeHechoSimilarEnFuente(setHechos, hecho));
   }
 }
-
-

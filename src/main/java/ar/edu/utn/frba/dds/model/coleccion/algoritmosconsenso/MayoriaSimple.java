@@ -6,36 +6,25 @@ import java.util.Set;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-
-/*
-* MAYORIA SIMPLE
-* si al menos la mitad de las fuentes del nodo contienen el mismo hecho,
-* se lo considera consensuado;
- */
-
 @Entity
 @DiscriminatorValue("May_simple")
 public class MayoriaSimple extends AlgoritmoDeConsenso {
 
-  /**
-   * Calcula el número mínimo de menciones necesarias para alcanzar la mayoría simple.
-   */
   private long calcularUmbralDeMayoria(int totalFuentes) {
     return (long) Math.ceil((double) totalFuentes / 2);
   }
 
-  /**
-   * Verifica si el número de menciones de un hecho alcanza el umbral.
-   */
   @Override
   protected boolean esConsensuado(Hecho hecho, List<Set<Hecho>> hechosDeFuentes) {
+    if (hechosDeFuentes.isEmpty()) return false;
+
     long umbralDeMayoria = calcularUmbralDeMayoria(hechosDeFuentes.size());
 
+    // Usamos el nuevo método flexible
     long menciones = hechosDeFuentes.stream()
-                                    .filter(hechos -> hechos.contains(hecho))
+                                    .filter(setHechos -> existeHechoSimilarEnFuente(setHechos, hecho))
                                     .count();
 
     return menciones >= umbralDeMayoria;
   }
 }
-

@@ -105,15 +105,6 @@ public class Router {
         }
     );
 
-    // Protegemos la MODIFICACIÓN de hechos
-//    app.before(
-//        "/hechos/{id}", ctx -> {
-//          if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-//            tieneRol(Rol.ADMINISTRADOR).handle(ctx);
-//          }
-//        }
-//    );
-
 
     // Protegemos TODAS las rutas de /estadisticas
     app.before(
@@ -158,6 +149,10 @@ public class Router {
     app.post("/admin/colecciones", ctx -> adminController.crearColeccion(ctx));
     app.post("/admin/colecciones/{id}/agregarHecho", adminController::agregarHechoAColeccion);
     app.post("/admin/colecciones/{id}/quitarHecho", adminController::removerHechoDeColeccion);
+
+    // --- NUEVO ENDPOINT PARA CALCULO MANUAL ---
+    app.post("/admin/colecciones/{id}/calcular-consenso", coleccionController::calcularConsenso);
+
     app.post("/admin/fuentes", ctx -> adminController.crearFuente(ctx));
     app.post("/admin/colecciones/{id}/configurar", adminController::configurarColeccion);
 
@@ -231,19 +226,6 @@ public class Router {
     );
 
     app.get("/home", ctx -> ctx.json(hechoController.findAll()));
-
-//    app.get(
-//        "/hechos/{id}", ctx -> {
-//          Long id = Long.parseLong(ctx.pathParam("id"));
-//          Hecho hecho = hechoController.findById(id);
-//          if (hecho == null) {
-//            ctx.status(404);
-//            ctx.result("Not Found");
-//          } else {
-//            ctx.json(hecho);
-//          }
-//        }
-//    );
 
     app.post(
         "/hechos", ctx -> {
@@ -327,24 +309,6 @@ public class Router {
         }
     );
 
-//    app.put(
-//        "/hechos/{id}", context -> {
-//          Long idABuscar = Long.parseLong(context.pathParam("id"));
-//          Long userId = context.sessionAttribute("usuario_id");
-//          HechoDTO hechoModificado = context.bodyAsClass(HechoDTO.class);
-//          try {
-//            Usuario usuarioEditor = userController.finById(userId);
-//            Hecho hechoOriginal = hechoController.findById(idABuscar);
-//            hechoController.modificarHecho(hechoOriginal, hechoModificado);
-//            context.json(hechoOriginal);
-//          } catch (RuntimeException e) {
-//            context.status(400);
-//            context.result(e.getMessage());
-//          }
-//        }
-//    );
-
-
     app.get(
         "/hechos", ctx -> {
           List<Hecho> hechos = hechoController.findAll();
@@ -413,26 +377,11 @@ public class Router {
     );
     app.get(
         "/fuentes", ctx -> {
-          List<Fuente> fuentes = fuenteController.findAll();
-          ctx.json(fuentes);
+          Boolean soloSimples = ctx.queryParamAsClass("soloSimples", Boolean.class).getOrDefault(false);
+          // Llamamos al método enriquecido, NO a findAll() directo
+          ctx.json(fuenteController.obtenerFuentesConTipo(soloSimples));
         }
     );
-
-//    app.get(
-//        "/colecciones", ctx -> {
-//          List<Coleccion> colecciones = coleccionController.findAll();
-//          ctx.json(colecciones);
-//          ctx.status(200);
-//        }
-//    );
-
-//    app.get(
-//        "/colecciones/categorias", ctx -> {
-//          List<String> categorias = coleccionController.getCategorias();
-//          ctx.json(categorias);
-//          ctx.status(200);
-//        }
-//    );
 
     app.get("/admin/estadisticas", ctx -> {
 

@@ -1,6 +1,9 @@
 package ar.edu.utn.frba.dds.model.coleccion;
 
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.Absoluta;
 import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.AlgoritmoDeConsenso;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MayoriaSimple;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MultiplesMenciones;
 import ar.edu.utn.frba.dds.model.filtro.Filtro;
 import ar.edu.utn.frba.dds.model.filtro.condiciones.Condicion;
 import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionTrue;
@@ -9,6 +12,7 @@ import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -25,19 +29,16 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 /**
- * Representa una colección de hechos obtenidos de una fuente específica,
- * con la capacidad de aplicar un filtro propio y un algoritmo de consenso.
- * Su responsabilidad es manejar su propia lógica de filtrado y consenso.
- * Puede recibir un filtro externo (ej. de hechos eliminados) para aplicarlo
- * antes que su filtro interno.
+ * Representa una colección de hechos obtenidos de una fuente específica.
  */
 @Entity
 @Table(name = "Coleccion")
 public class Coleccion {
-  //TODO: Poner nombres de var como la gente, no como si fueran de bd. de ultima le asignamos un nombre especal en la bd
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long coleccion_id;
+
   @ManyToOne
   @JoinColumn(name = "coleccion_fuente")
   private Fuente coleccion_fuente;
@@ -56,8 +57,8 @@ public class Coleccion {
   @ManyToMany
   @JoinTable(
       name = "coleccion_hecho",
-      joinColumns = @JoinColumn(name = "coleccion_id"),
-      inverseJoinColumns = @JoinColumn(name = "hecho_id")
+      joinColumns = @JoinColumn(name = "coleccion_coleccion_id"),
+      inverseJoinColumns = @JoinColumn(name = "hechos_hecho_id")
   )
   private Set<Hecho> hechos = new HashSet<>();
 
@@ -67,17 +68,8 @@ public class Coleccion {
 
   // --- Constructores ---
   public Coleccion() {
-    // Constructor vacío para JPA
   }
 
-  /**
-   * Constructor para crear una nueva Coleccion con sus datos fundamentales.
-   *
-   * @param coleccion_titulo      El título de la colección.
-   * @param coleccion_fuente      La fuente de donde se obtendrán los hechos.
-   * @param coleccion_descripcion Una breve descripción del propósito de la colección.
-   * @param coleccion_categoria   Una categoría para organizar la colección.
-   */
   public Coleccion(
       String coleccion_titulo,
       Fuente coleccion_fuente,
@@ -94,97 +86,45 @@ public class Coleccion {
     this.coleccion_fuente = coleccion_fuente;
     this.coleccion_descripcion = coleccion_descripcion;
     this.coleccion_categoria = coleccion_categoria;
-    this.coleccion_condicion = new CondicionTrue(); // Por defecto, no filtra nada
+    this.coleccion_condicion = new CondicionTrue();
     inicializarFiltro();
   }
 
   // --- Métodos de Lógica Principal ---
 
-  /**
-   * Recalcula y actualiza la lista interna de hechos consensuados.
-   *
-   * @param filtroExcluyente Un filtro (ej. de hechos eliminados) que se aplica ANTES del filtro propio.
-   */
   public void recalcularHechosConsensuados(Filtro filtroExcluyente, List<Fuente> fuentes) {
-    // 1. Filtramos primero (ej: sacar eliminados)
     List<Hecho> hechosParaAnalizar = this.obtenerHechosFiltrados(filtroExcluyente);
-
-    // 2. Le preguntamos al algoritmo cuáles pasan el consenso
     List<Hecho> aprobados = this.coleccion_algoritmo.listaDeHechosConsensuados(
         hechosParaAnalizar,
         fuentes
     );
-
-    // 3. Actualizamos NUESTRA lista persistente
     this.hechos.clear();
     this.hechos.addAll(aprobados);
   }
 
-  /**
-   * Obtiene los hechos de la fuente y aplica una cadena de filtros
-   *
-   * @param filtroExcluyente Un filtro que se aplica primero (ej. para excluir hechos eliminados).
-   * @return Una lista de hechos completamente filtrada.
-   */
   public List<Hecho> obtenerHechosFiltrados(Filtro filtroExcluyente) {
     List<Hecho> hechosFuente = coleccion_fuente.getHechos();
     List<Hecho> hechosSinExcluidos = filtroExcluyente.filtrar(hechosFuente);
     return this.filtro.filtrar(hechosSinExcluidos);
   }
 
-
-  // --- Métodos Auxiliares y de Ayuda ---
-
-  /**
-   * Verifica si la colección está asociada a una fuente específica.
-   *
-   * @param unaFuente La fuente a comprobar.
-   * @return {@code true} si la fuente de la colección es la misma que la proporcionada.
-   */
   public boolean contieneFuente(Fuente unaFuente) {
     return this.coleccion_fuente.equals(unaFuente);
   }
 
-  /**
-   * Verifica si un hecho está presente en la colección después de aplicar todos los filtros.
-   *
-   * @param unHecho          El hecho a verificar.
-   * @param filtroExcluyente El filtro externo necesario para una comprobación precisa.
-   * @return {@code true} si el hecho está en la colección, {@code false} en caso contrario.
-   */
   public boolean contieneHechoFiltrado(Hecho unHecho, Filtro filtroExcluyente) {
     return this.obtenerHechosFiltrados(filtroExcluyente)
                .contains(unHecho);
   }
 
-  /**
-   * Valida que los campos obligatorios del constructor no sean nulos o vacíos.
-   *
-   * @throws IllegalArgumentException si alguna validación falla.
-   */
   private void validarCamposObligatorios(
       String unTitulo, Fuente unaFuente, String unaDescripcion, String unaCategoria) {
-    if (unTitulo == null || unTitulo.isBlank()) {
-      throw new IllegalArgumentException("El titulo es un campo obligatorio.");
-    }
-    if (unaFuente == null) {
-      throw new IllegalArgumentException("La fuente es un campo obligatorio.");
-    }
-    if (unaDescripcion == null || unaDescripcion.isBlank()) {
-      throw new IllegalArgumentException("La descripcion es un campo obligatorio.");
-    }
-    if (unaCategoria == null || unaCategoria.isBlank()) {
-      throw new IllegalArgumentException("La categoria es un campo obligatorio.");
-    }
+    if (unTitulo == null || unTitulo.isBlank()) throw new IllegalArgumentException("El titulo es obligatorio.");
+    if (unaFuente == null) throw new IllegalArgumentException("La fuente es obligatoria.");
+    if (unaDescripcion == null || unaDescripcion.isBlank()) throw new IllegalArgumentException("La descripcion es obligatoria.");
+    if (unaCategoria == null || unaCategoria.isBlank()) throw new IllegalArgumentException("La categoria es obligatoria.");
   }
 
-  // --- Métodos de JPA ---
-
-  /**
-   * Inicializa el objeto Filtro transitorio después de que la entidad es cargada por JPA.
-   * Esto asegura que el filtro esté disponible para ser usado incluso en entidades recuperadas
-   * de la base de datos.
-   */
   @PostLoad
   private void inicializarFiltro() {
     if (this.coleccion_condicion != null) {
@@ -194,101 +134,66 @@ public class Coleccion {
     }
   }
 
-  // --- Getters y Setters ---
-
-  /**
-   * Devuelve una vista no modificable de la lista de hechos consensuados.
-   * Para actualizar esta lista, se debe llamar a recalcularHechosConsensuados().
-   *
-   * @return Una lista de solo lectura de los hechos consensuados.
-   */
   public List<Hecho> getHechosConsensuados() {
-    // CORRECCIÓN: Devolvemos directamente los hechos que la Coleccion tiene guardados.
     return new ArrayList<>(this.hechos);
   }
 
-  public String getTitulo() {
-    return coleccion_titulo;
+  public void recalcularConsenso() {
+    if (this.coleccion_fuente == null || this.coleccion_algoritmo == null) {
+      return;
+    }
+    List<Hecho> hechosCrudos = this.coleccion_fuente.getHechos();
+    List<Hecho> hechosFiltrados = this.coleccion_algoritmo.listaDeHechosConsensuados(
+        hechosCrudos,
+        List.of(coleccion_fuente)
+    );
+    this.hechos.clear();
+    this.hechos.addAll(hechosFiltrados);
   }
 
-  public String getDescripcion() {
-    return coleccion_descripcion;
+  // --- Método Helper para la Vista (Handlebars) ---
+  public String getAlgoritmoTipo() {
+    if (this.coleccion_algoritmo == null) return "";
+
+    if (this.coleccion_algoritmo instanceof Absoluta) return "Absoluta";
+    if (this.coleccion_algoritmo instanceof MayoriaSimple) return "May_simple";
+    if (this.coleccion_algoritmo instanceof MultiplesMenciones) return "Mult_menciones";
+
+    return "";
   }
 
-  public String getCategoria() {
-    return coleccion_categoria;
-  }
-
-  public Filtro getFiltro() {
-    return filtro;
-  }
-
-  public Fuente getFuente() {
-    return this.coleccion_fuente;
-  }
-
-  public AlgoritmoDeConsenso getAlgoritmo() {
-    return this.coleccion_algoritmo;
-  }
-
-  public Long getId() {
-    return this.coleccion_id;
-  }
+  // --- Getters y Setters Básicos ---
+  public String getTitulo() { return coleccion_titulo; }
+  public String getDescripcion() { return coleccion_descripcion; }
+  public String getCategoria() { return coleccion_categoria; }
+  public Filtro getFiltro() { return filtro; }
+  public Fuente getFuente() { return this.coleccion_fuente; }
+  public AlgoritmoDeConsenso getAlgoritmo() { return this.coleccion_algoritmo; }
+  public Long getId() { return this.coleccion_id; }
+  public Set<Hecho> getHechos() { return this.hechos; }
 
   public void setCondicion(Condicion coleccion_condicion) {
     this.coleccion_condicion = coleccion_condicion;
     this.filtro.setCondicion(coleccion_condicion);
   }
+  public void setId(Long id) { this.coleccion_id = id; }
+  public void setTitulo(String titulo) { this.coleccion_titulo = titulo; }
+  public void setCategoria(String categoria) { this.coleccion_categoria = categoria; }
+  public void setDescripcion(String descripcion) { this.coleccion_descripcion = descripcion; }
+  public void setFuente(Fuente fuente) { this.coleccion_fuente = fuente; }
+  public void setAlgoritmoDeConsenso(AlgoritmoDeConsenso algoritmo) { this.coleccion_algoritmo = algoritmo; }
 
-  public void setId(Long id) {
-    this.coleccion_id = id;
+  // --- Identidad ---
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Coleccion coleccion = (Coleccion) o;
+    return Objects.equals(coleccion_id, coleccion.coleccion_id);
   }
 
-  public void setTitulo(String titulo) {
-    this.coleccion_titulo = titulo;
-  }
-
-  public void setCategoria(String categoria) {
-    this.coleccion_categoria = categoria;
-  }
-
-  public void setDescripcion(String descripcion) {
-    this.coleccion_descripcion = descripcion;
-  }
-
-  public void setFuente(Fuente fuente) {
-    this.coleccion_fuente = fuente;
-  }
-
-  public void setAlgoritmoDeConsenso(AlgoritmoDeConsenso algoritmo) {
-    this.coleccion_algoritmo = algoritmo;
-  }
-
-  /**
-   * Ejecuta el algoritmo de consenso sobre la fuente actual
-   * y actualiza la lista interna de hechos de la colección.
-   */
-  public void recalcularConsenso() {
-    if (this.coleccion_fuente == null || this.coleccion_algoritmo == null) {
-      return; // No se puede calcular sin partes
-    }
-
-    // 1. Obtener los hechos crudos de la fuente
-    List<Hecho> hechosCrudos = this.coleccion_fuente.getHechos();
-
-    // 2. Aplicar el filtro del algoritmo
-    List<Hecho> hechosFiltrados = this.coleccion_algoritmo.listaDeHechosConsensuados(
-        hechosCrudos,
-        List.of(coleccion_fuente)
-    );
-
-    // 3. Actualizar la lista persistente
-    // Usamos clear() y addAll() para no romper la referencia de Hibernate
-    this.hechos.clear();
-    this.hechos.addAll(hechosFiltrados);
-  }
-
-  public Set<Hecho> getHechos() {
-    return this.hechos;
+  @Override
+  public int hashCode() {
+    return Objects.hash(coleccion_id);
   }
 }

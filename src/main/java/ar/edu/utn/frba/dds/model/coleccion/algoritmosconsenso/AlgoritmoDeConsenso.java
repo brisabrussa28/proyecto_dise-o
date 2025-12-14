@@ -63,5 +63,44 @@ public abstract class AlgoritmoDeConsenso {
                   .toList();
   }
 
+  protected boolean existeHechoSimilarEnFuente(Set<Hecho> hechosDeLaFuente, Hecho hechoBuscado) {
+    return hechosDeLaFuente.stream().anyMatch(h -> sonHechosEquivalentes(h, hechoBuscado));
+  }
+
+  /**
+   * Determina si dos hechos son equivalentes comparando múltiples campos clave.
+   * Reglas:
+   * 1. Identidad exacta (equals).
+   * 2. O coincidencia aproximada en: Título + (Dirección O Ubicación) + Fecha.
+   */
+  private boolean sonHechosEquivalentes(Hecho h1, Hecho h2) {
+    if (h1.equals(h2)) return true;
+
+    boolean tituloSimilar = h1.getTitulo() != null && h2.getTitulo() != null
+        && h1.getTitulo().trim().equalsIgnoreCase(h2.getTitulo().trim());
+
+    if (!tituloSimilar) return false;
+
+    boolean fechaSimilar = (h1.getFechasuceso() == null && h2.getFechasuceso() == null) ||
+        (h1.getFechasuceso() != null && h2.getFechasuceso() != null &&
+            h1.getFechasuceso().equals(h2.getFechasuceso()));
+
+    if (!fechaSimilar) return false;
+
+    boolean ubicacionSimilar = false;
+
+    if (h1.getUbicacion() != null && h2.getUbicacion() != null) {
+      double epsilon = 0.0001;
+      boolean latIgual = Math.abs(h1.getUbicacion().getLatitud() - h2.getUbicacion().getLatitud()) < epsilon;
+      boolean lngIgual = Math.abs(h1.getUbicacion().getLongitud() - h2.getUbicacion().getLongitud()) < epsilon;
+      ubicacionSimilar = latIgual && lngIgual;
+    } else {
+      ubicacionSimilar = h1.getDireccion() != null && h2.getDireccion() != null
+          && h1.getDireccion().trim().equalsIgnoreCase(h2.getDireccion().trim());
+    }
+
+    return ubicacionSimilar;
+  }
+
   protected abstract boolean esConsensuado(Hecho hecho, List<Set<Hecho>> hechosDeFuentes);
 }
