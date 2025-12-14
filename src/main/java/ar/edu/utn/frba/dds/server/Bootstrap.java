@@ -30,115 +30,110 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Bootstrap implements WithSimplePersistenceUnit {
+
   private Map<String, List<String>> convertirMapeoAString(Map<CampoHecho, List<String>> mapeoEnum) {
     return mapeoEnum.entrySet()
                     .stream()
                     .collect(Collectors.toMap(
-                        entry -> entry.getKey()
-                                      .name(), Map.Entry::getValue
+                        entry -> entry.getKey().name(),
+                        Map.Entry::getValue
                     ));
   }
 
   public void init() {
     withTransaction(() -> {
-      LocalDateTime hora = LocalDateTime.now();
-      PuntoGeografico ubicacion = new PuntoGeografico(-34.68415120338135, -58.58712709338028);
 
-      Hecho hecho1 = new HechoBuilder()
+      LocalDateTime ahora = LocalDateTime.now();
+      PuntoGeografico ubicacion = new PuntoGeografico(-34.60, -58.38);
+
+      Hecho h1 = new HechoBuilder()
           .conTitulo("Robo en Almagro")
-          .conCategoria("Robos")
-          .conFechaSuceso(hora.minusHours(1))
+          .conCategoria("Robo")
+          .conProvincia("Buenos Aires")
+          .conFechaSuceso(ahora.minusHours(1))
           .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
           .conUbicacion(ubicacion)
           .build();
 
-      Hecho hecho2 = new HechoBuilder()
-          .conTitulo("Robo en Caballito")
-          .conCategoria("Robos")
-          .conFechaSuceso(hora.minusHours(1))
-          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-          .conUbicacion(ubicacion)
-          .build();
-
-      Hecho hecho3 = new HechoBuilder()
+      Hecho h2 = new HechoBuilder()
           .conTitulo("Hurto en Avellaneda")
-          .conCategoria("Hurtos")
-          .conFechaSuceso(hora.minusHours(2))
+          .conCategoria("Hurto")
+          .conProvincia("Buenos Aires")
+          .conFechaSuceso(ahora.minusHours(2))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(ubicacion)
+          .build();
+
+      Hecho h3 = new HechoBuilder()
+          .conTitulo("Accidente en Córdoba")
+          .conCategoria("Accidente")
+          .conProvincia("Córdoba")
+          .conFechaSuceso(ahora.minusHours(3))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(ubicacion)
+          .build();
+
+      Hecho h4 = new HechoBuilder()
+          .conTitulo("Vandalismo en Rosario")
+          .conCategoria("Vandalismo")
+          .conProvincia("Santa Fe")
+          .conFechaSuceso(ahora.minusHours(4))
           .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
           .conUbicacion(ubicacion)
           .build();
 
       var fuente = new FuenteDinamica("Fuente para Estadísticas");
-      Map<String, List<String>> mapeoColumnas = convertirMapeoAString(Map.of(
-          CampoHecho.TITULO, List.of("titulo"),
-          CampoHecho.DESCRIPCION, List.of("descripcion"),
-          CampoHecho.LATITUD, List.of("latitud"),
-          CampoHecho.LONGITUD, List.of("longitud"),
-          CampoHecho.FECHA_SUCESO, List.of("fechaSuceso"),
-          CampoHecho.CATEGORIA, List.of("categoria"),
-          CampoHecho.DIRECCION, List.of("direccion"),
-          CampoHecho.PROVINCIA, List.of("provincia")
-      ));
+      fuente.agregarHecho(h1);
+      fuente.agregarHecho(h2);
+      fuente.agregarHecho(h3);
+      fuente.agregarHecho(h4);
 
-      var fuenteCsv = new FuenteEstatica(
-          "Una fuente estatica",
-          new ConfiguracionLectorCsv(',', "dd/MM/yyyy", mapeoColumnas)
-      );
-      fuente.agregarHecho(hecho1);
-      fuente.agregarHecho(hecho2);
-      fuente.agregarHecho(hecho3);
+      new FuenteRepository().save(fuente);
 
-      FuenteRepository repoFuentes = new FuenteRepository();
-      repoFuentes.save(fuente);
-      repoFuentes.save(fuenteCsv);
-
-      var calculadora = new CentralDeEstadisticas();
-      Exportador<Estadistica> exportadorCsv = new ExportadorCSV<>(new ModoSobrescribir());
-      calculadora.setExportador(exportadorCsv);
-
-      var algoritmo = new Absoluta();
       var coleccion = new Coleccion(
-          "Coleccion de Hechos",
+          "Colección de Hechos",
           fuente,
-          "Descripcion de prueba",
+          "Colección de prueba",
           "General",
-          algoritmo
+          new Absoluta()
       );
-      coleccion.setAlgoritmoDeConsenso(algoritmo);
 
-      // CORRECCIÓN 1: No guardamos el algoritmo manualmente.
-      // Dejamos que el guardado de la colección lo haga en cascada.
-      ColeccionRepository repoColeccion = new ColeccionRepository();
-      repoColeccion.save(coleccion);
+      new ColeccionRepository().save(coleccion);
 
-      UserRepository.instance()
-                    .guardar(new Usuario(
-                        "admin1@mock.com",
-                        "administrador",
-                        "admin123",
-                        Rol.ADMINISTRADOR
-                    ));
+      UserRepository.instance().guardar(
+          new Usuario("admin1@mock.com", "administrador", "admin123", Rol.ADMINISTRADOR)
+      );
 
-      EstadisticaRepository repoEstadisticas = EstadisticaRepository.instance();
-      repoEstadisticas.save(new Estadistica("Robos", 64L, "CATEGORIA CON MAS HECHOS", "Robos"));
-      repoEstadisticas.save(new Estadistica("Obras", 28L, "CATEGORIA CON MAS HECHOS", "Obras"));
-      repoEstadisticas.save(new Estadistica("Buenos Aires", 43L, "PROVINCIA CON MAS HECHOS", null));
-      repoEstadisticas.save(new Estadistica(
-          "15",
-          18L,
-          "HORA CON MAS HECHOS DE UNA CATEGORIA",
-          "Robos"
-      ));
-      repoEstadisticas.save(new Estadistica("Spam", 37L, "CANTIDAD DE SOLICITUDES SPAM", null));
+      EstadisticaRepository repoEst = EstadisticaRepository.instance();
 
-      SolicitudesRepository repoSolicitudes = SolicitudesRepository.instance();
+      repoEst.save(new Estadistica("Buenos Aires", 5L, "Robo", null, "HECHOS POR PROVINCIA Y CATEGORIA"));
+      repoEst.save(new Estadistica("Buenos Aires", 3L, "Hurto", null, "HECHOS POR PROVINCIA Y CATEGORIA"));
+      repoEst.save(new Estadistica("Córdoba", 4L, "Accidente", null, "HECHOS POR PROVINCIA Y CATEGORIA"));
+      repoEst.save(new Estadistica("Santa Fe", 2L, "Vandalismo", null, "HECHOS POR PROVINCIA Y CATEGORIA"));
 
-      // CORRECCIÓN 2: Generamos un string de 600 caracteres.
-      // Tu sistema valida que sea > 500 y < 1024, así que esto pasará.
-      String motivoValido = "x".repeat(600);
+      repoEst.save(new Estadistica("08", 3L, "Robo", null, "HECHOS POR HORA Y CATEGORIA"));
+      repoEst.save(new Estadistica("09", 2L, "Hurto", null, "HECHOS POR HORA Y CATEGORIA"));
+      repoEst.save(new Estadistica("10", 4L, "Accidente", null, "HECHOS POR HORA Y CATEGORIA"));
+      repoEst.save(new Estadistica("11", 1L, "Vandalismo", null, "HECHOS POR HORA Y CATEGORIA"));
 
-      repoSolicitudes.guardar(new Solicitud(hecho1, motivoValido));
-      repoSolicitudes.guardar(new Solicitud(hecho2, motivoValido));
+      repoEst.save(new Estadistica(null, 5L, "Robo", null, "HECHOS REPORTADOS POR CATEGORIA"));
+      repoEst.save(new Estadistica(null, 3L, "Hurto", null, "HECHOS REPORTADOS POR CATEGORIA"));
+      repoEst.save(new Estadistica(null, 4L, "Accidente", null, "HECHOS REPORTADOS POR CATEGORIA"));
+      repoEst.save(new Estadistica(null, 2L, "Vandalismo", null, "HECHOS REPORTADOS POR CATEGORIA"));
+
+      repoEst.save(new Estadistica("Buenos Aires", 4L, null, coleccion, "HECHOS REPORTADOS POR PROVINCIA Y COLECCION"));
+      repoEst.save(new Estadistica("Córdoba", 2L, null, coleccion, "HECHOS REPORTADOS POR PROVINCIA Y COLECCION"));
+      repoEst.save(new Estadistica("Santa Fe", 1L, null, coleccion, "HECHOS REPORTADOS POR PROVINCIA Y COLECCION"));
+
+      repoEst.save(new Estadistica(null, 110L, null, null, "CANTIDAD DE HECHOS"));
+
+      repoEst.save(new Estadistica(null, 60L, null, null, "CANTIDAD DE SOLICITUDES PENDIENTES"));
+
+      repoEst.save(new Estadistica(null, 30L, null, null, "CANTIDAD DE SPAM"));
+
+      String motivo = "x".repeat(600);
+      SolicitudesRepository.instance().guardar(new Solicitud(h1, motivo));
+      SolicitudesRepository.instance().guardar(new Solicitud(h2, motivo));
     });
   }
 }

@@ -2,9 +2,9 @@ package ar.edu.utn.frba.dds.repositories;
 
 import ar.edu.utn.frba.dds.model.estadisticas.Estadistica;
 import ar.edu.utn.frba.dds.utils.DBUtils;
-import java.util.List;
+
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
+import java.util.List;
 
 public class EstadisticaRepository {
 
@@ -14,73 +14,82 @@ public class EstadisticaRepository {
     return INSTANCE;
   }
 
-//  public void save(Estadistica estadistica) {
-//    if (estadistica.getId() == null) {
-//      DBUtils.comenzarTransaccion(em);
-//      em.persist(estadistica);
-//      DBUtils.commit(em);
-//    } else {
-//      DBUtils.comenzarTransaccion(em);
-//      em.merge(estadistica);
-//      DBUtils.commit(em);
-//    }
-//  }
+  private Estadistica findExisting(EntityManager em, Estadistica stat) {
 
-  public Estadistica findByNombreAndTipo(String nombre, String tipoEstadistica) {
-    EntityManager em = DBUtils.getEntityManager();
+    Long coleccionId = stat.getColeccion() != null
+                       ? stat.getColeccion().getId()
+                       : null;
+
     return em.createQuery(
-                 "SELECT e FROM Estadistica e WHERE e.estadistica_nombre = :nombre AND e.estadistica_tipo = :tipo",
+                 "SELECT e FROM Estadistica e " +
+                     "WHERE e.estadistica_tipo = :tipo " +
+                     "AND ((:grupo IS NULL AND e.estadistica_grupo IS NULL) OR e.estadistica_grupo = :grupo) " +
+                     "AND ((:categoria IS NULL AND e.estadistica_categoria IS NULL) OR e.estadistica_categoria = :categoria) " +
+                     "AND ((:coleccion IS NULL AND e.estadistica_coleccion IS NULL) OR e.estadistica_coleccion.id = :coleccion)",
                  Estadistica.class
              )
-             .setParameter("nombre", nombre)
-             .setParameter("tipo", tipoEstadistica)
+             .setParameter("tipo", stat.getTipo())
+             .setParameter("grupo", stat.getGrupo())
+             .setParameter("categoria", stat.getCategoria())
+             .setParameter("coleccion", coleccionId)
              .getResultStream()
              .findFirst()
              .orElse(null);
   }
 
-  // Update save method
   public void save(Estadistica estadistica) {
     EntityManager em = DBUtils.getEntityManager();
-    Estadistica existing = findByNombreAndTipo(estadistica.getNombre(), estadistica.getTipo());
-    DBUtils.comenzarTransaccion(em);
+
     try {
+      DBUtils.comenzarTransaccion(em);
+
+      Estadistica existing = findExisting(em, estadistica);
+
       if (existing != null) {
         estadistica.setId(existing.getId());
         em.merge(estadistica);
       } else {
         em.persist(estadistica);
       }
-    } catch (PersistenceException e) {
-      DBUtils.rollback(em);
-      throw new RuntimeException(e.getMessage());
-    } finally {
+
       DBUtils.commit(em);
+
+    } catch (Exception e) {
+      DBUtils.rollback(em);
+      throw new RuntimeException("Error guardando estadística", e);
+
+    } finally {
       em.close();
     }
   }
 
-
   public List<Estadistica> findAll() {
     EntityManager em = DBUtils.getEntityManager();
-    return em.createQuery("SELECT e FROM Estadistica e", Estadistica.class)
-             .getResultList();
-
+    List<Estadistica> result = em.createQuery("SELECT e FROM Estadistica e", Estadistica.class)
+                                 .getResultList();
+    em.close();
+    return result;
   }
 
   public Estadistica findById(Long id) {
     EntityManager em = DBUtils.getEntityManager();
-    return em.find(Estadistica.class, id);
+    Estadistica e = em.find(Estadistica.class, id);
+    em.close();
+    return e;
   }
 
   public Estadistica findByTipo(String tipo) {
     EntityManager em = DBUtils.getEntityManager();
-    return em.createQuery(
-                 "SELECT e from Estadistica e where e.estadistica_tipo = :tipo",
-                 Estadistica.class
-             )
-             .setParameter("tipo", tipo)
-             .getSingleResult();
-  }
+    Estadistica e = em.createQuery(
+                          "SELECT e FROM Estadistica e WHERE e.estadistica_tipo = :tipo",
+                          Estadistica.class
+                      )
+                      .setParameter("tipo", tipo)
+                      .getResultStream()
+                      .findFirst()
+                      .orElse(null);
 
+    em.close();
+    return e;
+  }
 }

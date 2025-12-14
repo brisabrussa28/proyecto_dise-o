@@ -66,15 +66,19 @@ public class GestorDeSolicitudes {
   }
 
   /**
-   * Devuelve un conteo de las solicitudes marcadas como spam.
+   * Devuelve las solicitudes marcadas como spam.
    *
-   * @return El número de solicitudes de spam.
+   * @return Lista de solicitudes de spam.
    */
-  public long cantidadDeSpamDetectado() {
-    return repositorio.obtenerPorEstado(EstadoSolicitud.SPAM)
-                      .size();
+  public List<Solicitud> getSpam() {
+    return repositorio.obtenerPorEstado(EstadoSolicitud.SPAM);
   }
 
+  /**
+   * Devuelve las solicitudes marcadas como pendiente.
+   *
+   * @return Lista de solicitudes pendientes.
+   */
   public List<Solicitud> getSolicitudesPendientes() {
     return repositorio.obtenerPorEstado(EstadoSolicitud.PENDIENTE);
   }

@@ -1,11 +1,14 @@
 package ar.edu.utn.frba.dds.model.estadisticas;
 
+import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -17,73 +20,73 @@ import javax.persistence.Table;
 @Table(name = "Estadistica")
 public class Estadistica {
 
+  //[id_stats]
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long estadistica_id;
 
-  private String estadistica_tipo;
+  //[nombre del grupo --> nombre provincia/hora]
+  private String estadistica_grupo;
+  //[valor_cantidad --> hechos, hechos reportados, solicitudes, spam]
+  private Long estadistica_cantidad;
+  //[categoria_nombre]
   private String estadistica_categoria;
+  //[coleccion_id]
+  @ManyToOne
+  @JoinColumn(name = "coleccion_id", nullable = true)
+  private Coleccion estadistica_coleccion;
+  //[tipo_stats]
+  private String estadistica_tipo;
 
-  @Column(name = "estadistica_nombre")
-  private String estadistica_nombre;
-  @Column(name = "estadistica_valor")
-  private Long estadistica_valor;
 
-
-  public Estadistica(String nombre, Long valor, String estadistica_tipo, String categoria) {
-    this.estadistica_nombre = nombre;
-    this.estadistica_valor = valor;
-    this.estadistica_tipo = estadistica_tipo;
+  //debo cambiar el constructor
+  public Estadistica(String grupo, Long cantidad, String categoria, Coleccion coleccion, String tipo) {
+    this.estadistica_grupo = grupo;
+    this.estadistica_cantidad = cantidad;
+    this.estadistica_tipo = tipo;
     this.estadistica_categoria = categoria;
+    this.estadistica_coleccion = coleccion;
   }
 
   public Estadistica() {
   }
 
-  public String getNombre() {
-    return estadistica_nombre;
-  }
+  // --- Getters ---
+  public Long getId() { return estadistica_id; }
+  public String getGrupo() { return estadistica_grupo; }
+  public Long getCantidad() { return estadistica_cantidad; }
+  public String getTipo() { return estadistica_tipo; }
+  public String getCategoria() { return estadistica_categoria; }
+  public Coleccion getColeccion() { return estadistica_coleccion; }
 
-  public Long getValor() {
-    return estadistica_valor;
+  // --- Setters ---
+  public void setColeccion(Coleccion coleccion) {
+    this.estadistica_coleccion = coleccion;
   }
-
-  public Long getId() {
-    return this.estadistica_id;
-  }
-
-  public String getTipo() {
-    return this.estadistica_tipo;
-  }
-
   public void setId(Long id) {
     this.estadistica_id = id;
   }
 
-  public String getCategoria() {
-    return this.estadistica_categoria;
-  }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     Estadistica that = (Estadistica) o;
-    return Objects.equals(estadistica_nombre, that.estadistica_nombre) && Objects.equals(
-        estadistica_valor, that.estadistica_valor);
+    return Objects.equals(estadistica_grupo, that.estadistica_grupo)
+        && Objects.equals(estadistica_cantidad, that.estadistica_cantidad)
+        && Objects.equals(estadistica_categoria, that.estadistica_categoria)
+        && Objects.equals(estadistica_tipo, that.estadistica_tipo)
+        && Objects.equals(estadistica_coleccion, that.estadistica_coleccion);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(estadistica_nombre, estadistica_valor);
+    return Objects.hash(estadistica_tipo, estadistica_cantidad);
   }
 
   @Override
   public String toString() {
-    return "Estadistica{" + "nombre='" + estadistica_nombre + '\'' + ", valor=" + estadistica_valor + '}';
+    return "Estadistica{" + "nombre='" + estadistica_tipo + '\'' + ", valor=" + estadistica_cantidad + '}';
   }
 }

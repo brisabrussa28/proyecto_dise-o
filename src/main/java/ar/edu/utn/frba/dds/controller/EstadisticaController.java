@@ -8,55 +8,67 @@ import ar.edu.utn.frba.dds.model.reportes.GestorDeSolicitudes;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.EstadisticaRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
+
 import java.util.List;
 
 public class EstadisticaController {
-  public Estadistica getEstadistica(EstadisticaDTO estadisticaDTO) {
-    return EstadisticaRepository.instance()
-                                .findByTipo(estadisticaDTO.getTipo());
-  }
 
   public List<Estadistica> getEstadisticas() {
     return EstadisticaRepository.instance().findAll();
   }
 
-  public Estadistica calcularEstadistica(EstadisticaDTO estadisticaDTO) {
+  public List<Estadistica> calcularEstadisticas(EstadisticaDTO dto) {
+
     CentralDeEstadisticas central = new CentralDeEstadisticas();
     central.setGestor(new GestorDeSolicitudes(SolicitudesRepository.instance()));
-    if (estadisticaDTO.getColeccion() != null ) {
-      Coleccion coleccion = ColeccionRepository.instance()
-                                               .findById(estadisticaDTO.getColeccion());
-      Estadistica stat = central.provinciaConMasHechos(coleccion);
-      EstadisticaRepository.instance()
-                           .save(stat);
-      return stat;
-    }
-    String categoria = estadisticaDTO.getCategoria();
-    Estadistica stat = new Estadistica();
-    switch (estadisticaDTO.getTipo()) {
-      case "CATEGORIA CON MAS HECHOS":
-        stat = central.categoriaConMasHechos();
+
+    List<Estadistica> resultado;
+
+    switch (dto.getTipo()) {
+
+      case "HECHOS POR PROVINCIA Y CATEGORIA":
+        if (dto.getCategoria() == null)
+          throw new RuntimeException("Debe especificarse una categoría");
+        resultado = central.hechosPorProvinciaSegunCategoria(dto.getCategoria());
         break;
-      case "HORA CON MAS HECHOS DE UNA CATEGORIA":
-        if (categoria != null) {
-          stat = central.horaConMasHechosDeCiertaCategoria(categoria);
-          break;
-        }
-        throw new RuntimeException("No se puede calcular la estadistica sin una categoria");
-      case "PROVINCIA CON MAS HECHOS DE UNA CATEGORIA":
-        if (categoria != null) {
-          stat = central.provinciaConMasHechosDeCiertaCategoria(categoria);
-          break;
-        }
-        throw new RuntimeException("No se puede calcular la estadistica sin una categoria");
-      case "CANTIDAD DE SOLICITUDES SPAM":
-        stat = central.cantidadDeSolicitudesSpam();
+
+      case "HECHOS POR HORA Y CATEGORIA":
+        if (dto.getCategoria() == null)
+          throw new RuntimeException("Debe especificarse una categoría");
+        resultado = central.hechosPorHora(dto.getCategoria());
         break;
+
+      case "HECHOS REPORTADOS POR CATEGORIA":
+        resultado = central.hechosPorCategoria();
+        break;
+
+      case "HECHOS REPORTADOS POR PROVINCIA Y COLECCION":
+        if (dto.getColeccion() == null)
+          throw new RuntimeException("Debe especificarse una colección");
+        Coleccion col = ColeccionRepository.instance().findById(dto.getColeccion());
+        if (col == null)
+          throw new RuntimeException("La colección no existe");
+        resultado = central.hechosPorProvinciaDeUnaColeccion(col);
+        break;
+
+      case "CANTIDAD DE HECHOS":
+        resultado = List.of(central.calcularStatsCantHechos());
+        break;
+
+      case "CANTIDAD DE SOLICITUDES PENDIENTES":
+        resultado = List.of(central.calcularStatsCantSolicitudes());
+        break;
+
+      case "CANTIDAD DE SPAM":
+        resultado = List.of(central.calcularStatsCantSpam());
+        break;
+
       default:
-        throw new RuntimeException("No se especifico una estadistica valida");
+        throw new RuntimeException("Tipo de estadística no reconocido");
     }
-    EstadisticaRepository.instance()
-                         .save(stat);
-    return stat;
+
+    resultado.forEach(EstadisticaRepository.instance()::save);
+
+    return resultado;
   }
 }

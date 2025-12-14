@@ -5,9 +5,11 @@ import ar.edu.utn.frba.dds.model.exportador.Exportador;
 import ar.edu.utn.frba.dds.model.filtro.Filtro;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.GestorDeSolicitudes;
+import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -23,119 +25,138 @@ public class CentralDeEstadisticas {
   private GestorDeSolicitudes gestor; // AHORA: Depende del Gestor
   private Exportador<Estadistica> exportador;
   private Filtro filtroAdicional; // Filtro opcional para refinar estadísticas
-
   // --- Lógica Principal de Estadísticas ---
 
+  //Cantidad de hechos por provincia segun categoria
+  public List<Estadistica> hechosPorProvinciaSegunCategoria(String categoria) {
+    List<Coleccion> colecciones = ColeccionRepository.instance().findAll();
+    List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
+
+    List<Hecho> hechosFiltrados = todosLosHechos.stream()
+                                                .filter(h -> categoria.equals(h.getCategoria()))
+                                                .collect(Collectors.toList());
+
+    Map<String, Long> cantidadPorProvincia = hechosFiltrados.stream()
+                                                            .collect(Collectors.groupingBy(
+                                                                Hecho::getProvincia,
+                                                                Collectors.counting()
+                                                            ));
+
+    List<Estadistica> estadisticas = cantidadPorProvincia.entrySet().stream()
+                                                         .map(entry -> new Estadistica(
+                                                             entry.getKey(),
+                                                             entry.getValue(),
+                                                             categoria,
+                                                             null,
+                                                             "HECHOS POR PROVINCIA Y CATEGORIA"
+                                                         ))
+                                                         .collect(Collectors.toList());
+    return estadisticas;
+  }
+
+  //Cantidad de hechos por hora segun categoria
+  public List<Estadistica> hechosPorHora(String categoria) {
+    List<Coleccion> colecciones = ColeccionRepository.instance().findAll();
+    List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
+
+    List<Hecho> hechosFiltrados = todosLosHechos.stream()
+                                                .filter(h -> categoria.equals(h.getCategoria()))
+                                                .collect(Collectors.toList());
+
+    Map<String, Long> cantidadPorHora = hechosFiltrados.stream()
+                                                         .collect(Collectors.groupingBy(
+                                                             h -> String.format("%02d", h.getFechasuceso().getHour()),
+                                                             Collectors.counting()
+                                                         ));
+
+    List<Estadistica> estadisticas = cantidadPorHora.entrySet().stream()
+                                                         .map(entry -> new Estadistica(
+                                                             entry.getKey(),
+                                                             entry.getValue(),
+                                                             categoria,
+                                                             null,
+                                                             "HECHOS POR HORA Y CATEGORIA"
+                                                         ))
+                                                         .collect(Collectors.toList());
+    return estadisticas;
+  }
+  //Cantidad de hechos reportados por categoria
+  public List<Estadistica> hechosPorCategoria() {
+    List<Coleccion> colecciones = ColeccionRepository.instance().findAll();
+    List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
+
+    Map<String, Long> cantidadPorCategoria = todosLosHechos.stream()
+                                                           .collect(Collectors.groupingBy(
+                                                               Hecho::getCategoria,
+                                                               Collectors.counting()
+                                                           ));
+
+    List<Estadistica> estadisticas = cantidadPorCategoria.entrySet().stream()
+                                                    .map(entry -> new Estadistica(
+                                                        null,
+                                                        entry.getValue(),
+                                                        entry.getKey(),
+                                                        null,
+                                                        "HECHOS REPORTADOS POR CATEGORIA"
+                                                    ))
+                                                    .collect(Collectors.toList());
+    return estadisticas;
+  }
+  //cantidad de hechos reportados por provincia segun coleccion
   public List<Estadistica> hechosPorProvinciaDeUnaColeccion(Coleccion coleccion) {
     Filtro filtroExcluyente = obtenerFiltroExcluyente();
     List<Hecho> hechosFiltrados = coleccion.obtenerHechosFiltrados(filtroExcluyente);
 
-    // Se aplica el filtro adicional si fue configurado
-    if (this.filtroAdicional != null) {
-      hechosFiltrados = this.filtroAdicional.filtrar(hechosFiltrados);
-    }
+    Map<String, Long> cantidadPorProvincia = hechosFiltrados.stream()
+                                                            .collect(Collectors.groupingBy(
+                                                                Hecho::getProvincia,
+                                                                Collectors.counting()
+                                                            ));
 
-    return hechosFiltrados.stream()
-                          .collect(Collectors.groupingBy(Hecho::getProvincia, Collectors.counting()))
-                          .entrySet()
-                          .stream()
-                          .map(entry -> new Estadistica(
-                              entry.getKey(), entry.getValue(), "PROVINCIA CON MAS HECHOS",
-                              null
-                          ))
-                          .collect(Collectors.toList());
+    List<Estadistica> estadisticas = cantidadPorProvincia.entrySet().stream()
+                                                    .map(entry -> new Estadistica(
+                                                        entry.getKey(),
+                                                        entry.getValue(),
+                                                        null,
+                                                        coleccion,
+                                                        "HECHOS REPORTADOS POR PROVINCIA Y COLECCION"
+                                                    ))
+                                                    .collect(Collectors.toList());
+    return estadisticas;
   }
-
-  public Estadistica provinciaConMasHechos(Coleccion coleccion) {
-    return hechosPorProvinciaDeUnaColeccion(coleccion).stream()
-                                                      .max(Comparator.comparing(Estadistica::getValor))
-                                                      .orElse(null);
-  }
-
-  //------------------------------------CANTIDAD DE HECHOS POR CATEGORIA
-  public List<Estadistica> hechosPorCategoria(List<Coleccion> colecciones) {
-    List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
-    return todosLosHechos.stream()
-                         .collect(Collectors.groupingBy(Hecho::getCategoria, Collectors.counting()))
-                         .entrySet()
-                         .stream()
-                         .map(entry -> new Estadistica(
-                             entry.getKey(), entry.getValue(), "CATEGORIA CON MAS HECHOS",
-                             entry.getKey()
-                         ))
-                         .collect(Collectors.toList());
-  }
-
-  public Estadistica categoriaConMasHechos() {
+  //Cantidad de hechos
+  public Estadistica calcularStatsCantHechos() {
     List<Coleccion> colecciones = ColeccionRepository.instance()
                                                      .findAll();
-    return hechosPorCategoria(colecciones).stream()
-                                          .max(Comparator.comparing(Estadistica::getValor))
-                                          .orElse(null);
-  }
-
-  //------------------------------------CANTIDAD DE HECHOS POR PROVINCIA SEGUN CATEGORIA
-  public List<Estadistica> hechosPorProvinciaSegunCategoria(List<Coleccion> colecciones, String categoria) {
     List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
-    return todosLosHechos.stream()
-                         .filter(hecho -> Objects.equals(hecho.getCategoria(), categoria))
-                         .collect(Collectors.groupingBy(Hecho::getProvincia, Collectors.counting()))
-                         .entrySet()
-                         .stream()
-                         .map(entry -> new Estadistica(
-                             entry.getKey(),
-                             entry.getValue(),
-                             "PROVINCIA CON MAS HECHOS DE UNA CATEGORIA",
-                             categoria
-                         ))
-                         .collect(Collectors.toList());
+    return new Estadistica(
+        null,
+        (long) todosLosHechos.size(),
+        null,
+        null,
+        "CANTIDAD DE HECHOS"
+    );
   }
-
-  public Estadistica provinciaConMasHechosDeCiertaCategoria(String categoria) {
-    List<Coleccion> colecciones = ColeccionRepository.instance()
-                                                     .findAll();
-    return hechosPorProvinciaSegunCategoria(colecciones, categoria).stream()
-                                                                   .max(Comparator.comparing(Estadistica::getValor))
-                                                                   .orElse(null);
+  //Cantidad de solicitudes pendientes
+  public Estadistica calcularStatsCantSolicitudes() {
+    return new Estadistica(
+        null,
+        (long) gestor.getSolicitudesPendientes().size(),
+        null,
+        null,
+        "CANTIDAD DE SOLICITUDES PENDIENTES "
+    );
   }
-
-  //------------------------------------CANTIDAD DE HECHOS POR HORA SEGUN CATEGORIA
-  public List<Estadistica> hechosPorHora(List<Coleccion> colecciones, String categoria) {
-    List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
-    return todosLosHechos.stream()
-                         .filter(hecho -> Objects.equals(hecho.getCategoria(), categoria))
-                         .collect(Collectors.groupingBy(
-                             hecho -> String.format(
-                                 "%02d",
-                                 hecho.getFechasuceso()
-                                      .getHour()
-                             ), Collectors.counting()
-                         ))
-                         .entrySet()
-                         .stream()
-                         .map(entry -> new Estadistica(
-                             entry.getKey(),
-                             entry.getValue(),
-                             "HORA CON MAS HECHOS DE UNA CATEGORIA",
-                             categoria
-                         ))
-                         .collect(Collectors.toList());
+  //Cantidad de solicitudes spam
+  public Estadistica calcularStatsCantSpam() {
+    return new Estadistica(
+        null,
+        (long) gestor.getSpam().size(),
+        null,
+        null,
+        "CANTIDAD DE SPAM"
+    );
   }
-
-  public Estadistica horaConMasHechosDeCiertaCategoria(String categoria) {
-    List<Coleccion> colecciones = ColeccionRepository.instance()
-                                                     .findAll();
-    return hechosPorHora(colecciones, categoria).stream()
-                                                .max(Comparator.comparing(Estadistica::getValor))
-                                                .orElse(null);
-  }
-
-  //------------------------------------CANTIDAD DE SOLICITUDES SPAM
-  public Estadistica cantidadDeSolicitudesSpam() {
-    validarGestorConfigurado();
-    return new Estadistica(null, gestor.cantidadDeSpamDetectado(), "CANTIDAD DE SOLICITUDES SPAM", null);
-  }
-
   // --- Lógica de Exportación ---
 
   public void exportar(List<Estadistica> datos, String rutaArchivo) {

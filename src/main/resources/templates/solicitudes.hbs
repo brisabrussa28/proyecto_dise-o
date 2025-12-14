@@ -65,28 +65,45 @@
     </body>
 
     <script>
-        function eliminarSolicitud(idDelElemento) {
-          const solicitudAEliminar = document.getElementById(idDelElemento);
-
-          if (solicitudAEliminar){
-            solicitudAEliminar.remove();
-            console.log("Elemento con ID" + idDelElemento + " eliminado.");
-          }
-          else {
-            console.log("No se encontró la solicitud a eliminar.");
-          }
+        async function eliminarSolicitud(idDelElemento) {
+            try {
+                const response = await fetch(`/admin/solicitudes?id=${idDelElemento}&aceptada=false`, {
+                    method: "PUT"
+                });
+                if (response.ok) {
+                    const solicitudAEliminar = document.getElementById(idDelElemento);
+                    if (solicitudAEliminar) {
+                        solicitudAEliminar.remove();
+                        console.log("Solicitud " + idDelElemento + " rechazada y eliminada.");
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.error("Error al rechazar solicitud:", errorText);
+                    alert("No se pudo rechazar la solicitud: " + errorText);
+                }
+            } catch (err) {
+                console.error("Error de red:", err);
+            }
         }
-
-        function aceptarSolicitud(idDelElemento) {
-          const solicitudAEliminar = document.getElementById(idDelElemento);
-
-          if (solicitudAEliminar){
-            solicitudAEliminar.remove();
-            console.log("Elemento con ID" + idDelElemento + " eliminado.");
-          }
-          else {
-            console.log("No se encontró la solicitud a eliminar.");
-          }
+        async function aceptarSolicitud(idDelElemento) {
+            try {
+                const response = await fetch(`/admin/solicitudes?id=${idDelElemento}&aceptada=true`, {
+                    method: "PUT"
+                });
+                if (response.ok) {
+                    const solicitudAEliminar = document.getElementById(idDelElemento);
+                    if (solicitudAEliminar) {
+                        solicitudAEliminar.remove();
+                        console.log("Solicitud " + idDelElemento + " aceptada y eliminada.");
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.error("Error al aceptar solicitud:", errorText);
+                    alert("No se pudo aceptar la solicitud: " + errorText);
+                }
+            } catch (err) {
+                console.error("Error de red:", err);
+            }
         }
     </script>
 {{/partial}}
