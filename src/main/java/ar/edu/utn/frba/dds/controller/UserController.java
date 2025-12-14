@@ -156,6 +156,10 @@ public class UserController {
     return UserRepository.instance().findById(id);
   }
 
+  public Usuario finByName(String name) {
+    return UserRepository.instance().findByName(name);
+  }
+
   private boolean esVacio(String texto) {
     return texto == null || texto.trim().isEmpty();
   }

@@ -73,6 +73,16 @@ public class UserRepository {
     }
   }
 
+  public Usuario findByName(String nombre) {
+    try {
+      return em.createQuery("SELECT u FROM Usuario u WHERE u.userName = :userName", Usuario.class)
+               .setParameter("userName", nombre)
+               .getSingleResult();
+    } catch (NoResultException e) {
+      return null;
+    }
+  }
+
   /**
    * Valida si un email ya existe.
    */

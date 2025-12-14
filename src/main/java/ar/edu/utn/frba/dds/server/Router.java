@@ -19,6 +19,7 @@ import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.model.usuario.Rol;
+import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
@@ -463,6 +464,17 @@ public class Router {
           }
 
           ctx.render("perfil.hbs", modeloConSesion(ctx));
+        }
+    );
+
+    app.get(
+        "/perfiles/{nombre}/", ctx -> {
+          Usuario user = userController.finByName(ctx.sessionAttribute(ctx.pathParam("nombre")));
+
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("perfil.hbs", user);
+
+          ctx.render("perfil.hbs", model);
         }
     );
 
