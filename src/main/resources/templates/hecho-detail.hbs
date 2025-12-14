@@ -133,11 +133,18 @@
                                 <span><i class="fa-regular fa-calendar me-2"></i>Fecha Suceso</span>
                                 <strong>{{fechaFormateada}}</strong>
                             </li>
-                            <li class="list-group-item d-flex justify-content-between px-0">
+                            <li class="list-group-item d-flex justify-content-between px-0 border-0">
                                 <span><i class="fa-solid fa-location-dot me-2"></i>Dirección</span>
                                 <span class="text-end text-truncate" style="max-width: 150px;"
                                       title="{{hecho.direccion}}">
                                     {{hecho.direccion}}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span><i class="fa-solid fa-map me-2"></i>Provincia</span>
+                                <span class="text-end text-truncate" style="max-width: 250px;"
+                                      title="{{hecho.provincia}}">
+                                    {{hecho.provincia}}
                                 </span>
                             </li>
                         </ul>

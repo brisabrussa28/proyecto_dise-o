@@ -29,6 +29,10 @@
 
             hechosData.forEach(hecho => {
                 const ubicacion = hecho.hecho_ubicacion;
+                const direccion = hecho.hecho_direccion ? hecho.hecho_direccion.trim() : 'Ubicación aproximada';
+                const provincia = hecho.hecho_provincia ? hecho.hecho_provincia.trim() : '';
+
+                const ubicacionTexto = provincia ? `${direccion}, ${provincia}` : direccion;
 
                 if (ubicacion && ubicacion.latitud && ubicacion.longitud) {
                     let fechaTexto = "S/D";
@@ -54,7 +58,7 @@
                         <img src="/hechos/${hecho.id}/fotos/0"
                              class="card-img-top mb-2"
                              alt="Foto"
-                             style="height: 140px; object-fit: cover;">
+                             style="height: 140px; object-fit: scale-down;">
                     `;
                     }
 
@@ -137,8 +141,7 @@
                                 <div class="d-flex align-items-start mb-1 text-muted small">
                                     <i class="fa-solid fa-location-dot mt-1 me-2 text-danger"></i>
                                     <span style="line-height: 1.2;">
-                                        ${hecho.hecho_direccion ? hecho.hecho_direccion : 'Ubicación aproximada'}
-                                        ${hecho.hecho_provincia ? ', ' + hecho.hecho_provincia : ''}
+                                        ${ubicacionTexto}
                                     </span>
                                 </div>
 
