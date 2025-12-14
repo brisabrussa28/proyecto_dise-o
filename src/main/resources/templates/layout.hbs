@@ -139,24 +139,27 @@
             <label for="tipoFiltro" class="form-label">Categoría</label>
             <select class="form-select" id="Categoria">
                 <option selected value="0">Todas</option>
-                <option value="1">Incidente Vial</option>
-                <option value="2">Corte de Luz</option>
+                {{#each categorias}}
+                    <option value="{{this}}">{{this}}</option>
+                {{/each}}
             </select>
         </div>
         <div class="mb-3">
             <label for="tipoFiltro" class="form-label">Fuente</label>
             <select class="form-select" id="Fuente">
                 <option selected value="0">Todas</option>
-                <option value="1">Incidente Vial</option>
-                <option value="2">Corte de Luz</option>
+                {{#each fuentes}}
+                    <option value="{{this.nombre}}">{{this.nombre}}</option>
+                {{/each}}
             </select>
         </div>
         <div class="mb-3">
             <label for="tipoFiltro" class="form-label">Colección</label>
             <select class="form-select" id="Coleccion">
                 <option selected value="0">Todas</option>
-                <option value="1">Incidente Vial</option>
-                <option value="2">Corte de Luz</option>
+                {{#each colecciones}}
+                    <option value="{{this.titulo}}">{{this.titulo}}</option>
+                {{/each}}
             </select>
         </div>
         <div class="d-flex flex-row" style="gap: 30px;">

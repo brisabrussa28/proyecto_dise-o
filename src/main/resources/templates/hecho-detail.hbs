@@ -30,6 +30,10 @@
                     <a href="/hechos/{{hecho.id}}/editar" class="btn btn-warning btn-sm">
                         <i class="fa-solid fa-pen"></i> Editar
                     </a>
+                {{else}}
+                    <a href="/hechos/reporte/{{hecho.id}}/" class="btn btn-warning btn-sm">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Reportar
+                    </a>
                 {{/if}}
             </div>
         </div>
