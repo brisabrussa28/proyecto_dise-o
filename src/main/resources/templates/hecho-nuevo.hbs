@@ -142,15 +142,22 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            const modoEdicion = "{{hecho.id}}" !== "";
+                    // --- 1. CONFIGURACIÓN ---
+                    const modoEdicion = "{{hecho.id}}" !== "";
             const provinciaGuardada = "{{hecho.provincia}}";
 
+            // Coordenadas iniciales
             const latInicial = {{#if hecho.ubicacion.latitud}}{{hecho.ubicacion.latitud}}{{else}}-34.6037{{/if}};
             const lngInicial = {{#if hecho.ubicacion.longitud}}{{hecho.ubicacion.longitud}}{{else}}-58.3816{{/if}};
 
             const selectProvincia = document.getElementById('input-provincia');
             const inputDireccion = document.getElementById('input-direccion');
 
+            // Alertas
+            const alertaError = document.getElementById('alerta-error');
+            const textoError = document.getElementById('texto-error');
+
+            // --- 2. CARGAR PROVINCIAS (GEOREF - Lista Oficial) ---
             fetch('https://apis.datos.gob.ar/georef/api/provincias?campos=nombre&orden=nombre')
                 .then(res => res.json())
                 .then(data => {
@@ -160,32 +167,128 @@
                         option.value = prov.nombre;
                         option.textContent = prov.nombre;
 
-                        // Si estamos editando y coincide la provincia, la seleccionamos
+                        // Si editamos, seleccionamos la que estaba guardada
                         if (provinciaGuardada && prov.nombre === provinciaGuardada) {
                             option.selected = true;
                         }
                         selectProvincia.appendChild(option);
                     });
                 })
-                .catch(err => {
+                .catch(() => {
                     selectProvincia.innerHTML = '<option value="">Error cargando provincias</option>';
-                }
-            );
+                });
 
+            // --- 3. INICIALIZAR MAPA ---
             const map = L.map('map-picker').setView([latInicial, lngInicial], 13);
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
 
             let marker;
 
-            // Si ya había coordenadas (Edición), ponemos el marcador de una vez
             if (modoEdicion || (latInicial !== -34.6037)) {
                 marker = L.marker([latInicial, lngInicial], {draggable: true}).addTo(map);
                 actualizarInputs(latInicial, lngInicial);
+
+                marker.on('dragend', function(e) {
+                    const pos = e.target.getLatLng();
+                    actualizarInputs(pos.lat, pos.lng);
+                    obtenerDatosUbicacion(pos.lat, pos.lng);
+                });
             }
+
+            // --- 4. FUNCIONES CLAVE ---
 
             function actualizarInputs(lat, lng) {
                 document.getElementById('lat').value = lat;
                 document.getElementById('lng').value = lng;
+            }
+
+            // Función para quitar acentos y minúsculas (para comparar fácil)
+            function normalizarTexto(texto) {
+                return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            }
+
+            // Función MODIFICADA con la excepción para CABA vs Buenos Aires
+            function obtenerDatosUbicacion(lat, lng) {
+                inputDireccion.value = "Consultando mapa...";
+
+                // --- CORRECCIÓN: Usamos nombres distintos para evitar el error "Identifier already declared" ---
+                const latNum = parseFloat(lat);
+                const lngNum = parseFloat(lng);
+
+                // Límites aproximados de CABA
+                const CABA_LIMITES = {
+                    norte: -34.52,
+                    sur:   -34.72,
+                    este:  -58.33,
+                    oeste: -58.54
+                };
+
+                // Verificamos si el punto está dentro del cuadro usando los números parseados
+                const esCABA = (latNum <= CABA_LIMITES.norte && latNum >= CABA_LIMITES.sur) &&
+                               (lngNum <= CABA_LIMITES.este  && lngNum >= CABA_LIMITES.oeste);
+
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.address) {
+                            // A. Dirección
+                            const calle = data.address.road || "";
+                            const altura = data.address.house_number || "";
+                            const barrio = data.address.neighbourhood || "";
+                            let textoDireccion = (calle + " " + altura).trim();
+                            if (!textoDireccion) textoDireccion = barrio;
+                            if (!textoDireccion) textoDireccion = data.display_name.split(',')[0];
+
+                            inputDireccion.value = textoDireccion;
+
+                            // B. Selección de Provincia (LÓGICA HÍBRIDA)
+                            const opciones = selectProvincia.options;
+
+                            if (esCABA) {
+                                console.log("Detectado CABA por coordenadas");
+                                for (let i = 0; i < opciones.length; i++) {
+                                    const nombre = normalizarTexto(opciones[i].value);
+                                    if (nombre.includes("autonoma") || nombre.includes("ciudad")) {
+                                        selectProvincia.selectedIndex = i;
+                                        return;
+                                    }
+                                }
+                            }
+
+                            // --- CAMINO NORMAL: No es CABA, buscamos por nombre ---
+                            const estadoNominatim = data.address.state || data.address.city;
+                            if (estadoNominatim) {
+                                const nombreMapa = normalizarTexto(estadoNominatim);
+                                let mejorMatch = -1;
+
+                                for (let i = 0; i < opciones.length; i++) {
+                                    const nombreOficial = normalizarTexto(opciones[i].value);
+
+                                    // Si NO es CABA por coordenadas, prohibimos seleccionar CABA
+                                    if (!esCABA && (nombreOficial.includes("autonoma") || nombreOficial.includes("ciudad"))) {
+                                        continue;
+                                    }
+
+                                    if (nombreOficial === nombreMapa) {
+                                        mejorMatch = i;
+                                        break;
+                                    }
+                                    if (nombreOficial.includes(nombreMapa) || nombreMapa.includes(nombreOficial)) {
+                                        mejorMatch = i;
+                                    }
+                                }
+
+                                if (mejorMatch > -1) selectProvincia.selectedIndex = mejorMatch;
+                            }
+
+                        } else {
+                            inputDireccion.value = "Ubicación desconocida";
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        inputDireccion.value = "";
+                    });
             }
 
             function moverMarcador(lat, lng) {
@@ -193,81 +296,69 @@
                     marker.setLatLng([lat, lng]);
                 } else {
                     marker = L.marker([lat, lng], {draggable: true}).addTo(map);
-                    // Evento: si arrastras el marcador con el mouse
                     marker.on('dragend', function(e) {
                         const pos = e.target.getLatLng();
                         actualizarInputs(pos.lat, pos.lng);
+                        obtenerDatosUbicacion(pos.lat, pos.lng);
                     });
                 }
                 map.setView([lat, lng], 16);
                 actualizarInputs(lat, lng);
             }
 
+            // --- 5. EVENTOS ---
+
             map.on('click', function(e) {
-                moverMarcador(e.latlng.lat, e.latlng.lng);
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                moverMarcador(lat, lng);
+                obtenerDatosUbicacion(lat, lng);
             });
 
-            const alertaError = document.getElementById('alerta-error');
-            const textoError = document.getElementById('texto-error');
+            const btnBuscar = document.getElementById('btn-buscar-dir');
+            if (btnBuscar) {
+                btnBuscar.addEventListener('click', () => {
+                    const calle = inputDireccion.value;
+                    const provSelect = selectProvincia.value; // Usamos el valor oficial seleccionado
 
-            function mostrarError(mensaje) {
-                textoError.textContent = mensaje;
-                alertaError.classList.remove('d-none'); // Muestra el cuadro
+                    if (alertaError) alertaError.classList.add('d-none');
 
-                // Opcional: Ocultar automáticamente después de 5 segundos
-                setTimeout(() => {
-                    alertaError.classList.add('d-none');
-                }, 5000);
-            }
+                    if (!calle) {
+                        alert("Ingresa una dirección"); return;
+                    }
 
-            function ocultarError() {
-                alertaError.classList.add('d-none'); // Oculta el cuadro
-            }
+                    let url = `https://nominatim.openstreetmap.org/search?format=json&street=${encodeURIComponent(calle)}&country=Argentina`;
 
-            document.getElementById('btn-buscar-dir').addEventListener('click', () => {
-                const calle = inputDireccion.value;
-                const prov = selectProvincia.value;
+                    // Si hay provincia seleccionada en el dropdown, la usamos para filtrar
+                    if (provSelect && provSelect !== "Cargando provincias...") {
+                         url += `&state=${encodeURIComponent(provSelect)}`;
+                    }
 
-                ocultarError();
-
-                if (!calle) {
-                    mostrarError("Por favor, escribe una dirección antes de buscar.");
-                    return;
-                }
-
-                const btnBuscar = document.getElementById('btn-buscar-dir');
-                const htmlOriginal = btnBuscar.innerHTML;
-                btnBuscar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-                btnBuscar.disabled = true;
-
-                let url = `https://nominatim.openstreetmap.org/search?format=json&street=${encodeURIComponent(calle)}&country=Argentina`;
-
-                if (prov && prov !== "Cargando provincias...") {
-                    url += `&state=${encodeURIComponent(prov)}`;
-                }
-
-                fetch(url)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data && data.length > 0) {
-                            const lat = data[0].lat;
-                            const lon = data[0].lon;
-                            moverMarcador(lat, lon);
-                            ocultarError();
-                        } else {
-                            let msg = "No se encontró la dirección.";
-                            mostrarError(msg);
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        mostrarError("Error de conexión con el servicio de mapas.");
-                    })
-                    .finally(() => {
-                        btnBuscar.innerHTML = htmlOriginal;
-                        btnBuscar.disabled = false;
-                    });
+                    fetch(url)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.length > 0) {
+                                const res = data[0];
+                                moverMarcador(res.lat, res.lon);
+                                obtenerDatosUbicacion(res.lat, res.lon); // Actualiza texto y confirma provincia
+                            } else {
+                                if(mostrarError) mostrarError("Dirección no encontrada");
+                                else alert("No encontrada");
+                            }
+                        })
+                        .catch(() => alert("Error de conexión"));
                 });
+            }
+
+            // Función auxiliar para errores (si la tienes definida en tu HTML)
+            function mostrarError(msg) {
+                if(textoError && alertaError) {
+                    textoError.textContent = msg;
+                    alertaError.classList.remove('d-none');
+                    setTimeout(() => { alertaError.classList.add('d-none'); }, 5000);
+                }
+            }
+
             setTimeout(() => { map.invalidateSize(); }, 500);
         });
     </script>
