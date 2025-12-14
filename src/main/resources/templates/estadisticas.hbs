@@ -330,7 +330,6 @@
                 .addEventListener("shown.bs.collapse", cargarColeccion);
 
         async function descargarCSVCompleto(tipo) {
-            // Caso especial: hechos (provincia + hora juntos)
             if (tipo === "hechos") {
                 const resp = await fetch("/admin/estadisticas/hechos/todas");
                 const datos = await resp.json();
@@ -358,7 +357,6 @@
                 return;
             }
 
-            // Resto de los tipos usa el camino genérico
             let url = "";
 
             if (tipo === "coleccion") url = "/admin/estadisticas/coleccion";

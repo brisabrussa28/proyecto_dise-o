@@ -83,5 +83,6 @@ public class Server {
     }
 
     app.start(port);
+    new EstadisticasScheduler().iniciar();
   }
 }

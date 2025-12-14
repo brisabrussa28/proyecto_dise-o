@@ -11,6 +11,12 @@ public class EstadisticaDTO {
   @JsonProperty("tipo")
   private String tipo;
 
+  public EstadisticaDTO(String tipo, String categoria, Long coleccion) {
+    this.tipo = tipo;
+    this.categoria = categoria;
+    this.coleccion = coleccion;
+  }
+
   public Long getColeccion() {
     return coleccion;
   }

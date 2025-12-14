@@ -71,4 +71,8 @@ public class EstadisticaController {
 
     return resultado;
   }
+
+  public List<String> getCategorias() {
+    return new HechoController().getCategorias();
+  }
 }

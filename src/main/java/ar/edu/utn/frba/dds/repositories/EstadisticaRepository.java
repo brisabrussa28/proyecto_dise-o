@@ -92,4 +92,19 @@ public class EstadisticaRepository {
     em.close();
     return e;
   }
+
+  public void deleteAll() {
+    EntityManager em = DBUtils.getEntityManager();
+
+    try {
+      DBUtils.comenzarTransaccion(em);
+      em.createQuery("DELETE FROM Estadistica").executeUpdate();
+      DBUtils.commit(em);
+    } catch (Exception e) {
+      DBUtils.rollback(em);
+      throw new RuntimeException("Error al borrar estadísticas", e);
+    } finally {
+      em.close();
+    }
+  }
 }
