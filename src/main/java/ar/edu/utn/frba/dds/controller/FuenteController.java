@@ -15,10 +15,11 @@ import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLector;
 import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLectorCsv;
 import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLectorJson;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.http.Context;
 import io.javalin.http.UploadedFile;
-import java.util.HashMap; // Necesario para el mapa manual
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,31 +44,20 @@ public class FuenteController {
     return todas;
   }
 
-  /**
-   * Método CLAVE para el frontend: Convierte las fuentes a Map e inyecta el campo "tipo".
-   * CORRECCIÓN: Se construye el Map manualmente para evitar la serialización profunda
-   * de 'hechos' que causa errores con LocalDateTime y Jackson sin el módulo JSR310.
-   */
   public List<Map<String, Object>> obtenerFuentesConTipo(boolean soloSimples) {
     List<Fuente> fuentes = this.findAll(soloSimples);
 
     return fuentes.stream().map(f -> {
-      // 1. Crear Map manualmente.
-      // Esto evita que Jackson intente serializar f.getHechos() y falle con las fechas.
       Map<String, Object> dto = new HashMap<>();
       dto.put("id", f.getId());
       dto.put("nombre", f.getNombre());
-      // Si la propiedad en tu clase Fuente se llama distinto (ej: getFuente_nombre), ajusta aquí.
-      // Asumimos getNombre() por convención estándar.
 
-      // 2. Determinar Tipo explícitamente
       String tipo = "OTRO";
       if (f instanceof FuenteDinamica) tipo = "DINAMICA";
       else if (f instanceof FuenteEstatica) tipo = "ESTATICA";
       else if (f instanceof FuenteDeAgregacion) tipo = "AGREGACION";
       else if (f instanceof FuenteExternaAPI) tipo = "API";
 
-      // 3. Inyectar campo
       dto.put("tipo", tipo);
       return dto;
     }).collect(Collectors.toList());
@@ -92,22 +82,67 @@ public class FuenteController {
 
       case "ESTATICA":
         UploadedFile archivo = ctx.uploadedFile("archivo_fuente");
+
+        // Parámetros
+        String jsonMapeo = ctx.formParam("mapeo_columnas_json");
+        String separadorStr = ctx.formParam("csv_separador");
+        String formatoFecha = ctx.formParam("csv_formato_fecha");
+
         if (archivo != null && !archivo.filename().isEmpty()) {
-          ConfiguracionLector configLector = determinarConfig(archivo.filename());
-          Lector<Hecho> lector = configLector.build(Hecho.class);
-          List<Hecho> hechosImportados = lector.importar(archivo.content());
-          hechosImportados.forEach(hecho -> {
-            if (hecho.getOrigen() == null) hecho.setOrigen(Origen.DATASET);
-          });
-          fuente = new FuenteEstatica(nombreFuente, hechosImportados);
-          FuenteRepository.instance().save(fuente);
+          try {
+            // Determinar la estrategia de lectura correcta
+            ConfiguracionLector configLector = determinarConfig(
+                archivo.filename(),
+                jsonMapeo,
+                separadorStr,
+                formatoFecha
+            );
+
+            // Construir el lector y procesar
+            Lector<Hecho> lector = configLector.build(Hecho.class);
+            List<Hecho> hechosImportados = lector.importar(archivo.content());
+
+            // VALIDACIÓN 1: Lista vacía o nula
+            if (hechosImportados == null || hechosImportados.isEmpty()) {
+              throw new RuntimeException("El archivo no contiene hechos válidos o no se pudieron leer. La fuente no será creada.");
+            }
+
+            // VALIDACIÓN 2: Integridad de campos
+            for (int i = 0; i < hechosImportados.size(); i++) {
+              Hecho h = hechosImportados.get(i);
+              if (h.getTitulo() == null || h.getTitulo().isBlank()) {
+                throw new RuntimeException("Error en fila " + (i+1) + ": Falta el título (hecho_titulo).");
+              }
+              if (h.getFechasuceso() == null) {
+                throw new RuntimeException("Error en fila " + (i+1) + ": Falta la fecha de suceso (hecho_fecha_suceso).");
+              }
+
+              // --- VALIDACIÓN DE UBICACIÓN (Al menos uno: Lat/Long, Dirección o Provincia) ---
+              boolean tieneCoordenadas = (h.getUbicacion() != null);
+              boolean tieneDireccion = (h.getDireccion() != null && !h.getDireccion().isBlank());
+              boolean tieneProvincia = (h.getProvincia() != null && !h.getProvincia().isBlank());
+
+              if (!tieneCoordenadas && !tieneDireccion && !tieneProvincia) {
+                throw new RuntimeException("Error en fila " + (i+1) + ": Se requiere al menos Latitud/Longitud, Dirección o Provincia para ubicar el hecho.");
+              }
+            }
+
+            // Forzar DATASET como origen para todos los importados
+            hechosImportados.forEach(hecho -> hecho.setOrigen(Origen.DATASET));
+
+            fuente = new FuenteEstatica(nombreFuente, hechosImportados);
+            FuenteRepository.instance().save(fuente);
+
+          } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error crítico al procesar la fuente estática: " + e.getMessage());
+          }
         }
         break;
 
       case "API":
         String urlApi = ctx.formParam("url");
         if (urlApi != null && !urlApi.isBlank()) {
-          // CORRECCIÓN URL: Validar Protocolo para evitar MalformedURLException
           if (!urlApi.startsWith("http://") && !urlApi.startsWith("https://")) {
             urlApi = "http://" + urlApi;
           }
@@ -143,17 +178,44 @@ public class FuenteController {
   }
 
   // --- AUXILIARES ---
-  private ConfiguracionLector determinarConfig(String fileName) {
+
+  private ConfiguracionLector determinarConfig(String fileName, String jsonMapeo, String separadorStr, String formatoFechaInput) {
+
+    // Parseo común del mapeo si existe
+    Map<String, List<String>> mapeoColumnas = null;
+    if (jsonMapeo != null && !jsonMapeo.isBlank()) {
+      try {
+        mapeoColumnas = mapper.readValue(jsonMapeo, new TypeReference<Map<String, List<String>>>(){});
+      } catch (Exception e) {
+        System.out.println("Error parseando mapeo dinámico: " + e.getMessage());
+        mapeoColumnas = this.crearMapeoColumnasDefault();
+      }
+    } else {
+      mapeoColumnas = this.crearMapeoColumnasDefault();
+    }
+
     if (fileName.toLowerCase().endsWith(".csv")) {
-      String formatoPolimorfico = "[yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS]" + "[yyyy-MM-dd'T'HH:mm:ss]" + "[yyyy-MM-dd HH:mm]" + "[yyyy-MM-dd]" + "[dd/MM/yyyy]" + "[dd/MM/yyyy HH:mm]";
-      return new ConfiguracionLectorCsv(',', formatoPolimorfico, this.crearMapeoColumnas());
-    } else if (fileName.toLowerCase().endsWith(".json")) {
+      char separador = ',';
+      if (separadorStr != null && !separadorStr.isEmpty()) {
+        separador = separadorStr.charAt(0);
+      }
+
+      String formatoFecha = "dd/MM/yyyy HH:mm";
+      if (formatoFechaInput != null && !formatoFechaInput.isBlank()) {
+        formatoFecha = formatoFechaInput;
+      }
+
+      return new ConfiguracionLectorCsv(separador, formatoFecha, mapeoColumnas);
+
+    }
+    else if (fileName.toLowerCase().endsWith(".json")) {
       return new ConfiguracionLectorJson();
     }
-    throw new RuntimeException("Formato no soportado: " + fileName);
+
+    throw new RuntimeException("Formato no soportado: " + fileName + ". Solo se permiten archivos .csv o .json");
   }
 
-  private Map<String, List<String>> crearMapeoColumnas() {
+  private Map<String, List<String>> crearMapeoColumnasDefault() {
     return convertirMapeoAString(Map.of(
         CampoHecho.TITULO, List.of("titulo", "TITULO", "hecho_titulo"),
         CampoHecho.DESCRIPCION, List.of("descripcion", "DESCRIPCION", "hecho_descripcion"),
@@ -163,7 +225,8 @@ public class FuenteController {
         CampoHecho.CATEGORIA, List.of("categoria", "CATEGORIA", "hecho_categoria"),
         CampoHecho.DIRECCION, List.of("direccion", "DIRECCION", "hecho_ubicacion", "hecho_direccion"),
         CampoHecho.PROVINCIA, List.of("provincia", "PROVINCIA", "hecho_provincia"),
-        CampoHecho.ETIQUETAS, List.of("etiquetas", "ETIQUETAS", "hecho_etiquetas")
+        CampoHecho.ETIQUETAS, List.of("etiquetas", "ETIQUETAS", "hecho_etiquetas"),
+        CampoHecho.FOTOS, List.of("fotos", "foto", "url_imagen", "IMAGEN")
     ));
   }
 

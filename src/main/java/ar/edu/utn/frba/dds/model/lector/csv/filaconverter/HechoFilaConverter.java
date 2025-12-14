@@ -4,10 +4,16 @@ import ar.edu.utn.frba.dds.model.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
+import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URL;
 import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -103,13 +109,64 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
       builder.conUbicacion(new PuntoGeografico(latitud, longitud));
     }
 
-    // Origen (por defecto DATASET, pero puede venir en el CSV)
-    obtenerPrimerValor(fila, CampoHecho.ORIGEN.name())
-        .map(this::parseOrigen)
-        .ifPresentOrElse(builder::conFuenteOrigen, () -> builder.conFuenteOrigen(Origen.DATASET));
+    // --- CAMBIO: Origen SIEMPRE es DATASET para fuentes estáticas ---
+    builder.conFuenteOrigen(Origen.DATASET);
 
-    // Se llama a build(), que ahora devuelve el Hecho directamente.
-    return builder.build();
+    // --- PROCESAMIENTO DE FOTOS ---
+    List<String> urlsFotos = obtenerTodosLosValores(fila, CampoHecho.FOTOS.name());
+
+    // Construimos el Hecho base
+    Hecho hechoConstruido = builder.build();
+
+    // Asignación tardía de fotos
+    if (!urlsFotos.isEmpty()) {
+      List<Multimedia> listaMultimedia = new ArrayList<>();
+      for (String valorCelda : urlsFotos) {
+        String[] urlsIndividuales = valorCelda.split("[,|;]");
+        for (String urlStr : urlsIndividuales) {
+          Multimedia m = descargarYCrearMultimedia(urlStr.trim());
+          if (m != null) listaMultimedia.add(m);
+        }
+      }
+      hechoConstruido.setFotos(listaMultimedia);
+    }
+
+    return hechoConstruido;
+  }
+
+  /**
+   * Intenta descargar una imagen desde una URL y crear un objeto Multimedia.
+   * Si falla, retorna null pero no detiene la importación.
+   */
+  private Multimedia descargarYCrearMultimedia(String urlStr) {
+    try {
+      if (!urlStr.startsWith("http")) {
+        return null; // Ignoramos rutas locales o inválidas por seguridad
+      }
+      URL url = new URL(urlStr);
+
+      String fileName = urlStr.substring(urlStr.lastIndexOf('/') + 1);
+      if (fileName.isEmpty()) fileName = "imagen_importada.jpg";
+
+      try (InputStream in = url.openStream();
+           ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+        byte[] buffer = new byte[1024];
+        int n;
+        while (-1 != (n = in.read(buffer))) {
+          out.write(buffer, 0, n);
+        }
+        byte[] bytes = out.toByteArray();
+
+        String contentType = "image/jpeg";
+        if (fileName.toLowerCase().endsWith(".png")) contentType = "image/png";
+
+        return new Multimedia(fileName, contentType, bytes);
+      }
+    } catch (Exception e) {
+      logger.warning("No se pudo descargar la imagen de la URL: " + urlStr + ". Error: " + e.getMessage());
+      return null;
+    }
   }
 
   /**
@@ -135,14 +192,6 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
     return true;
   }
 
-
-  /**
-   * Obtiene todos los valores de las columnas mapeadas para un campo específico.
-   *
-   * @param fila  El mapa que representa la fila del CSV.
-   * @param campo El nombre del campo (como String) a buscar.
-   * @return Una lista con todos los valores encontrados para ese campo.
-   */
   private List<String> obtenerTodosLosValores(Map<String, String> fila, String campo) {
     List<String> posiblesColumnas = mapeoColumnas.get(campo);
     if (posiblesColumnas == null) {
@@ -154,13 +203,6 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
                            .collect(Collectors.toList());
   }
 
-  /**
-   * Une una lista de strings con un separador, devolviendo null si la lista está vacía.
-   *
-   * @param valores   La lista de strings a unir.
-   * @param separador El separador a usar entre elementos.
-   * @return El string resultante o null.
-   */
   private String unirValores(List<String> valores, String separador) {
     if (valores == null || valores.isEmpty()) {
       return null;
@@ -168,13 +210,6 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
     return String.join(separador, valores);
   }
 
-  /**
-   * Obtiene el primer valor no nulo de las columnas mapeadas para un campo.
-   *
-   * @param fila  El mapa que representa la fila del CSV.
-   * @param campo El nombre del campo (como String) a buscar.
-   * @return Un Optional con el valor si se encuentra, o un Optional vacío.
-   */
   private java.util.Optional<String> obtenerPrimerValor(Map<String, String> fila, String campo) {
     List<String> posiblesColumnas = mapeoColumnas.get(campo);
     if (posiblesColumnas == null) {
@@ -186,9 +221,6 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
                            .findFirst();
   }
 
-  /**
-   * Convierte un String a Double, manejando comas y errores de formato.
-   */
   private Double parseDouble(String valor) {
     if (valor == null || valor.isBlank()) {
       return null;
@@ -203,7 +235,8 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
   }
 
   /**
-   * Convierte un String a LocalDateTime usando el formato definido en el constructor.
+   * Convierte un String a LocalDateTime.
+   * AHORA ES MÁS ROBUSTO: Si falla el parseo de Fecha+Hora, intenta solo Fecha y agrega 00:00.
    */
   private LocalDateTime parseFecha(String valor) {
     if (valor == null || valor.isBlank()) {
@@ -213,41 +246,38 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
 
     // Lista de formatos a probar en orden
     List<String> formatosPosibles = List.of(
-        this.dateFormatStr,           // El formato configurado
-        "dd/MM/yyyy HH:mm",          // Formato con hora:minuto
-        "dd/MM/yyyy HH:mm:ss",       // Formato con hora:minuto:segundo
-        "yyyy-MM-dd'T'HH:mm:ss",     // ISO 8601
-        "yyyy-MM-dd HH:mm",          // Formato alternativo
-        "dd/MM/yyyy"                 // Solo fecha
+        this.dateFormatStr,           // El formato configurado por el usuario tiene prioridad
+        "dd/MM/yyyy HH:mm",
+        "dd/MM/yyyy HH:mm:ss",
+        "yyyy-MM-dd'T'HH:mm:ss",
+        "yyyy-MM-dd HH:mm",
+        "dd/MM/yyyy",
+        "yyyy-MM-dd"
     );
 
     for (String formato : formatosPosibles) {
+      DateTimeFormatter formatter;
       try {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formato);
+        formatter = DateTimeFormatter.ofPattern(formato);
+      } catch (IllegalArgumentException e) {
+        continue; // Ignorar formatos inválidos
+      }
+
+      // 1. Intentar parsear como LocalDateTime (Fecha y Hora)
+      try {
         return LocalDateTime.parse(valor, formatter);
       } catch (DateTimeException e) {
-        // Continuar con el siguiente formato
+        // 2. Si falla, intentar parsear como LocalDate (Solo fecha) y agregar inicio del día
+        try {
+          return LocalDate.parse(valor, formatter).atStartOfDay();
+        } catch (DateTimeException e2) {
+          // Sigue sin coincidir, probar siguiente formato
+        }
       }
     }
 
     logger.warning("Error al parsear fecha: '" + valor + "'. No coincide con ningún formato conocido.");
     return null;
-  }
-
-  /**
-   * Convierte un String a Origen, manejando errores de formato.
-   */
-  private Origen parseOrigen(String valor) {
-    if (valor == null || valor.isBlank()) {
-      return null;
-    }
-    try {
-      return Origen.valueOf(valor.trim()
-                                 .toUpperCase());
-    } catch (IllegalArgumentException e) {
-      logger.warning("Error al parsear origen: '" + valor + "'. Usando DATASET por defecto.");
-      return Origen.DATASET;
-    }
   }
 
   @Override
@@ -260,4 +290,3 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
     return this.mapeoColumnas;
   }
 }
-
