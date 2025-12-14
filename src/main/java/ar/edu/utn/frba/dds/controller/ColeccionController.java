@@ -81,4 +81,13 @@ public class ColeccionController {
     return ColeccionRepository.instance()
                               .countAll();
   }
+
+  public record ColeccionDTO(Long id, String titulo) {}
+
+  public List<ColeccionDTO> getColeccionesDTO() {
+    return ColeccionRepository.instance()
+                              .findAll().stream()
+                              .map(c -> new ColeccionDTO(c.getId(), c.getTitulo()))
+                              .toList();
+  }
 }
