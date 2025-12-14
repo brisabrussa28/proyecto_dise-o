@@ -114,6 +114,19 @@
                         }
                     }
 
+
+                    // Botón de reportar (todos salvo el autor)
+                    let reportButton = '';
+                    if (autorId && autorId !== currentUserId) {
+                        reportButton = `
+                        <a href="/hechos/reporte/${hecho.id}"
+                            class="btn btn-danger"
+                            title="Reporta hecho" style="padding-left: 5px; padding-right: 5px; padding-top: 1px; padding-bottom: 1px; color: white;">
+                            Reportar
+                        </a>
+                            `;
+                    }
+
                     const popupHTML = `
                         <div class="card border-0" style="width: 220px; overflow: hidden;">
 
@@ -167,6 +180,10 @@
                                 ${editButton ? `
                                     <div class="ms-2">
                                         ${editButton} </div>
+                                ` : ''}
+                                ${reportButton ? `
+                                    <div class="ms-2">
+                                        ${reportButton} </div>
                                 ` : ''}
                             </div>
                         </div>

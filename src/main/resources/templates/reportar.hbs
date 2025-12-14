@@ -1,0 +1,44 @@
+{{#partial "nav_izquierda"}}
+    <a href="/" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+       title="Volver al Mapa">
+        <i class="fa-regular fa-map"></i>
+        <span class="d-none d-sm-block">Volver al Mapa</span>
+    </a>
+{{/partial}}
+
+{{#partial "contenido"}}
+    <div class="d-flex flex-column">
+        <div class="d-flex flex-column cabecera shadow">
+            <h3 style="font-weight: 600;">Hecho ID: {{hecho.id}}</h3>
+            <div class="d-flex flex-column detalles">
+                <div class="d-flex flex-column">
+                    <h5 style="font-weight: 600;">Motivo del reporte</h5>
+                    <label for="motivoInput" class="form-label"></label>
+                    <textarea
+                            class="form-control"
+                            id="motivoInput"
+                            rows="4"
+                            placeholder="Escriba su motivo aquí.">
+                    </textarea>
+                    <h6 style="margin-top: 1vh;">El reporte debe tener un mínimo de 500 carácteres explicando sus razones para eliminar el hecho,
+                        no se aceptan insultos ni vaguedades. Una vez enviado el reporte, este no se puede deshacer y
+                        será almacenado para su consecuente análisis durante los siguientes 7 días posteriores al
+                        lanzamiento del mismo. La empresa no se hace responsable ante cualquier inconveniente.
+                    </h6>
+                    <div class="d-flex flex-row" style="justify-content: end; margin-top: 3vh; gap: 3vh;">
+                        <button type="button" class="btn btn-secondary" onclick="vaciarMotivo()">Restablecer</button>
+                        <button type="button" class="btn btn-primary">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function vaciarMotivo() {
+            document.getElementById('motivoInput').value = "";
+        }
+    </script>
+{{/partial}}
+
+{{> templates/layout}}

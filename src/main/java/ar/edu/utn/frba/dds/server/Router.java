@@ -306,10 +306,12 @@ public class Router {
             ctx.status(201);
             ctx.redirect("/");
 
-          } catch (RazonInvalidaException e) {
+          }
+          catch (RazonInvalidaException e) {
             ctx.status(403)
                .result(e.getMessage());
-          } catch (Exception e) {
+          }
+          catch (Exception e) {
             // Capturamos errores de parseo (fechas, enums, nulos)
             e.printStackTrace();
             ctx.status(400)
@@ -359,7 +361,8 @@ public class Router {
             Solicitud solicitud = solicitudController.crearSolicitud(ctx.bodyAsClass(SolicitudDTO.class));
             ctx.status(201);
             ctx.json(solicitud);
-          } catch (RazonInvalidaException e) {
+          }
+          catch (RazonInvalidaException e) {
             ctx.status(400);
             ctx.result("Argumento inválido: " + e.getMessage());
           }
@@ -394,7 +397,8 @@ public class Router {
               ctx.status(200);
               ctx.json(soli);
             }
-          } catch (RuntimeException e) {
+          }
+          catch (RuntimeException e) {
             ctx.status(400);
             ctx.result("La solicitud ya ha sido analizada");
           }
@@ -442,7 +446,8 @@ public class Router {
             var stat = estadisticaController.calcularEstadistica(ctx.bodyAsClass(EstadisticaDTO.class));
             ctx.status(200);
             ctx.json(stat);
-          } catch (RuntimeException e) {
+          }
+          catch (RuntimeException e) {
             ctx.status(400);
             ctx.result(e.getMessage());
           }
@@ -470,18 +475,42 @@ public class Router {
             return;
           }
 
-          ctx.render("perfil.hbs", modeloConSesion(ctx));
+          Usuario user = userController.finByName(ctx.sessionAttribute("nombreUsuario"));
+
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("perfil", user);
+
+          ctx.render("perfil.hbs", model);
         }
     );
 
     app.get(
         "/perfiles/{nombre}/", ctx -> {
-          Usuario user = userController.finByName(ctx.sessionAttribute(ctx.pathParam("nombre")));
+          Usuario user = userController.finByName(ctx.pathParam("nombre"));
+          System.out.println(user);
 
           Map<String, Object> model = modeloConSesion(ctx);
-          model.put("perfil.hbs", user);
+          model.put("perfil", user);
 
           ctx.render("perfil.hbs", model);
+        }
+    );
+
+    app.get(
+        "/hechos/reporte/{id}/", ctx -> {
+          Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
+
+          if (estaLogueado == null || !estaLogueado) {
+            ctx.redirect("/auth/login");
+            return;
+          }
+
+          Hecho hecho = hechoController.findById(Long.parseLong(ctx.pathParam("id")));
+
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("hecho", hecho);
+
+          ctx.render("reportar.hbs", model);
         }
     );
 

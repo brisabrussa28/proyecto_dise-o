@@ -9,10 +9,10 @@
 {{#partial "contenido"}}
     <div class="d-flex flex-column">
         <div class="d-flex flex-row portada shadow">
-            {{this.foto}}
+            {{perfil.foto}}
             <i class="bi bi-person-circle" style="font-size: 450%"></i>
             <h2 class="nombre-av">
-                {{this.nombreUsuario}}
+                {{perfil.userName}}
             </h2>
         </div>
         <div class="d-flex flex-column datos shadow">
@@ -20,15 +20,15 @@
             <div class="d-flex flex-column detalles">
                 <div class="d-flex flex-column">
                     <h5 style="font-weight: 700;">Correo Electrónico</h5>
-                    <h6>{{this.emailUsuario}}</h6>
+                    <h6>{{perfil.email}}</h6>
                 </div>
                 <div class="d-flex flex-column">
                     <h5 style="font-weight: 700;">País</h5>
-                    <h6>{{this.pais}}ARGENTINA</h6>
+                    <h6>{{perfil.pais}}ARGENTINA</h6>
                 </div>
                 <div class="d-flex flex-column">
                     <h5 style="font-weight: 700;">Rol</h5>
-                    <h6>{{this.rolUsuario}}</h6>
+                    <h6>{{perfil.rol}}</h6>
                 </div>
             </div>
         </div>

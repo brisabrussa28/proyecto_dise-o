@@ -1,0 +1,7 @@
+.cabecera{
+    margin: 10%;
+    border-top: 0.5vh solid #ffc107;
+    gap: 4%;
+    min-height: 50vh;
+    padding: 2%;
+}
