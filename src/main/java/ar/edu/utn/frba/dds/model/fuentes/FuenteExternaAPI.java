@@ -23,8 +23,6 @@ public class FuenteExternaAPI extends FuenteDeCopiaLocal {
   @Column(name = "api_url")
   private String urlBase;
 
-  //  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  //  @JoinColumn(name = "fuente_configuracion_adapter")
   @Transient
   private ConfiguracionAdapter configuracionAdapter;
 

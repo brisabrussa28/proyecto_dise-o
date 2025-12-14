@@ -4,8 +4,11 @@ import ar.edu.utn.frba.dds.model.geolocalizacion.GeoApi;
 import ar.edu.utn.frba.dds.model.geolocalizacion.GeoGeoref;
 import ar.edu.utn.frba.dds.model.hecho.EnriquecedorDeHechos;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import io.github.cdimascio.dotenv.Dotenv;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -13,19 +16,42 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 
 public class DBUtils {
-  // La fábrica ahora no es final y se inicializará de forma "lazy" (perezosa)
   private static EntityManagerFactory factory;
 
-  // Bloque estático para configurar la zona horaria UNA SOLA VEZ al cargar la clase.
-  // Esto se ejecuta antes que cualquier método de esta clase sea llamado.
   static {
-    TimeZone.setDefault(TimeZone.getTimeZone("America/Argentina/Buenos_Aires"));
+    Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+    String timezone = dotenv.get("TIMEZONE", "America/Argentina/Buenos_Aires");
+    TimeZone.setDefault(TimeZone.getTimeZone(timezone));
   }
 
   // Método sincronizado para asegurar que la fábrica se cree una sola vez (thread-safe)
   private static synchronized EntityManagerFactory getFactory() {
     if (factory == null) {
-      factory = Persistence.createEntityManagerFactory("simple-persistence-unit");
+      Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+
+      Map<String, String> configOverrides = new HashMap<>();
+
+      String dbUrl = dotenv.get("DB_URL");
+      if (dbUrl != null) {
+        configOverrides.put("hibernate.connection.url", dbUrl);
+      }
+
+      String dbUser = dotenv.get("DB_USER");
+      if (dbUser != null) {
+        configOverrides.put("hibernate.connection.username", dbUser);
+      }
+
+      String dbPassword = dotenv.get("DB_PASSWORD");
+      if (dbPassword != null) {
+        configOverrides.put("hibernate.connection.password", dbPassword);
+      }
+
+      String dbTimezone = dotenv.get("TIMEZONE");
+      if (dbTimezone != null) {
+        configOverrides.put("hibernate.jdbc.time_zone", dbTimezone);
+      }
+
+      factory = Persistence.createEntityManagerFactory("simple-persistence-unit", configOverrides);
     }
     return factory;
   }
@@ -97,4 +123,3 @@ public class DBUtils {
     }
   }
 }
-
