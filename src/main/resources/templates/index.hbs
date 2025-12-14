@@ -8,7 +8,7 @@
                     Filtros
                     <i class="bi bi-list"></i>
                 </button>
-                <input class="form-control mr-sm-2 shadow-sm" type="search" placeholder="Buscar un hecho"
+                <input class="form-control mr-sm-2 shadow-sm" type="search" placeholder="Buscar un hecho" id="searchInput"
                        aria-label="Search"
                        style="width: 37vw;">
             </div>
@@ -16,8 +16,91 @@
 
         <!-- El mapa real se inicializará aquí -->
         <div id="map" style="height: 100%; width: 100%;"></div>
-
     </div>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasResultados"
+         aria-labelledby="offcanvasResultadosLabel"
+         data-bs-backdrop="false"
+         data-bs-scroll="true">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasResultadosLabel">Resultados de Búsqueda</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="d-flex flex-column" style="gap: 3vh;">
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Palermo
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+                <div class="d-flex flex-row hechos-resultantes shadow">
+                    Hecho en Medrano
+                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -192,6 +275,38 @@
                     L.marker([ubicacion.latitud, ubicacion.longitud])
                             .addTo(map)
                             .bindPopup(popupHTML);
+                }
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // 1. Obtén referencia al input de búsqueda por su nuevo ID
+            const searchInput = document.getElementById('searchInput');
+
+            // 2. Obtén la instancia del Offcanvas de Bootstrap
+            // Requerimos la clase nativa de Bootstrap JS para controlar el offcanvas programáticamente
+            const offcanvasResultadosEl = document.getElementById('offcanvasResultados');
+            const offcanvasResultados = new bootstrap.Offcanvas(offcanvasResultadosEl);
+
+            // 3. Añade el Event Listener para la tecla "Enter"
+            searchInput.addEventListener('keydown', function(e) {
+                // Verifica si la tecla presionada es "Enter"
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    const query = searchInput.value.trim();
+
+                    if (query !== "") {
+                        // Muestra la barra lateral de resultados
+                        offcanvasResultados.show();
+
+                        // *** AQUÍ LLAMARÍAS A TU FUNCIÓN DE BACKEND/API PARA BUSCAR LOS HECHOS ***
+                        console.log("Iniciando búsqueda de: " + query);
+                        // cargarResultadosEnSidebar(query);
+                    } else {
+                        // Si el campo está vacío, puedes ocultar la barra si estaba abierta
+                        offcanvasResultados.hide();
+                    }
                 }
             });
         });
