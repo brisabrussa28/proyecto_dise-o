@@ -270,13 +270,15 @@ public class Router {
             List<Multimedia> listaFotos = new ArrayList<>();
 
             for (UploadedFile file : ctx.uploadedFiles("fotos")) {
-              Multimedia foto = new Multimedia(
-                  file.filename(),
-                  file.contentType(),
-                  file.content()
-                      .readAllBytes()
-              );
-              listaFotos.add(foto);
+              if (file.size() > 0) {
+                Multimedia foto = new Multimedia(
+                    file.filename(),
+                    file.contentType(),
+                    file.content()
+                        .readAllBytes()
+                );
+                listaFotos.add(foto);
+              }
             }
 
             Hecho nuevoHecho = new Hecho(
@@ -294,6 +296,11 @@ public class Router {
                 userController.finById(userId)
             );
 
+            // Con esto evito que se persista un archivo vacio y rompa el diseño
+            if (nuevoHecho.getFotos()
+                          .isEmpty()) {
+              nuevoHecho.setFotos(null);
+            }
             Hecho hechoGuardado = hechoController.subirHecho(nuevoHecho);
 
             ctx.status(201);

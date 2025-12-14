@@ -208,7 +208,10 @@ public class HechoController {
     Double lng = Double.valueOf(Objects.requireNonNull(ctx.formParam("longitud")));
 
     hechoModificado.setUbicacion(new PuntoGeografico(lat, lng));
-    hechoModificado.setProvincia(ctx.formParam("provincia"));
+    String provincia = ctx.formParam("provincia");
+    if (provincia != null & !provincia.isBlank()) {
+      hechoModificado.setProvincia(provincia);
+    }
 
     modificarHecho(hechoOriginal, hechoModificado);
     HechoRepository.instance()
@@ -252,9 +255,10 @@ public class HechoController {
     if (hecho.getFechasuceso() != null) {
       java.time.format.DateTimeFormatter formatter =
           java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-      model.put("fechaFormateada",
-                hecho.getFechasuceso()
-                     .format(formatter)
+      model.put(
+          "fechaFormateada",
+          hecho.getFechasuceso()
+               .format(formatter)
       );
     }
 
