@@ -8,7 +8,12 @@
 
 {{#partial "contenido"}}
 
-    <body class="principal" style="background-color: white;">
+    <body class="principal" style="
+    background-image: url('/ruta/a/tu/imagen.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+">
 
     <h1 style="font-weight: 700; font-size: 32px; color: black; padding-left: 8px; padding-top: 10px; margin-left: 2%; margin-bottom: 2%;">
         <i class="bi bi-kanban" style="transform: rotate(180deg); display: inline-block;"></i>
@@ -20,7 +25,7 @@
         <div class="d-flex flex-row align-items-center" style="gap: 27px;">
 
             <div class="d-flex flex-column align-items-center stats_recuadro">
-                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Hechos totales</h1>
+                <h1 style="font-size: 1.35vw; font-weight: 700; color: #005baa;">Hechos Visibles</h1>
                 <h2 style="font-size: 2.25vw; font-weight: bold; color: #005baa;">
                     {{#each cantidadHechos}}{{cantidad}}{{/each}}
                 </h2>
@@ -121,7 +126,7 @@
                                         <select id="selectColeccion" class="form-select"
                                                 aria-label="Menú de selección de colección"
                                                 style="width: 15vw; max-width: 220px;">
-                                        <option value="">Seleccione una coleccion</option>
+                                            <option value="">Seleccione una coleccion</option>
                                             {{#each colecciones}}
                                                 <option value="{{id}}">{{titulo}}</option>
                                             {{/each}}
@@ -213,7 +218,7 @@
                         backgroundColor: 'rgba(0, 91, 170, 0.7)'
                     }]
                 },
-                options: { scales: { y: { beginAtZero: true } } }
+                options: {scales: {y: {beginAtZero: true}}}
             });
         }
 
@@ -244,6 +249,7 @@
                 chartHechos = crearGrafico("chartHechos", datos, "Hechos por hora");
             }
         }
+
         let chartCategorias = null;
 
         async function cargarCategorias() {
@@ -277,7 +283,7 @@
                             maintainAspectRatio: false,
                             indexAxis: 'y',
                             scales: {
-                                x: { beginAtZero: true }
+                                x: {beginAtZero: true}
                             }
                         }
                     }
@@ -316,7 +322,7 @@
                         options: {
                             indexAxis: 'x',
                             scales: {
-                                x: { beginAtZero: true }
+                                x: {beginAtZero: true}
                             }
                         }
                     }
@@ -348,7 +354,7 @@
                     csv += `${e.hora},${e.categoria},${e.cantidad}\n`;
                 });
 
-                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
                 link.download = "estadisticas_hechos.csv";
@@ -389,7 +395,7 @@
                 });
             }
 
-            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
             link.download = `estadisticas_${tipo}.csv`;

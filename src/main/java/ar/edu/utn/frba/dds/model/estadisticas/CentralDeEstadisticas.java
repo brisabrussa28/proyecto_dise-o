@@ -82,10 +82,9 @@ public class CentralDeEstadisticas {
   }
   //Cantidad de hechos reportados por categoria
   public List<Estadistica> hechosPorCategoria() {
-    List<Coleccion> colecciones = ColeccionRepository.instance().findAll();
-    List<Hecho> todosLosHechos = obtenerTodosLosHechos(colecciones);
+    List<Hecho> hechosReportados = gestor.obtenerHechosReportados();
 
-    Map<String, Long> cantidadPorCategoria = todosLosHechos.stream()
+    Map<String, Long> cantidadPorCategoria = hechosReportados.stream()
                                                            .collect(Collectors.groupingBy(
                                                                Hecho::getCategoria,
                                                                Collectors.counting()
@@ -104,14 +103,17 @@ public class CentralDeEstadisticas {
   }
   //cantidad de hechos reportados por provincia segun coleccion
   public List<Estadistica> hechosPorProvinciaDeUnaColeccion(Coleccion coleccion) {
-    Filtro filtroExcluyente = obtenerFiltroExcluyente();
-    List<Hecho> hechosFiltrados = coleccion.obtenerHechosFiltrados(filtroExcluyente);
+    List<Hecho> hechosReportados = gestor.obtenerHechosReportados();
 
-    Map<String, Long> cantidadPorProvincia = hechosFiltrados.stream()
-                                                            .collect(Collectors.groupingBy(
-                                                                Hecho::getProvincia,
-                                                                Collectors.counting()
-                                                            ));
+    List<Hecho> hechosDeColeccion = hechosReportados.stream()
+                                                    .filter(h -> coleccion.getHechos().contains(h))
+                                                    .collect(Collectors.toList());
+
+    Map<String, Long> cantidadPorProvincia = hechosDeColeccion.stream()
+                                                              .collect(Collectors.groupingBy(
+                                                                  Hecho::getProvincia,
+                                                                  Collectors.counting()
+                                                              ));
 
     List<Estadistica> estadisticas = cantidadPorProvincia.entrySet().stream()
                                                     .map(entry -> new Estadistica(
@@ -144,7 +146,7 @@ public class CentralDeEstadisticas {
         (long) gestor.getSolicitudesPendientes().size(),
         null,
         null,
-        "CANTIDAD DE SOLICITUDES PENDIENTES "
+        "CANTIDAD DE SOLICITUDES PENDIENTES"
     );
   }
   //Cantidad de solicitudes spam
@@ -192,6 +194,7 @@ public class CentralDeEstadisticas {
     List<Hecho> todosLosHechos = colecciones.stream()
                                             .flatMap(coleccion -> coleccion.obtenerHechosFiltrados(filtroExcluyente)
                                                                            .stream())
+                                            .distinct()
                                             .collect(Collectors.toList());
 
     if (this.filtroAdicional != null) {

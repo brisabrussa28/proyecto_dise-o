@@ -96,6 +96,13 @@ public class GestorDeSolicitudes {
                       .collect(Collectors.toList());
   }
 
+  public List<Hecho> obtenerHechosReportados() {
+    return repositorio.findAll().stream()
+                      .map(Solicitud::getHechoSolicitado)
+                      .distinct()
+                      .collect(Collectors.toList());
+  }
+
   /**
    * Devuelve un filtro que puede ser usado para excluir los hechos eliminados
    * de otros reportes.
