@@ -1,3 +1,11 @@
+{{#partial "nav_izquierda"}}
+    <a href="/admin/dashboard" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+       title="Volver al panel">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="d-none d-sm-block">Volver</span>
+    </a>
+{{/partial}}
+
 {{#partial "contenido"}}
 
     <!-- Fondo con imagen -->
@@ -46,7 +54,8 @@
 
                     {{#if (gt paginaActual 1)}}
                         <li class="page-item">
-                            <a class="page-link" href="/api/hechos?page={{subtract paginaActual 1}}">Anterior</a>
+                            <a class="page-link" href="/api/hechos?page={{subtract paginaActual 1}}
+                            ">Anterior</a>
                         </li>
                     {{/if}}
 
@@ -58,7 +67,8 @@
 
                     {{#if (lt paginaActual totalPaginas)}}
                         <li class="page-item">
-                            <a class="page-link" href="/api/hechos?page={{add paginaActual 1}}">Siguiente</a>
+                            <a class="page-link" href="/api/hechos?page={{add paginaActual 1}}
+                            ">Siguiente</a>
                         </li>
                     {{/if}}
 
