@@ -257,20 +257,41 @@
                 let fechaTexto = "Fecha no disponible";
                 let horaTexto = "";
 
-                if (hecho.hecho_fecha_suceso) {
+                const fechaRaw = hecho.hecho_fecha_suceso || hecho.fechaSuceso;
+
+                if (fechaRaw) {
                     try {
-                        const fechaObj = new Date(hecho.hecho_fecha_suceso);
-                        fechaTexto = fechaObj.toLocaleDateString('es-AR', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit'
-                        });
-                        horaTexto = fechaObj.toLocaleTimeString('es-AR', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
+                        let fechaObj;
+
+                        // CASO 1: Es un Array [año, mes, dia, hora, min, seg] (formato Jackson por defecto)
+                        if (Array.isArray(fechaRaw)) {
+                            // Nota: en JS el mes es base 0 (Enero = 0), por eso restamos 1 al mes
+                            fechaObj = new Date(
+                                fechaRaw[0],
+                                fechaRaw[1] - 1,
+                                fechaRaw[2],
+                                fechaRaw[3] || 0,
+                                fechaRaw[4] || 0
+                            );
+                        }
+                        // CASO 2: Es un String ISO o Timestamp (formato estándar)
+                        else {
+                            fechaObj = new Date(fechaRaw);
+                        }
+
+                        if (!isNaN(fechaObj.getTime())) {
+                            fechaTexto = fechaObj.toLocaleDateString('es-AR', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit'
+                            });
+                            horaTexto = fechaObj.toLocaleTimeString('es-AR', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        }
                     } catch (e) {
-                        console.warn('Error parsing date:', hecho.hecho_fecha_suceso);
+                        console.warn('Error parsing date:', fechaRaw);
                     }
                 }
 
@@ -470,8 +491,19 @@
 
                 hechos.forEach((hecho, index) => {
                     const esConsensuado = hecho.colecciones && hecho.colecciones.length > 0;
-                    const fecha = hecho.hecho_fecha_suceso ?
-                        new Date(hecho.hecho_fecha_suceso).toLocaleDateString('es-AR') : 'S/F';
+
+                    let fecha = 'S/F';
+                    const fechaRaw = hecho.hecho_fecha_suceso || hecho.fechaSuceso;
+
+                    if (fechaRaw) {
+                         if (Array.isArray(fechaRaw)) {
+                             // Array -> Date
+                             fecha = new Date(fechaRaw[0], fechaRaw[1]-1, fechaRaw[2]).toLocaleDateString('es-AR');
+                         } else {
+                             // String -> Date
+                             fecha = new Date(fechaRaw).toLocaleDateString('es-AR');
+                        }
+                    }
 
                     const resultadoHTML = `
                         <div class="card mb-2 hecho-card ${esConsensuado ? 'consensuado' : ''}"
