@@ -329,7 +329,14 @@ public class Router {
     app.post("/admin/fuentes/{id}/agregar-fuente", adminController::agregarFuenteAAgregacion);
     app.post("/admin/fuentes/{id}/quitar-fuente/{idHija}", adminController::quitarFuenteDeAgregacion);
 
-    app.get("/admin/colecciones", ctx -> adminController.listarColecciones(ctx, modeloConSesion(ctx)));
+    app.get("/admin/colecciones", ctx -> {
+      Map<String, Object> model = modeloConSesion(ctx);
+
+      List<String> categorias = coleccionController.getCategorias();
+      model.put("categorias", categorias);
+
+      adminController.listarColecciones(ctx, model);
+    });
     app.get("/admin/colecciones/{id}", ctx -> adminController.editarColeccion(ctx, modeloConSesion(ctx)));
     app.post("/admin/colecciones", ctx -> adminController.crearColeccion(ctx));
     app.post("/admin/colecciones/{id}/configurar", adminController::configurarColeccion);
