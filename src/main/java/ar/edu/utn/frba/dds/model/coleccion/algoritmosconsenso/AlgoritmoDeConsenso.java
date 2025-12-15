@@ -81,9 +81,9 @@ public abstract class AlgoritmoDeConsenso {
 
     if (!tituloSimilar) return false;
 
-    boolean fechaSimilar = (h1.getFechasuceso() == null && h2.getFechasuceso() == null) ||
-        (h1.getFechasuceso() != null && h2.getFechasuceso() != null &&
-            h1.getFechasuceso().equals(h2.getFechasuceso()));
+    boolean fechaSimilar = (h1.getFechaSuceso() == null && h2.getFechaSuceso() == null) ||
+        (h1.getFechaSuceso() != null && h2.getFechaSuceso() != null &&
+            h1.getFechaSuceso().equals(h2.getFechaSuceso()));
 
     if (!fechaSimilar) return false;
 

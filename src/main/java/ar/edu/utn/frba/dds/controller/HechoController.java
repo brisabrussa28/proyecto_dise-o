@@ -69,9 +69,10 @@ public class HechoController {
     if (hechoModificado.getUbicacion() != null) {
       hechoOriginal.setUbicacion(hechoModificado.getUbicacion());
     }
-    if (hechoModificado.getFechasuceso() != null) {
-      if (hechoModificado.getFechasuceso().isBefore(hechoOriginal.getFechasuceso())) {
-        hechoOriginal.setFechasuceso(hechoModificado.getFechasuceso());
+    if (hechoModificado.getFechaSuceso() != null) {
+      if (hechoModificado.getFechaSuceso()
+                         .isBefore(hechoOriginal.getFechaSuceso())) {
+        hechoOriginal.setFechasuceso(hechoModificado.getFechaSuceso());
       }
     }
     List<Multimedia> fotosNuevas = hechoModificado.getFotos();
@@ -91,7 +92,8 @@ public class HechoController {
   }
 
   private void validarHecho(Hecho hecho) {
-    if (hecho.getFechasuceso().isAfter(LocalDateTime.now())) {
+    if (hecho.getFechaSuceso()
+             .isAfter(LocalDateTime.now())) {
       throw new RuntimeException("EL HECHO NO PUEDE SUCEDER EN EL FUTURO");
     }
   }
@@ -109,8 +111,8 @@ public class HechoController {
     Long idUsuario = ctx.sessionAttribute("usuario_id");
     Hecho hecho = this.findById(idHecho);
 
-    if (hecho.getFechasuceso() != null) {
-      String fechaFormateada = hecho.getFechasuceso()
+    if (hecho.getFechaSuceso() != null) {
+      String fechaFormateada = hecho.getFechaSuceso()
                                     .truncatedTo(ChronoUnit.MINUTES) // Elimina segundos y nanos
                                     .toString();
 
@@ -238,10 +240,13 @@ public class HechoController {
     boolean esPropietario = hecho.getAutor() != null && hecho.getAutor().getId().equals(usuarioId);
     model.put("esPropietario", esPropietario);
 
-    if (hecho.getFechasuceso() != null) {
+    if (hecho.getFechaSuceso() != null) {
       java.time.format.DateTimeFormatter formatter =
           java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-      model.put("fechaFormateada", hecho.getFechasuceso().format(formatter));
+      model.put("fechaFormateada",
+                hecho.getFechaSuceso()
+                     .format(formatter)
+      );
     }
 
     ctx.render("hecho-detail.hbs", model);
@@ -503,10 +508,10 @@ public class HechoController {
                                                                                                                      .equals(
                                                                                                                          coleccion))))
                 // Filtro de Fechas
-                .filter(h -> fechaDesde == null || (h.getFechasuceso() != null && !h.getFechasuceso()
+                .filter(h -> fechaDesde == null || (h.getFechaSuceso() != null && !h.getFechaSuceso()
                                                                                     .isBefore(
                                                                                         fechaDesde)))
-                .filter(h -> fechaHasta == null || (h.getFechasuceso() != null && !h.getFechasuceso()
+                .filter(h -> fechaHasta == null || (h.getFechaSuceso() != null && !h.getFechaSuceso()
                                                                                     .isAfter(
                                                                                         fechaHasta)))
                 // Filtro Consensuados
@@ -521,11 +526,31 @@ public class HechoController {
     map.put("hecho_titulo", h.getTitulo());
     map.put("hecho_descripcion", h.getDescripcion());
     map.put("hecho_categoria", h.getCategoria());
-    map.put("hecho_fecha_suceso", h.getFechasuceso());
+    map.put("hecho_fecha_suceso", h.getFechaSuceso());
     map.put("hecho_provincia", h.getProvincia());
     map.put("hecho_direccion", h.getDireccion());
-    map.put("etiquetas", h.getEtiquetas());
-    map.put("colecciones", h.getColecciones());
+
+    map.put("etiquetas", h.getEtiquetas() != null ? h.getEtiquetas() : new ArrayList<>());
+
+    if (h.getColecciones() != null) {
+      try {
+        List<Map<String, Object>> colsSimple = h.getColecciones()
+                                                .stream()
+                                                .map(c -> {
+                                                  Map<String, Object> m = new HashMap<>();
+                                                  m.put("id", c.getId());
+                                                  m.put("titulo", c.getTitulo());
+                                                  return m;
+                                                })
+                                                .collect(Collectors.toList());
+        map.put("colecciones", colsSimple);
+      } catch (Exception e) {
+        map.put("colecciones", new ArrayList<>());
+      }
+    } else {
+      map.put("colecciones", new ArrayList<>());
+    }
+
     return map;
   }
 }

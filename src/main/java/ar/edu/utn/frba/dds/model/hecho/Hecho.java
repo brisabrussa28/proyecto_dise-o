@@ -219,7 +219,7 @@ public class Hecho {
    * @return Date fecha del suceso
    */
   @JsonProperty("hecho_fecha_suceso")
-  public LocalDateTime getFechasuceso() {
+  public LocalDateTime getFechaSuceso() {
     return hecho_fecha_suceso;
   }
 

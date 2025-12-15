@@ -149,12 +149,22 @@
 
     <div class="navbar-nav">
         {{#block "nav_izquierda"}}
-            <a href="{{#if estaLogueado}}/hechos/nuevo{{else}}/auth/login?redirect=/hechos/nuevo{{/if}}"
+            <div class="d-flex align-items-center gap-2">
+
+                <a href="{{#if
+                        estaLogueado}}/hechos/nuevo{{else}}/auth/login?redirect=/hechos/nuevo{{/if}}"
                class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
                title="{{#unless estaLogueado}}Debes iniciar sesión para crear un hecho{{/unless}}">
                 <i class="fa-solid fa-plus"></i>
                 <span class="d-none d-sm-block">Nuevo Hecho</span>
             </a>
+                <a href="/api/hechos"
+                   class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+                   title="Ver todos los hechos">
+                    <i class="fa-solid fa-map-pin"></i>
+                    <span class="d-none d-sm-block">Hechos</span>
+                </a>
+            </div>
         {{/block}}
     </div>
 

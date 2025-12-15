@@ -34,7 +34,7 @@ public class HechoBuilder {
     this.direccion = original.getDireccion();
     this.provincia = original.getProvincia();
     this.ubicacion = original.getUbicacion();
-    this.fechaSuceso = original.getFechasuceso();
+    this.fechaSuceso = original.getFechaSuceso();
     this.fechaCarga = original.getFechacarga();
     this.fuenteOrigen = original.getOrigen();
     this.etiquetas = new ArrayList<>(original.getEtiquetas());
