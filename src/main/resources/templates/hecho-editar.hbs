@@ -173,9 +173,16 @@
                                                 <div class="img-selector shadow-sm"
                                                      onclick="toggleSeleccion(this)">
 
-                                                    <img src="/hechos/{{../hecho.id}}/fotos/{{@index}}"
-                                                         class="w-100"
-                                                         style="height: 150px; object-fit: cover; display: block;">
+                                                    {{#if this.esVideo}}
+                                                        <video src="/hechos/{{../hecho.id}}/multimedia/{{@index}}"
+                                                               style="height: 150px; object-fit: cover; display: block;"
+                                                               controls>
+                                                        </video>
+                                                    {{else}}
+                                                        <img src="/hechos/{{../hecho.id}}/multimedia/{{@index}}"
+                                                             class="w-100"
+                                                             style="height: 150px; object-fit: cover; display: block;">
+                                                    {{/if}}
 
                                                     <div class="trash-overlay">
                                                         <i class="fa-solid fa-trash-can"></i>

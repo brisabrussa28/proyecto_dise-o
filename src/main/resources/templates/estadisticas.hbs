@@ -9,199 +9,198 @@
 {{#partial "contenido"}}
 
     <body class="principal">
+    <div class="container py-4">
+        <div class="container my-5 bg-white bg-opacity-75 rounded p-3">
+            <h1 class="mt-2 fw-bold">
+                <i class="bi bi-kanban"
+                   style="transform: rotate(180deg); display: inline-block;"></i>
+                Estadísticas
+            </h1>
 
-    <div class="container-fluid  bg-white bg-opacity-75 rounded p-3 mt-3 py-1">
-
-        <h1 class="mt-2 fw-bold">
-            <i class="bi bi-kanban" style="transform: rotate(180deg); display: inline-block;"></i>
-            Estadísticas
-        </h1>
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card text-white bg-white mb-3 shadow-sm h-100">
-                    <div class="card-body d-flex align-items-center justify-content-between">
-                        <h2 class="card-title" style="color: #005baa;">Hechos
-                            Visibles</h2>
-                        <p class="card-text display-6 fw-bold" style="color: #005baa;">
-                            {{#each cantidadHechos}}{{cantidad}}{{/each}}
-                        </p>
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-white bg-white mb-3 shadow-sm h-100">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <h2 class="card-title" style="color: #005baa;">Hechos Visibles</h2>
+                            <p class="card-text display-6 fw-bold" style="color: #005baa;">
+                                {{#each cantidadHechos}}{{cantidad}}{{/each}}
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-4">
-                <div class="card text-white bg-white mb-3 shadow-sm h-100">
-                    <div class="card-body d-flex align-items-center justify-content-between">
-                        <h2 class="card-title" style="color: #005baa;">Solicitudes
-                            Pendientes</h2>
-                        <p class="card-text display-6 fw-bold" style="color: #005baa;">
-                            {{#each solicitudesPendientes}}{{cantidad}}{{/each}}
-                        </p>
+                <div class="col-md-4">
+                    <div class="card text-white bg-white mb-3 shadow-sm h-100">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <h2 class="card-title" style="color: #005baa;">Solicitudes
+                                Pendientes</h2>
+                            <p class="card-text display-6 fw-bold" style="color: #005baa;">
+                                {{#each solicitudesPendientes}}{{cantidad}}{{/each}}
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-4">
-                <div class="card text-white bg-white mb-3 shadow-sm h-100">
-                    <div class="card-body d-flex align-items-center justify-content-between">
-                        <h2 class="card-title" style="color: #005baa;"
-                        >Solicitudes
-                            Spam</h2>
-                        <p class="card-text display-6 fw-bold" style="color: #005baa;">
-                            {{#each solicitudesSpam}}{{cantidad}}{{/each}}
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="accordion" id="accordionExample">
-            <div class="accordion-item" style="padding-bottom: 4vh;">
-                <h2 class="accordion-header" id="panelsStayOpen-headingOne">
-                    <button class="accordion-button btn btn-light btn-white-to-gray bot-stats"
-                            type="button" data-bs-toggle="collapse"
-                            data-bs-target="#panelsStayOpen-collapseOne"
-                            aria-expanded="true"
-                            aria-controls="panelsStayOpen-collapseOne"
-                            style="font-size: 25px;">
-                        <strong>Estadísticas de Hechos</strong>
-                    </button>
-                </h2>
-                <div id="panelsStayOpen-collapseOne"
-                     class="accordion-collapse collapse show"
-                     aria-labelledby="panelsStayOpen-headingOne">
-                    <div class="accordion-body">
-                        <div class="d-flex flex-row align-items-center"
-                             style="gap: 80px; justify-content: space-between">
-                            <div class="d-flex flex-column align-items-center"
-                                 style="gap: 20px;">
-                                <div class="d-flex flex-column align-items-center">
-                                    <h5>Filtrar por:</h5>
-                                    <select id="selectFiltroHechos" class="form-select"
-                                            aria-label="Menú de selección de opciones"
-                                            style="width: 15vw; max-width: 220px;">
-                                        <option selected>Seleccionar filtro</option>
-                                        <option value="1">Provincia</option>
-                                        <option value="2">Hora</option>
-                                    </select>
-                                </div>
-
-                                <div class="d-flex flex-column align-items-center">
-                                    <h5>Categoría:</h5>
-                                    <select id="selectCategoriaHechos" class="form-select"
-                                            aria-label="Menú de selección de categorias"
-                                            style="width: 15vw; max-width: 220px;">
-                                        <option value="">Seleccione una categoria</option>
-                                        {{#each categorias}}
-                                            <option value="{{this}}">{{this}}</option>
-                                        {{/each}}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="d-flex flex-column align-items-center">
-                                <canvas id="chartHechos" class="stats_grafico" height="13vw"
-                                        width="69vw"></canvas>
-                                <button type="button"
-                                        class="btn btn-info descargar-csv"
-                                        data-type="hechos">
-                                    Descargar CSV
-                                </button>
-
-                            </div>
+                <div class="col-md-4">
+                    <div class="card text-white bg-white mb-3 shadow-sm h-100">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <h2 class="card-title" style="color: #005baa;">Solicitudes Spam</h2>
+                            <p class="card-text display-6 fw-bold" style="color: #005baa;">
+                                {{#each solicitudesSpam}}{{cantidad}}{{/each}}
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="accordion-item" style="padding-bottom: 4vh;">
-                <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
-                    <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats"
-                            type="button" data-bs-toggle="collapse"
-                            data-bs-target="#panelsStayOpen-collapseTwo"
-                            aria-expanded="true"
-                            aria-controls="panelsStayOpen-collapseTwo"
-                            style="font-size: 25px;">
-                        <strong>Estadísticas de Hechos Reportados por Colección</strong>
-                    </button>
-                </h2>
-                <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
-                     aria-labelledby="panelsStayOpen-headingTwo">
-                    <div class="accordion-body">
-                        <div class="d-flex flex-row align-items-center"
-                             style="gap: 80px; justify-content: space-between">
-                            <div class="d-flex flex-column align-items-center"
-                                 style="gap: 20px;">
 
-                                <div class="d-flex flex-column align-items-center">
-                                    <h5>Colección:</h5>
-                                    <select id="selectColeccion" class="form-select"
-                                            aria-label="Menú de selección de colección"
-                                            style="width: 15vw; max-width: 220px;">
-                                        <option value="">Seleccione una coleccion</option>
-                                        {{#each colecciones}}
-                                            <option value="{{id}}">{{titulo}}</option>
-                                        {{/each}}
-                                    </select>
+            <div class="accordion" id="accordionExample">
+
+                <div class="accordion-item" style="padding-bottom: 4vh;">
+                    <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                        <button class="accordion-button btn btn-light btn-white-to-gray bot-stats"
+                                type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseOne"
+                                aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseOne"
+                                style="font-size: 25px;">
+                            <strong>Estadísticas de Hechos</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseOne"
+                         class="accordion-collapse collapse show"
+                         aria-labelledby="panelsStayOpen-headingOne">
+                        <div class="accordion-body">
+                            <div class="row g-4 align-items-start">
+
+                                <div class="col-12 col-lg-3">
+                                    <div class="d-flex flex-column gap-3 align-items-center align-items-lg-start">
+                                        <div class="w-100">
+                                            <label class="form-label fw-bold mb-1">Filtrar
+                                                por:</label>
+                                            <select id="selectFiltroHechos"
+                                                    class="form-select w-100">
+                                                <option value="" selected>Seleccionar filtro
+                                                </option>
+                                                <option value="1">Provincia</option>
+                                                <option value="2">Hora</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="w-100">
+                                            <label class="form-label fw-bold mb-1">Categoría:</label>
+                                            <select id="selectCategoriaHechos"
+                                                    class="form-select w-100">
+                                                <option value="">Todas las categorías</option>
+                                                {{#each categorias}}
+                                                    <option value="{{this}}">{{this}}</option>
+                                                {{/each}}
+                                            </select>
+                                        </div>
+
+                                        <button type="button"
+                                                class="btn btn-info w-100 mt-2 descargar-csv"
+                                                data-type="hechos">
+                                            <i class="fa-solid fa-download me-2"></i>Descargar CSV
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="d-flex flex-column align-items-center">
-                                <canvas id="myBarChart-2" class="stats_grafico"
-                                        height="13vw"
-                                        width="69vw"></canvas>
-                                <button type="button"
-                                        class="btn btn-info descargar-csv"
-                                        data-type="coleccion">
-                                    Descargar CSV
-                                </button>
+
+                                <div class="col-12 col-lg-9">
+                                    <div style="position: relative; height: 400px; width: 100%;">
+                                        <canvas id="canvasHechos"></canvas>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="accordion-item" style="padding-bottom: 4vh;">
-                <h2 class="accordion-header" id="panelsStayOpen-headingThree">
-                    <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats"
-                            type="button" data-bs-toggle="collapse"
-                            data-bs-target="#panelsStayOpen-collapseThree"
-                            aria-expanded="true"
-                            aria-controls="panelsStayOpen-collapseThree"
-                            style="font-size: 25px;">
-                        <strong>Estadísticas de Hechos Reportados por Categoría</strong>
-                    </button>
-                </h2>
-                <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse"
-                     aria-labelledby="panelsStayOpen-headingThree">
-                    <div class="accordion-body">
-                        <div class="d-flex flex-row align-items-center"
-                             style="gap: 80px; justify-content: space-between">
-                            <div class="d-flex flex-column align-items-center"
-                                 style="gap: 20px;">
-                                <div class="d-flex flex-column align-items-center">
-                                    <h5>Obtener Top:</h5>
-                                    <select id="selectTopCategorias" class="form-select"
-                                            aria-label="Menú de selección de ejemplo"
-                                            style="width: 15vw; max-width: 220px;">
-                                        <option selected>Seleccionar top</option>
-                                        <option value="1">1</option>
-                                        <option value="3">3</option>
-                                        <option value="5">5</option>
-                                        <option value="10">10</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                    </select>
+
+                <div class="accordion-item" style="padding-bottom: 4vh;">
+                    <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+                        <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats"
+                                type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseTwo"
+                                aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseTwo"
+                                style="font-size: 25px;">
+                            <strong>Reportados por Colección</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
+                         aria-labelledby="panelsStayOpen-headingTwo">
+                        <div class="accordion-body">
+                            <div class="row g-4 align-items-start">
+                                <div class="col-12 col-lg-3">
+                                    <div class="d-flex flex-column gap-3">
+                                        <div class="w-100">
+                                            <label class="form-label fw-bold mb-1">Colección:</label>
+                                            <select id="selectColeccion" class="form-select w-100">
+                                                <option value="">Seleccione una colección</option>
+                                                {{#each colecciones}}
+                                                    <option value="{{id}}">{{titulo}}</option>
+                                                {{/each}}
+                                            </select>
+                                        </div>
+                                        <button type="button"
+                                                class="btn btn-info w-100 mt-2 descargar-csv"
+                                                data-type="coleccion">
+                                            Descargar CSV
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-9">
+                                    <div style="position: relative; height: 400px; width: 100%;">
+                                        <canvas id="canvasColeccion"></canvas>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
 
-                            <div class="d-flex flex-column align-items-center">
-                                <canvas id="myBarChart-3"
-                                        style="width: 100%;
-                                            height: auto;"
-                                        width="900" height="400"></canvas>
-                                <button type="button"
-                                        class="btn btn-info descargar-csv"
-                                        data-type="categorias">
-                                    Descargar CSV
-                                </button>
+                <div class="accordion-item" style="padding-bottom: 4vh;">
+                    <h2 class="accordion-header" id="panelsStayOpen-headingThree">
+                        <button class="accordion-button collapsed btn btn-light btn-white-to-gray bot-stats"
+                                type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseThree"
+                                aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseThree"
+                                style="font-size: 25px;">
+                            <strong>Reportados por Categoría</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse"
+                         aria-labelledby="panelsStayOpen-headingThree">
+                        <div class="accordion-body">
+                            <div class="row g-4 align-items-start">
+                                <div class="col-12 col-lg-3">
+                                    <div class="d-flex flex-column gap-3">
+                                        <div class="w-100">
+                                            <label class="form-label fw-bold mb-1">Obtener
+                                                Top:</label>
+                                            <select id="selectTopCategorias"
+                                                    class="form-select w-100">
+                                                <option selected>Seleccionar top</option>
+                                                <option value="1">Top 1</option>
+                                                <option value="3">Top 3</option>
+                                                <option value="5">Top 5</option>
+                                                <option value="10">Top 10</option>
+                                                <option value="50">Top 50</option>
+                                                <option value="100">Top 100</option>
+                                            </select>
+                                        </div>
+                                        <button type="button"
+                                                class="btn btn-info w-100 mt-2 descargar-csv"
+                                                data-type="categorias">
+                                            Descargar CSV
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-9">
+                                    <div style="position: relative; height: 400px; width: 100%;">
+                                        <canvas id="canvasCategorias"></canvas>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -215,209 +214,161 @@
 
     <script>
         let chartHechos = null;
+        let chartCategorias = null;
+        let chartColeccion = null;
 
-        function crearGrafico(id, datos, label) {
-            const ctx = document.getElementById(id).getContext('2d');
+        // Función genérica para crear gráficos
+        function crearGrafico(idCanvas, datos, label, horizontal = false) {
+            const canvas = document.getElementById(idCanvas);
+            if (!canvas) {
+                console.error("No se encontró el canvas:", idCanvas);
+                return;
+            }
 
+            const ctx = canvas.getContext('2d');
             return new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: datos.map(e => e.grupo || e.categoria),
+                    labels: datos.map(e => e.grupo || e.categoria || e.coleccion),
                     datasets: [{
                         label: label,
                         data: datos.map(e => e.cantidad),
                         backgroundColor: 'rgba(0, 91, 170, 0.7)'
                     }]
                 },
-                options: {scales: {y: {beginAtZero: true}}}
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // ESTO ES CLAVE
+                    indexAxis: horizontal ? 'y' : 'x',
+                    scales: {
+                        x: { beginAtZero: true },
+                        y: { beginAtZero: true }
+                    }
+                }
             });
         }
 
-        document.getElementById("panelsStayOpen-collapseOne")
-                .addEventListener("shown.bs.collapse", cargarHechos);
-        document.getElementById("selectFiltroHechos")
-                .addEventListener("change", cargarHechos);
-        document.getElementById("selectCategoriaHechos")
-                .addEventListener("change", cargarHechos);
-
+        // 1. CARGA HECHOS
         async function cargarHechos() {
-            const filtro = document.getElementById("selectFiltroHechos").value;
-            const categoria = document.getElementById("selectCategoriaHechos").value;
+            const selectFiltro = document.getElementById("selectFiltroHechos");
+            const selectCategoria = document.getElementById("selectCategoriaHechos");
 
-            if (filtro === "1") {
-                const resp = await fetch(`/admin/estadisticas/provincia?categoria=${categoria}`);
-                const datos = await resp.json();
+            let filtro = selectFiltro.value;
+            const categoria = selectCategoria.value;
 
-                if (chartHechos) chartHechos.destroy();
-                chartHechos = crearGrafico("chartHechos", datos, "Hechos por provincia");
-            }
-
-            if (filtro === "2") {
-                const resp = await fetch(`/admin/estadisticas/hora?categoria=${categoria}`);
-                const datos = await resp.json();
-
-                if (chartHechos) chartHechos.destroy();
-                chartHechos = crearGrafico("chartHechos", datos, "Hechos por hora");
-            }
-        }
-
-        let chartCategorias = null;
-
-        async function cargarCategorias() {
-            const topValue = document.getElementById("selectTopCategorias").value;
-
-            const top = isNaN(parseInt(topValue)) ? null : parseInt(topValue);
-
-            const url = top
-                    ? `/admin/estadisticas/categorias?top=${top}`
-                    : `/admin/estadisticas/categorias`;
-
-            const resp = await fetch(url);
-            const datos = await resp.json();
-
-            if (chartCategorias) chartCategorias.destroy();
-
-            chartCategorias = new Chart(
-                    document.getElementById("myBarChart-3").getContext("2d"),
-                    {
-                        type: 'bar',
-                        data: {
-                            labels: datos.map(e => e.categoria),
-                            datasets: [{
-                                label: "Hechos por categoría",
-                                data: datos.map(e => e.cantidad),
-                                backgroundColor: 'rgba(0, 91, 170, 0.7)'
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            indexAxis: 'y',
-                            scales: {
-                                x: {beginAtZero: true}
-                            }
-                        }
-                    }
-            );
-        }
-
-        document.getElementById("panelsStayOpen-collapseThree")
-                .addEventListener("shown.bs.collapse", cargarCategorias);
-        document.getElementById("selectTopCategorias")
-                .addEventListener("change", cargarCategorias);
-
-        let chartColeccion = null;
-
-        async function cargarColeccion() {
-            const id = document.getElementById("selectColeccion").value;
-
-            if (!id) return;
-
-            const resp = await fetch(`/admin/estadisticas/coleccion/${id}`);
-            const datos = await resp.json();
-
-            if (chartColeccion) chartColeccion.destroy();
-
-            chartColeccion = new Chart(
-                    document.getElementById("myBarChart-2").getContext("2d"),
-                    {
-                        type: 'bar',
-                        data: {
-                            labels: datos.map(e => e.grupo),
-                            datasets: [{
-                                label: "Hechos por provincia",
-                                data: datos.map(e => e.cantidad),
-                                backgroundColor: 'rgba(0, 91, 170, 0.7)'
-                            }]
-                        },
-                        options: {
-                            indexAxis: 'x',
-                            scales: {
-                                x: {beginAtZero: true}
-                            }
-                        }
-                    }
-            );
-        }
-
-        document.getElementById("selectColeccion")
-                .addEventListener("change", cargarColeccion);
-
-        document.getElementById("panelsStayOpen-collapseTwo")
-                .addEventListener("shown.bs.collapse", cargarColeccion);
-
-        async function descargarCSVCompleto(tipo) {
-            if (tipo === "hechos") {
-                const resp = await fetch("/admin/estadisticas/hechos/todas");
-                const datos = await resp.json();
-
-                let csv = "=== Hechos por Provincia ===\n";
-                csv += "Provincia,Categoría,Cantidad\n";
-
-                datos.provincia.forEach(e => {
-                    csv += `${e.provincia},${e.categoria},${e.cantidad}\n`;
-                });
-
-                csv += "\n=== Hechos por Hora ===\n";
-                csv += "Hora,Categoría,Cantidad\n";
-
-                datos.hora.forEach(e => {
-                    csv += `${e.hora},${e.categoria},${e.cantidad}\n`;
-                });
-
-                const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = "estadisticas_hechos.csv";
-                link.click();
-
-                return;
+            // Lógica de seguridad para valor por defecto
+            if (filtro === "" || filtro === "Seleccionar filtro") {
+                filtro = "1";
+                selectFiltro.value = "1";
             }
 
             let url = "";
+            let titulo = "";
 
-            if (tipo === "coleccion") url = "/admin/estadisticas/coleccion";
-            if (tipo === "categorias") url = "/admin/estadisticas/categorias/todas";
-            if (tipo === "provincia") url = "/admin/estadisticas/provincia/todas";
-
-            const resp = await fetch(url);
-            const datos = await resp.json();
-
-            let csv = "";
-
-            if (tipo === "coleccion") {
-                csv = "Colección,Provincia,Cantidad\n";
-                datos.forEach(e => {
-                    csv += `${e.coleccion},${e.provincia},${e.cantidad}\n`;
-                });
+            if (filtro === "1") {
+                url = `/admin/estadisticas/provincia?categoria=${categoria}`;
+                titulo = "Hechos por provincia";
+            } else if (filtro === "2") {
+                url = `/admin/estadisticas/hora?categoria=${categoria}`;
+                titulo = "Hechos por hora";
+            } else {
+                return;
             }
 
-            if (tipo === "categorias") {
-                csv = "Categoría,Cantidad\n";
-                datos.forEach(e => {
-                    csv += `${e.categoria},${e.cantidad}\n`;
-                });
-            }
+            try {
+                const resp = await fetch(url);
+                const datos = await resp.json();
 
-            if (tipo === "provincia") {
-                csv = "Provincia,Categoría,Cantidad\n";
-                datos.forEach(e => {
-                    csv += `${e.provincia ?? e.grupo ?? ""},${e.categoria},${e.cantidad}\n`;
-                });
+                if (chartHechos) chartHechos.destroy();
+                // Usamos el ID NUEVO: canvasHechos
+                chartHechos = crearGrafico("canvasHechos", datos, titulo, false);
+            } catch (error) {
+                console.error("Error cargando hechos:", error);
             }
+        }
 
-            const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+        // 2. CARGA CATEGORÍAS
+        async function cargarCategorias() {
+            const topValue = document.getElementById("selectTopCategorias").value;
+            const top = isNaN(parseInt(topValue)) ? null : parseInt(topValue);
+            const url = top ? `/admin/estadisticas/categorias?top=${top}` : `/admin/estadisticas/categorias`;
+
+            try {
+                const resp = await fetch(url);
+                const datos = await resp.json();
+
+                if (chartCategorias) chartCategorias.destroy();
+                // Usamos el ID NUEVO: canvasCategorias
+                chartCategorias = crearGrafico("canvasCategorias", datos, "Hechos por categoría", true);
+            } catch (error) { console.error(error); }
+        }
+
+        // 3. CARGA COLECCIÓN
+        async function cargarColeccion() {
+            const id = document.getElementById("selectColeccion").value;
+            if (!id) return;
+            try {
+                const resp = await fetch(`/admin/estadisticas/coleccion/${id}`);
+                const datos = await resp.json();
+
+                if (chartColeccion) chartColeccion.destroy();
+                // Usamos el ID NUEVO: canvasColeccion
+                chartColeccion = crearGrafico("canvasColeccion", datos, "Detalle de Colección", false);
+            } catch (error) { console.error(error); }
+        }
+
+        // DESCARGA CSV
+        async function descargarCSVCompleto(tipo) {
+             try {
+                if (tipo === "hechos") {
+                    const resp = await fetch("/admin/estadisticas/hechos/todas");
+                    const datos = await resp.json();
+                    let csv = "=== Hechos por Provincia ===\nProvincia,Categoría,Cantidad\n";
+                    if(datos.provincia) datos.provincia.forEach(e => csv += `${e.provincia},${e.categoria},${e.cantidad}\n`);
+                    csv += "\n=== Hechos por Hora ===\nHora,Categoría,Cantidad\n";
+                    if(datos.hora) datos.hora.forEach(e => csv += `${e.hora},${e.categoria},${e.cantidad}\n`);
+                    downloadBlob(csv, "estadisticas_hechos.csv");
+                    return;
+                }
+                let url = "";
+                if (tipo === "coleccion") url = "/admin/estadisticas/coleccion";
+                if (tipo === "categorias") url = "/admin/estadisticas/categorias/todas";
+
+                const resp = await fetch(url);
+                const datos = await resp.json();
+                let csv = "Dato,Cantidad\n";
+                datos.forEach(e => csv += `${e.provincia || e.categoria || e.coleccion},${e.cantidad}\n`);
+                downloadBlob(csv, `estadisticas_${tipo}.csv`);
+            } catch (e) { console.error(e); }
+        }
+
+        function downloadBlob(content, filename) {
+            const blob = new Blob([content], {type: "text/csv;charset=utf-8;"});
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `estadisticas_${tipo}.csv`;
+            link.download = filename;
             link.click();
         }
 
-        document.querySelectorAll(".descargar-csv").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const tipo = btn.dataset.type;
-                descargarCSVCompleto(tipo);
+        // INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', () => {
+            // Listeners
+            document.getElementById("panelsStayOpen-collapseOne").addEventListener("shown.bs.collapse", cargarHechos);
+            document.getElementById("selectFiltroHechos").addEventListener("change", cargarHechos);
+            document.getElementById("selectCategoriaHechos").addEventListener("change", cargarHechos);
+
+            document.getElementById("selectColeccion").addEventListener("change", cargarColeccion);
+            document.getElementById("panelsStayOpen-collapseTwo").addEventListener("shown.bs.collapse", cargarColeccion);
+
+            document.getElementById("panelsStayOpen-collapseThree").addEventListener("shown.bs.collapse", cargarCategorias);
+            document.getElementById("selectTopCategorias").addEventListener("change", cargarCategorias);
+
+            document.querySelectorAll(".descargar-csv").forEach(btn => {
+                btn.addEventListener("click", () => { descargarCSVCompleto(btn.dataset.type); });
             });
+
+            // --- EJECUCIÓN INMEDIATA ---
+            cargarHechos();
         });
     </script>
 

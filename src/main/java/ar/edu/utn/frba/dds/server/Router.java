@@ -259,7 +259,7 @@ public class Router {
         }
     );
 
-    app.get("/hechos/{id}/fotos/{indice}", hechoController::getFoto);
+    app.get("/hechos/{id}/multimedia/{indice}", hechoController::getMultimedia);
 
     app.post(
         "/solicitudes", ctx -> {

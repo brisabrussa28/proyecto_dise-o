@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.model.hecho.multimedia;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.persistence.Embeddable;
 import javax.persistence.Lob;
 
@@ -32,5 +33,10 @@ public class Multimedia {
 
   public byte[] getDatos() {
     return this.contenido;
+  }
+
+  @JsonProperty("esVideo")
+  public boolean esVideo() {
+    return this.mimetype.equals("video/mp4");
   }
 }

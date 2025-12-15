@@ -272,6 +272,10 @@ public class Hecho {
     return this.autor;
   }
 
+  public void setAutor(Usuario autor) {
+    this.autor = autor;
+  }
+
   //  @JsonProperty("hecho_fotos")
   public List<Multimedia> getFotos() {
     return new ArrayList<>(fotos);
