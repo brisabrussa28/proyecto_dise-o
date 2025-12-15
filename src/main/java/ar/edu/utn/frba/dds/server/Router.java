@@ -9,6 +9,7 @@ import ar.edu.utn.frba.dds.controller.SolicitudController;
 import ar.edu.utn.frba.dds.controller.UserController;
 import ar.edu.utn.frba.dds.dto.EstadisticaDTO;
 import ar.edu.utn.frba.dds.dto.SolicitudDTO;
+import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.estadisticas.Estadistica;
 import ar.edu.utn.frba.dds.model.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
@@ -235,6 +236,19 @@ public class Router {
             "error", true,
             "mensaje", e.getMessage()
         ));
+      }
+    });
+
+    app.get("/api/admin/colecciones/buscar", ctx -> {
+      try {
+        String titulo = ctx.queryParam("titulo");
+        String categoria = ctx.queryParam("categoria");
+
+        List<Coleccion> resultados = coleccionController.buscarRapido(titulo, categoria);
+        ctx.json(resultados);
+      } catch (Exception e) {
+        e.printStackTrace(); // Esto te permite ver el error real en la consola de IntelliJ
+        ctx.status(500).json(Map.of("mensaje", "Error en la base de datos: " + e.getMessage()));
       }
     });
 
