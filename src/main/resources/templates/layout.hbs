@@ -39,49 +39,28 @@
         main {
             flex-grow: 1;
             position: relative;
-            overflow: auto; /* Importante para el scroll */
+            overflow: auto;
         }
 
-        /* Override para offcanvas backdrop si es necesario */
         .offcanvas-backdrop {
             z-index: 1040;
-        }
-
-        /* Estilos específicos para inputs en el sidebar claro */
-        .sidebar-filtros .form-label {
-            color: #495057;
-        }
-
-        .sidebar-filtros .form-control,
-        .sidebar-filtros .form-select {
-            border-color: #ced4da;
-            background-color: #fff;
-        }
-
-        .sidebar-filtros .form-control:focus,
-        .sidebar-filtros .form-select:focus {
-            border-color: #86b7fe;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
         }
     </style>
 </head>
 <body>
 
-<!-- Navbar Corregido -->
 <nav class="navbar navbar-expand navbar-dark navbar-custom">
     <div class="container-fluid position-relative">
 
     <div class="navbar-nav">
         {{#block "nav_izquierda"}}
             <div class="d-flex align-items-center gap-2">
-
-                <a href="{{#if
-                        estaLogueado}}/hechos/nuevo{{else}}/auth/login?redirect=/hechos/nuevo{{/if}}"
-               class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
-               title="{{#unless estaLogueado}}Debes iniciar sesión para crear un hecho{{/unless}}">
-                <i class="fa-solid fa-plus"></i>
-                <span class="d-none d-sm-block">Nuevo Hecho</span>
-            </a>
+                <a href="{{#if estaLogueado}}/hechos/nuevo{{else}}/auth/login?redirect=/hechos/nuevo{{/if}}"
+                   class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+                   title="{{#unless estaLogueado}}Debes iniciar sesión para crear un hecho{{/unless}}">
+                    <i class="fa-solid fa-plus"></i>
+                    <span class="d-none d-sm-block">Nuevo Hecho</span>
+                </a>
                 <a href="/api/hechos"
                    class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
                    title="Ver todos los hechos">
@@ -92,7 +71,7 @@
         {{/block}}
     </div>
 
-        <!-- Logo Central (Con clase para centrado absoluto) -->
+        <!-- Logo Central -->
         <a class="navbar-brand navbar-brand-centered" href="/">
             <img src="/metamapa-icon.png" alt="MetaMapa" class="navbar-logo">
         </a>
@@ -163,7 +142,7 @@
     </div>
 </nav>
 
-<!-- Sidebar de Filtros (Estilo Claro/Consistente) -->
+<!-- Sidebar de Filtros -->
 <div class="offcanvas offcanvas-start sidebar-filtros" tabindex="-1" id="offcanvasFiltros" aria-labelledby="offcanvasFiltrosLabel">
     <div class="offcanvas-header sidebar-header-custom">
         <h5 class="offcanvas-title sidebar-title" id="offcanvasFiltrosLabel">
@@ -265,9 +244,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // Wrapper local para asegurar que la UI se limpie aunque la función global falle
     function limpiarFiltrosLocal() {
-        // Resetear visualmente los campos del sidebar
         if(document.getElementById('Categoria')) document.getElementById('Categoria').value = "0";
         if(document.getElementById('Fuente')) document.getElementById('Fuente').value = "0";
         if(document.getElementById('Coleccion')) document.getElementById('Coleccion').value = "0";
@@ -275,7 +252,6 @@
         if(document.getElementById('fechaHasta')) document.getElementById('fechaHasta').value = "";
         if(document.getElementById('filtroConsensuadosSidebar')) document.getElementById('filtroConsensuadosSidebar').checked = false;
 
-        // Llamar a la función principal si existe
         if (typeof window.limpiarFiltros === 'function') {
             window.limpiarFiltros();
         }

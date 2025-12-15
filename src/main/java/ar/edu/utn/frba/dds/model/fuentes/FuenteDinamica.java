@@ -32,12 +32,8 @@ public class FuenteDinamica extends FuenteConHechos {
 
   @Override
   public List<Hecho> getHechos() {
-    // Aprovecha la implementación base, solo asegura que no sea null
+    // Aprovecha la implementación base de FuenteConHechos que ya maneja la lista 'hechos'
     return super.getHechos();
-    if (this.hechosPersistidos == null || this.hechosPersistidos.isEmpty()) {
-      return Collections.emptyList();
-    }
-    return this.hechosPersistidos;
   }
 
   public void removerHecho(Hecho hecho) {

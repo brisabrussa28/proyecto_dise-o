@@ -4,11 +4,13 @@ import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteConHechos;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica; // IMPORT AGREGADO
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -92,10 +94,8 @@ public class ColeccionRepository {
   public List<Coleccion> buscarRapido(String titulo, String categoria) {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      // 1. SQL Nativo con espacios correctos y nombres de tabla en minúsculas
       StringBuilder queryStr = new StringBuilder(
-          "SELECT DISTINCT c.* FROM coleccion c " +
-              "WHERE 1=1"
+          "SELECT DISTINCT c.* FROM coleccion c WHERE 1=1"
       );
 
       Map<String, Object> params = new HashMap<>();
@@ -145,7 +145,6 @@ public class ColeccionRepository {
       e.printStackTrace();
       throw e;
     } finally {
-      // 5. El EntityManager se cierra aquí, pero los datos ya fueron cargados arriba
       em.close();
     }
   }
@@ -294,8 +293,6 @@ public class ColeccionRepository {
   public List<Hecho> findHechosConsensuados() {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      // Optimización: Usamos una query directa para obtener los hechos únicos que pertenecen a colecciones
-      // Esto es mucho más rápido que traer colecciones y recorrerlas en Java
       return em.createQuery(
                    "SELECT DISTINCT h FROM Coleccion c JOIN c.hechos h " +
                        "LEFT JOIN FETCH h.fotos " +

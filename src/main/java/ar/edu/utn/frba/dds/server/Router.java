@@ -12,7 +12,6 @@ import ar.edu.utn.frba.dds.dto.SolicitudDTO;
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.estadisticas.Estadistica;
 import ar.edu.utn.frba.dds.model.exceptions.RazonInvalidaException;
-import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
@@ -26,6 +25,7 @@ import io.javalin.http.Handler;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,10 +142,7 @@ public class Router {
             return;
           }
           Map<String, Object> model = modeloConSesion(ctx);
-          if (ctx.queryParam("fuente_id") != null) {
-            Fuente fuente = fuenteController.findById(Long.parseLong(ctx.queryParam("fuente_id")));
-            model.put("fuente", fuente);
-          }
+          model.put("fuente_id", ctx.queryParam("fuente_id"));
           ctx.render("hecho-nuevo.hbs", model);
         }
     );
@@ -249,9 +246,8 @@ public class Router {
         String titulo = ctx.queryParam("titulo");
         Boolean soloConsensuados = ctx.queryParamAsClass("soloConsensuados", Boolean.class).getOrDefault(false);
 
-        // Usamos buscarRapido del repositorio que tiene lógica de integridad
-        List<Hecho> resultados = ar.edu.utn.frba.dds.repositories.HechoRepository.instance()
-                                                                                 .buscarRapido(titulo, soloConsensuados);
+        // Usamos el controlador en lugar del repositorio directamente para mayor robustez
+        List<Hecho> resultados = hechoController.buscarRapido(titulo, soloConsensuados);
         ctx.json(resultados);
 
       } catch (Exception e) {

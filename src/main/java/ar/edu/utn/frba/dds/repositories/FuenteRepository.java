@@ -4,7 +4,6 @@ import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteConHechos;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
-import ar.edu.utn.frba.dds.model.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteExternaAPI;
@@ -52,14 +51,15 @@ public class FuenteRepository {
     EntityManager em = DBUtils.getEntityManager();
     try {
       Fuente fuente = em.createQuery(
-                   "SELECT DISTINCT f FROM Fuente f where f.fuente_nombre = :nombre",
-                   Fuente.class
-               )
-               .setParameter("nombre", nombre)
-               .getSingleResult();
+                            "SELECT DISTINCT f FROM Fuente f where f.fuente_nombre = :nombre",
+                            Fuente.class
+                        )
+                        .setParameter("nombre", nombre)
+                        .getSingleResult();
 
       if (fuente != null) {
-        cargarHechosParaFuente(em, fuente);
+        // Corrección: Usar el método interno para cargar dependencias en lugar de uno no definido
+        cargarDependenciasLazy(em, fuente);
       }
 
       return fuente;
@@ -140,9 +140,6 @@ public class FuenteRepository {
                                           .setParameter("id", fuente.getId())
                                           .getSingleResult();
 
-        // Actualizamos la referencia en memoria (aunque al ser managed dentro de la sesión, 'fuente' y 'agregacion' deberían ser el mismo objeto si están en contexto)
-        // Si 'fuente' vino de un find() anterior, hibernate garantiza identidad de objeto.
-        // Accedemos al método para asegurar la inicialización si fuera un proxy
         ((FuenteDeAgregacion) fuente).setFuentesCargadas(agregacion.getFuentesCargadas());
       }
 
@@ -157,7 +154,6 @@ public class FuenteRepository {
                                       .getSingleResult();
 
         // Forzamos la inicialización accediendo a la colección
-        // Nota: Convertimos a ArrayList en setHechos internamente o usamos el Set directamente
         ((FuenteConHechos) fuente).getHechos();
       }
 
@@ -255,11 +251,8 @@ public class FuenteRepository {
     try {
       // Usamos TYPE(f) que es estándar JPA
       return em.createQuery(
-                   "SELECT f FROM Fuente f WHERE TYPE(f) = :tipo", // Esto podría requerir pasar la clase en vez de string dependiendo del proveedor, pero Hibernate suele soportar cadenas si coinciden con el discriminador o entity name
+                   "SELECT f FROM Fuente f WHERE TYPE(f) = :tipo",
                    Fuente.class)
-               // Nota: JPA estándar usa Entity Class para TYPE, Hibernate puede ser flexible.
-               // Si falla, se puede filtrar en memoria o usar SQL nativo.
-               // Alternativa más segura: filtrar en memoria si no son muchos.
                .getResultList();
     } catch (IllegalArgumentException e) {
       // Fallback: traer todos y filtrar

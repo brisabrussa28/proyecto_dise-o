@@ -11,8 +11,6 @@
     <div class="container-sm py-4 mx-auto">
         <div class="bg-white bg-opacity-75 p-3 rounded shadow-sm">
             <h2 class="fw-bold mb-3 text-center text-primary">
-        <div class="bg-white bg-opacity-75 p-3 rounded">
-            <h2 class="mb-4 fw-bold">
                 <i class="fa-solid fa-map-location-dot me-2"></i>
                 Hechos registrados
             </h2>
@@ -80,7 +78,23 @@
                                 <div class="small text-muted">
                                     <i class="fa-regular fa-calendar me-1"></i>
                                     {{#if hecho_fecha_suceso}}
-                                        {{formatDate hecho_fecha_suceso "dd/MM/yyyy HH:mm"}}
+                                        <script>
+                                            document.write(
+                                                (function(dateInput) {
+                                                    if (!dateInput) return 'Fecha no disponible';
+                                                    let date;
+                                                    if (Array.isArray(dateInput)) {
+                                                        date = new Date(dateInput[0], dateInput[1] - 1, dateInput[2], dateInput[3]||0, dateInput[4]||0);
+                                                    } else {
+                                                        date = new Date(dateInput);
+                                                    }
+                                                    if (isNaN(date.getTime())) return 'Fecha inválida';
+                                                    return date.toLocaleString('es-AR', {
+                                                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                    });
+                                                })({{{json hecho_fecha_suceso}}})
+                                            );
+                                        </script>
                                     {{else}}
                                         Fecha no disponible
                                     {{/if}}
@@ -134,8 +148,8 @@
             const resultsList = document.getElementById('resultsList');
             const paginationContainer = document.getElementById('paginationContainer');
 
-            function formatDate(dateInput, format) {
-                if (!dateInput) return '';
+            function formatDate(dateInput) {
+                if (!dateInput) return 'Fecha no disponible';
                 let date;
                 if (Array.isArray(dateInput)) {
                     date = new Date(dateInput[0], dateInput[1] - 1, dateInput[2], dateInput[3]||0, dateInput[4]||0);
@@ -144,12 +158,9 @@
                 }
                 if (isNaN(date.getTime())) return 'Fecha inválida';
 
-                if (format === 'dd/MM/yyyy HH:mm') {
-                    return date.toLocaleString('es-AR', {
-                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                    });
-                }
-                return date.toLocaleDateString('es-AR');
+                return date.toLocaleString('es-AR', {
+                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
             }
 
             async function buscarHechos(titulo, categoria, consensuados = false, page = 1) {
@@ -191,7 +202,7 @@
 
                     hechosResultantes.forEach(hecho => {
                         const esConsensuado = hecho.colecciones && hecho.colecciones.length > 0;
-                        const fechaFormateada = formatDate(hecho.hecho_fecha_suceso, 'dd/MM/yyyy HH:mm');
+                        const fechaFormateada = formatDate(hecho.hecho_fecha_suceso);
                         const etiquetasHTML = hecho.etiquetas ? hecho.etiquetas.map(e => `<span class="badge bg-secondary me-1">${e.nombre}</span>`).join('') : '';
 
                         const itemHTML = `
@@ -272,7 +283,6 @@
                 const categoria = categoriaSelect.value;
                 const consensuados = soloConsensuados.checked;
 
-                // Actualizar URL
                 const urlParams = new URLSearchParams(window.location.search);
                 if (titulo) urlParams.set('titulo', titulo); else urlParams.delete('titulo');
                 if (categoria !== '0') urlParams.set('categoria', categoria); else urlParams.delete('categoria');
@@ -285,14 +295,16 @@
             });
 
             // Lógica del botón Limpiar
-            btnLimpiar.addEventListener('click', function() {
-                searchInput.value = '';
-                categoriaSelect.value = '0';
-                soloConsensuados.checked = false;
+            if(btnLimpiar) {
+                btnLimpiar.addEventListener('click', function() {
+                    searchInput.value = '';
+                    categoriaSelect.value = '0';
+                    soloConsensuados.checked = false;
 
-                history.replaceState(null, '', window.location.pathname);
-                buscarHechos('', '0', false, 1);
-            });
+                    history.replaceState(null, '', window.location.pathname);
+                    buscarHechos('', '0', false, 1);
+                });
+            }
 
             // Inicialización con parámetros URL
             const urlParams = new URLSearchParams(window.location.search);
