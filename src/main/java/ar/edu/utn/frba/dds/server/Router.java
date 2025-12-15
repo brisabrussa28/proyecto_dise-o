@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class Router {
@@ -294,6 +295,154 @@ public class Router {
           ctx.render("estadisticas.hbs", model);
         }
     );
+    app.get("/admin/estadisticas/coleccion/{id}", ctx -> {
+      Long id = Long.parseLong(ctx.pathParam("id"));
+
+      List<Estadistica> todas = estadisticaController.getEstadisticas();
+
+      List<Map<String, Object>> resultado = todas.stream()
+                                                 .filter(e -> "HECHOS REPORTADOS POR PROVINCIA Y COLECCION".equals(e.getTipo()))
+                                                 .filter(e -> e.getColeccion() != null && e.getColeccion().getId().equals(id))
+                                                 .map(e -> {
+                                                   Map<String, Object> m = new HashMap<>();
+                                                   m.put("grupo", e.getGrupo());
+                                                   m.put("cantidad", e.getCantidad());
+                                                   return m;
+                                                 })
+                                                 .toList();
+
+      ctx.json(resultado);
+    });
+
+    app.get("/admin/estadisticas/provincia", ctx -> {
+      String categoria = ctx.queryParam("categoria");
+
+      List<Estadistica> todas = estadisticaController.getEstadisticas();
+
+      List<Map<String, Object>> resultado = todas.stream()
+                                                 .filter(e -> "HECHOS POR PROVINCIA Y CATEGORIA".equals(e.getTipo()))
+                                                 .filter(e -> categoria == null || categoria.equals(e.getCategoria()))
+                                                 .map(e -> {
+                                                   Map<String, Object> m = new HashMap<>();
+                                                   m.put("grupo", e.getGrupo());     // provincia
+                                                   m.put("cantidad", e.getCantidad());
+                                                   return m;
+                                                 })
+                                                 .toList();
+
+      ctx.json(resultado);
+    });
+
+    app.get("/admin/estadisticas/hora", ctx -> {
+      String categoria = ctx.queryParam("categoria");
+
+      List<Estadistica> todas = estadisticaController.getEstadisticas();
+
+      List<Map<String, Object>> resultado = todas.stream()
+                                                 .filter(e -> "HECHOS POR HORA Y CATEGORIA".equals(e.getTipo()))
+                                                 .filter(e -> categoria == null || categoria.equals(e.getCategoria()))
+                                                 .map(e -> {
+                                                   Map<String, Object> m = new HashMap<>();
+                                                   m.put("grupo", e.getGrupo());     // hora
+                                                   m.put("cantidad", e.getCantidad());
+                                                   return m;
+                                                 })
+                                                 .toList();
+
+      ctx.json(resultado);
+    });
+
+    app.get("/admin/estadisticas/categorias", ctx -> {
+      Integer top = ctx.queryParamAsClass("top", Integer.class).getOrDefault(10);
+      String orden = ctx.queryParam("orden"); // "asc" o "desc"
+
+      List<Estadistica> todas = estadisticaController.getEstadisticas();
+
+      List<Map<String, Object>> resultado = todas.stream()
+                                                 .filter(e -> "HECHOS REPORTADOS POR CATEGORIA".equals(e.getTipo()))
+                                                 .sorted((a, b) -> {
+                                                   if ("asc".equalsIgnoreCase(orden)) {
+                                                     return a.getCantidad().compareTo(b.getCantidad());
+                                                   }
+                                                   return b.getCantidad().compareTo(a.getCantidad());
+                                                 })
+                                                 .limit(top)
+                                                 .map(e -> {
+                                                   Map<String, Object> m = new HashMap<>();
+                                                   m.put("categoria", e.getCategoria());
+                                                   m.put("cantidad", e.getCantidad());
+                                                   return m;
+                                                 })
+                                                 .toList();
+
+      ctx.json(resultado);
+    });
+
+    app.get("/admin/estadisticas/coleccion", ctx -> {
+      List<Estadistica> todas = estadisticaController.getEstadisticas();
+
+      List<Map<String, Object>> resultado = todas.stream()
+                                                 .filter(e -> "HECHOS REPORTADOS POR PROVINCIA Y COLECCION".equals(e.getTipo()))
+                                                 .map(e -> {
+                                                   Map<String, Object> m = new HashMap<>();
+                                                   m.put("coleccion", e.getColeccion().getTitulo());
+                                                   m.put("provincia", e.getGrupo());
+                                                   m.put("cantidad", e.getCantidad());
+                                                   return m;
+                                                 })
+                                                 .toList();
+
+      ctx.json(resultado);
+    });
+
+    app.get("/admin/estadisticas/categorias/todas", ctx -> {
+      List<Estadistica> todas = estadisticaController.getEstadisticas();
+
+      List<Map<String, Object>> resultado = todas.stream()
+                                                 .filter(e -> "HECHOS REPORTADOS POR CATEGORIA".equals(e.getTipo()))
+                                                 .map(e -> {
+                                                   Map<String, Object> m = new HashMap<>();
+                                                   m.put("categoria", e.getCategoria());
+                                                   m.put("cantidad", e.getCantidad());
+                                                   return m;
+                                                 })
+                                                 .toList();
+
+      ctx.json(resultado);
+    });
+
+    app.get("/admin/estadisticas/hechos/todas", ctx -> {
+      List<Estadistica> todas = estadisticaController.getEstadisticas();
+
+      Map<String, Object> resultado = new HashMap<>();
+
+      List<Map<String, Object>> provincia = todas.stream()
+                                                 .filter(e -> "HECHOS POR PROVINCIA Y CATEGORIA".equals(e.getTipo()))
+                                                 .map(e -> {
+                                                   Map<String, Object> m = new HashMap<>();
+                                                   m.put("provincia", e.getGrupo());
+                                                   m.put("categoria", e.getCategoria());
+                                                   m.put("cantidad", e.getCantidad());
+                                                   return m;
+                                                 })
+                                                 .collect(Collectors.toList());
+
+      List<Map<String, Object>> hora = todas.stream()
+                                            .filter(e -> "HECHOS POR HORA Y CATEGORIA".equals(e.getTipo()))
+                                            .map(e -> {
+                                              Map<String, Object> m = new HashMap<>();
+                                              m.put("hora", e.getGrupo());
+                                              m.put("categoria", e.getCategoria());
+                                              m.put("cantidad", e.getCantidad());
+                                              return m;
+                                            })
+                                            .collect(Collectors.toList());
+
+      resultado.put("provincia", provincia);
+      resultado.put("hora", hora);
+
+      ctx.json(resultado);
+    });
 
 
     app.post(
