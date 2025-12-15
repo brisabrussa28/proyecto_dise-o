@@ -18,14 +18,12 @@ public class EstadisticaController {
   }
 
   public List<Estadistica> calcularEstadisticas(EstadisticaDTO dto) {
-
     CentralDeEstadisticas central = new CentralDeEstadisticas();
     central.setGestor(new GestorDeSolicitudes(SolicitudesRepository.instance()));
 
     List<Estadistica> resultado;
 
     switch (dto.getTipo()) {
-
       case "HECHOS POR PROVINCIA Y CATEGORIA":
         if (dto.getCategoria() == null)
           throw new RuntimeException("Debe especificarse una categoría");
@@ -45,9 +43,20 @@ public class EstadisticaController {
       case "HECHOS REPORTADOS POR PROVINCIA Y COLECCION":
         if (dto.getColeccion() == null)
           throw new RuntimeException("Debe especificarse una colección");
+
         Coleccion col = ColeccionRepository.instance().findById(dto.getColeccion());
+
         if (col == null)
           throw new RuntimeException("La colección no existe");
+
+        if (col.getFuente() == null) {
+          throw new RuntimeException("La colección no tiene fuente asociada");
+        }
+
+        if (col.getFuente().getHechos() != null) {
+          col.getFuente().getHechos().size();
+        }
+
         resultado = central.hechosPorProvinciaDeUnaColeccion(col);
         break;
 
@@ -74,5 +83,43 @@ public class EstadisticaController {
 
   public List<String> getCategorias() {
     return new HechoController().getCategorias();
+  }
+
+  public List<Coleccion> getColeccionesConHechos() {
+    return ColeccionRepository.instance().findAllConFuentesYHechos();
+  }
+
+  public void calcularTodasLasEstadisticas() {
+    try {
+      System.out.println("Calculando todas las estadísticas...");
+
+      this.calcularEstadisticas(new EstadisticaDTO("CANTIDAD DE HECHOS", null, null));
+      this.calcularEstadisticas(new EstadisticaDTO("CANTIDAD DE SOLICITUDES PENDIENTES", null, null));
+      this.calcularEstadisticas(new EstadisticaDTO("CANTIDAD DE SPAM", null, null));
+
+      List<String> categorias = this.getCategorias();
+      for (String categoria : categorias) {
+        this.calcularEstadisticas(new EstadisticaDTO("HECHOS POR PROVINCIA Y CATEGORIA", categoria, null));
+        this.calcularEstadisticas(new EstadisticaDTO("HECHOS POR HORA Y CATEGORIA", categoria, null));
+      }
+
+      List<Coleccion> colecciones = ColeccionRepository.instance().findAllConFuentesYHechos();
+      for (Coleccion col : colecciones) {
+        if (col.getFuente() != null && !col.getFuente().getHechos().isEmpty()) {
+          this.calcularEstadisticas(
+              new EstadisticaDTO("HECHOS REPORTADOS POR PROVINCIA Y COLECCION", null, col.getId())
+          );
+        }
+      }
+
+      this.calcularEstadisticas(new EstadisticaDTO("HECHOS REPORTADOS POR CATEGORIA", null, null));
+
+      System.out.println("Todas las estadísticas calculadas correctamente.");
+
+    } catch (Exception e) {
+      System.err.println("Error calculando estadísticas: " + e.getMessage());
+      e.printStackTrace();
+      throw new RuntimeException("Error al calcular estadísticas", e);
+    }
   }
 }

@@ -103,6 +103,12 @@ public class Coleccion {
   }
 
   public List<Hecho> obtenerHechosFiltrados(Filtro filtroExcluyente) {
+    if (coleccion_fuente == null) {
+      return new ArrayList<>();
+    }
+
+    // IMPORTANTE: Este método debería ser llamado solo dentro de un contexto transaccional
+    // donde la fuente esté managed y sus hechos puedan ser cargados
     List<Hecho> hechosFuente = coleccion_fuente.getHechos();
     List<Hecho> hechosSinExcluidos = filtroExcluyente.filtrar(hechosFuente);
     return this.filtro.filtrar(hechosSinExcluidos);
@@ -113,8 +119,7 @@ public class Coleccion {
   }
 
   public boolean contieneHechoFiltrado(Hecho unHecho, Filtro filtroExcluyente) {
-    return this.obtenerHechosFiltrados(filtroExcluyente)
-               .contains(unHecho);
+    return this.obtenerHechosFiltrados(filtroExcluyente).contains(unHecho);
   }
 
   private void validarCamposObligatorios(

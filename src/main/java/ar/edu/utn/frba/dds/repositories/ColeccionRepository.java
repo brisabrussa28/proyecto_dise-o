@@ -47,10 +47,15 @@ public class ColeccionRepository {
     }
   }
 
+  // MÉTODO MODIFICADO: Ahora carga la fuente y sus hechos con JOIN FETCH
   public Coleccion findById(Long id) {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      return em.createQuery("SELECT DISTINCT c FROM Coleccion c LEFT JOIN FETCH c.hechos WHERE c.coleccion_id = :id", Coleccion.class)
+      return em.createQuery(
+                   "SELECT DISTINCT c FROM Coleccion c " +
+                       "LEFT JOIN FETCH c.coleccion_fuente f " +
+                       "LEFT JOIN FETCH f.hechosPersistidos " +
+                       "WHERE c.coleccion_id = :id", Coleccion.class)
                .setParameter("id", id)
                .getSingleResult();
     } catch (NoResultException e) {
@@ -60,7 +65,21 @@ public class ColeccionRepository {
     }
   }
 
-  // --- NUEVO: Buscar colecciones por ID de fuente ---
+  public List<Coleccion> findAllConFuentesYHechos() {
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      return em.createQuery(
+                   "SELECT DISTINCT c FROM Coleccion c " +
+                       "LEFT JOIN FETCH c.coleccion_fuente f " +
+                       "LEFT JOIN FETCH f.hechosPersistidos " +
+                       "WHERE f IS NOT NULL", Coleccion.class)
+               .getResultList();
+    } finally {
+      em.close();
+    }
+  }
+
+  // Buscar colecciones por ID de fuente
   public List<Coleccion> findByFuenteId(Long fuenteId) {
     EntityManager em = DBUtils.getEntityManager();
     try {
@@ -100,6 +119,46 @@ public class ColeccionRepository {
     EntityManager em = DBUtils.getEntityManager();
     try {
       return em.createQuery("select distinct c.coleccion_categoria from Coleccion c", String.class).getResultList();
+    } finally {
+      em.close();
+    }
+  }
+
+  public List<Coleccion> findAllConHechos() {
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      return em.createQuery(
+                   "SELECT DISTINCT c FROM Coleccion c " +
+                       "LEFT JOIN FETCH c.coleccion_fuente f " +
+                       "LEFT JOIN FETCH f.hechosPersistidos h " +
+                       "LEFT JOIN FETCH h.etiquetas " +
+                       "LEFT JOIN FETCH h.fotos",
+                   Coleccion.class)
+               .getResultList();
+    } finally {
+      em.close();
+    }
+  }
+
+  // MÉTODO ADICIONAL: Para forzar la inicialización de la colección de hechos
+  public Coleccion findByIdConHechosInicializados(Long id) {
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      Coleccion coleccion = em.createQuery(
+                                  "SELECT DISTINCT c FROM Coleccion c " +
+                                      "LEFT JOIN FETCH c.coleccion_fuente f " +
+                                      "WHERE c.coleccion_id = :id", Coleccion.class)
+                              .setParameter("id", id)
+                              .getSingleResult();
+
+      // Forzar la inicialización de la colección lazy
+      if (coleccion != null && coleccion.getFuente() != null) {
+        coleccion.getFuente().getHechos().size(); // Esto fuerza el load
+      }
+
+      return coleccion;
+    } catch (NoResultException e) {
+      return null;
     } finally {
       em.close();
     }

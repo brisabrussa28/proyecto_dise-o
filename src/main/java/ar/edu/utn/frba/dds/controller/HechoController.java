@@ -6,7 +6,6 @@ import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -28,19 +27,16 @@ public class HechoController {
 
   public Hecho subirHecho(Hecho hecho) {
     this.validarHecho(hecho);
-    HechoRepository.instance()
-                   .save(hecho);
+    HechoRepository.instance().save(hecho);
     return hecho;
   }
 
   public Optional<Hecho> findAny() {
-    return HechoRepository.instance()
-                          .findAny();
+    return HechoRepository.instance().findAny();
   }
 
   public Hecho findById(Long id) {
-    return HechoRepository.instance()
-                          .findById(id);
+    return HechoRepository.instance().findById(id);
   }
 
   public List<Hecho> findByTitle(String titulo) {
@@ -49,19 +45,14 @@ public class HechoController {
   }
 
   public List<Hecho> findAll() {
-    return HechoRepository.instance()
-                          .findAll();
+    return HechoRepository.instance().findAll();
   }
 
   public Long countAll() {
-    return HechoRepository.instance()
-                          .countAll();
+    return HechoRepository.instance().countAll();
   }
 
-  public Hecho modificarHecho(
-      Hecho hechoOriginal,
-      Hecho hechoModificado
-  ) {
+  public Hecho modificarHecho(Hecho hechoOriginal, Hecho hechoModificado) {
     if (hechoModificado.getTitulo() != null) {
       hechoOriginal.setTitulo(hechoModificado.getTitulo());
     }
@@ -75,9 +66,7 @@ public class HechoController {
       hechoOriginal.setUbicacion(hechoModificado.getUbicacion());
     }
     if (hechoModificado.getFechasuceso() != null) {
-      if (hechoModificado.getFechasuceso()
-                         .isBefore(hechoOriginal.getFechasuceso())) {
-
+      if (hechoModificado.getFechasuceso().isBefore(hechoOriginal.getFechasuceso())) {
         hechoOriginal.setFechasuceso(hechoModificado.getFechasuceso());
       }
     }
@@ -85,36 +74,30 @@ public class HechoController {
     if (fotosNuevas != null && !fotosNuevas.isEmpty()) {
       fotosNuevas.forEach(foto -> hechoOriginal.agregarFoto(foto));
     }
-    if (!hechoModificado.getCategoria()
-                        .isBlank()) {
+    if (!hechoModificado.getCategoria().isBlank()) {
       hechoOriginal.setCategoria(hechoModificado.getCategoria());
     }
-    if (!hechoModificado.getDireccion()
-                        .isBlank()) {
+    if (!hechoModificado.getDireccion().isBlank()) {
       hechoOriginal.setDireccion(hechoModificado.getDireccion());
     }
-    if (hechoModificado.getProvincia() != null && !hechoModificado.getProvincia()
-                                                                  .isBlank()) {
+    if (hechoModificado.getProvincia() != null && !hechoModificado.getProvincia().isBlank()) {
       hechoOriginal.setProvincia(hechoModificado.getProvincia());
     }
     return hechoOriginal;
   }
 
   private void validarHecho(Hecho hecho) {
-    if (hecho.getFechasuceso()
-             .isAfter(LocalDateTime.now())) {
+    if (hecho.getFechasuceso().isAfter(LocalDateTime.now())) {
       throw new RuntimeException("EL HECHO NO PUEDE SUCEDER EN EL FUTURO");
     }
   }
 
   public List<String> getCategorias() {
-    return HechoRepository.instance()
-                          .getCategorias();
+    return HechoRepository.instance().getCategorias();
   }
 
   public List<String> getEtiquetas() {
-    return HechoRepository.instance()
-                          .getEtiquetas();
+    return HechoRepository.instance().getEtiquetas();
   }
 
   public void editarHecho(Context ctx, Map<String, Object> model) {
@@ -130,19 +113,16 @@ public class HechoController {
       model.put("fechaLimite", fechaFormateada);
     }
 
-    if (!hecho.getAutor()
-              .getId()
-              .equals(idUsuario)) {
+    if (!hecho.getAutor().getId().equals(idUsuario)) {
       ctx.status(HttpStatus.FORBIDDEN);
     }
     model.put("hecho", hecho);
     if (hecho.getEtiquetas() != null) {
-      String etiquetasStr = String.join(
-          ", ",
-          hecho.getEtiquetas()
-               .stream()
-               .map(e -> e.getNombre())
-               .toList()
+      String etiquetasStr = String.join(", ",
+                                        hecho.getEtiquetas()
+                                             .stream()
+                                             .map(e -> e.getNombre())
+                                             .toList()
       );
       model.put("etiquetasTexto", etiquetasStr);
     }
@@ -182,8 +162,7 @@ public class HechoController {
                                            .collect(Collectors.toList());
 
       for (int i : indices) {
-        if (i >= 0 && i < hechoOriginal.getFotos()
-                                       .size()) {
+        if (i >= 0 && i < hechoOriginal.getFotos().size()) {
           hechoOriginal.quitar(i);
         }
       }
@@ -194,8 +173,7 @@ public class HechoController {
     for (UploadedFile archivo : archivos) {
       if (archivo.size() > 0) {
         try {
-          byte[] bytesImagen = archivo.content()
-                                      .readAllBytes();
+          byte[] bytesImagen = archivo.content().readAllBytes();
           Multimedia nuevaFoto = new Multimedia(
               archivo.filename(),
               archivo.contentType(),
@@ -223,8 +201,7 @@ public class HechoController {
     }
 
     modificarHecho(hechoOriginal, hechoModificado);
-    HechoRepository.instance()
-                   .save(hechoOriginal);
+    HechoRepository.instance().save(hechoOriginal);
     ctx.redirect("/");
   }
 
@@ -234,10 +211,8 @@ public class HechoController {
 
     Hecho hecho = this.findById(idHecho);
 
-    if (hecho != null && hecho.getFotos() != null && indice < hecho.getFotos()
-                                                                   .size()) {
-      Multimedia foto = hecho.getFotos()
-                             .get(indice);
+    if (hecho != null && hecho.getFotos() != null && indice < hecho.getFotos().size()) {
+      Multimedia foto = hecho.getFotos().get(indice);
 
       ctx.contentType(foto.getMimetype());
       ctx.result(foto.getDatos());
@@ -256,19 +231,13 @@ public class HechoController {
     model.put("hecho", hecho);
 
     Long usuarioId = ctx.sessionAttribute("usuario_id");
-    boolean esPropietario = hecho.getAutor() != null && hecho.getAutor()
-                                                             .getId()
-                                                             .equals(usuarioId);
+    boolean esPropietario = hecho.getAutor() != null && hecho.getAutor().getId().equals(usuarioId);
     model.put("esPropietario", esPropietario);
 
     if (hecho.getFechasuceso() != null) {
       java.time.format.DateTimeFormatter formatter =
           java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-      model.put(
-          "fechaFormateada",
-          hecho.getFechasuceso()
-               .format(formatter)
-      );
+      model.put("fechaFormateada", hecho.getFechasuceso().format(formatter));
     }
 
     ctx.render("hecho-detail.hbs", model);

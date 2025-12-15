@@ -19,27 +19,36 @@ public class HechoRepository {
 
   public void save(Hecho hecho) {
     EntityManager em = DBUtils.getEntityManager();
-    DBUtils.enriquecerHecho(hecho);
+    DBUtils.comenzarTransaccion(em);
     try {
-      DBUtils.comenzarTransaccion(em);
+      DBUtils.enriquecerHecho(hecho);
+
       if (hecho.getId() == null) {
         em.persist(hecho);
       } else {
         em.merge(hecho);
       }
+      DBUtils.commit(em);
     } catch (PersistenceException e) {
       DBUtils.rollback(em);
-      throw new RuntimeException(e.getMessage());
+      throw new RuntimeException("Error al guardar hecho: " + e.getMessage());
     } finally {
-      DBUtils.commit(em);
       em.close();
     }
   }
 
   public List<Hecho> findAll() {
     EntityManager em = DBUtils.getEntityManager();
-    return em.createQuery("SELECT h FROM Hecho h left join fetch h.fotos", Hecho.class)
-             .getResultList();
+    try {
+      return em.createQuery(
+                   "SELECT DISTINCT h FROM Hecho h " +
+                       "LEFT JOIN FETCH h.fotos " +
+                       "LEFT JOIN FETCH h.etiquetas",
+                   Hecho.class)
+               .getResultList();
+    } finally {
+      em.close();
+    }
   }
 
   public Optional<Hecho> findAny() {
@@ -50,9 +59,17 @@ public class HechoRepository {
 
   public Hecho findById(Long id) {
     EntityManager em = DBUtils.getEntityManager();
-    return em.createQuery("SELECT h FROM Hecho h lEFT JOIN FETCH h.fotos WHERE h.id = :id", Hecho.class)
-             .setParameter("id", id)
-             .getSingleResult();
+    try {
+      return em.createQuery(
+                   "SELECT h FROM Hecho h " +
+                       "LEFT JOIN FETCH h.fotos " +
+                       "LEFT JOIN FETCH h.etiquetas " +
+                       "WHERE h.id = :id", Hecho.class)
+               .setParameter("id", id)
+               .getSingleResult();
+    } finally {
+      em.close();
+    }
   }
 
   /*
@@ -96,20 +113,34 @@ public class HechoRepository {
 
   public List<String> getCategorias() {
     EntityManager em = DBUtils.getEntityManager();
-    return em.createQuery("select distinct h.hecho_categoria from Hecho h", String.class)
-             .getResultList();
+    try {
+      return em.createQuery(
+                   "SELECT DISTINCT h.hecho_categoria FROM Hecho h", String.class)
+               .getResultList();
+    } finally {
+      em.close();
+    }
   }
 
   public List<String> getEtiquetas() {
     EntityManager em = DBUtils.getEntityManager();
-    return em.createNativeQuery("SELECT DISTINCT etiqueta_nombre FROM hecho_etiquetas")
-             .getResultList();
+    try {
+      return em.createNativeQuery(
+                   "SELECT DISTINCT etiqueta_nombre FROM hecho_etiquetas")
+               .getResultList();
+    } finally {
+      em.close();
+    }
   }
 
   public Long countAll() {
     EntityManager em = DBUtils.getEntityManager();
-    return em.createQuery("SELECT COUNT(DISTINCT h.id) FROM Hecho h", Long.class)
-             .getSingleResult();
+    try {
+      return em.createQuery(
+                   "SELECT COUNT(DISTINCT h.id) FROM Hecho h", Long.class)
+               .getSingleResult();
+    } finally {
+      em.close();
+    }
   }
-
 }
