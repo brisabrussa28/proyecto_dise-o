@@ -19,42 +19,64 @@ public class ColeccionController {
       String descripcion = ctx.formParam("descripcion");
       String categoria = ctx.formParam("categoria");
 
-      String algoTipo = ctx.formParam("algoritmo_tipo");
-      AlgoritmoDeConsenso algoritmo = null;
-      switch (algoTipo) {
-        case "Absoluta":
-          algoritmo = new Absoluta();
-          break;
-        case "May_simple":
-          algoritmo = new MayoriaSimple();
-          break;
-        case "Mult_menciones":
-          algoritmo = new MultiplesMenciones();
-          break;
-        default:
-          algoritmo = new MayoriaSimple(); // Default seguro
-      }
+      // Algoritmo de consenso
+      String algoritmoStr = ctx.formParam("algoritmo"); // Cambiado de algoritmo_tipo a algoritmo
+      AlgoritmoDeConsenso algoritmo = determinarAlgoritmo(algoritmoStr);
 
-      String modoFuente = ctx.formParam("modo_fuente");
-      Fuente fuente;
+      // Fuente de datos
+      String modo_fuente = ctx.formParam("modo_fuente");
+      Fuente fuente = null;
 
-      if ("nueva".equals(modoFuente)) {
+      System.out.println("Modo fuente recibido: " + modo_fuente);
+
+      if ("nueva".equals(modo_fuente)) {
+        System.out.println("Creando NUEVA fuente...");
         fuente = fuenteController.crearFuente(ctx);
-        fuenteController.save(fuente);
+        if (fuente == null) {
+          throw new RuntimeException("No se pudo crear la fuente");
+        }
+        // NO llamar a fuenteController.save() aquí porque crearFuente() ya lo hace
+        System.out.println("Fuente creada con ID: " + fuente.getId());
       } else {
-        Long fuenteId = Long.parseLong(ctx.formParam("fuente_id"));
-        fuente = fuenteController.findById(fuenteId);
+        System.out.println("Usando fuente EXISTENTE...");
+        String fuenteIdStr = ctx.formParam("fuente_id");
+        if (fuenteIdStr != null && !fuenteIdStr.isEmpty()) {
+          Long fuenteId = Long.parseLong(fuenteIdStr);
+          fuente = fuenteController.findById(fuenteId);
+          System.out.println("Fuente recuperada con ID: " + fuenteId);
+        } else {
+          throw new RuntimeException("No se proporcionó ID de fuente existente");
+        }
       }
+
+      if (fuente == null) {
+        throw new RuntimeException("No se pudo obtener o crear la fuente para la colección");
+      }
+
+      // Crear colección
       Coleccion col = new Coleccion(nombre, fuente, descripcion, categoria, algoritmo);
       col.recalcularConsenso();
-      ColeccionRepository.instance()
-                         .save(col);
+      ColeccionRepository.instance().save(col);
+
+      System.out.println("Colección creada exitosamente con ID: " + col.getId());
       ctx.redirect("/admin/colecciones");
     } catch (Exception e) {
       e.printStackTrace();
-      ctx.status(400)
-         .result("Error al crear colección: " + e.getMessage());
+      ctx.status(400).result("Error al crear colección: " + e.getMessage());
     }
+  }
+
+  private AlgoritmoDeConsenso determinarAlgoritmo(String algoritmoStr) {
+    if (algoritmoStr == null) {
+      return new MayoriaSimple();
+    }
+
+    return switch (algoritmoStr) {
+      case "MAYORIA_SIMPLE" -> new MayoriaSimple();
+      case "ABSOLUTA" -> new Absoluta();
+      case "MULTIPLES_MENCIONES" -> new MultiplesMenciones();
+      default -> new MayoriaSimple();
+    };
   }
 
   // --- NUEVO MÉTODO PARA CALCULO MANUAL ---
@@ -64,13 +86,8 @@ public class ColeccionController {
       Coleccion coleccion = this.findById(id);
 
       if (coleccion != null) {
-        // Ejecutamos la lógica de negocio
         coleccion.recalcularConsenso();
-
-        // Guardamos el estado actualizado (lista de hechos)
         this.persist(coleccion);
-
-        // Volvemos a la misma página para ver los cambios
         ctx.redirect("/admin/colecciones/" + id);
       } else {
         ctx.status(404).result("Colección no encontrada");
@@ -82,28 +99,23 @@ public class ColeccionController {
   }
 
   public void persist(Coleccion colecccion) {
-    ColeccionRepository.instance()
-                       .save(colecccion);
+    ColeccionRepository.instance().save(colecccion);
   }
 
   public List<String> getCategorias() {
-    return ColeccionRepository.instance()
-                              .getCategorias();
+    return ColeccionRepository.instance().getCategorias();
   }
 
   public List<Coleccion> findAll() {
-    return ColeccionRepository.instance()
-                              .findAll();
+    return ColeccionRepository.instance().findAll();
   }
 
   public Coleccion findById(Long id) {
-    return ColeccionRepository.instance()
-                              .findById(id);
+    return ColeccionRepository.instance().findById(id);
   }
 
   public Long countAll() {
-    return ColeccionRepository.instance()
-                              .countAll();
+    return ColeccionRepository.instance().countAll();
   }
 
   public record ColeccionDTO(Long id, String titulo) {}

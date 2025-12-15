@@ -48,13 +48,13 @@
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-primary">Fuente de Datos</label>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="modoFuente" id="modoExistente" value="existente" checked onchange="toggleModoFuente()">
+                                    <input class="form-check-input" type="radio" name="modo_fuente" id="modoExistente" value="existente" checked onchange="togglemodo_fuente()">
                                     <label class="form-check-label" for="modoExistente">
                                         Usar Fuente Existente
                                     </label>
                                 </div>
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="modoFuente" id="modoNueva" value="nueva" onchange="toggleModoFuente()">
+                                    <input class="form-check-input" type="radio" name="modo_fuente" id="modoNueva" value="nueva" onchange="togglemodo_fuente()">
                                     <label class="form-check-label" for="modoNueva">
                                         Crear Nueva Fuente
                                     </label>
@@ -181,12 +181,13 @@
 
                             <hr>
 
+                            <!-- CORRECCIÓN APLICADA AQUÍ: Cambiado "algoritmo" por "algoritmo_tipo" y los valores -->
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Algoritmo de Consenso</label>
-                                <select name="algoritmo" class="form-select">
-                                    <option value="MAYORIA_SIMPLE">Mayoría Simple</option>
-                                    <option value="ABSOLUTA">Unanimidad / Absoluta</option>
-                                    <option value="MULTIPLES_MENCIONES">Múltiples Menciones</option>
+                                <select name="algoritmo_tipo" class="form-select">
+                                    <option value="May_simple">Mayoría Simple</option>
+                                    <option value="Absoluta">Unanimidad / Absoluta</option>
+                                    <option value="Mult_menciones">Múltiples Menciones</option>
                                 </select>
                             </div>
 
@@ -240,7 +241,7 @@
         ];
 
         document.addEventListener('DOMContentLoaded', function() {
-            toggleModoFuente();     // Estado inicial radios
+            togglemodo_fuente();     // Estado inicial radios
             gestionarCambioTipo(); // Estado inicial select tipo
 
             const inputArchivo = document.getElementById('inputArchivo');
@@ -260,7 +261,7 @@
         });
 
         // 1. Alternar entre Fuente Existente vs Nueva
-        function toggleModoFuente() {
+        function togglemodo_fuente() {
             const modoNueva = document.getElementById('modoNueva').checked;
             const panelExistente = document.getElementById('panelFuenteExistente');
             const panelNueva = document.getElementById('panelFuenteNueva');
@@ -459,7 +460,6 @@
             document.getElementById('placeholder-agregacion').classList.add('d-none');
 
             // Crear Input Oculto (Mismo nombre que en FuenteController)
-            const inputHidden = document.createElement('input');
             inputHidden.type = 'hidden';
             inputHidden.name = 'fuentes_seleccionadas';
             inputHidden.value = idFuente;

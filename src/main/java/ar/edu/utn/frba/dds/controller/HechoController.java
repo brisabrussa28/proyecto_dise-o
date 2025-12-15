@@ -1,9 +1,12 @@
 package ar.edu.utn.frba.dds.controller;
 
+import ar.edu.utn.frba.dds.model.fuentes.Fuente;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -21,6 +24,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HechoController {
+  FuenteController fuenteController = new FuenteController();
+
   public Hecho subirHecho(Hecho hecho) {
     this.validarHecho(hecho);
     HechoRepository.instance()
@@ -153,10 +158,10 @@ public class HechoController {
       List<Etiqueta> nuevasEtiquetas = Arrays.stream(etiquetasInput.split(","))
                                              .map(String::trim)
                                              .filter(s -> !s.isEmpty())
-                                             .map(nombre -> new Etiqueta(nombre)) // Instanciamos tu clase Etiqueta
+                                             .map(nombre -> new Etiqueta(nombre))
                                              .collect(Collectors.toList());
 
-      hechoModificado.setEtiquetas(nuevasEtiquetas); // Asumo que tienes setEtiquetas(List<Etiqueta>)
+      hechoModificado.setEtiquetas(nuevasEtiquetas);
     }
     String fechaStr = ctx.formParam("fechaSuceso");
 
@@ -191,7 +196,6 @@ public class HechoController {
               archivo.contentType(),
               bytesImagen
           );
-          // Agregamos a la lista temporal, NO guardamos todavía
           listaNuevasFotos.add(nuevaFoto);
         } catch (Exception e) {
           e.printStackTrace();
@@ -230,8 +234,8 @@ public class HechoController {
       Multimedia foto = hecho.getFotos()
                              .get(indice);
 
-      ctx.contentType(foto.getMimetype()); // ej: "image/jpeg"
-      ctx.result(foto.getDatos());         // Los bytes de la DB
+      ctx.contentType(foto.getMimetype());
+      ctx.result(foto.getDatos());
     } else {
       ctx.status(404);
     }
@@ -263,5 +267,104 @@ public class HechoController {
     }
 
     ctx.render("hecho-detail.hbs", model);
+  }
+
+  // NUEVO MÉTODO PARA CREAR HECHO (con o sin fuente)
+  public void crearHecho(Context ctx) {
+    try {
+      // Obtener datos del formulario
+      String titulo = ctx.formParam("titulo");
+      String descripcion = ctx.formParam("descripcion");
+      String categoria = ctx.formParam("categoria");
+      String direccion = ctx.formParam("direccion");
+      String provincia = ctx.formParam("provincia");
+
+      // Parsear fecha
+      String fechaSucesoStr = ctx.formParam("fechaSuceso");
+      LocalDateTime fechaSuceso = fechaSucesoStr != null && !fechaSucesoStr.isBlank()
+                                  ? LocalDateTime.parse(fechaSucesoStr)
+                                  : LocalDateTime.now();
+
+      // Parsear coordenadas
+      Double lat = ctx.formParam("latitud") != null ? Double.parseDouble(ctx.formParam("latitud")) : null;
+      Double lng = ctx.formParam("longitud") != null ? Double.parseDouble(ctx.formParam("longitud")) : null;
+
+      if (lat == null || lng == null) {
+        throw new RuntimeException("Las coordenadas son obligatorias");
+      }
+
+      PuntoGeografico ubicacion = new PuntoGeografico(lat, lng);
+
+      // Obtener usuario autor
+      Long usuarioId = ctx.sessionAttribute("usuario_id");
+      if (usuarioId == null) {
+        throw new RuntimeException("Usuario no autenticado");
+      }
+
+      // Crear hecho base
+      Hecho nuevoHecho = new Hecho();
+      nuevoHecho.setTitulo(titulo);
+      nuevoHecho.setDescripcion(descripcion);
+      nuevoHecho.setCategoria(categoria);
+      nuevoHecho.setDireccion(direccion);
+      nuevoHecho.setProvincia(provincia);
+      nuevoHecho.setUbicacion(ubicacion);
+      nuevoHecho.setFechasuceso(fechaSuceso);
+      nuevoHecho.setFechacarga(LocalDateTime.now());
+      nuevoHecho.setOrigen(ar.edu.utn.frba.dds.model.hecho.Origen.PROVISTO_CONTRIBUYENTE);
+
+      // Procesar etiquetas
+      String etiquetasInput = ctx.formParam("etiquetas");
+      if (etiquetasInput != null && !etiquetasInput.isBlank()) {
+        List<Etiqueta> etiquetas = Arrays.stream(etiquetasInput.split(","))
+                                         .map(String::trim)
+                                         .filter(s -> !s.isEmpty())
+                                         .map(nombre -> new Etiqueta(nombre))
+                                         .collect(Collectors.toList());
+        nuevoHecho.setEtiquetas(etiquetas);
+      }
+
+      // Procesar fotos
+      List<UploadedFile> archivos = ctx.uploadedFiles("fotos");
+      List<Multimedia> fotos = new ArrayList<>();
+      for (UploadedFile archivo : archivos) {
+        if (archivo != null && archivo.size() > 0) {
+          byte[] bytesImagen = archivo.content().readAllBytes();
+          Multimedia foto = new Multimedia(
+              archivo.filename(),
+              archivo.contentType(),
+              bytesImagen
+          );
+          fotos.add(foto);
+        }
+      }
+      nuevoHecho.setFotos(fotos);
+
+      // Validar hecho
+      validarHecho(nuevoHecho);
+
+      // Obtener fuente_id si existe
+      String fuenteIdStr = ctx.formParam("fuente_id");
+      if (fuenteIdStr != null && !fuenteIdStr.isEmpty()) {
+        Long fuenteId = Long.parseLong(fuenteIdStr);
+        Fuente fuente = fuenteController.findById(fuenteId);
+
+        if (fuente instanceof FuenteDinamica) {
+          // Asignar el hecho a la fuente dinámica
+          ((FuenteDinamica) fuente).agregarHecho(nuevoHecho);
+          fuenteController.save(fuente);
+          ctx.redirect("/admin/fuentes/" + fuenteId);
+          return;
+        }
+      }
+
+      // Si no hay fuente dinámica, guardar como hecho normal
+      this.subirHecho(nuevoHecho);
+      ctx.redirect("/");
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      ctx.status(400).result("Error al crear hecho: " + e.getMessage());
+    }
   }
 }

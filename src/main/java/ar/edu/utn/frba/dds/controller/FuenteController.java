@@ -51,14 +51,7 @@ public class FuenteController {
       Map<String, Object> dto = new HashMap<>();
       dto.put("id", f.getId());
       dto.put("nombre", f.getNombre());
-
-      String tipo = "OTRO";
-      if (f instanceof FuenteDinamica) tipo = "DINAMICA";
-      else if (f instanceof FuenteEstatica) tipo = "ESTATICA";
-      else if (f instanceof FuenteDeAgregacion) tipo = "AGREGACION";
-      else if (f instanceof FuenteExternaAPI) tipo = "API";
-
-      dto.put("tipo", tipo);
+      dto.put("tipo", determinarTipo(f));
       return dto;
     }).collect(Collectors.toList());
   }
@@ -67,7 +60,15 @@ public class FuenteController {
     return FuenteRepository.instance().findById(id);
   }
 
-  // --- MÉTODOS DE CREACIÓN ---
+  public String determinarTipo(Fuente f) {
+    if (f instanceof FuenteDinamica) return "DINAMICA";
+    if (f instanceof FuenteEstatica) return "ESTATICA";
+    if (f instanceof FuenteDeAgregacion) return "AGREGACION";
+    if (f instanceof FuenteExternaAPI) return "API";
+    return "OTRO";
+  }
+
+  // --- CREACIÓN ---
 
   public Fuente crearFuente(Context ctx) {
     String nombreFuente = ctx.formParam("nueva_fuente_nombre");
@@ -82,32 +83,21 @@ public class FuenteController {
 
       case "ESTATICA":
         UploadedFile archivo = ctx.uploadedFile("archivo_fuente");
-
-        // Parámetros
         String jsonMapeo = ctx.formParam("mapeo_columnas_json");
         String separadorStr = ctx.formParam("csv_separador");
         String formatoFecha = ctx.formParam("csv_formato_fecha");
 
         if (archivo != null && !archivo.filename().isEmpty()) {
           try {
-            // Determinar la estrategia de lectura correcta
-            ConfiguracionLector configLector = determinarConfig(
-                archivo.filename(),
-                jsonMapeo,
-                separadorStr,
-                formatoFecha
-            );
-
-            // Construir el lector y procesar
+            ConfiguracionLector configLector = determinarConfig(archivo.filename(), jsonMapeo, separadorStr, formatoFecha);
             Lector<Hecho> lector = configLector.build(Hecho.class);
             List<Hecho> hechosImportados = lector.importar(archivo.content());
 
-            // VALIDACIÓN 1: Lista vacía o nula
             if (hechosImportados == null || hechosImportados.isEmpty()) {
               throw new RuntimeException("El archivo no contiene hechos válidos o no se pudieron leer. La fuente no será creada.");
             }
 
-            // VALIDACIÓN 2: Integridad de campos
+            // Validación de integridad
             for (int i = 0; i < hechosImportados.size(); i++) {
               Hecho h = hechosImportados.get(i);
               if (h.getTitulo() == null || h.getTitulo().isBlank()) {
@@ -117,7 +107,6 @@ public class FuenteController {
                 throw new RuntimeException("Error en fila " + (i+1) + ": Falta la fecha de suceso (hecho_fecha_suceso).");
               }
 
-              // --- VALIDACIÓN DE UBICACIÓN (Al menos uno: Lat/Long, Dirección o Provincia) ---
               boolean tieneCoordenadas = (h.getUbicacion() != null);
               boolean tieneDireccion = (h.getDireccion() != null && !h.getDireccion().isBlank());
               boolean tieneProvincia = (h.getProvincia() != null && !h.getProvincia().isBlank());
@@ -127,7 +116,6 @@ public class FuenteController {
               }
             }
 
-            // Forzar DATASET como origen para todos los importados
             hechosImportados.forEach(hecho -> hecho.setOrigen(Origen.DATASET));
 
             fuente = new FuenteEstatica(nombreFuente, hechosImportados);
@@ -177,17 +165,101 @@ public class FuenteController {
     return fuente;
   }
 
+  // --- EDICIÓN Y GESTIÓN ---
+
+  public void borrar(Fuente fuente) {
+    FuenteRepository.instance().delete(fuente);
+  }
+
+  public void agregarHechoDinamico(Fuente fuente, Hecho hecho) {
+    if (fuente instanceof FuenteDinamica) {
+      ((FuenteDinamica) fuente).agregarHecho(hecho);
+      FuenteRepository.instance().save(fuente);
+    }
+  }
+
+  public void borrarHechoDinamico(Fuente fuente, Long idHecho) {
+    if (fuente instanceof FuenteDinamica) {
+      FuenteDinamica fd = (FuenteDinamica) fuente;
+      fd.getHechos().removeIf(h -> h.getId().equals(idHecho));
+      FuenteRepository.instance().save(fuente);
+    }
+  }
+
+  /**
+   * Agrega una fuente hija a una agregación existente.
+   * Valida que no se agreguen agregaciones recursivas.
+   */
+  public void agregarFuenteAAgregacion(Fuente fuentePadre, Long idHija) {
+    if (!(fuentePadre instanceof FuenteDeAgregacion)) {
+      throw new RuntimeException("La fuente padre no es de tipo agregación.");
+    }
+
+    Fuente fuenteHija = this.findById(idHija);
+
+    if (fuenteHija == null) {
+      throw new RuntimeException("La fuente a agregar no existe.");
+    }
+
+    if (fuenteHija instanceof FuenteDeAgregacion) {
+      throw new RuntimeException("No se puede agregar una fuente de agregación dentro de otra (evitar ciclos).");
+    }
+
+    if (fuenteHija.getId().equals(fuentePadre.getId())) {
+      throw new RuntimeException("No se puede agregar una fuente a sí misma.");
+    }
+
+    // Verificar si ya está agregada
+    FuenteDeAgregacion agregacion = (FuenteDeAgregacion) fuentePadre;
+    boolean yaExiste = agregacion.getFuentesCargadas().stream()
+                                 .anyMatch(f -> f.getId().equals(idHija));
+
+    if (yaExiste) {
+      throw new RuntimeException("La fuente ya está agregada.");
+    }
+
+    agregacion.agregarFuente(fuenteHija);
+    FuenteRepository.instance().update(fuentePadre);
+  }
+
+  /**
+   * Remueve una fuente hija de una agregación.
+   */
+  public void removerFuenteDeAgregacion(Fuente fuentePadre, Long idHija) {
+    if (!(fuentePadre instanceof FuenteDeAgregacion)) {
+      throw new RuntimeException("La fuente padre no es de tipo agregación.");
+    }
+
+    Fuente fuenteHija = this.findById(idHija);
+    if (fuenteHija == null) {
+      throw new RuntimeException("La fuente hija no existe.");
+    }
+
+    FuenteDeAgregacion agregacion = (FuenteDeAgregacion) fuentePadre;
+    agregacion.removerFuente(fuenteHija);
+    FuenteRepository.instance().update(fuentePadre);
+  }
+
+  /**
+   * Actualiza una fuente existente (principalmente para cambiar nombre).
+   */
+  public void save(Fuente fuente) {
+    if (fuente.getId() == null) {
+      FuenteRepository.instance().save(fuente);
+    } else {
+      FuenteRepository.instance().update(fuente);
+    }
+  }
+
   // --- AUXILIARES ---
 
   private ConfiguracionLector determinarConfig(String fileName, String jsonMapeo, String separadorStr, String formatoFechaInput) {
 
-    // Parseo común del mapeo si existe
     Map<String, List<String>> mapeoColumnas = null;
     if (jsonMapeo != null && !jsonMapeo.isBlank()) {
       try {
         mapeoColumnas = mapper.readValue(jsonMapeo, new TypeReference<Map<String, List<String>>>(){});
       } catch (Exception e) {
-        System.out.println("Error parseando mapeo dinámico: " + e.getMessage());
         mapeoColumnas = this.crearMapeoColumnasDefault();
       }
     } else {
@@ -195,18 +267,9 @@ public class FuenteController {
     }
 
     if (fileName.toLowerCase().endsWith(".csv")) {
-      char separador = ',';
-      if (separadorStr != null && !separadorStr.isEmpty()) {
-        separador = separadorStr.charAt(0);
-      }
-
-      String formatoFecha = "dd/MM/yyyy HH:mm";
-      if (formatoFechaInput != null && !formatoFechaInput.isBlank()) {
-        formatoFecha = formatoFechaInput;
-      }
-
+      char separador = (separadorStr != null && !separadorStr.isEmpty()) ? separadorStr.charAt(0) : ',';
+      String formatoFecha = (formatoFechaInput != null && !formatoFechaInput.isBlank()) ? formatoFechaInput : "dd/MM/yyyy HH:mm";
       return new ConfiguracionLectorCsv(separador, formatoFecha, mapeoColumnas);
-
     }
     else if (fileName.toLowerCase().endsWith(".json")) {
       return new ConfiguracionLectorJson();
@@ -234,9 +297,5 @@ public class FuenteController {
     return mapeoEnum.entrySet().stream().collect(Collectors.toMap(
         entry -> entry.getKey().name(), Map.Entry::getValue
     ));
-  }
-
-  public void save(Fuente fuente) {
-    FuenteRepository.instance().save(fuente);
   }
 }
