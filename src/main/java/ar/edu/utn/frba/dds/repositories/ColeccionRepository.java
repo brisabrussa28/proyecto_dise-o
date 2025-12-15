@@ -4,7 +4,7 @@ import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteConHechos;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
-import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica; // IMPORT AGREGADO
+import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.ArrayList;
@@ -68,11 +68,14 @@ public class ColeccionRepository {
   public Coleccion findById(Long id) {
     EntityManager em = DBUtils.getEntityManager();
     try {
+      // FIX CRÍTICO: Agregado LEFT JOIN FETCH c.hechos para inicializar la colección
+      // y evitar LazyInitializationException en la vista
       Coleccion coleccion = em.createQuery(
                                   "SELECT DISTINCT c FROM Coleccion c "
                                       + "LEFT JOIN FETCH c.coleccion_fuente "
                                       + "LEFT JOIN FETCH c.coleccion_algoritmo "
                                       + "LEFT JOIN FETCH c.coleccion_condicion "
+                                      + "LEFT JOIN FETCH c.hechos "
                                       + "WHERE c.coleccion_id = :id",
                                   Coleccion.class
                               )

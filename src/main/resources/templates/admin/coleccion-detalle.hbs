@@ -1,139 +1,124 @@
 {{#partial "nav_izquierda"}}
-    <a href="javascript:history.back()"
-       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
+    <a href="/admin/colecciones" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
         <i class="fa-solid fa-arrow-left"></i>
         <span class="d-none d-sm-block">Volver</span>
     </a>
 {{/partial}}
 
 {{#partial "contenido"}}
-    <div class="container py-3 bg-white bg-opacity-75 rounded p-3 mt-3">
+    <div class="container py-4">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- Encabezado -->
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
             <div>
-                <h3><i class="fa-solid fa-folder-open text-warning me-2"></i>Colección:
-                    <strong>{{coleccion.titulo}}</strong></h3>
-                <span class="badge bg-secondary">{{coleccion.categoria}}</span>
-                <span class="text-muted ms-2 small">{{coleccion.descripcion}}</span>
+                <h2 class="fw-light text-dark mb-0">{{coleccion.titulo}}</h2>
+                <small class="text-muted">
+                    {{#if coleccion.descripcion}}{{coleccion.descripcion}}{{else}}Sin descripción{{/if}}
+                </small>
             </div>
+            <span class="badge rounded-pill bg-dark fw-normal px-3 py-2">
+                {{#if coleccion.categoria}}{{coleccion.categoria}}{{else}}General{{/if}}
+            </span>
         </div>
 
-        <div class="card shadow-sm mb-4 border">
-            <div class="card-header bg-primary text-white fw-bold">
-                <i class="fa-solid fa-sliders me-2"></i>Configuración de la Colección
-            </div>
-            <div class="card-body bg-light">
-                <form action="/admin/colecciones/{{coleccion.id}}/configurar" method="POST" class="row g-3">
+        <div class="row g-4">
 
-                    <div class="col-12 border-bottom pb-3 mb-3">
-                        <h6 class="text-primary fw-bold"><i class="fa-solid fa-pen-to-square me-1"></i>Datos Generales
+            <!-- PANEL CONFIGURACIÓN -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm bg-light">
+                    <div class="card-body p-4">
+                        <h6 class="card-title fw-bold text-uppercase text-muted mb-3 small">
+                            <i class="fa-solid fa-gear me-2"></i>Configuración
                         </h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Título</label>
-                                <input type="text" name="titulo" class="form-control" value="{{coleccion.titulo}}"
-                                       required>
+
+                        <form action="/admin/colecciones/{{coleccion.id}}/configurar" method="POST">
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Título</label>
+                                <input type="text" name="titulo" class="form-control" value="{{coleccion.titulo}}" required>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Categoría</label>
-                                <input type="text" name="categoria" class="form-control" value="{{coleccion.categoria}}"
-                                       required>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Categoría</label>
+                                <input type="text" name="categoria" class="form-control" value="{{coleccion.categoria}}" required>
                             </div>
 
-                            <div class="col-12">
-                                <label class="form-label fw-bold small">Descripción</label>
-                                <textarea name="descripcion" class="form-control" rows="2"
-                                          required>{{coleccion.descripcion}}</textarea>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Descripción</label>
+                                <textarea name="descripcion" class="form-control" rows="2" required>{{coleccion.descripcion}}</textarea>
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="col-12">
-                        <h6 class="text-primary fw-bold"><i class="fa-solid fa-gears me-1"></i>Fuente y consenso</h6>
-                    </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Fuente de Datos</label>
+                                <select name="fuente_id" class="form-select" required>
+                                    <option value="" disabled {{#unless coleccion.fuente}}selected{{/unless}}>Seleccionar...</option>
+                                    {{#each fuentesDisponibles}}
+                                        <!-- Usamos el helper 'eq' del servidor -->
+                                        <option value="{{this.id}}" {{#if (eq this.id ../coleccion.fuente.id)}}selected{{/if}}>
+                                            {{this.nombre}}
+                                        </option>
+                                    {{/each}}
+                                </select>
+                            </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold small">Fuente de Datos</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-database"></i></span>
-                            <select name="fuente_id" class="form-select" required>
-                                {{#if coleccion.fuente}}
-                                    <option value="{{coleccion.fuente.id}}" selected>{{coleccion.fuente.nombre}}
-                                    </option>
-                                {{else}}
-                                    <option value="" selected disabled>Seleccionar...</option>
-                                {{/if}}
+                            <div class="mb-4">
+                                <label class="form-label small fw-bold">Algoritmo de Consenso</label>
+                                <select name="algoritmo_tipo" class="form-select" required>
+                                    <!-- Usamos el helper 'eq' del servidor -->
+                                    <option value="May_simple" {{#if (eq coleccion.algoritmoTipo "May_simple")}}selected{{/if}}>Mayoría Simple</option>
+                                    <option value="Absoluta" {{#if (eq coleccion.algoritmoTipo "Absoluta")}}selected{{/if}}>Unanimidad / Absoluta</option>
+                                    <option value="Mult_menciones" {{#if (eq coleccion.algoritmoTipo "Mult_menciones")}}selected{{/if}}>Múltiples Menciones</option>
+                                </select>
+                            </div>
 
-                                {{#each fuentesDisponibles}}
-                                    {{#unless (eq this.id ../coleccion.fuente.id)}}
-                                        <option value="{{this.id}}">{{this.nombre}}</option>
-                                    {{/unless}}
-                                {{/each}}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold small">Algoritmo de Consenso</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-filter"></i></span>
-                            <select name="algoritmo_tipo" class="form-select" required>
-                                <option value="Absoluta" {{#if (eq coleccion.algoritmoTipo "Absoluta")}}selected{{/if}}>
-                                    Absoluta
-                                </option>
-                                <option value="May_simple" {{#if (eq coleccion.algoritmoTipo "May_simple")}}selected{{/if}}>
-                                    Mayoría Simple
-                                </option>
-                                <option value="Mult_menciones"
-                                        {{#if (eq coleccion.algoritmoTipo "Mult_menciones")}}selected{{/if}}>Múltiples Menciones
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="col-12 mt-4 text-end">
-                        <button type="submit" class="btn btn-success px-4 fw-bold">
-                            <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Cambios
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
-                        <span>Hechos Consensuados</span>
-
-                        <div class="d-flex align-items-center gap-3">
-                            <form action="/admin/colecciones/{{coleccion.id}}/calcular-consenso" method="POST" class="m-0">
-                                <button type="submit" class="btn btn-sm btn-outline-primary fw-bold" title="Ejecutar algoritmo ahora">
-                                    <i class="fa-solid fa-calculator me-1"></i> Calcular Consenso
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    Guardar Cambios
                                 </button>
-                            </form>
-
-                            <span class="badge bg-secondary">{{coleccion.hechos.size}} items</span>
-                        </div>
+                            </div>
+                        </form>
                     </div>
-                    <div class="card-body p-0">
+                </div>
+            </div>
+
+            <!-- PANEL HECHOS -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold small text-uppercase text-muted">
+                            Hechos Consensuados ({{#if coleccion.hechos}}{{coleccion.hechos.size}}{{else}}0{{/if}})
+                        </span>
+
+                        <form action="/admin/colecciones/{{coleccion.id}}/calcular-consenso" method="POST" class="m-0">
+                            <button type="submit" class="btn btn-sm btn-outline-dark">
+                                <i class="fa-solid fa-sync me-1"></i> Recalcular
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
                         <ul class="list-group list-group-flush">
                             {{#each coleccion.hechos}}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <span class="fw-bold">{{this.titulo}}</span>
-                                        <div class="small text-muted">{{this.descripcion}}</div>
-                                        <div class="x-small text-muted fst-italic mt-1">
-                                            <i class="fa-solid fa-calendar-day me-1"></i>{{# formatDate this.fechaSuceso "dd/MM/yyyy hh:mm"}}{{/formatDate}}
-                                        </div>
+                                <li class="list-group-item p-3 item-hecho">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1 fw-bold">{{this.titulo}}</h6>
+                                        <small class="text-muted">ID: {{this.id}}</small>
                                     </div>
-                                    <span class="badge bg-light text-dark border">ID: {{this.id}}</span>
+                                    <p class="mb-1 small text-muted text-truncate">
+                                        {{#if this.descripcion}}{{this.descripcion}}{{else}}Sin descripción{{/if}}
+                                    </p>
+
+                                    <!-- Usamos el helper 'formatDate' del servidor -->
+                                    <small class="text-primary">
+                                        <i class="fa-regular fa-calendar me-1"></i>
+                                        {{formatDate this.fechaSuceso "dd/MM/yyyy HH:mm"}}
+                                    </small>
                                 </li>
                             {{else}}
-                                <li class="list-group-item text-center text-muted py-4">
-                                    No hay hechos procesados. Verifica la Fuente y el Algoritmo, o prueba "Calcular Consenso".
-                                </li>
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fa-regular fa-folder-open fa-2x mb-3 opacity-50"></i>
+                                    <p class="mb-0">No hay hechos consensuados.</p>
+                                </div>
                             {{/each}}
                         </ul>
                     </div>

@@ -1,134 +1,40 @@
 {{#partial "contenido"}}
-    <div class="container d-flex flex-column justify-content-center align-items-center"
-         style="min-height: 80vh;">
-        <div class="text-center w-100" style="max-width: 800px;">
-            <!-- Icono de error crítico -->
-            <div class="mb-4">
-                <i class="fas fa-server text-danger"
-                   style="font-size: 8rem;"></i>
-            </div>
+<div class="d-flex align-items-center justify-content-center min-vh-100 bg-white">
+    <div class="text-center px-4" style="max-width: 700px;">
 
-            <!-- Título principal -->
-            <h1 class="display-5 fw-bold text-dark mb-3">
-                <i class="fas fa-bug me-3"></i>Error del Servidor
-            </h1>
+        <!-- Código de Estado -->
+        <h1 class="fw-bold text-dark" style="font-size: 6rem; line-height: 1;">
+            {{#if errorStatus}}{{errorStatus}}{{else}}Error{{/if}}
+        </h1>
 
-            <h2 class="h4 text-danger mb-4">
-                {{#if errorStatus}}
-                    Error {{errorStatus}}
-                {{else}}
-                    Error Interno
-                {{/if}}
-            </h2>
+        <!-- Mensaje -->
+        <h2 class="h4 text-secondary mb-4 mt-2">
+            {{#if errorMessage}}{{errorMessage}}{{else}}Ocurrió un error inesperado{{/if}}
+        </h2>
 
-            <!-- Mensaje descriptivo -->
-            <div class="card shadow-sm border-danger mb-4">
-                <div class="card-header bg-danger text-white">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    Detalles del Error
-                </div>
-                <div class="card-body">
-                    <!-- Mensaje de error principal -->
-                    <div class="alert alert-danger mb-3">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
-                            <div>
-                                <h5 class="alert-heading mb-1">Error:</h5>
-                                <p class="mb-0">{{errorMessage}}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Detalles técnicos (opcional, se puede ocultar) -->
-                    {{#if showDetails}}
-                        <div class="accordion mb-3" id="errorDetails">
-                            <div class="accordion-item border-0">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed bg-light text-dark"
-                                            type="button"
-                                            data-bs-toggle="collapse"
-                                            data-bs-target="#collapseDetails">
-                                        <i class="fas fa-code me-2"></i>
-                                        Detalles Técnicos
-                                    </button>
-                                </h2>
-                                <div id="collapseDetails" class="accordion-collapse collapse">
-                                    <div class="accordion-body bg-dark text-light font-monospace small">
-                                        <pre class="mb-0" style="white-space: pre-wrap; word-wrap: break-word;">{{errorDetails}}</pre>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {{/if}}
-
-                    <!-- Timestamp -->
-                    <div class="text-muted small">
-                        <i class="far fa-clock me-1"></i>
-                        {{#if timestamp}}
-                            {{timestamp}}
-                        {{else}}
-                            {{formatDate}}
-                        {{/if}}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Soluciones sugeridas -->
-            <div class="card shadow-sm border-info mb-4">
-                <div class="card-header bg-info text-white">
-                    <i class="fas fa-lightbulb me-2"></i>
-                    Posibles Soluciones
-                </div>
-                <div class="card-body">
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <i class="fas fa-redo text-primary me-2"></i>
-                            <strong>Recarga la página</strong> - Intenta recargar la página
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-history text-primary me-2"></i>
-                            <strong>Vuelve más tarde</strong> - El problema podría ser temporal
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-envelope text-primary me-2"></i>
-                            <strong>Contacta al administrador</strong> - Reporta este error si persiste
-                        </li>
-                        <li>
-                            <i class="fas fa-broom text-primary me-2"></i>
-                            <strong>Limpia la caché</strong> - Limpia cookies y caché del navegador
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Botones de acción -->
-            <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
-                <a href="/" class="btn btn-primary btn-lg px-4">
-                    <i class="fas fa-home me-2"></i>Ir al inicio
-                </a>
-
-                <button onclick="location.reload()" class="btn btn-warning btn-lg px-4">
-                    <i class="fas fa-sync-alt me-2"></i>Reintentar
-                </button>
-
-                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg px-4">
-                    <i class="fas fa-arrow-left me-2"></i>Volver atrás
-                </a>
-            </div>
-
-            <!-- Información de contacto -->
-            <div class="mt-5 pt-3 border-top">
-                <p class="text-muted small">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Si el problema persiste, contacta al soporte técnico.
-                    <br>
-                    <a href="mailto:soporte@metamapa.com" class="text-decoration-none">
-                        <i class="far fa-envelope me-1"></i>soporte@metamapa.com
-                    </a>
-                </p>
-            </div>
+        <div class="d-grid gap-2 d-sm-flex justify-content-center mt-4">
+            <a href="javascript:history.back()" class="btn btn-dark btn-lg px-5 rounded-pill">
+                Volver
+            </a>
+            <a href="/" class="btn btn-outline-dark btn-lg px-5 rounded-pill">
+                Inicio
+            </a>
         </div>
-    </div>
-{{/partial}}
 
+        <!-- Detalles Técnicos (Ocultos nativamente) -->
+        {{#if errorDetails}}
+            <div class="mt-5 text-start">
+                <details class="border rounded p-2 bg-light">
+                    <summary class="text-muted small cursor-pointer">Ver detalles técnicos</summary>
+                    <div class="mt-2 p-3 bg-dark text-white rounded font-monospace" style="font-size: 0.75rem; overflow-x: auto;">
+                        <div class="mb-2 text-warning">Timestamp: {{timestamp}}</div>
+                        <pre class="m-0">{{errorDetails}}</pre>
+                    </div>
+                </details>
+            </div>
+        {{/if}}
+
+    </div>
+</div>
+{{/partial}}
 {{> templates/layout}}

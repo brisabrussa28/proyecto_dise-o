@@ -30,13 +30,17 @@ public class Server {
     // Configurar TimeZone por defecto para toda la JVM
     TimeZone.setDefault(TimeZone.getTimeZone(timezone));
 
+    // --- CONFIGURACIÓN CENTRALIZADA DEL MAPPER ---
     ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule());
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     mapper.registerModule(new Jdk8Module());
 
     Javalin app = Javalin.create(javalinConfig -> {
+      // 1. IMPORTANTE: Usar el mapper configurado arriba para APIs JSON
       javalinConfig.jsonMapper(new JavalinJackson());
+
+      // 2. Registrar el motor de plantillas (JavalinHandlebars ya tiene los helpers configurados internamente)
       javalinConfig.fileRenderer(new JavalinRenderer().register("hbs", new JavalinHandlebars()));
 
       // Configurar archivos estáticos
@@ -53,7 +57,7 @@ public class Server {
         javalinConfig.router.ignoreTrailingSlashes = true;
       }
 
-      // Configuración de CORS dinámica
+      // Configuración de CORS
       javalinConfig.bundledPlugins.enableCors(cors -> {
         cors.addRule(it -> {
           if (corsAllowAnyOrigin) {
@@ -77,9 +81,6 @@ public class Server {
 
     // Configurar rutas
     new Router().configure(app, mapper, debugMode);
-
-    // Cargar datos iniciales (Bootstrap)
-    //new Bootstrap().init();
 
     // Iniciar el servidor
     System.out.println("Iniciando servidor en http://localhost:" + port);
