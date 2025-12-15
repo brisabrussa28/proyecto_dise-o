@@ -122,6 +122,7 @@ public class Router {
 
           Map<String, Object> model = modeloConSesion(ctx);
           model.put("hechosJson", hechosJson);
+          model.put("hechos", hechos);
           model.put("categorias", hechoController.getCategorias());
           model.put("colecciones", coleccionController.findAll());
           model.put("fuentes", fuenteController.findAll());
