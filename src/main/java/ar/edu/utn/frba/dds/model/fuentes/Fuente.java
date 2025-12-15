@@ -11,7 +11,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.Transient;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -48,5 +47,18 @@ public abstract class Fuente {
 
   public void setNombre(String nombre) {
     this.fuente_nombre = nombre;
+  }
+
+  public String getTipo() {
+    if (this instanceof FuenteDinamica) {
+      return "Dinámica";
+    } else if (this instanceof FuenteEstatica) {
+      return "Estática";
+    } else if (this instanceof FuenteExternaAPI) {
+      return "Api";
+    } else if (this instanceof FuenteDeAgregacion) {
+      return "Agregadora";
+    }
+    return "Sin definir";
   }
 }

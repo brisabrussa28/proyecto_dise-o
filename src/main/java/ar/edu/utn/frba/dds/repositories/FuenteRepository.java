@@ -17,7 +17,8 @@ public class FuenteRepository {
 
   public void save(Fuente fuente) {
     EntityManager em = DBUtils.getEntityManager();
-    fuente.getHechos().forEach(DBUtils::enriquecerHecho);
+    fuente.getHechos()
+          .forEach(DBUtils::enriquecerHecho);
     DBUtils.comenzarTransaccion(em);
     try {
       em.persist(fuente);
@@ -46,8 +47,10 @@ public class FuenteRepository {
 
   public List<Fuente> findAll() {
     EntityManager em = DBUtils.getEntityManager();
+    DBUtils.comenzarTransaccion(em);
     try {
-      return em.createQuery("SELECT f FROM Fuente f", Fuente.class).getResultList();
+      return em.createQuery("SELECT f FROM Fuente f", Fuente.class)
+               .getResultList();
     } finally {
       em.close();
     }
@@ -95,7 +98,8 @@ public class FuenteRepository {
     // Paso 1: Eliminar Colecciones dependientes directas
     List<Coleccion> coleccionesDirectas = em.createQuery(
                                                 "SELECT c FROM Coleccion c WHERE c.coleccion_fuente.id = :id",
-                                                Coleccion.class)
+                                                Coleccion.class
+                                            )
                                             .setParameter("id", fuente.getId())
                                             .getResultList();
 
@@ -107,7 +111,8 @@ public class FuenteRepository {
     // Paso 2: Desvincular de Agregaciones padre
     List<FuenteDeAgregacion> padres = em.createQuery(
                                             "SELECT f FROM FuenteDeAgregacion f JOIN f.fuentesCargadas hija WHERE hija.id = :hijoId",
-                                            FuenteDeAgregacion.class)
+                                            FuenteDeAgregacion.class
+                                        )
                                         .setParameter("hijoId", fuente.getId())
                                         .getResultList();
 
@@ -120,7 +125,8 @@ public class FuenteRepository {
       em.merge(padre);
 
       // Paso 3: Si el padre quedó vacío, eliminarlo recursivamente
-      if (padre.getFuentesCargadas().isEmpty()) {
+      if (padre.getFuentesCargadas()
+               .isEmpty()) {
         eliminarRecursivamente(padre, em);
       }
     }
@@ -139,7 +145,8 @@ public class FuenteRepository {
     try {
       return em.createQuery(
                    "SELECT f FROM FuenteDeAgregacion f JOIN f.fuentesCargadas hija WHERE hija.id = :hijoId",
-                   FuenteDeAgregacion.class)
+                   FuenteDeAgregacion.class
+               )
                .setParameter("hijoId", hijoId)
                .getResultList();
     } finally {
@@ -158,7 +165,8 @@ public class FuenteRepository {
                    "SELECT DISTINCT c FROM Coleccion c " +
                        "WHERE c.coleccion_fuente.id IN " +
                        "(SELECT f.id FROM FuenteDeAgregacion f JOIN f.fuentesCargadas hija WHERE hija.id = :fuenteId)",
-                   Coleccion.class)
+                   Coleccion.class
+               )
                .setParameter("fuenteId", fuenteId)
                .getResultList();
     } finally {
