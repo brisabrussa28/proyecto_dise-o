@@ -25,7 +25,9 @@ import io.javalin.http.Handler;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +90,8 @@ public class Router {
       );
 
       @SuppressWarnings("unchecked")
-      List<Map<String, Object>> hechosValidos = (List<Map<String, Object>>) resultadoValidado.get("resultados");
+      List<Map<String, Object>> hechosValidos = (List<Map<String, Object>>) resultadoValidado.get(
+          "resultados");
       String hechosJson = mapper.writeValueAsString(hechosValidos);
 
       Map<String, Object> model = modeloConSesion(ctx);
@@ -194,9 +197,10 @@ public class Router {
       try {
         // Logging de parámetros recibidos
         System.out.println("=== BÚSQUEDA COMPLETA ===");
-        ctx.queryParamMap().forEach((key, values) ->
-                                        System.out.println("  " + key + " = " + values)
-        );
+        ctx.queryParamMap()
+           .forEach((key, values) ->
+                        System.out.println("  " + key + " = " + values)
+           );
 
         String titulo = ctx.queryParam("titulo");
         String categoria = ctx.queryParam("categoria");
@@ -235,8 +239,11 @@ public class Router {
 
         ctx.status(400).json(Map.of(
             "error", true,
-            "mensaje", e.getMessage(),
-            "detalle", e.getClass().getName()
+            "mensaje",
+            e.getMessage(),
+            "detalle",
+            e.getClass()
+             .getName()
         ));
       }
     });
@@ -258,18 +265,21 @@ public class Router {
       }
     });
 
-    app.get("/api/admin/colecciones/buscar", ctx -> {
-      try {
-        String titulo = ctx.queryParam("titulo");
-        String categoria = ctx.queryParam("categoria");
+    app.get(
+        "/api/admin/colecciones/buscar", ctx -> {
+          try {
+            String titulo = ctx.queryParam("titulo");
+            String categoria = ctx.queryParam("categoria");
 
-        List<Coleccion> resultados = coleccionController.buscarRapido(titulo, categoria);
-        ctx.json(resultados);
-      } catch (Exception e) {
-        e.printStackTrace(); // Esto te permite ver el error real en la consola de IntelliJ
-        ctx.status(500).json(Map.of("mensaje", "Error en la base de datos: " + e.getMessage()));
-      }
-    });
+            List<Coleccion> resultados = coleccionController.buscarRapido(titulo, categoria);
+            ctx.json(resultados);
+          } catch (Exception e) {
+            e.printStackTrace(); // Esto te permite ver el error real en la consola de IntelliJ
+            ctx.status(500)
+               .json(Map.of("mensaje", "Error en la base de datos: " + e.getMessage()));
+          }
+        }
+    );
 
     app.get("/hechos/categorias", ctx -> {
       List<String> categorias = hechoController.getCategorias();
@@ -507,6 +517,18 @@ public class Router {
       }
       Usuario user = userController.findByName(ctx.sessionAttribute("nombreUsuario"));
       Map<String, Object> model = modeloConSesion(ctx);
+
+      List<Hecho> ultimosHechos = new ArrayList<>();
+      if (user.getHechos() != null) {
+        ultimosHechos = user.getHechos()
+                            .stream()
+                            .sorted(Comparator.comparing(
+                                Hecho::getFechacarga,
+                                Comparator.nullsLast(Comparator.reverseOrder())
+                            ))
+                            .limit(5)
+                            .collect(Collectors.toList());
+      }
       model.put("perfil", user);
       ctx.render("perfil.hbs", model);
     });
