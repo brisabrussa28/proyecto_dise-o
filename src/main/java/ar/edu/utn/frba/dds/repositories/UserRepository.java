@@ -60,7 +60,10 @@ public class UserRepository {
   public Usuario findByName(String nombre) {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      return em.createQuery("SELECT u FROM Usuario u WHERE u.userName = :userName", Usuario.class)
+      return em.createQuery(
+                   "SELECT DISTINCT u FROM Usuario u LEFT JOIN FETCH u.hechos WHERE u.userName = :userName",
+                   Usuario.class
+               )
                .setParameter("userName", nombre)
                .getSingleResult();
     } catch (NoResultException e) {
@@ -98,7 +101,12 @@ public class UserRepository {
   public Usuario findById(Long id) {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      return em.find(Usuario.class, id);
+      return em.createQuery(
+                   "SELECT u FROM Usuario u LEFT JOIN FETCH u.hechos where u.id = :id",
+                   Usuario.class
+               )
+               .setParameter("id", id)
+               .getSingleResult();
     } finally {
       em.close();
     }
