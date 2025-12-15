@@ -7,7 +7,8 @@
 {{/partial}}
 
 {{#partial "contenido"}}
-    <div class="container d-flex flex-column bg-white rounded p-3 mt-3 py-1 gap-2">
+    <div class="container d-flex flex-column bg-white rounded p-3 mt-3 py-1 gap-2"
+         style="max-width: 720px;">
         <div class="d-flex flex-row portada">
             {{perfil.foto}}
             <i class="bi bi-person-circle" style="font-size: 450%"></i>
@@ -15,7 +16,7 @@
                 {{perfil.userName}}
             </h2>
         </div>
-        <div class="d-flex flex-column datos bg-white">
+        <div class="d-flex flex-column datos">
             <h3 style="font-weight: 600;">Detalles de usuario</h3>
             <div class="d-flex flex-column detalles">
                 <div class="d-flex flex-column">
