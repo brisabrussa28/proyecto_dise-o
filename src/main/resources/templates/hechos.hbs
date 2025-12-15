@@ -10,9 +10,9 @@
 {{#partial "contenido"}}
     <div class="container-sm py-4 mx-auto">
         <div class="bg-white bg-opacity-75 p-3 rounded shadow-sm">
-            <h2 class="fw-bold mb-3 text-center text-primary">
+            <h2 class="fw-bold mb-3 text-black">
                 <i class="fa-solid fa-map-location-dot me-2"></i>
-                Hechos registrados
+                Hechos Registrados
             </h2>
 
             <form id="searchForm" class="mb-3 p-3 bg-light rounded border">
@@ -52,18 +52,19 @@
 
             <div class="list-group" id="resultsList">
                 {{#each hechos}}
-                    <a href="/hechos/{{id}}" class="list-group-item list-group-item-action py-3 border-start-0 border-end-0">
+                    <a href="/hechos/{{this.id}}"
+                       class="list-group-item list-group-item-action py-3 border">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1">
                                 <div class="d-flex align-items-center mb-1">
-                                    <h6 class="fw-bold text-dark mb-0 me-2">{{hecho_titulo}}</h6>
+                                    <h6 class="fw-bold text-dark mb-0 me-2">{{titulo}}</h6>
                                     {{#if colecciones}}
                                         <span class="badge bg-success" title="Hecho consensuado"><i class="fa-solid fa-check"></i></span>
                                     {{/if}}
                                 </div>
-                                <p class="mb-2 text-muted small">{{hecho_descripcion}}</p>
+                                <p class="mb-2 text-muted small">{{descripcion}}</p>
                                 <div class="mb-2">
-                                    <span class="badge bg-info text-dark">{{hecho_categoria}}</span>
+                                    <span class="badge bg-info text-dark">{{categoria}}</span>
                                     {{#if etiquetas}}
                                         {{#each etiquetas}}
                                             <span class="badge bg-secondary">{{nombre}}</span>
@@ -72,7 +73,7 @@
                                 </div>
                                 <div class="small text-muted">
                                     <i class="fa-regular fa-calendar me-1"></i>
-                                    {{#if hecho_fecha_suceso}}
+                                    {{#if fechaSuceso}}
                                         <script>
                                             document.write(
                                                 (function(dateInput) {
@@ -87,7 +88,7 @@
                                                     return date.toLocaleString('es-AR', {
                                                         day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                                                     });
-                                                })({{{json hecho_fecha_suceso}}})
+                                                })({{{json fechaSuceso}}})
                                             );
                                         </script>
                                     {{else}}
@@ -95,10 +96,10 @@
                                     {{/if}}
                                     <br>
                                     <i class="fa-solid fa-location-dot me-1"></i>
-                                    {{#if hecho_provincia}}
-                                        {{hecho_provincia}} —
+                                    {{#if provincia}}
+                                        {{provincia}} —
                                     {{/if}}
-                                    {{hecho_direccion}}
+                                    {{direccion}}
                                 </div>
                             </div>
                             <div class="ms-3 align-self-center">
@@ -110,7 +111,10 @@
             </div>
 
             <nav class="mt-4">
-                <ul class="pagination pagination-sm justify-content-center" id="paginationContainer">
+                <ul class="pagination pagination-sm justify-content-center"
+                    id="paginationContainer"
+                    style="display: {{#if (gt totalPaginas 1)}}flex{{else}}none{{/if}}">
+
                     {{#if (gt paginaActual 1)}}
                         <li class="page-item">
                             <a class="page-link" href="#" data-page="{{subtract paginaActual 1}}">Anterior</a>
@@ -197,7 +201,7 @@
                     hechosResultantes.forEach(hecho => {
                         const esConsensuado = hecho.colecciones && hecho.colecciones.length > 0;
                         const fechaFormateada = formatDate(hecho.hecho_fecha_suceso);
-                        const etiquetasHTML = hecho.etiquetas ? hecho.etiquetas.map(e => `<span class="badge bg-secondary me-1">${e.nombre}</span>`).join('') : '';
+                        const etiquetasHTML = hecho.etiquetas ? hecho.etiquetas.map(e => `<span class="badge bg-secondary me-1">${e.nombre}</span>`) : '';
 
                         const itemHTML = `
                             <a href="/hechos/${hecho.id}" class="list-group-item list-group-item-action py-3 border-start-0 border-end-0">
@@ -215,7 +219,8 @@
                                         <div class="small text-muted">
                                             <i class="fa-regular fa-calendar me-1"></i> ${fechaFormateada}
                                             <br>
-                                            <i class="fa-solid fa-location-dot me-1"></i> ${hecho.hecho_provincia || ''} ${hecho.hecho_direccion || ''}
+                                            <i class="fa-solid fa-location-dot me-1"></i>
+                                             ${hecho.hecho_provincia ? hecho.hecho_provincia + ' — ' : ''} ${hecho.hecho_direccion || ''}
                                         </div>
                                     </div>
                                     <div class="ms-3 align-self-center">

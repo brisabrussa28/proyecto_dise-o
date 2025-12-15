@@ -530,6 +530,7 @@ public class Router {
                             .collect(Collectors.toList());
       }
       model.put("perfil", user);
+      model.put("ultimosHechos", ultimosHechos);
       ctx.render("perfil.hbs", model);
     });
 
@@ -538,7 +539,19 @@ public class Router {
     app.get("/perfiles/{nombre}/", ctx -> {
       Usuario user = userController.findByName(ctx.pathParam("nombre"));
       Map<String, Object> model = modeloConSesion(ctx);
+      List<Hecho> ultimosHechos = new ArrayList<>();
+      if (user.getHechos() != null) {
+        ultimosHechos = user.getHechos()
+                            .stream()
+                            .sorted(Comparator.comparing(
+                                Hecho::getFechacarga,
+                                Comparator.nullsLast(Comparator.reverseOrder())
+                            ))
+                            .limit(5)
+                            .collect(Collectors.toList());
+      }
       model.put("perfil", user);
+      model.put("ultimosHechos", user);
       ctx.render("perfil.hbs", model);
     });
 
