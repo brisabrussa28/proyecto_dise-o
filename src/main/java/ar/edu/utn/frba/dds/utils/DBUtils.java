@@ -52,8 +52,35 @@ public class DBUtils {
       }
 
       factory = Persistence.createEntityManagerFactory("simple-persistence-unit", configOverrides);
+
+      inicializarExtensiones();
     }
     return factory;
+  }
+
+  private static void inicializarExtensiones() {
+    EntityManager em = null;
+    EntityTransaction tx = null;
+
+    try {
+      em = factory.createEntityManager();
+      tx = em.getTransaction();
+      tx.begin();
+
+      em.createNativeQuery("CREATE EXTENSION IF NOT EXISTS fuzzystrmatch").executeUpdate();
+
+      tx.commit();
+      System.out.println("✅ Extensión fuzzystrmatch verificada/creada correctamente.");
+    } catch (Exception e) {
+      if (tx != null && tx.isActive()) {
+        tx.rollback();
+      }
+      System.err.println("⚠️ Error al inicializar extensiones de BD: " + e.getMessage());
+    } finally {
+      if (em != null) {
+        em.close();
+      }
+    }
   }
 
   public static EntityManager getEntityManager() {
