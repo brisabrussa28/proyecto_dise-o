@@ -6,7 +6,9 @@ import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.AlgoritmoDeConsens
 import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MayoriaSimple;
 import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MultiplesMenciones;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
+import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import io.javalin.http.Context;
 import java.util.List;
 
@@ -112,6 +114,10 @@ public class ColeccionController {
 
   public Coleccion findById(Long id) {
     return ColeccionRepository.instance().findById(id);
+  }
+
+  public List<Coleccion> buscarRapido(String titulo, String categoria) {
+    return ColeccionRepository.instance().buscarRapido(titulo, categoria);
   }
 
   public Long countAll() {

@@ -7,11 +7,13 @@ import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 
 public class ColeccionRepository {
   private static final ColeccionRepository INSTANCE = new ColeccionRepository();
@@ -83,6 +85,67 @@ public class ColeccionRepository {
     } catch (NoResultException e) {
       return null;
     } finally {
+      em.close();
+    }
+  }
+
+  public List<Coleccion> buscarRapido(String titulo, String categoria) {
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      // 1. SQL Nativo con espacios correctos y nombres de tabla en minúsculas
+      StringBuilder queryStr = new StringBuilder(
+          "SELECT DISTINCT c.* FROM coleccion c " +
+              "WHERE 1=1"
+      );
+
+      Map<String, Object> params = new HashMap<>();
+      int UMBRAL_TOLERANCIA = 3;
+
+      if (titulo != null && !titulo.isBlank()) {
+        queryStr.append(" AND (");
+        queryStr.append("   levenshtein(unaccent(LOWER(COALESCE(c.coleccion_titulo, ''))), unaccent(LOWER(:tituloRaw))) <= :umbral");
+        queryStr.append("   OR unaccent(LOWER(COALESCE(c.coleccion_titulo, ''))) LIKE unaccent(LOWER(:tituloLike))");
+        queryStr.append("   OR unaccent(LOWER(COALESCE(c.coleccion_descripcion, ''))) LIKE unaccent(LOWER(:tituloLike))");
+        queryStr.append(" )");
+
+        params.put("tituloRaw", titulo.trim());
+        params.put("tituloLike", "%" + titulo.trim() + "%");
+        params.put("umbral", UMBRAL_TOLERANCIA);
+      }
+
+      if (categoria != null && !categoria.equals("Todas") && !categoria.equals("0")) {
+        queryStr.append(" AND LOWER(c.coleccion_categoria) = LOWER(:categoriaRaw)");
+        params.put("categoriaRaw", categoria.trim());
+      }
+
+      queryStr.append(" ORDER BY c.coleccion_titulo DESC");
+
+      Query query = em.createNativeQuery(queryStr.toString(), Coleccion.class);
+
+      for (Map.Entry<String, Object> entry : params.entrySet()) {
+        query.setParameter(entry.getKey(), entry.getValue());
+      }
+
+      List<Coleccion> resultados = query.getResultList();
+
+      for (Coleccion col : resultados) {
+        if (col.getHechos() != null) {
+          col.getHechos().size();
+        }
+
+        if (col.getFuente() instanceof FuenteDinamica) {
+          FuenteDinamica fd = (FuenteDinamica) col.getFuente();
+          if (fd.getHechos() != null) fd.getHechos().size();
+        }
+      }
+
+      return resultados;
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      // 5. El EntityManager se cierra aquí, pero los datos ya fueron cargados arriba
       em.close();
     }
   }

@@ -12,7 +12,8 @@
                 <div class="col-12">
                     <h2 class="fw-bold"><i class="fa-solid fa-layer-group me-2"></i>Gestión de
                         Colecciones</h2>
-                    <p class="text-muted">¡Creá colecciones definiendo una fuente y criterios de consenso para filtrar!</p>
+                    <p class="text-muted">¡Creá colecciones definiendo una fuente y criterios de consenso para
+                        filtrar!</p>
                 </div>
             </div>
 
@@ -263,28 +264,55 @@
                     </div>
                 </div>
 
-                <!-- Listado de Colecciones -->
-                <div class="col-md-7">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white fw-bold">Colecciones Existentes</div>
-                        <ul class="list-group list-group-flush">
-                            {{#each colecciones}}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5 class="mb-0 fw-bold">{{this.titulo}}</h5>
-                                        <small class="text-muted">{{this.categoria}}</small>
+                <div class="d-flex flex-column col-md-7">
+                    <form id="searchForm" class="mb-3">
+                        <div class="row g-2 align-items-end" style="justify-content: space-between;">
+                            <div class="col-md-5">
+                                <label for="searchInput" class="form-label">Título</label>
+                                <input id="searchInput" type="text" class="form-control"
+                                       placeholder="Buscar colecciones por nombre..."
+                                       name="titulo" value="{{query}}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="categoriaSelect" class="form-label">Categoría</label>
+                                <select class="form-select" id="categoriaSelect" name="categoria">
+                                    <option value="0">Todas</option>
+                                    {{#each categorias}}
+                                        <option value="{{this}}"
+                                                {{#if (eq this ../categoriaSeleccionada)}}selected{{/if}}>{{this}}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary w-100" type="submit">
+                                    <i class="fa-solid fa-search me-1"></i> Buscar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- Listado de Colecciones -->
+                    <div>
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-white fw-bold">Colecciones Existentes</div>
+                            <ul class="list-group list-group-flush" id="resultsList">
+                                {{#each colecciones}}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="mb-0 fw-bold">{{this.titulo}}</h5>
+                                            <small class="text-muted">{{this.categoria}}</small>
+                                        </div>
+                                        <a href="/admin/colecciones/{{this.id}}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fa-solid fa-gear"></i> Configurar
+                                        </a>
+                                    </li>
+                                {{else}}
+                                    <div class="p-4 text-center text-muted">No hay colecciones
+                                        creadas.
                                     </div>
-                                    <a href="/admin/colecciones/{{this.id}}"
-                                       class="btn btn-sm btn-outline-primary">
-                                        <i class="fa-solid fa-gear"></i> Configurar
-                                    </a>
-                                </li>
-                            {{else}}
-                                <div class="p-4 text-center text-muted">No hay colecciones
-                                    creadas.
-                                </div>
-                            {{/each}}
-                        </ul>
+                                {{/each}}
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -558,6 +586,80 @@
                 document.getElementById('placeholder-agregacion').classList.remove('d-none');
             }
         }
+    </script>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchInput');
+            const categoriaSelect = document.getElementById('categoriaSelect');
+            const resultsList = document.getElementById('resultsList');
+
+            // Función principal de búsqueda
+            async function buscarColecciones() {
+                const titulo = searchInput.value.trim();
+                const categoria = categoriaSelect.value;
+
+                // Estado de carga
+                resultsList.innerHTML = '<li class="list-group-item text-center p-4">Buscando colecciones...</li>';
+
+                try {
+                    // Sincronizado con tu ruta: /api/admin/colecciones/buscar
+                    const url = `/api/admin/colecciones/buscar?titulo=${encodeURIComponent(titulo)}&categoria=${encodeURIComponent(categoria)}`;
+
+                    const response = await fetch(url);
+
+                    // Si el servidor responde con error (400 o 500)
+                    if (!response.ok) {
+                        const errorJson = await response.json();
+                        throw new Error(errorJson.mensaje || "Error en el servidor");
+                    }
+
+                    const colecciones = await response.json();
+                    resultsList.innerHTML = ''; // Limpiar lista
+
+                    if (colecciones.length === 0) {
+                        resultsList.innerHTML = '<li class="list-group-item text-center p-4 text-muted">No se encontraron colecciones.</li>';
+                        return;
+                    }
+
+                    // Renderizar resultados manteniendo tu diseño original
+                    colecciones.forEach(c => {
+                        // Importante: Usar los nombres de atributos que devuelve tu JSON (id, titulo, categoria)
+                        const itemHTML = `
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-0 fw-bold">${c.titulo || c.coleccion_titulo}</h5>
+                                    <small class="text-muted">${c.categoria || c.coleccion_categoria}</small>
+                                </div>
+                                <a href="/admin/colecciones/${c.id}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fa-solid fa-gear"></i> Configurar
+                                </a>
+                            </li>
+                        `;
+                        resultsList.insertAdjacentHTML('beforeend', itemHTML);
+                    });
+
+                } catch (error) {
+                    console.error("Error en la búsqueda:", error);
+                    resultsList.innerHTML = `<li class="list-group-item list-group-item-danger text-center p-4">Error: ${error.message}</li>`;
+                }
+            }
+
+            // Event Listener para el formulario
+            if (searchForm) {
+                searchForm.addEventListener('submit', (e) => {
+                    e.preventDefault(); // Evita recargar la página
+                    buscarColecciones();
+                });
+            }
+
+            // Opcional: Buscar automáticamente al cambiar la categoría en el select
+            if (categoriaSelect) {
+                categoriaSelect.addEventListener('change', buscarColecciones);
+            }
+        });
     </script>
 {{/partial}}
 {{> templates/layout}}
