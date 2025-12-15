@@ -216,13 +216,84 @@
                             .bindPopup(popupHTML);
                 }
             });
+
+            // Asumo que tienes una referencia a dónde van los resultados
+            const sidebarBody = document.querySelector('#offcanvasResultados .offcanvas-body');
+
+            // Función para manejar la llamada al backend y mostrar resultados
+            async function cargarResultadosEnSidebar(query) {
+                // Limpiar resultados anteriores
+                sidebarBody.innerHTML = '<p>Buscando...</p>';
+
+                try {
+                    // Llama al endpoint de Javalin que creamos
+                    const resp = await fetch(`/api/hechos/buscar?titulo=${encodeURIComponent(query)}`);
+
+                    if (!resp.ok) {
+                        throw new Error('Error al cargar los datos del backend.');
+                    }
+
+                    // Convierte la respuesta a JSON (una lista de objetos Hecho)
+                    const hechosResultantes = await resp.json();
+
+                    sidebarBody.innerHTML = ''; // Limpiar el "Buscando..."
+
+                    if (hechosResultantes.length === 0) {
+                        sidebarBody.innerHTML = '<p>No se encontraron hechos para esa búsqueda.</p>';
+                        return;
+                    }
+
+                    // Renderizar los resultados
+                    hechosResultantes.forEach(hecho => {
+                        const resultadoHTML = `
+                            <div class="d-flex flex-row hechos-resultantes shadow mb-2 p-2">
+                                ${hecho.hecho_titulo}
+                                <button type="button"
+                                        class="btn btn-primary ver-en-mapa ms-auto"
+                                        data-latitud="${hecho.hecho_ubicacion.latitud}"
+                                        data-longitud="${hecho.hecho_ubicacion.longitud}"
+                                        data-titulo="${hecho.hecho_titulo}">
+                                    Ver en el mapa
+                                </button>
+                            </div>
+                        `;
+                        sidebarBody.insertAdjacentHTML('beforeend', resultadoHTML);
+                    });
+
+                } catch (error) {
+                    console.error(error);
+                    sidebarBody.innerHTML = `<p class="text-danger">Ocurrió un error: ${error.message}</p>`;
+                }
+            }
+
+            const searchInput = document.getElementById('searchInput');
+            const offcanvasResultadosEl = document.getElementById('offcanvasResultados');
+            const offcanvasResultados = new bootstrap.Offcanvas(offcanvasResultadosEl);
+
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    const query = searchInput.value.trim();
+
+                    if (query !== "") {
+                        offcanvasResultados.show();
+
+                        console.log("Iniciando búsqueda de: " + query);
+                        // Descomenta la siguiente línea:
+                        cargarResultadosEnSidebar(query);
+                    } else {
+                        offcanvasResultados.hide();
+                    }
+                }
+            });
+
+            const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance('#offcanvasResultados');
+
             function centrarMapaEnHecho(lat, lng, titulo) {
 
                 if (typeof L !== 'undefined' && map) {
                     map.setView([lat, lng], 15);
                 }
 
-                const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance('#offcanvasResultados');
                 bsOffcanvas.hide();
             }
 
@@ -238,35 +309,18 @@
                     }
                 }
             });
-        });
-    </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            // 1. Obtén referencia al input de búsqueda por su nuevo ID
-            const searchInput = document.getElementById('searchInput');
-
-            // 2. Obtén la instancia del Offcanvas de Bootstrap
-            // Requerimos la clase nativa de Bootstrap JS para controlar el offcanvas programáticamente
-            const offcanvasResultadosEl = document.getElementById('offcanvasResultados');
-            const offcanvasResultados = new bootstrap.Offcanvas(offcanvasResultadosEl);
-
-            // 3. Añade el Event Listener para la tecla "Enter"
+            // Modifica el event listener de 'keydown' (Enter) para usar la nueva función
             searchInput.addEventListener('keydown', function(e) {
-                // Verifica si la tecla presionada es "Enter"
                 if (e.key === 'Enter' || e.keyCode === 13) {
                     const query = searchInput.value.trim();
 
                     if (query !== "") {
-                        // Muestra la barra lateral de resultados
-                        offcanvasResultados.show();
-
-                        // *** AQUÍ LLAMARÍAS A TU FUNCIÓN DE BACKEND/API PARA BUSCAR LOS HECHOS ***
-                        console.log("Iniciando búsqueda de: " + query);
-                        // cargarResultadosEnSidebar(query);
+                        bsOffcanvas.show();
+                        // Llamamos a la función de búsqueda aquí:
+                        cargarResultadosEnSidebar(query);
                     } else {
-                        // Si el campo está vacío, puedes ocultar la barra si estaba abierta
-                        offcanvasResultados.hide();
+                        bsOffcanvas.hide();
                     }
                 }
             });

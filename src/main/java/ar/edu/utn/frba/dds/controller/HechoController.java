@@ -43,6 +43,11 @@ public class HechoController {
                           .findById(id);
   }
 
+  public List<Hecho> findByTitle(String titulo) {
+    return HechoRepository.instance()
+                          .findByTitle(titulo);
+  }
+
   public List<Hecho> findAll() {
     return HechoRepository.instance()
                           .findAll();

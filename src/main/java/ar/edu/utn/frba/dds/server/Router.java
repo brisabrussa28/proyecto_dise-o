@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +143,18 @@ public class Router {
           ctx.render("index.hbs", model);
         }
     );
+
+    app.get("/api/hechos/buscar", ctx -> {
+      String titulo = ctx.queryParam("titulo");
+
+      if (titulo == null || titulo.trim().isEmpty()) {
+        ctx.json(Collections.emptyList());
+        return;
+      }
+
+      List<Hecho> resultados = hechoController.findByTitle(titulo);
+      ctx.json(resultados);
+    });
 
     app.get(
         "/admin/dashboard", ctx -> {
