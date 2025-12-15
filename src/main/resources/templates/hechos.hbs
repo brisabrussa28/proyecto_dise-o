@@ -1,0 +1,70 @@
+{{#partial "contenido"}}
+
+    <div class="container py-4">
+
+        <h2 class="fw-bold mb-3">
+            <i class="fa-solid fa-map-location-dot me-2"></i>
+            Hechos registrados
+        </h2>
+
+        <div class="list-group">
+
+            {{#each hechos}}
+                <a href="/hechos/{{id}}" class="list-group-item list-group-item-action py-3">
+
+                    <h5 class="fw-bold text-dark">{{titulo}}</h5>
+
+                    <p class="mb-1 text-muted">{{descripcion}}</p>
+
+                    <div class="mb-2">
+                        <span class="badge bg-info text-dark">{{categoria}}</span>
+
+                        {{#each etiquetas}}
+                            <span class="badge bg-secondary">{{nombre}}</span>
+                        {{/each}}
+                    </div>
+
+                    <div class="small text-muted">
+                        <i class="fa-regular fa-clock"></i>
+                        {{fechasuceso}}
+
+                        <br>
+
+                        <i class="fa-solid fa-location-dot"></i>
+                        {{provincia}} — {{direccion}}
+                    </div>
+
+                </a>
+            {{/each}}
+
+        </div>
+
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+
+                {{#if (gt paginaActual 1)}}
+                    <li class="page-item">
+                        <a class="page-link" href="/api/hechos?page={{subtract paginaActual 1}}">Anterior</a>
+                    </li>
+                {{/if}}
+
+                {{#each (range 1 totalPaginas)}}
+                    <li class="page-item {{#if (eq this ../paginaActual)}}active{{/if}}">
+                        <a class="page-link" href="/api/hechos?page={{this}}">{{this}}</a>
+                    </li>
+                {{/each}}
+
+                {{#if (lt paginaActual totalPaginas)}}
+                    <li class="page-item">
+                        <a class="page-link" href="/api/hechos?page={{add paginaActual 1}}">Siguiente</a>
+                    </li>
+                {{/if}}
+
+            </ul>
+        </nav>
+
+    </div>
+
+{{/partial}}
+
+{{> templates/layout}}

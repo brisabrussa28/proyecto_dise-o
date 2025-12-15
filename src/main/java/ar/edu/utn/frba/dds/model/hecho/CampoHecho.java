@@ -14,5 +14,6 @@ public enum CampoHecho {
   ORIGEN,
   ETIQUETAS,
   LATITUD,
-  LONGITUD
+  LONGITUD,
+  FOTOS // Nuevo campo para mapear URLs de imágenes
 }

@@ -12,15 +12,16 @@ public class ConfiguracionLectorJson extends ConfiguracionLector {
 
   @Override
   public <T> Lector<T> build(Class<T> clazz) {
-    // La creación de un LectorJson genérico requiere un TypeReference.
+    // La creación de un LectorJson genérico requiere un TypeReference específico.
     if (clazz.equals(Hecho.class)) {
-      // El cast es seguro porque está validado por la clase.
+      // El cast es seguro porque está validado por el if.
+      // Creamos el TypeReference explícito para List<Hecho>
       @SuppressWarnings("unchecked")
-      Lector<T> lector = (Lector<T>) new LectorJson<>(new TypeReference<List<Hecho>>() {
-      });
+      Lector<T> lector = (Lector<T>) new LectorJson<>(new TypeReference<List<Hecho>>() {});
       return lector;
     }
-    // Se podría agregar un 'else if' para otras clases.
+
+    // Si en el futuro agregas más tipos importables, agrega los 'else if' aquí.
 
     throw new IllegalArgumentException("No hay un TypeReference de LectorJson definido para la clase: " + clazz.getName());
   }

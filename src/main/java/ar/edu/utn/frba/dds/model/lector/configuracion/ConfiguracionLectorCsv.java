@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 /**
  * Entidad de configuración para un LectorCSV.
- * Persiste su configuración de forma normalizada usando la entidad MapeoCSV.
  */
 //@Entity
 //@DiscriminatorValue("CSV")
@@ -22,28 +21,17 @@ public class ConfiguracionLectorCsv extends ConfiguracionLector {
   private char separador;
   private String formatoFecha;
 
-
-  //  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-//  @JoinColumn(name = "config_lector_csv_id")
-//  @Transient
+  //  @OneToMany...
   private List<MapeoCSV> mapeos = new ArrayList<>();
 
-  // Constructor para JPA.
   public ConfiguracionLectorCsv() {
   }
 
   /**
-   * Constructor principal que recibe un mapa genérico y lo transforma en entidades MapeoCSV.
-   *
-   * @param separador     Carácter separador del CSV.
-   * @param formatoFecha  Formato de fecha a utilizar.
-   * @param mapeoColumnas Mapa con clave String que representa el campo y valor como lista de nombres de columnas.
+   * Constructor completo usado por el Controller.
+   * Convierte el Map simple a la estructura interna List<MapeoCSV>.
    */
-  public ConfiguracionLectorCsv(
-      char separador,
-      String formatoFecha,
-      Map<String, List<String>> mapeoColumnas
-  ) {
+  public ConfiguracionLectorCsv(char separador, String formatoFecha, Map<String, List<String>> mapeoColumnas) {
     this.separador = separador;
     this.formatoFecha = formatoFecha;
     if (mapeoColumnas != null) {
@@ -54,21 +42,17 @@ public class ConfiguracionLectorCsv extends ConfiguracionLector {
     }
   }
 
-  /**
-   * Construye el lector lógico (LectorCSV).
-   * Transforma la lista de MapeoCSV de nuevo a un Map<String, List<String>> para pasárselo al FilaConverter.
-   */
   @Override
   public <T> Lector<T> build(Class<T> clazz) {
     if (clazz.equals(Hecho.class)) {
-      // 1. Convertir la lista de entidades MapeoCSV de nuevo a un mapa simple.
+      // 1. Convertir la lista interna de MapeoCSV a un mapa simple para el converter.
       Map<String, List<String>> mapeoParaConverter = this.mapeos.stream()
                                                                 .collect(Collectors.toMap(
                                                                     MapeoCSV::getCampo,
                                                                     MapeoCSV::getNombresColumnas
                                                                 ));
 
-      // 2. Crear el FilaConverter con el mapa simple.
+      // 2. Crear el FilaConverter con el mapa y formato.
       FilaConverter<Hecho> converter = new HechoFilaConverter(formatoFecha, mapeoParaConverter);
 
       // 3. Crear y devolver el LectorCSV.
@@ -80,4 +64,3 @@ public class ConfiguracionLectorCsv extends ConfiguracionLector {
     throw new IllegalArgumentException("No hay un FilaConverter definido para la clase: " + clazz.getName());
   }
 }
-

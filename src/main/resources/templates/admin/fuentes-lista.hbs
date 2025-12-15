@@ -15,12 +15,12 @@
         <div class="row">
 
             <!-- Panel de Creación -->
-            <div class="col-md-4">
+            <div class="col-md-5">
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white fw-bold">Nueva Fuente</div>
                     <div class="card-body">
 
-                        <form action="/admin/fuentes" method="POST" enctype="multipart/form-data" id="formCrearFuente">
+                        <form action="/admin/fuentes" method="POST" enctype="multipart/form-data" id="formCrearFuente" onsubmit="prepararEnvioMapeo()">
 
                             <div class="mb-3">
                                 <label class="form-label">Nombre</label>
@@ -30,14 +30,14 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Tipo de Fuente</label>
-                                <select name="nueva_fuente_tipo" id="selectorTipo"
-                                        class="form-select"
-                                        onchange="mostrarCampos()">
+                                <select id="selectorTipoUI" class="form-select" onchange="gestionarCambioTipo()">
                                     <option value="DINAMICA" selected>Dinámica</option>
-                                    <option value="ESTATICA">Estática JSON o CSV</option>
+                                    <option value="ESTATICA_CSV">Importar CSV (Con Mapeo)</option>
+                                    <option value="ESTATICA_JSON">Importar JSON (Directo)</option>
                                     <option value="API">API Externa</option>
                                     <option value="AGREGACION">Agregación (Combinada)</option>
                                 </select>
+                                <input type="hidden" name="nueva_fuente_tipo" id="inputTipoReal" value="DINAMICA">
                             </div>
 
                             <!-- Campos para API -->
@@ -55,20 +55,92 @@
                                 </div>
                             </div>
 
-                            <!-- Campos para Archivo Estático -->
+                            <!-- Campos para Archivo Estático (CSV o JSON) -->
                             <div id="camposEstatica" class="d-none bg-light p-2 rounded mb-3 border">
+
+                                <!-- CONFIGURACIONES CSV -->
+                                <div id="configCsv" class="d-none mb-3 border-bottom pb-2">
+                                    <label class="small fw-bold text-primary mb-2">Configuración CSV</label>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <label class="form-label x-small mb-1">Separador</label>
+                                            <select name="csv_separador" class="form-select form-select-sm">
+                                                <option value="," selected>Coma (,)</option>
+                                                <option value=";">Punto y coma (;)</option>
+                                                <option value="|">Barra (|)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label x-small mb-1">Formato Fecha</label>
+                                            <input type="text" name="csv_formato_fecha"
+                                                   class="form-control form-control-sm"
+                                                   value="dd/MM/yyyy HH:mm"
+                                                   title="Ej: dd/MM/yyyy HH:mm o yyyy-MM-dd">
+                                        </div>
+                                    </div>
+                                    <div class="form-text x-small mt-1 text-muted">
+                                        Usá patrón Java: <code>dd/MM/yyyy</code>.
+                                    </div>
+                                </div>
+
                                 <label class="small fw-bold text-primary">Archivo de Datos</label>
-                                <input type="file" name="archivo_fuente"
-                                       class="form-control form-control-sm"
-                                       accept=".csv, .json">
-                                <div class="form-text x-small">Formatos soportados: CSV, JSON.</div>
+                                <input type="file" name="archivo_fuente" id="inputArchivo"
+                                       class="form-control form-control-sm mb-2">
+
+                                <div id="msgAyudaMapeo" class="d-none alert alert-info py-2 px-2 mb-2" style="font-size: 0.8rem;">
+                                    <i class="fa-solid fa-arrow-up me-1"></i> Subí tu archivo <b>.csv</b> para configurar el mapeo.
+                                </div>
+
+                                <!-- Ayuda JSON Expandible con TODOS los campos -->
+                                <div id="msgAyudaJson" class="d-none mb-2">
+                                    <div class="alert alert-light border py-2 px-2 mb-2 d-flex justify-content-between align-items-center" style="font-size: 0.8rem;">
+                                        <span><i class="fa-solid fa-code me-1"></i> El JSON debe respetar la estructura.</span>
+                                        <button class="btn btn-sm btn-outline-info py-0 px-2" type="button" data-bs-toggle="collapse" data-bs-target="#jsonStructureInfo" aria-expanded="false" aria-controls="jsonStructureInfo" title="Ver estructura requerida">
+                                            <i class="fa-solid fa-info"></i>
+                                        </button>
+                                    </div>
+                                    <div class="collapse" id="jsonStructureInfo">
+                                        <div class="card card-body bg-white p-2 border" style="font-size: 0.75rem;">
+                                            <strong class="d-block mb-1 text-dark">Campos requeridos (Keys):</strong>
+                                            <ul class="list-unstyled mb-0 font-monospace text-muted ps-2 border-start border-3 border-info">
+                                                <li><span class="text-danger fw-bold">*</span> "hecho_titulo": "Texto"</li>
+                                                <li><span class="text-danger fw-bold">*</span> "hecho_fecha_suceso": "ISO-8601"</li>
+                                                <li>"hecho_descripcion": "Texto"</li>
+                                                <li>"hecho_categoria": "Texto"</li>
+                                                <li><span class="text-warning fw-bold">*</span> "hecho_direccion": "Texto"</li>
+                                                <li><span class="text-warning fw-bold">*</span> "hecho_provincia": "Texto"</li>
+                                                <li>"hecho_fecha_carga": "ISO-8601"</li>
+                                                <li><span class="text-warning fw-bold">*</span> "hecho_ubicacion": { "latitud": double, "longitud": double }</li>
+                                                <li class="mt-1 fw-bold text-dark">Colecciones:</li>
+                                                <li>"hecho_etiquetas": [ { "etiqueta_nombre": "Tag1" } ]</li>
+                                                <li>"hecho_fotos": [ { "nombre": "...", "tipo": "...", "datos": "..." } ]</li>
+                                            </ul>
+                                            <small class="d-block mt-2 text-muted fst-italic">
+                                                * Nota: El campo "hecho_origen" es ignorado y se fuerza a DATASET.
+                                                <br> <span class="text-warning fw-bold">*</span> Al menos uno de estos campos de ubicación es obligatorio.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SECCION DE MAPEO DINAMICO -->
+                                <div id="seccionMapeo" class="d-none mt-2 pt-2 border-top">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="small fw-bold text-dark mb-0">Mapeo de Columnas</h6>
+                                        <span class="badge bg-success text-white border" style="font-size: 0.6rem;">CSV LEÍDO</span>
+                                    </div>
+                                    <p class="x-small text-muted mb-2">
+                                        Asigna las columnas detectadas a los campos del sistema.
+                                    </p>
+                                    <div id="contenedorFilasMapeo" class="d-grid gap-2"></div>
+                                </div>
+
+                                <input type="hidden" name="mapeo_columnas_json" id="inputMapeoJson">
                             </div>
 
-                            <!-- Campos para Agregación (NUEVO DISEÑO) -->
+                            <!-- Campos para Agregación -->
                             <div id="camposAgregacion" class="d-none bg-light p-2 rounded mb-3 border">
                                 <label class="small fw-bold text-primary mb-2">Componer Agregación</label>
-
-                                <!-- Selector y Botón Agregar (Se llena vía JS con /fuentes?soloSimples=true) -->
                                 <div class="input-group input-group-sm mb-2">
                                     <select id="selectFuenteOrigen" class="form-select">
                                         <option value="" disabled selected>Cargando fuentes...</option>
@@ -77,20 +149,12 @@
                                         <i class="fa-solid fa-plus"></i>
                                     </button>
                                 </div>
-
-                                <!-- Lista visual de seleccionados -->
                                 <ul id="listaFuentesSeleccionadas" class="list-group list-group-flush mb-2 border rounded bg-white" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
                                     <li class="list-group-item text-center text-muted small fst-italic" id="placeholder-lista">
                                         Sin fuentes seleccionadas
                                     </li>
                                 </ul>
-
-                                <!-- Contenedor de Inputs Ocultos (Lo que se envía al servidor) -->
                                 <div id="inputsOcultosContainer"></div>
-
-                                <div class="form-text x-small">
-                                    Agregá las fuentes que formarán parte de este grupo. No se permiten duplicados.
-                                </div>
                             </div>
 
                             <button type="submit" class="btn btn-warning w-100">Crear Fuente</button>
@@ -100,7 +164,7 @@
             </div>
 
             <!-- Listado de Fuentes -->
-            <div class="col-md-8">
+            <div class="col-md-7">
                 <div class="card shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0" style="font-weight: 600;">Fuentes Existentes</h5>
@@ -110,30 +174,21 @@
                     </div>
 
                     <div class="card-body p-0">
-
-                        <!-- Loader -->
                         <div id="loaderFuentes" class="text-center p-4 d-none">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Cargando...</span>
                             </div>
-                            <p class="text-muted small mt-2">Consultando endpoint...</p>
                         </div>
 
-                        <!-- Error -->
                         <div id="errorFuentes" class="alert alert-warning m-3 d-none align-items-center" role="alert">
                             <div>
                                 <i class="fa-solid fa-triangle-exclamation me-2"></i>
                                 <span id="msgError"></span>
-                                <div class="small mt-1 fst-italic">Mostrando lista local como respaldo.</div>
                             </div>
                         </div>
 
-                        <!-- Lista Dinámica (Se llena con JS vía /fuentes) -->
-                        <ul id="listaFuentesDinamica" class="list-group list-group-flush d-none">
-                            <!-- Aquí se inyectarán los items del fetch -->
-                        </ul>
+                        <ul id="listaFuentesDinamica" class="list-group list-group-flush d-none"></ul>
 
-                        <!-- Fallback Servidor: Se muestra si el fetch falla o mientras carga si se desea -->
                         <ul id="listaFuentesServer" class="list-group list-group-flush">
                             {{#each fuentes}}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -151,7 +206,6 @@
                                 <div class="p-4 text-center text-muted">No hay fuentes cargadas (Local).</div>
                             {{/each}}
                         </ul>
-
                     </div>
                 </div>
             </div>
@@ -160,19 +214,201 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN DE ENDPOINTS ---
         const API_ENDPOINT_TODAS = "/fuentes";
         const API_ENDPOINT_SIMPLES = "/fuentes?soloSimples=true";
-        // ----------------------------------
 
-        // Ejecutar al cargar la página
+        const CAMPOS_SISTEMA = [
+            { id: "TITULO", label: "Título", required: true },
+            { id: "FECHA_SUCESO", label: "Fecha Suceso", required: true },
+            { id: "FECHA_CARGA", label: "Fecha Carga", required: false },
+            { id: "CATEGORIA", label: "Categoría", required: false },
+            { id: "DESCRIPCION", label: "Descripción", required: false },
+            { id: "DIRECCION", label: "Dirección", required: false }, // Condicional
+            { id: "PROVINCIA", label: "Provincia", required: false }, // Condicional
+            { id: "LATITUD", label: "Latitud", required: false }, // Condicional
+            { id: "LONGITUD", label: "Longitud", required: false },
+            { id: "ETIQUETAS", label: "Etiquetas", required: false },
+            { id: "FOTOS", label: "Fotos (URLs)", required: false }
+        ];
+
         document.addEventListener('DOMContentLoaded', function() {
-            mostrarCampos();
-            cargarTodasLasFuentes();        // Lista general
-            cargarFuentesParaSelect();      // Lista para el selector de agregación
+            gestionarCambioTipo();
+            cargarTodasLasFuentes();
+            cargarFuentesParaSelect();
+
+            const inputArchivo = document.getElementById('inputArchivo');
+            if(inputArchivo) {
+                inputArchivo.addEventListener('change', procesarArchivoCSV);
+            }
         });
 
-        // 1. Cargar Lista General (Panel Derecho)
+        function gestionarCambioTipo() {
+            const uiSelect = document.getElementById('selectorTipoUI');
+            const realInput = document.getElementById('inputTipoReal');
+            const inputArchivo = document.getElementById('inputArchivo');
+            const ayudaMapeo = document.getElementById('msgAyudaMapeo');
+            const ayudaJson = document.getElementById('msgAyudaJson');
+            const seccionMapeo = document.getElementById('seccionMapeo');
+            const configCsv = document.getElementById('configCsv');
+
+            const valorUI = uiSelect.value;
+
+            document.getElementById('camposApi').classList.add('d-none');
+            document.getElementById('camposEstatica').classList.add('d-none');
+            document.getElementById('camposAgregacion').classList.add('d-none');
+            seccionMapeo.classList.add('d-none');
+            ayudaMapeo.classList.add('d-none');
+            ayudaJson.classList.add('d-none');
+            configCsv.classList.add('d-none');
+
+            if (valorUI === 'ESTATICA_CSV') {
+                realInput.value = 'ESTATICA';
+                document.getElementById('camposEstatica').classList.remove('d-none');
+                inputArchivo.setAttribute('accept', '.csv');
+                inputArchivo.value = '';
+                ayudaMapeo.classList.remove('d-none');
+                configCsv.classList.remove('d-none');
+
+            } else if (valorUI === 'ESTATICA_JSON') {
+                realInput.value = 'ESTATICA';
+                document.getElementById('camposEstatica').classList.remove('d-none');
+                inputArchivo.setAttribute('accept', '.json');
+                inputArchivo.value = '';
+                ayudaJson.classList.remove('d-none');
+
+            } else if (valorUI === 'API') {
+                realInput.value = 'API';
+                document.getElementById('camposApi').classList.remove('d-none');
+
+            } else if (valorUI === 'AGREGACION') {
+                realInput.value = 'AGREGACION';
+                document.getElementById('camposAgregacion').classList.remove('d-none');
+
+            } else {
+                realInput.value = 'DINAMICA';
+            }
+        }
+
+        function procesarArchivoCSV(e) {
+            const file = e.target.files[0];
+            const seccionMapeo = document.getElementById('seccionMapeo');
+            const contenedorFilas = document.getElementById('contenedorFilasMapeo');
+            const ayudaMapeo = document.getElementById('msgAyudaMapeo');
+            const tipoActual = document.getElementById('selectorTipoUI').value;
+
+            if (tipoActual === 'ESTATICA_JSON') {
+                seccionMapeo.classList.add('d-none');
+                return;
+            }
+
+            if (!file || !file.name.toLowerCase().endsWith('.csv')) {
+                seccionMapeo.classList.add('d-none');
+                if (tipoActual === 'ESTATICA_CSV') {
+                     ayudaMapeo.classList.remove('d-none');
+                }
+                return;
+            }
+
+            ayudaMapeo.classList.add('d-none');
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const contenido = evt.target.result;
+                const primeraLinea = contenido.split('\n')[0];
+                if (!primeraLinea) return;
+
+                const separadorSelect = document.querySelector('select[name="csv_separador"]').value;
+                const headers = primeraLinea.split(separadorSelect).map(h => h.trim().replace(/^"|"$/g, ''));
+
+                generarTablaMapeo(headers, contenedorFilas);
+                seccionMapeo.classList.remove('d-none');
+            };
+            reader.readAsText(file);
+        }
+
+        document.querySelector('select[name="csv_separador"]').addEventListener('change', function() {
+            const inputArchivo = document.getElementById('inputArchivo');
+            if (inputArchivo.files.length > 0) {
+                const event = new Event('change');
+                inputArchivo.dispatchEvent(event);
+            }
+        });
+
+        function generarTablaMapeo(headersCSV, contenedor) {
+            contenedor.innerHTML = '';
+            let optionsHtml = '';
+            headersCSV.forEach(header => {
+                optionsHtml += `<option value="${header}">${header}</option>`;
+            });
+
+            CAMPOS_SISTEMA.forEach(campo => {
+                const row = document.createElement('div');
+                row.className = 'row align-items-center mb-1';
+
+                // Lógica de etiqueta visual
+                let labelText = campo.label;
+                if (campo.required) {
+                    labelText += ` <span class="text-danger fw-bold" style="font-size: 0.65rem;">(Req)</span>`;
+                } else if (campo.id === "LATITUD" || campo.id === "LONGITUD" || campo.id === "DIRECCION" || campo.id === "PROVINCIA") {
+                    // Indicador de "Al menos uno" en amarillo
+                    labelText += ` <span class="text-warning fw-bold" style="font-size: 0.65rem;" title="Debe incluir Lat/Long, Dirección o Provincia">*</span>`;
+                }
+
+                row.innerHTML = `
+                    <div class="col-4 text-end pe-2">
+                        <label class="small fw-bold mb-0 text-secondary" style="font-size: 0.8rem;">
+                            ${labelText}
+                        </label>
+                    </div>
+                    <div class="col-8">
+                        <select class="form-select form-select-sm select-mapeo shadow-sm"
+                                multiple
+                                name="map_${campo.id}"
+                                data-campo-sistema="${campo.id}"
+                                ${campo.required ? 'required' : ''}
+                                style="height: auto; min-height: 38px; max-height: 80px;">
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                `;
+                contenedor.appendChild(row);
+            });
+
+            // Mensaje de aclaración sobre ubicación
+            const note = document.createElement('div');
+            note.className = "text-muted x-small mt-2 fst-italic text-center";
+            note.innerHTML = "<span class='text-warning fw-bold'>*</span> Se requiere al menos Latitud/Longitud, Dirección o Provincia para ubicar el hecho.";
+            contenedor.appendChild(note);
+        }
+
+        function prepararEnvioMapeo() {
+            const tipoActual = document.getElementById('selectorTipoUI').value;
+            const inputMapeo = document.getElementById('inputMapeoJson');
+
+            if (tipoActual !== 'ESTATICA_CSV') {
+                inputMapeo.value = "";
+                return;
+            }
+
+            const selects = document.querySelectorAll('.select-mapeo');
+            const mapeoObj = {};
+            let hayMapeo = false;
+
+            selects.forEach(select => {
+                const campoSistema = select.getAttribute('data-campo-sistema');
+                const valoresSeleccionados = Array.from(select.selectedOptions).map(opt => opt.value);
+
+                if (valoresSeleccionados.length > 0) {
+                    mapeoObj[campoSistema] = valoresSeleccionados;
+                    hayMapeo = true;
+                }
+            });
+
+            if (hayMapeo) {
+                inputMapeo.value = JSON.stringify(mapeoObj);
+            }
+        }
+
         async function cargarTodasLasFuentes() {
             const listaDinamica = document.getElementById('listaFuentesDinamica');
             const listaServer = document.getElementById('listaFuentesServer');
@@ -186,16 +422,12 @@
             loader.classList.remove('d-none');
 
             try {
-                console.log("Consultando fuentes generales a:", API_ENDPOINT_TODAS);
                 const response = await fetch(API_ENDPOINT_TODAS);
-
                 if (!response.ok) throw new Error(`Error endpoint (${response.status})`);
-
                 const data = await response.json();
                 const fuentesArray = Array.isArray(data) ? data : (data.results || []);
 
                 listaDinamica.innerHTML = '';
-
                 if (fuentesArray.length === 0) {
                     listaDinamica.innerHTML = '<div class="p-4 text-center text-muted">No hay fuentes disponibles.</div>';
                 } else {
@@ -218,62 +450,32 @@
                     });
                 }
                 listaDinamica.classList.remove('d-none');
-
             } catch (err) {
-                console.warn("Fallo en Fetch General:", err);
                 msgError.textContent = `Error cargando lista: ${err.message}`;
                 errorDiv.classList.remove('d-none');
                 errorDiv.classList.add('d-flex');
-                listaServer.classList.remove('d-none'); // Fallback
+                listaServer.classList.remove('d-none');
             } finally {
                 loader.classList.add('d-none');
             }
         }
 
-        // 2. Cargar Selector de Agregación (Solo Simples)
         async function cargarFuentesParaSelect() {
             const select = document.getElementById('selectFuenteOrigen');
-
             try {
-                console.log("Consultando fuentes simples a:", API_ENDPOINT_SIMPLES);
                 const response = await fetch(API_ENDPOINT_SIMPLES);
-
-                if (!response.ok) throw new Error("Error al obtener fuentes simples");
-
+                if (!response.ok) throw new Error("Error");
                 const data = await response.json();
                 const fuentesSimples = Array.isArray(data) ? data : (data.results || []);
-
-                // Limpiar opciones previas
                 select.innerHTML = '<option value="" disabled selected>Seleccionar fuente...</option>';
-
                 fuentesSimples.forEach(fuente => {
                     const option = document.createElement('option');
                     option.value = fuente.id;
                     option.textContent = fuente.nombre || `Fuente #${fuente.id}`;
                     select.appendChild(option);
                 });
-
             } catch (err) {
-                console.error("Error cargando selector:", err);
                 select.innerHTML = '<option value="" disabled selected>Error cargando opciones</option>';
-            }
-        }
-
-        // --- Funciones del Formulario Original ---
-
-        function mostrarCampos() {
-            const tipo = document.getElementById('selectorTipo').value;
-
-            document.getElementById('camposApi').classList.add('d-none');
-            document.getElementById('camposEstatica').classList.add('d-none');
-            document.getElementById('camposAgregacion').classList.add('d-none');
-
-            if (tipo === 'API') {
-                document.getElementById('camposApi').classList.remove('d-none');
-            } else if (tipo === 'ESTATICA') {
-                document.getElementById('camposEstatica').classList.remove('d-none');
-            } else if (tipo === 'AGREGACION') {
-                document.getElementById('camposAgregacion').classList.remove('d-none');
             }
         }
 
@@ -282,21 +484,14 @@
             const lista = document.getElementById('listaFuentesSeleccionadas');
             const inputsContainer = document.getElementById('inputsOcultosContainer');
             const placeholder = document.getElementById('placeholder-lista');
-
             const idFuente = select.value;
             const nombreFuente = select.options[select.selectedIndex].text;
 
             if (!idFuente) return;
-
             const yaExiste = document.querySelector(`input[name="fuentes_seleccionadas"][value="${idFuente}"]`);
-            if (yaExiste) {
-                alert("Esa fuente ya está agregada.");
-                return;
-            }
+            if (yaExiste) { alert("Esa fuente ya está agregada."); return; }
 
-            if (placeholder) {
-                placeholder.classList.add('d-none');
-            }
+            if (placeholder) placeholder.classList.add('d-none');
 
             const inputHidden = document.createElement('input');
             inputHidden.type = 'hidden';
@@ -310,22 +505,17 @@
             li.id = `li-fuente-${idFuente}`;
             li.innerHTML = `
                 <span class="small fw-bold">${nombreFuente}</span>
-                <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="quitarFuente('${idFuente}')">
+                <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick=\"quitarFuente('${idFuente}')\">
                     <i class="fa-solid fa-times"></i>
                 </button>
             `;
             lista.appendChild(li);
-
             select.value = "";
         }
 
         function quitarFuente(id) {
-            const input = document.getElementById(`input-fuente-${id}`);
-            if (input) input.remove();
-
-            const li = document.getElementById(`li-fuente-${id}`);
-            if (li) li.remove();
-
+            document.getElementById(`input-fuente-${id}`)?.remove();
+            document.getElementById(`li-fuente-${id}`)?.remove();
             const inputsContainer = document.getElementById('inputsOcultosContainer');
             if (inputsContainer.children.length === 0) {
                 document.getElementById('placeholder-lista').classList.remove('d-none');

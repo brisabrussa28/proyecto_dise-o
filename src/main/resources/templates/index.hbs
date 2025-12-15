@@ -27,75 +27,15 @@
         </div>
         <div class="offcanvas-body">
             <div class="d-flex flex-column" style="gap: 3vh;">
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Palermo
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
-                <div class="d-flex flex-row hechos-resultantes shadow">
-                    Hecho en Medrano
-                    <button type="button" class="btn btn-primary ver-en-mapa">Ver en el mapa</button>
-                </div>
+                {{#each hechos}}
+                    <div class="d-flex flex-row hechos-resultantes shadow">
+                        {{titulo}}
+                        <button type="button" class="btn btn-primary ver-en-mapa"
+                                data-latitud="{{ubicacion.latitud}}"
+                                data-longitud="{{ubicacion.longitud}}"
+                                data-titulo="{{titulo}}">Ver en el mapa</button>
+                    </div>
+                {{/each}}
             </div>
         </div>
     </div>
@@ -274,6 +214,28 @@
                     L.marker([ubicacion.latitud, ubicacion.longitud])
                             .addTo(map)
                             .bindPopup(popupHTML);
+                }
+            });
+            function centrarMapaEnHecho(lat, lng, titulo) {
+
+                if (typeof L !== 'undefined' && map) {
+                    map.setView([lat, lng], 15);
+                }
+
+                const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance('#offcanvasResultados');
+                bsOffcanvas.hide();
+            }
+
+                document.addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('ver-en-mapa')) {
+                    const button = e.target;
+                    const latitud = button.getAttribute('data-latitud');
+                    const longitud = button.getAttribute('data-longitud');
+                    const titulo = button.getAttribute('data-titulo');
+
+                    if (latitud && longitud) {
+                        centrarMapaEnHecho(parseFloat(latitud), parseFloat(longitud), titulo);
+                    }
                 }
             });
         });

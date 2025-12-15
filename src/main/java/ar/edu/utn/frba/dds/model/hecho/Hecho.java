@@ -39,6 +39,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 @Entity
 @Indexed
 @Table(name = "Hecho")
+@JsonIgnoreProperties(ignoreUnknown = true) // Ignora campos extra en el JSON si los hubiera
 public class Hecho {
   // Quiza deberiamos poner el allocation a 10 pq la mayoria de los hechos se cargan en bulk
   @Id
@@ -288,47 +289,61 @@ public class Hecho {
     this.fotos.add(foto);
   }
 
+  // --- SETTERS CON ANOTACIONES PARA IMPORTACIÓN JSON ---
+
+  @JsonProperty("hecho_titulo")
   public void setTitulo(String hecho_titulo) {
     this.hecho_titulo = hecho_titulo;
   }
 
+  @JsonProperty("hecho_descripcion")
   public void setDescripcion(String hecho_descripcion) {
     this.hecho_descripcion = hecho_descripcion;
   }
 
+  @JsonProperty("hecho_categoria")
   public void setCategoria(String hecho_categoria) {
     this.hecho_categoria = hecho_categoria;
   }
 
+  @JsonProperty("hecho_direccion")
   public void setDireccion(String hecho_direccion) {
     this.hecho_direccion = hecho_direccion;
   }
 
+  @JsonProperty("hecho_ubicacion")
   public void setUbicacion(PuntoGeografico hecho_ubicacion) {
     this.hecho_ubicacion = hecho_ubicacion;
   }
 
+  @JsonProperty("hecho_fecha_suceso")
   public void setFechasuceso(LocalDateTime fechaSuceso) {
     this.hecho_fecha_suceso = fechaSuceso;
   }
 
+  @JsonProperty("hecho_etiquetas")
   public void setEtiquetas(List<Etiqueta> etiquetas) {
     this.etiquetas = new HashSet<>(etiquetas);
   }
 
+  @JsonProperty("hecho_estado")
   public void setEstado(Estado estado) {
     this.estado = estado;
   }
 
+  @JsonProperty("hecho_fecha_carga")
   public void setFechacarga(LocalDateTime fechaCarga) {
     this.hecho_fecha_carga = fechaCarga;
   }
 
+  @JsonProperty("hecho_provincia")
   public void setProvincia(String hecho_provincia) {
     this.hecho_provincia = hecho_provincia;
   }
 
-  @JsonProperty("hecho_origen")
+  // REMOVIDO @JsonProperty("hecho_origen") para evitar errores de parseo con valores inválidos
+  // El origen se setea manualmente a DATASET en el Controller
+  @JsonIgnore
   public void setOrigen(Origen fuenteOrigen) {
     this.fuenteOrigen = fuenteOrigen;
   }
