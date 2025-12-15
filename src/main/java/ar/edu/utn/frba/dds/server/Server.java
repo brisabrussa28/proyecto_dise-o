@@ -11,9 +11,7 @@ import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JavalinJackson;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 
 public class Server {
@@ -81,7 +79,7 @@ public class Server {
     new Router().configure(app, mapper, debugMode);
 
     // Cargar datos iniciales (Bootstrap)
-    new Bootstrap().init();
+    //new Bootstrap().init();
 
     // Iniciar el servidor
     System.out.println("Iniciando servidor en http://localhost:" + port);

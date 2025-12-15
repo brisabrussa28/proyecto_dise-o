@@ -121,6 +121,23 @@ public class Router {
 
       ctx.render("hechos.hbs", model);
     });
+    app.get(
+        "/hechos/nuevo", ctx -> {
+          Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
+          if (estaLogueado == null || !estaLogueado) {
+            String redirect = "/hechos/nuevo";
+            String fuenteId = ctx.queryParam("fuente_id");
+            if (fuenteId != null) {
+              redirect += "?fuente_id=" + fuenteId;
+            }
+            ctx.redirect("/auth/login?redirect=" + redirect);
+            return;
+          }
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("fuente_id", ctx.queryParam("fuente_id"));
+          ctx.render("hecho-nuevo.hbs", model);
+        }
+    );
 
     app.get("/hechos/{id}", ctx -> {
       Map<String, Object> model = modeloConSesion(ctx);
@@ -136,21 +153,6 @@ public class Router {
 
     app.post("/hechos/{id}/editar", hechoController::actualizarHecho);
 
-    app.get("/hechos/nuevo", ctx -> {
-      Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
-      if (estaLogueado == null || !estaLogueado) {
-        String redirect = "/hechos/nuevo";
-        String fuenteId = ctx.queryParam("fuente_id");
-        if (fuenteId != null) {
-          redirect += "?fuente_id=" + fuenteId;
-        }
-        ctx.redirect("/auth/login?redirect=" + redirect);
-        return;
-      }
-      Map<String, Object> model = modeloConSesion(ctx);
-      model.put("fuente_id", ctx.queryParam("fuente_id"));
-      ctx.render("hecho-nuevo.hbs", model);
-    });
 
     app.post("/hechos/nuevo", ctx -> {
       try {
