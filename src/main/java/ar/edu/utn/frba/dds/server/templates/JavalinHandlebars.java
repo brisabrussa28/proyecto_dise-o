@@ -8,6 +8,8 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.rendering.FileRenderer;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,6 +45,36 @@ public class JavalinHandlebars implements FileRenderer {
             return false;
           }
       );
+
+      handlebars.registerHelper("range", (Object start, Options options) -> {
+        int s = Integer.parseInt(start.toString());
+        int e = Integer.parseInt(options.param(0).toString());
+
+        List<Integer> list = new ArrayList<>();
+        for (int i = s; i <= e; i++) {
+          list.add(i);
+        }
+        return list;
+      });
+
+      handlebars.registerHelper("add", (Object a, Options options) -> {
+        int x = Integer.parseInt(a.toString());
+        int y = Integer.parseInt(options.param(0).toString());
+        return x + y;
+      });
+
+      handlebars.registerHelper("subtract", (Object a, Options options) -> {
+        int x = Integer.parseInt(a.toString());
+        int y = Integer.parseInt(options.param(0).toString());
+        return x - y;
+      });
+
+      handlebars.registerHelper("lt", (Object a, Options options) -> {
+        int x = Integer.parseInt(a.toString());
+        int y = Integer.parseInt(options.param(0).toString());
+        return x < y;
+      });
+
       template = handlebars.compile("templates/" + path.replace(".hbs", ""));
       return template.apply(model);
     } catch (IOException e) {

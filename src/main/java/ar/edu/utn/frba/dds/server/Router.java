@@ -317,6 +317,28 @@ public class Router {
         }
     );
 
+    app.get("/api/hechos", ctx -> {
+      int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
+      int pageSize = 15;
+
+      List<Hecho> hechos = hechoController.findAll();
+
+      int totalHechos = hechos.size();
+      int totalPages = (int) Math.ceil((double) totalHechos / pageSize);
+
+      int fromIndex = (page - 1) * pageSize;
+      int toIndex = Math.min(fromIndex + pageSize, totalHechos);
+
+      List<Hecho> hechosPagina = hechos.subList(fromIndex, toIndex);
+
+      Map<String, Object> model = modeloConSesion(ctx);
+      model.put("hechos", hechosPagina);
+      model.put("paginaActual", page);
+      model.put("totalPaginas", totalPages);
+
+      ctx.render("hechos.hbs", model);
+    });
+
     app.get(
         "/hechos/{id}", ctx -> {
           Map<String, Object> model = modeloConSesion(ctx);
