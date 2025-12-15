@@ -59,6 +59,14 @@ public class FuenteDeAgregacion extends Fuente {
     this.fuentesCargadas.add(fuente);
   }
 
+  // --- NUEVO MÉTODO PARA BORRADO SEGURO ---
+  public void removerFuente(Fuente fuente) {
+    if (this.fuentesCargadas != null) {
+      // Usamos removeIf para evitar problemas de concurrencia al iterar
+      this.fuentesCargadas.removeIf(f -> f.getId().equals(fuente.getId()));
+    }
+  }
+
   /**
    * Obtiene una copia de la lista de fuentes que componen esta agregación.
    *
@@ -79,9 +87,10 @@ public class FuenteDeAgregacion extends Fuente {
     if (this.fuentesCargadas == null || this.fuentesCargadas.isEmpty()) {
       return new ArrayList<>();
     }
+
     return this.fuentesCargadas.stream()
-                               .flatMap(fuente -> fuente.getHechos()
-                                                        .stream())
+                               .map(Fuente::getHechos)
+                               .flatMap(List::stream)
                                .distinct()
                                .collect(Collectors.toList());
   }

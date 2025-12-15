@@ -14,33 +14,38 @@
                 <div class="card shadow-sm">
                     <div class="card-header bg-white py-3">
                         <h5 class="mb-0"><i class="fa-regular fa-pen-to-square me-2"></i>Nuevo Hecho
+                            {{#if fuente_id}}
+                            <span class="badge bg-info">Para fuente dinámica</span>
+                            {{/if}}
                         </h5>
                     </div>
 
                     <div class="card-body p-4">
-                        <form action="/hechos" method="POST" enctype="multipart/form-data">
+                        <form action="/hechos/nuevo" method="POST" enctype="multipart/form-data">
+
+                            <!-- Campo oculto para fuente_id -->
+                            {{#if fuente_id}}
+                            <input type="hidden" name="fuente_id" value="{{fuente_id}}">
+                            {{/if}}
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Título</label>
+                                <label class="form-label fw-bold">Título <span class="text-danger">*</span></label>
                                 <input type="text" name="titulo" class="form-control" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Descripción</label>
-                                <textarea name="descripcion" class="form-control"
-                                          rows="3"></textarea>
+                                <textarea name="descripcion" class="form-control" rows="3"></textarea>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Fecha del Suceso</label>
-                                    <input type="datetime-local" name="fechaSuceso"
-                                           class="form-control"
-                                           required>
+                                    <label class="form-label fw-bold">Fecha del Suceso <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" name="fechaSuceso" class="form-control" required>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Categoría</label>
+                                    <label class="form-label fw-bold">Categoría <span class="text-danger">*</span></label>
                                     <input type="text" name="categoria" class="form-control"
                                            list="lista-categorias"
                                            placeholder="Ej: Robos, Accidentes, etc..."
@@ -65,7 +70,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Ubicación</label>
+                                <label class="form-label fw-bold">Ubicación <span class="text-danger">*</span></label>
 
                                 <div class="row">
                                     <div class="col-md-5 mb-2">
@@ -126,9 +131,12 @@
                             </div>
 
                             <div class="d-flex justify-content-end gap-2">
+                                {{#if fuente_id}}
+                                <a href="/admin/fuentes/{{fuente_id}}" class="btn btn-outline-secondary">Cancelar</a>
+                                {{else}}
                                 <a href="/" class="btn btn-outline-secondary">Cancelar</a>
-                                <button type="submit" class="btn btn-primary px-4">Guardar Hecho
-                                </button>
+                                {{/if}}
+                                <button type="submit" class="btn btn-primary px-4">Guardar Hecho</button>
                             </div>
                         </form>
                     </div>
@@ -141,10 +149,10 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-
-                    // --- 1. CONFIGURACIÓN ---
-                    const modoEdicion = "{{hecho.id}}" !== "";
+            // --- 1. CONFIGURACIÓN ---
+            const modoEdicion = "{{hecho.id}}" !== "";
             const provinciaGuardada = "{{hecho.provincia}}";
+            const fuenteId = "{{fuente_id}}";
 
             // Coordenadas iniciales
             const latInicial = {{#if hecho.ubicacion.latitud}}{{hecho.ubicacion.latitud}}{{else}}-34.6037{{/if}};
@@ -211,7 +219,6 @@
             function obtenerDatosUbicacion(lat, lng) {
                 inputDireccion.value = "Consultando mapa...";
 
-                // --- CORRECCIÓN: Usamos nombres distintos para evitar el error "Identifier already declared" ---
                 const latNum = parseFloat(lat);
                 const lngNum = parseFloat(lng);
 
@@ -319,7 +326,7 @@
             if (btnBuscar) {
                 btnBuscar.addEventListener('click', () => {
                     const calle = inputDireccion.value;
-                    const provSelect = selectProvincia.value; // Usamos el valor oficial seleccionado
+                    const provSelect = selectProvincia.value;
 
                     if (alertaError) alertaError.classList.add('d-none');
 
@@ -340,17 +347,15 @@
                             if (data && data.length > 0) {
                                 const res = data[0];
                                 moverMarcador(res.lat, res.lon);
-                                obtenerDatosUbicacion(res.lat, res.lon); // Actualiza texto y confirma provincia
+                                obtenerDatosUbicacion(res.lat, res.lon);
                             } else {
-                                if(mostrarError) mostrarError("Dirección no encontrada");
-                                else alert("No encontrada");
+                                mostrarError("Dirección no encontrada");
                             }
                         })
-                        .catch(() => alert("Error de conexión"));
+                        .catch(() => mostrarError("Error de conexión"));
                 });
             }
 
-            // Función auxiliar para errores (si la tienes definida en tu HTML)
             function mostrarError(msg) {
                 if(textoError && alertaError) {
                     textoError.textContent = msg;
