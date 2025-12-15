@@ -175,8 +175,8 @@
 
                                                     {{#if this.esVideo}}
                                                         <video src="/hechos/{{../hecho.id}}/multimedia/{{@index}}"
-                                                               style="height: 150px; object-fit: cover; display: block;"
-                                                               controls>
+                                                               style="height: 150px; object-fit: cover; display: block; width: -webkit-fill-available;"
+                                                               muted>
                                                         </video>
                                                     {{else}}
                                                         <img src="/hechos/{{../hecho.id}}/multimedia/{{@index}}"

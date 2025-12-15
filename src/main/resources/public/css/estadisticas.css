@@ -66,8 +66,8 @@ img {
 }
 
 .btn-info {
-    margin-top: 1%;
-    margin-left: 87%;
-    margin-bottom: -2%;
+    /* Quitamos los márgenes que rompen el flujo */
+    margin-top: 10px; /* Un pequeño margen arriba está bien, o usa la clase mt-2 del HTML */
     font-size: 18px;
+    color: white; /* Opcional: para asegurar que el texto se lea bien */
 }

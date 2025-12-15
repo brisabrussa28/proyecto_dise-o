@@ -39,4 +39,13 @@ public class Multimedia {
   public boolean esVideo() {
     return this.mimetype.equals("video/mp4");
   }
+
+  public String getBase64Src() {
+    if (contenido == null || contenido.length == 0) {
+      return "";
+    }
+    String base64 = java.util.Base64.getEncoder()
+                                    .encodeToString(contenido);
+    return "data:" + mimetype + ";base64," + base64;
+  }
 }

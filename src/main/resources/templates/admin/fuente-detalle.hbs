@@ -10,14 +10,14 @@
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h3 class="mb-0"><i class="fa-solid fa-database text-primary me-2"></i>Fuente: <strong>{{fuente.nombre}}</strong></h3>
+                <h3 class="mb-0"><i class="fa-solid fa-database text-black me-2"></i>Fuente: <strong>{{fuente.nombre}}</strong></h3>
                 <div class="mt-1">
                     <span class="badge bg-secondary">ID: {{fuente.id}}</span>
                     <span class="badge bg-info text-dark">{{tipoFuente}}</span>
                 </div>
             </div>
             <form action="/admin/fuentes/{{fuente.id}}/borrar" method="POST" onsubmit="return confirm('ATENCIÓN: Borrar esta fuente eliminará las colecciones que dependen de ella directamente. ¿Continuar?');">
-                <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash-can me-2"></i>Eliminar Fuente</button>
+                <button type="submit" class="btn btn-danger text-white"><i class="fa-solid fa-trash-can me-2"></i>Eliminar Fuente</button>
             </form>
         </div>
 
@@ -26,7 +26,7 @@
             <div class="col-md-7">
 
                 <!-- Panel General (Nombre) -->
-                <div class="card shadow-sm mb-4 border-primary">
+                <div class="card shadow-sm mb-4 border">
                     <div class="card-header bg-primary text-white fw-bold"><i class="fa-solid fa-sliders me-2"></i>Configuración</div>
                     <div class="card-body bg-light">
                         <form action="/admin/fuentes/{{fuente.id}}/configurar" method="POST" class="row g-3">
@@ -137,7 +137,7 @@
 
             <!-- Dependencias (MODIFICADO CON NUEVA ESTRUCTURA) -->
             <div class="col-md-5">
-                <div class="card shadow-sm border-warning">
+                <div class="card shadow-sm border">
                     <div class="card-header bg-warning text-dark fw-bold">
                         <i class="fa-solid fa-diagram-project me-2"></i>Fuente incluida en
                     </div>

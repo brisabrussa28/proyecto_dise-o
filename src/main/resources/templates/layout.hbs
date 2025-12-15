@@ -68,9 +68,14 @@
                 <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
                    id="dropdownUserMenu" data-bs-toggle="dropdown" aria-expanded="false">
 
-                    <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center me-2 border border-1 border-light"
+                    <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center me-2 border border-1 border-light overflow-hidden"
                          style="width: 35px; height: 35px;">
-                        <i class="fa-solid fa-user text-white" style="font-size: 1.2rem;"></i>
+
+                        {{!-- Usamos {{usuario_id}} que viene de la sesión --}}
+                        <img src="/usuarios/{{usuario_id}}/foto"
+                             alt="Foto de perfil"
+                             class="w-100 h-100"
+                             style="object-fit: cover;">
                     </div>
                     <span class="d-none d-sm-inline fw-bold">{{nombreUsuario}}</span>
                 </a>

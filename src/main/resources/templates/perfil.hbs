@@ -9,8 +9,19 @@
 {{#partial "contenido"}}
     <div class="container d-flex flex-column bg-white bg-opacity-75 rounded p-3 mt-3 py-1">
         <div class="d-flex flex-row portada bg-white">
-            {{perfil.foto}}
+            {{#if perfil.foto}}
+                <div class="rounded-circle overflow-hidden border border-2 border"
+                     style="width: 100px; height: 100px;">
+
+                    {{!-- Apuntamos al endpoint que definimos en el Router --}}
+                    <img src="/usuarios/{{perfil.id}}/foto"
+                         alt="Foto de perfil"
+                         class="w-100 h-100"
+                         style="object-fit: cover;">
+                </div>
+            {{else}}
             <i class="bi bi-person-circle" style="font-size: 450%"></i>
+            {{/if}}
             <h2 class="nombre-av">
                 {{perfil.userName}}
             </h2>

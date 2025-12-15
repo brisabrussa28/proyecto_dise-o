@@ -79,7 +79,7 @@
                                                 por:</label>
                                             <select id="selectFiltroHechos"
                                                     class="form-select w-100">
-                                                <option value="" selected>Seleccionar filtro
+                                                <option value="" selected>Filtrar por:
                                                 </option>
                                                 <option value="1">Provincia</option>
                                                 <option value="2">Hora</option>
@@ -90,7 +90,7 @@
                                             <label class="form-label fw-bold mb-1">Categoría:</label>
                                             <select id="selectCategoriaHechos"
                                                     class="form-select w-100">
-                                                <option value="">Todas las categorías</option>
+                                                <option value="">Seleccione una categoria:</option>
                                                 {{#each categorias}}
                                                     <option value="{{this}}">{{this}}</option>
                                                 {{/each}}
@@ -100,7 +100,8 @@
                                         <button type="button"
                                                 class="btn btn-info w-100 mt-2 descargar-csv"
                                                 data-type="hechos">
-                                            <i class="fa-solid fa-download me-2"></i>Descargar CSV
+                                            <i class="fa-solid fa-download me-2"></i>Exportar en
+                                            formato CSV
                                         </button>
                                     </div>
                                 </div>
@@ -123,7 +124,7 @@
                                 aria-expanded="true"
                                 aria-controls="panelsStayOpen-collapseTwo"
                                 style="font-size: 25px;">
-                            <strong>Reportados por Colección</strong>
+                            <strong>Hechos reportados por Colección</strong>
                         </button>
                     </h2>
                     <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
@@ -144,7 +145,7 @@
                                         <button type="button"
                                                 class="btn btn-info w-100 mt-2 descargar-csv"
                                                 data-type="coleccion">
-                                            Descargar CSV
+                                            Exportar en formato CSV
                                         </button>
                                     </div>
                                 </div>
@@ -166,7 +167,7 @@
                                 aria-expanded="true"
                                 aria-controls="panelsStayOpen-collapseThree"
                                 style="font-size: 25px;">
-                            <strong>Reportados por Categoría</strong>
+                            <strong>Hechos reportados por Categoría</strong>
                         </button>
                     </h2>
                     <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse"
@@ -238,7 +239,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, // ESTO ES CLAVE
+                    maintainAspectRatio: false,
                     indexAxis: horizontal ? 'y' : 'x',
                     scales: {
                         x: { beginAtZero: true },

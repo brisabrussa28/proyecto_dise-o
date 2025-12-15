@@ -41,7 +41,9 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">Fecha del Suceso <span class="text-danger">*</span></label>
-                                    <input type="datetime-local" name="fechaSuceso" class="form-control" required>
+                                    <input type="datetime-local" name="fechaSuceso"
+                                           class="form-control" required
+                                           id="fecha-suceso">
                                 </div>
 
                                 <div class="col-md-6 mb-3">
@@ -368,6 +370,23 @@
             }
 
             setTimeout(() => { map.invalidateSize(); }, 500);
+
+
+            const inputFechaSuceso = document.getElementById('fecha-suceso');
+            if (inputFechaSuceso) {
+                const ahora = new Date();
+
+                const pad = n => n.toString().padStart(2, '0');
+
+                const year = ahora.getFullYear();
+                const month = pad(ahora.getMonth() + 1); // 0\-based
+                const day = pad(ahora.getDate());
+                const hours = pad(ahora.getHours());
+                const minutes = pad(ahora.getMinutes());
+
+                const isoLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
+                inputFechaSuceso.setAttribute('max', isoLocal);
+            }
         });
     </script>
 {{/partial}}

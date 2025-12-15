@@ -414,14 +414,16 @@ public class Router {
         ctx.redirect("/auth/login?redirect=/perfil");
         return;
       }
-      Usuario user = userController.finByName(ctx.sessionAttribute("nombreUsuario"));
+      Usuario user = userController.findByName(ctx.sessionAttribute("nombreUsuario"));
       Map<String, Object> model = modeloConSesion(ctx);
       model.put("perfil", user);
       ctx.render("perfil.hbs", model);
     });
 
+    app.get("/usuarios/{id}/foto", userController::obtenerFotoPerfil);
+
     app.get("/perfiles/{nombre}/", ctx -> {
-      Usuario user = userController.finByName(ctx.pathParam("nombre"));
+      Usuario user = userController.findByName(ctx.pathParam("nombre"));
       Map<String, Object> model = modeloConSesion(ctx);
       model.put("perfil", user);
       ctx.render("perfil.hbs", model);

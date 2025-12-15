@@ -1,18 +1,16 @@
 package ar.edu.utn.frba.dds.model.usuario;
 
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.ArrayList;
+import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -24,6 +22,9 @@ public class Usuario {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @Embedded
+  private Multimedia foto;
 
   @Column(name = "usuario_nombre", unique = true, nullable = false)
   private String userName;
@@ -44,9 +45,10 @@ public class Usuario {
   public Usuario() {
   }
 
-  public Usuario(String email, String userName, String password, Rol rol) {
+  public Usuario(String email, String userName, Multimedia foto, String password, Rol rol) {
     this.email = email;
     this.userName = userName;
+    this.foto = foto;
     this.passwordHash = DigestUtils.sha256Hex(password);
     this.rol = rol;
   }
@@ -101,5 +103,13 @@ public class Usuario {
 
   public void setUserName(String newUserName) {
     this.userName = newUserName;
+  }
+
+  public Multimedia getFoto() {
+    return this.foto;
+  }
+
+  public void setFoto(Multimedia foto) {
+    this.foto = foto;
   }
 }

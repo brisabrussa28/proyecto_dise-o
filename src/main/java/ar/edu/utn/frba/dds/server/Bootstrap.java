@@ -10,7 +10,6 @@ import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
-import ar.edu.utn.frba.dds.model.reportes.detectorspam.VectorTFIDF;
 import ar.edu.utn.frba.dds.model.usuario.Rol;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
@@ -20,7 +19,6 @@ import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import ar.edu.utn.frba.dds.repositories.TFIDFRepository;
 import ar.edu.utn.frba.dds.repositories.UserRepository;
 import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
-
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -155,7 +153,13 @@ public class Bootstrap implements WithSimplePersistenceUnit {
     try {
       UserRepository userRepo = UserRepository.instance();
       if (userRepo.buscarPorEmail("admin1@mock.com") == null) {
-        Usuario admin = new Usuario("admin1@mock.com", "administrador", "admin123", Rol.ADMINISTRADOR);
+        Usuario admin = new Usuario(
+            "admin1@mock.com",
+            "administrador",
+            null,
+            "admin123",
+            Rol.ADMINISTRADOR
+        );
         userRepo.guardar(admin);
         System.out.println("Usuario admin creado: admin1@mock.com");
       } else {

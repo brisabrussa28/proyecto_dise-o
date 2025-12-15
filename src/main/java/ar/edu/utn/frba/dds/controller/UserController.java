@@ -1,10 +1,13 @@
 package ar.edu.utn.frba.dds.controller;
 
+import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.usuario.Rol;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.UserRepository;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.http.UploadedFile;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,18 +108,32 @@ public class UserController {
       return;
     }
 
-    Usuario nuevoUsuario = new Usuario(email, userName, password, rol);
+    Multimedia fotoDePerfil = null;
+    UploadedFile foto = ctx.uploadedFile("foto_perfil");
 
+    if (foto != null && foto.size() > 0) {
+      try {
+        byte[] bytes = foto.content()
+                           .readAllBytes();
+        fotoDePerfil = new Multimedia("Foto de perfil", foto.contentType(), bytes);
+      } catch (IOException e) {
+        throw new RuntimeException(e.getMessage());
+      }
+    }
+    Usuario nuevoUsuario = new Usuario(
+        email,
+        userName,
+        fotoDePerfil,
+        password,
+        rol
+    );
     try {
       UserRepository.instance().guardar(nuevoUsuario);
-
-
       if (redirigirAlFinal) {
         iniciarSesion(ctx, nuevoUsuario, email);
         String destino = (redirect != null && !redirect.isEmpty()) ? redirect : "/";
         ctx.redirect(destino);
       } else {
-        // Respuesta API para creación de admin
         ctx.status(HttpStatus.CREATED).json(Map.of("message", "Admin creado con éxito", "id", nuevoUsuario.getId()));
       }
 
@@ -156,7 +173,7 @@ public class UserController {
     return UserRepository.instance().findById(id);
   }
 
-  public Usuario finByName(String name) {
+  public Usuario findByName(String name) {
     return UserRepository.instance().findByName(name);
   }
 
@@ -189,5 +206,19 @@ public class UserController {
       model.put("redirect", redirect);
     }
     ctx.render(vista, model);
+  }
+
+  public void obtenerFotoPerfil(Context ctx) {
+    Long id = Long.parseLong(ctx.pathParam("id"));
+    Usuario usuario = findById(id);
+
+    if (usuario != null && usuario.getFoto() != null) {
+      ctx.contentType(usuario.getFoto()
+                             .getMimetype());
+      ctx.result(usuario.getFoto()
+                        .getDatos());
+    } else {
+      ctx.redirect("/img/default-user.png");
+    }
   }
 }

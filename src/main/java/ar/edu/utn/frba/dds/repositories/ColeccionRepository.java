@@ -3,8 +3,8 @@ package ar.edu.utn.frba.dds.repositories;
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteConHechos;
-import ar.edu.utn.frba.dds.model.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteExternaAPI;
@@ -68,11 +68,14 @@ public class ColeccionRepository {
     EntityManager em = DBUtils.getEntityManager();
     try {
       Coleccion coleccion = em.createQuery(
-                                  "SELECT DISTINCT c FROM Coleccion c " +
-                                      "LEFT JOIN FETCH c.coleccion_fuente " +
-                                      "LEFT JOIN FETCH c.algoritmoDeConsenso " +
-                                      "LEFT JOIN FETCH c.condicion " +
-                                      "WHERE c.coleccion_id = :id", Coleccion.class)
+                                  "SELECT DISTINCT c FROM Coleccion c "
+                                      + "LEFT JOIN FETCH c.coleccion_fuente "
+                                      + "LEFT JOIN FETCH c.coleccion_algoritmo "
+                                      + "LEFT JOIN FETCH c.coleccion_condicion "
+                                      + "LEFT JOIN FETCH c.hechos "
+                                      + "WHERE c.coleccion_id = :id",
+                                  Coleccion.class
+                              )
                               .setParameter("id", id)
                               .getSingleResult();
 
