@@ -87,8 +87,8 @@ public class HechoRepository {
     int UMBRAL_TOLERANCIA = 3;
 
     String sql = "SELECT * FROM Hecho h " +
-        "WHERE levenshtein(LOWER(h.hecho_titulo), LOWER(:queryParam)) <= :umbral " +
-        "   OR LOWER(h.hecho_descripcion) LIKE LOWER(:queryParamLike)";
+        "WHERE levenshtein(unaccent(LOWER(h.hecho_titulo)), unaccent(LOWER(:queryParam))) <= :umbral " +
+        "   OR unaccent(LOWER(h.hecho_descripcion)) LIKE unaccent(LOWER(:queryParamLike))";
 
     try {
       Query q = em.createNativeQuery(sql, Hecho.class);
@@ -297,26 +297,31 @@ public class HechoRepository {
     EntityManager em = DBUtils.getEntityManager();
     try {
       StringBuilder queryStr = new StringBuilder(
-          "SELECT DISTINCT h FROM Hecho h " +
-              "LEFT JOIN FETCH h.fotos " +
-              "LEFT JOIN FETCH h.etiquetas " +
+          "SELECT DISTINCT h.* FROM Hecho h " +
               "WHERE 1=1"
       );
 
       Map<String, Object> params = new HashMap<>();
+      int UMBRAL_TOLERANCIA = 3;
 
       if (titulo != null && !titulo.isBlank()) {
-        queryStr.append(" AND LOWER(h.hecho_titulo) LIKE LOWER(:titulo)");
-        params.put("titulo", "%" + titulo + "%");
+        queryStr.append(" AND (");
+        queryStr.append("   levenshtein(unaccent(LOWER(h.hecho_titulo)), unaccent(LOWER(:tituloRaw))) <= :umbral");
+        queryStr.append("   OR unaccent(LOWER(h.hecho_descripcion)) LIKE unaccent(LOWER(:tituloLike))");
+        queryStr.append(" )");
+
+        params.put("tituloRaw", titulo.trim());
+        params.put("tituloLike", "%" + titulo.trim() + "%");
+        params.put("umbral", UMBRAL_TOLERANCIA);
       }
 
       if (soloConsensuados != null && soloConsensuados) {
-        queryStr.append(" AND h.id IN (SELECT hc.id FROM Coleccion c JOIN c.hechosConsensuados hc)");
+        queryStr.append(" AND h.id IN (SELECT hc.hecho_id FROM Coleccion_Hecho hc)");
       }
 
       queryStr.append(" ORDER BY h.hecho_fecha_suceso DESC");
 
-      TypedQuery<Hecho> query = em.createQuery(queryStr.toString(), Hecho.class);
+      Query query = em.createNativeQuery(queryStr.toString(), Hecho.class);
 
       for (Map.Entry<String, Object> entry : params.entrySet()) {
         query.setParameter(entry.getKey(), entry.getValue());
@@ -327,6 +332,7 @@ public class HechoRepository {
       em.close();
     }
   }
+
 
   // Métodos auxiliares para obtener información de filtros
   public List<String> getCategorias() {
