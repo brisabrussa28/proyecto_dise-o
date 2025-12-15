@@ -63,7 +63,7 @@ public class FuenteDinamica extends FuenteConHechos {
     if (this.hechosPersistidos == null || this.hechosPersistidos.isEmpty()) {
       return Collections.emptyList();
     }
-    return Collections.unmodifiableList(this.hechosPersistidos);
+    return this.hechosPersistidos;
   }
 
   /**

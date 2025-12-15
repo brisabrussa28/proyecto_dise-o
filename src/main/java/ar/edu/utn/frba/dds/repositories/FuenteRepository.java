@@ -50,12 +50,19 @@ public class FuenteRepository {
   public Fuente findByName(String nombre) {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      return em.createQuery(
+      Fuente fuente = em.createQuery(
                    "SELECT DISTINCT f FROM Fuente f where f.fuente_nombre = :nombre",
                    Fuente.class
                )
                .setParameter("nombre", nombre)
                .getSingleResult();
+
+      if (fuente != null) {
+        cargarHechosParaFuente(em, fuente);
+      }
+
+      return fuente;
+
     } catch (NoResultException e) {
       return null;
     } finally {

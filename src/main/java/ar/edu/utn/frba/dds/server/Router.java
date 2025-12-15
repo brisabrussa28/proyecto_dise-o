@@ -11,6 +11,7 @@ import ar.edu.utn.frba.dds.dto.EstadisticaDTO;
 import ar.edu.utn.frba.dds.dto.SolicitudDTO;
 import ar.edu.utn.frba.dds.model.estadisticas.Estadistica;
 import ar.edu.utn.frba.dds.model.exceptions.RazonInvalidaException;
+import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
@@ -24,7 +25,6 @@ import io.javalin.http.Handler;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,7 +130,10 @@ public class Router {
             return;
           }
           Map<String, Object> model = modeloConSesion(ctx);
-          model.put("fuente_id", ctx.queryParam("fuente_id"));
+          if (ctx.queryParam("fuente_id") != null) {
+            Fuente fuente = fuenteController.findById(Long.parseLong(ctx.queryParam("fuente_id")));
+            model.put("fuente", fuente);
+          }
           ctx.render("hecho-nuevo.hbs", model);
         }
     );
