@@ -60,6 +60,21 @@
     box-shadow: none !important;
 }
 
+/* --- ESTILOS BOTÓN LIMPIAR ROJO --- */
+.search-controls-overlay .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    background-color: transparent;
+    transition: all 0.2s ease;
+}
+
+.search-controls-overlay .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+    transform: scale(1.05);
+}
+
 .leaflet-top .leaflet-control {
   margin-top: 80vh;
 }

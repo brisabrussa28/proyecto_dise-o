@@ -17,7 +17,7 @@
 
             <form id="searchForm" class="mb-3 p-3 bg-light rounded border">
                 <div class="row g-2 align-items-end">
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <label for="searchInput" class="form-label fw-bold">Título</label>
                         <input id="searchInput" type="text" class="form-control"
                                placeholder="Buscar hechos por título..."
@@ -42,15 +42,10 @@
                             </label>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-primary flex-grow-1 fw-bold" type="submit">
-                                <i class="fa-solid fa-search me-1"></i> Buscar
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" id="btnLimpiar" title="Limpiar filtros">
-                                <i class="fa-solid fa-eraser"></i>
-                            </button>
-                        </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100 fw-bold" type="submit">
+                            <i class="fa-solid fa-search me-1"></i> Buscar
+                        </button>
                     </div>
                 </div>
             </form>
@@ -144,7 +139,6 @@
             const searchInput = document.getElementById('searchInput');
             const categoriaSelect = document.getElementById('categoriaSelect');
             const soloConsensuados = document.getElementById('soloConsensuados');
-            const btnLimpiar = document.getElementById('btnLimpiar');
             const resultsList = document.getElementById('resultsList');
             const paginationContainer = document.getElementById('paginationContainer');
 
@@ -293,18 +287,6 @@
 
                 buscarHechos(titulo, categoria, consensuados);
             });
-
-            // Lógica del botón Limpiar
-            if(btnLimpiar) {
-                btnLimpiar.addEventListener('click', function() {
-                    searchInput.value = '';
-                    categoriaSelect.value = '0';
-                    soloConsensuados.checked = false;
-
-                    history.replaceState(null, '', window.location.pathname);
-                    buscarHechos('', '0', false, 1);
-                });
-            }
 
             // Inicialización con parámetros URL
             const urlParams = new URLSearchParams(window.location.search);
