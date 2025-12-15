@@ -1,0 +1,55 @@
+/* Estilos específicos para páginas de error */
+
+.error-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.error-details {
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 15px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.error-card {
+    border-left: 5px solid #dc3545;
+    transition: transform 0.3s ease;
+}
+
+.error-card:hover {
+    transform: translateY(-2px);
+}
+
+.solution-item {
+    padding: 10px 15px;
+    border-radius: 8px;
+    background-color: rgba(0, 123, 255, 0.05);
+    margin-bottom: 10px;
+    border-left: 3px solid #007bff;
+}
+
+.solution-item:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .error-details {
+        max-height: 200px;
+        font-size: 10px;
+    }
+    
+    .display-1 {
+        font-size: 4rem !important;
+    }
+}

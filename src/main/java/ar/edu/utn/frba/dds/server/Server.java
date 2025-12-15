@@ -11,7 +11,9 @@ import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JavalinJackson;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class Server {
@@ -25,6 +27,7 @@ public class Server {
     int port = Integer.parseInt(dotenv.get("PORT", "9001"));
     boolean corsAllowAnyOrigin = Boolean.parseBoolean(dotenv.get("CORS_ALLOW_ANY_ORIGIN", "false"));
     String allowedOriginsStr = dotenv.get("ALLOWED_ORIGINS", "http://localhost:3000");
+    boolean debugMode = Boolean.parseBoolean(dotenv.get("DEBUG_MODE", "true"));
 
     // Configurar TimeZone por defecto para toda la JVM
     TimeZone.setDefault(TimeZone.getTimeZone(timezone));
@@ -37,7 +40,20 @@ public class Server {
     Javalin app = Javalin.create(javalinConfig -> {
       javalinConfig.jsonMapper(new JavalinJackson());
       javalinConfig.fileRenderer(new JavalinRenderer().register("hbs", new JavalinHandlebars()));
-      javalinConfig.staticFiles.add("/public", Location.CLASSPATH);
+
+      // Configurar archivos estáticos
+      javalinConfig.staticFiles.add(staticFiles -> {
+        staticFiles.hostedPath = "/";
+        staticFiles.directory = "/public";
+        staticFiles.location = Location.CLASSPATH;
+        staticFiles.precompress = false;
+        staticFiles.skipFileFunction = req -> false;
+      });
+
+      // Habilitar registro de rutas para debugging
+      if (debugMode) {
+        javalinConfig.router.ignoreTrailingSlashes = true;
+      }
 
       // Configuración de CORS dinámica
       javalinConfig.bundledPlugins.enableCors(cors -> {
@@ -45,20 +61,14 @@ public class Server {
           if (corsAllowAnyOrigin) {
             it.anyHost();
           } else {
-            // Convertimos la cadena "url1, url2" en una List de Strings limpia
             List<String> origins = Arrays.stream(allowedOriginsStr.split(","))
                                          .map(String::trim)
                                          .filter(s -> !s.isEmpty())
                                          .toList();
 
             if (!origins.isEmpty()) {
-              // Tomamos el primer origen
               String firstOrigin = origins.get(0);
-
-              // Creamos un array con el resto (si hay)
               String[] otherOrigins = origins.subList(1, origins.size()).toArray(new String[0]);
-
-              // Llamamos a allowHost(String, String...)
               it.allowHost(firstOrigin, otherOrigins);
             }
           }
@@ -68,13 +78,14 @@ public class Server {
     });
 
     // Configurar rutas
-    new Router().configure(app, mapper);
+    new Router().configure(app, mapper, debugMode);
 
     // Cargar datos iniciales (Bootstrap)
     new Bootstrap().init();
 
     // Iniciar el servidor
     System.out.println("Iniciando servidor en http://localhost:" + port);
+    System.out.println("Modo debug: " + (debugMode ? "HABILITADO" : "DESHABILITADO"));
 
     if (corsAllowAnyOrigin) {
       System.out.println("CORS: Permitido CUALQUIER origen (Modo Inseguro/Dev)");
@@ -83,6 +94,8 @@ public class Server {
     }
 
     app.start(port);
+
+    // Iniciar scheduler de estadísticas
     new EstadisticasScheduler().iniciar();
   }
 }
