@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.model.fuentes;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -10,18 +11,21 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
 
 /**
  * Fuente que combina los hechos de múltiples otras fuentes en tiempo real.
- * No mantiene una copia local, ya que las fuentes subyacentes ya son persistentes.
  */
 @Entity
+@Table(name = "fuente_agregacion")
+@PrimaryKeyJoinColumn(name = "fuente_id")
 @DiscriminatorValue("AGREGACION")
 public class FuenteDeAgregacion extends Fuente {
 
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(
-      name = "fuente_agregacion",
+      name = "fuente_agregacion_relacion",
       joinColumns = @JoinColumn(name = "padre_id"),
       inverseJoinColumns = @JoinColumn(name = "hijo_id")
   )
@@ -35,37 +39,38 @@ public class FuenteDeAgregacion extends Fuente {
     super(nombre);
   }
 
-  /**
-   * Agrega una fuente a la lista de fuentes cargadas.
-   */
+  @Override
+  public String getTipo() {
+    return "AGREGACION";
+  }
+
   public void agregarFuente(Fuente fuente) {
-    if (fuente == null) {
-      throw new IllegalArgumentException("No se puede agregar una fuente nula.");
-    }
-    if (fuente.getId() != null && fuente.getId().equals(this.getId())) {
+    Objects.requireNonNull(fuente, "No se puede agregar una fuente nula.");
+
+    // FIXED: Prevenir recursión directa (agregarse a sí mismo)
+    if (Objects.equals(fuente.getId(), this.getId())) {
       throw new IllegalArgumentException("Una fuente no puede agregarse a sí misma.");
     }
+
     if (this.fuentesCargadas == null) {
       this.fuentesCargadas = new ArrayList<>();
     }
-    // Evitar duplicados
-    if (this.fuentesCargadas.stream().noneMatch(f -> f.getId().equals(fuente.getId()))) {
+
+    // Verificar duplicados
+    boolean yaExiste = this.fuentesCargadas.stream()
+                                           .anyMatch(f -> Objects.equals(f.getId(), fuente.getId()));
+
+    if (!yaExiste) {
       this.fuentesCargadas.add(fuente);
     }
   }
 
-  /**
-   * Remueve una fuente de la lista de fuentes cargadas.
-   */
   public void removerFuente(Fuente fuente) {
     if (this.fuentesCargadas != null && fuente != null) {
-      this.fuentesCargadas.removeIf(f -> f.getId().equals(fuente.getId()));
+      this.fuentesCargadas.removeIf(f -> Objects.equals(f.getId(), fuente.getId()));
     }
   }
 
-  /**
-   * Obtiene una copia de las fuentes cargadas.
-   */
   public List<Fuente> getFuentesCargadas() {
     if (this.fuentesCargadas == null) {
       return new ArrayList<>();
@@ -73,10 +78,6 @@ public class FuenteDeAgregacion extends Fuente {
     return new ArrayList<>(this.fuentesCargadas);
   }
 
-  /**
-   * Obtiene todos los hechos de todas las fuentes agregadas.
-   * Los hechos se obtienen en tiempo real de cada fuente.
-   */
   @Override
   public List<Hecho> getHechos() {
     if (this.fuentesCargadas == null || this.fuentesCargadas.isEmpty()) {
@@ -84,38 +85,51 @@ public class FuenteDeAgregacion extends Fuente {
     }
 
     return this.fuentesCargadas.stream()
-                               .filter(f -> f != null)
+                               .filter(Objects::nonNull)
                                .map(Fuente::getHechos)
                                .flatMap(List::stream)
-                               .distinct()
+                               .distinct() // Evita hechos duplicados si una fuente está agregada múltiples veces indirectamente
                                .collect(Collectors.toList());
   }
 
-  /**
-   * Setter para fuentes cargadas.
-   */
   public void setFuentesCargadas(List<Fuente> fuentes) {
     if (this.fuentesCargadas == null) {
       this.fuentesCargadas = new ArrayList<>();
     } else {
       this.fuentesCargadas.clear();
     }
+
     if (fuentes != null) {
-      this.fuentesCargadas.addAll(fuentes);
+      for (Fuente f : fuentes) {
+        if (f != null && !Objects.equals(f.getId(), this.getId())) {
+          this.agregarFuente(f); // Usar agregarFuente para validar duplicados
+        }
+      }
     }
   }
 
-  /**
-   * Verifica si esta fuente de agregación está vacía.
-   */
-  public boolean isEmpty() {
-    return this.fuentesCargadas == null || this.fuentesCargadas.isEmpty();
-  }
-
-  /**
-   * Obtiene la cantidad de fuentes agregadas.
-   */
   public int cantidadFuentes() {
     return this.fuentesCargadas == null ? 0 : this.fuentesCargadas.size();
+  }
+
+  @Override
+  public String toString() {
+    // FIXED: Eliminado getCantidadHechos() para evitar recursión infinita o costo excesivo
+    return String.format("FuenteDeAgregacion{id=%d, nombre='%s', fuentesAgregadas=%d}",
+                         getId(), getNombre(), cantidadFuentes());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof FuenteDeAgregacion)) return false;
+    if (!super.equals(o)) return false;
+    // La igualdad basada en listas mutables es peligrosa en JPA, mejor confiar en ID del padre
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    return super.hashCode();
   }
 }

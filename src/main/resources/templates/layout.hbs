@@ -7,13 +7,12 @@
 
     <link rel="icon" href="/metamapa-icon.png" type="image/png">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <!-- Hojas de estilo -->
     <link rel="stylesheet" href="/css/solicitudes.css">
     <link rel="stylesheet" href="/css/estadisticas.css">
     <link rel="stylesheet" href="/css/inicio.css">
@@ -40,112 +39,37 @@
         main {
             flex-grow: 1;
             position: relative;
-            overflow: auto;
+            overflow: auto; /* Importante para el scroll */
         }
 
-        .navbar {
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        /* Override para offcanvas backdrop si es necesario */
+        .offcanvas-backdrop {
+            z-index: 1040;
         }
 
-        .dropdown-menu {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+        /* Estilos específicos para inputs en el sidebar claro */
+        .sidebar-filtros .form-label {
+            color: #495057;
         }
 
-        .dropdown-item:hover {
-            background-color: #f8f9fa;
+        .sidebar-filtros .form-control,
+        .sidebar-filtros .form-select {
+            border-color: #ced4da;
+            background-color: #fff;
         }
 
-        .offcanvas-start {
-            width: 380px !important;
-        }
-
-        .offcanvas-header {
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .offcanvas-body {
-            overflow-y: auto;
-        }
-
-        .form-control:focus {
+        .sidebar-filtros .form-control:focus,
+        .sidebar-filtros .form-select:focus {
             border-color: #86b7fe;
             box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        }
-
-        .form-check-input:checked {
-            background-color: #198754;
-            border-color: #198754;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-            border: none;
-            color: #212529;
-        }
-
-        .btn-outline-light {
-            border-color: rgba(255, 255, 255, 0.5);
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .btn-outline-light:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-color: white;
-            color: white;
-        }
-
-        .badge {
-            font-weight: 500;
-            padding: 0.35em 0.65em;
-        }
-
-        /* Animaciones */
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Scrollbar personalizado */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
         }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand navbar-dark bg-dark px-3 py-2 w-100"
-     style="background: linear-gradient(90deg, #000000 0%, #005baa 30%, #5287a5 50%, #005baa 70%, #000000 100%);
-            height: 56px; color: white; font-size: 20px; padding-left: 20px; flex-shrink: 0; position: relative;">
+<!-- Navbar Corregido -->
+<nav class="navbar navbar-expand navbar-dark navbar-custom">
+    <div class="container-fluid position-relative">
 
     <div class="navbar-nav">
         {{#block "nav_izquierda"}}
@@ -168,96 +92,94 @@
         {{/block}}
     </div>
 
-    <a class="navbar-brand position-absolute top-50 start-50 translate-middle d-flex align-items-center"
-       href="/" style="z-index: 1000;">
-        <img src="/metamapa-icon.png" alt="Logo" class="d-inline-block align-text-top"
-             style="height: 40px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-    </a>
+        <!-- Logo Central (Con clase para centrado absoluto) -->
+        <a class="navbar-brand navbar-brand-centered" href="/">
+            <img src="/metamapa-icon.png" alt="MetaMapa" class="navbar-logo">
+        </a>
 
-    <div class="ms-auto">
-        {{#if estaLogueado}}
-            <div class="dropdown" style="z-index: 1001;">
-                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
-                   id="dropdownUserMenu" data-bs-toggle="dropdown" aria-expanded="false">
+        <!-- Bloque Derecho (Usuario) -->
+        <div class="ms-auto d-flex align-items-center">
+            {{#if estaLogueado}}
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+                       id="dropdownUserMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center me-2 border border-1 border-light overflow-hidden"
+                             style="width: 35px; height: 35px;">
+                            <img src="/usuarios/{{usuario_id}}/foto"
+                                 alt="Foto"
+                                 class="w-100 h-100"
+                                 style="object-fit: cover;">
+                        </div>
+                        <span class="d-none d-md-inline fw-bold small">{{nombreUsuario}}</span>
+                    </a>
 
-                    <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center me-2 border border-1 border-light overflow-hidden"
-                         style="width: 35px; height: 35px;">
-                        <img src="/usuarios/{{usuario_id}}/foto"
-                             alt="Foto de perfil"
-                             class="w-100 h-100"
-                             style="object-fit: cover;">
-                    </div>
-                    <span class="d-none d-sm-inline fw-bold">{{nombreUsuario}}</span>
-                </a>
-
-                <ul class="dropdown-menu dropdown-menu-end shadow"
-                    aria-labelledby="dropdownUserMenu">
-                    <li><h6 class="dropdown-header">
-                        <i class="fa-solid fa-user-tag me-2"></i>Rol:
-                        <span class="badge bg-info text-dark ms-2">{{rolUsuario}}</span>
-                    </h6></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="/perfil">
-                        <i class="fa-regular fa-id-card me-2 text-primary"></i>Mi Perfil
-                    </a></li>
-                    {{#if esAdmin}}
-                        <li><a class="dropdown-item" href="/admin/dashboard">
-                            <i class="fa-solid fa-gauge-high me-2 text-success"></i>Panel de Control
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="dropdownUserMenu">
+                        <li><h6 class="dropdown-header">
+                            <i class="fa-solid fa-user-tag me-2"></i>Rol:
+                            <span class="badge bg-info text-dark ms-2">{{rolUsuario}}</span>
+                        </h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/perfil">
+                            <i class="fa-regular fa-id-card me-2 text-primary"></i>Mi Perfil
                         </a></li>
-                        <li><a class="dropdown-item" href="/admin/fuentes">
-                            <i class="fa-solid fa-database me-2 text-info"></i>Gestión de Fuentes
-                        </a></li>
-                        <li><a class="dropdown-item" href="/admin/colecciones">
-                            <i class="fa-solid fa-layer-group me-2 text-warning"></i>Colecciones
-                        </a></li>
-                    {{/if}}
-                    {{#if esUsuario}}
-                        <li><a class="dropdown-item" href="/mis-hechos">
-                            <i class="fa-solid fa-list me-2 text-primary"></i>Mis Reportes
-                        </a></li>
-                    {{/if}}
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <form action="/logout" method="POST" style="margin: 0;">
-                            <button type="submit" class="dropdown-item text-danger fw-bold"
-                                    style="border: none; background: none; width: 100%; text-align: left; cursor: pointer;">
-                                <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
-                            </button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-        {{else}}
-            <div class="d-flex gap-2">
-                <a href="/auth/login"
-                   class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
-                    <i class="fa-regular fa-user"></i>
-                    <span class="d-none d-sm-block">Ingresar</span>
-                </a>
-                <a href="/auth/register" class="btn btn-primary btn-sm fw-bold">
-                    Registrarse
-                </a>
-            </div>
-        {{/if}}
+                        {{#if esAdmin}}
+                            <li><a class="dropdown-item" href="/admin/dashboard">
+                                <i class="fa-solid fa-gauge-high me-2 text-success"></i>Panel de Control
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/fuentes">
+                                <i class="fa-solid fa-database me-2 text-info"></i>Gestión de Fuentes
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/colecciones">
+                                <i class="fa-solid fa-layer-group me-2 text-warning"></i>Colecciones
+                            </a></li>
+                        {{/if}}
+                        {{#if esUsuario}}
+                            <li><a class="dropdown-item" href="/mis-hechos">
+                                <i class="fa-solid fa-list me-2 text-primary"></i>Mis Reportes
+                            </a></li>
+                        {{/if}}
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="/logout" method="POST" class="m-0">
+                                <button type="submit" class="dropdown-item text-danger fw-bold">
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            {{else}}
+                <div class="d-flex gap-2">
+                    <a href="/auth/login" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
+                        <i class="fa-regular fa-user"></i>
+                        <span class="d-none d-sm-block">Ingresar</span>
+                    </a>
+                    <a href="/auth/register" class="btn btn-primary btn-sm fw-bold shadow-sm">
+                        Registrarse
+                    </a>
+                </div>
+            {{/if}}
+        </div>
     </div>
 </nav>
 
-<!-- Sidebar de Filtros -->
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFiltros" aria-labelledby="offcanvasFiltrosLabel">
-    <div class="offcanvas-header bg-dark text-white">
-        <h5 class="offcanvas-title" id="offcanvasFiltrosLabel">
-            <i class="fa-solid fa-filter me-2"></i>Filtros Avanzados
+<!-- Sidebar de Filtros (Estilo Claro/Consistente) -->
+<div class="offcanvas offcanvas-start sidebar-filtros" tabindex="-1" id="offcanvasFiltros" aria-labelledby="offcanvasFiltrosLabel">
+    <div class="offcanvas-header sidebar-header-custom">
+        <h5 class="offcanvas-title sidebar-title" id="offcanvasFiltrosLabel">
+            <i class="fa-solid fa-filter me-2 text-primary"></i>Filtros Avanzados
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
+
     <div class="offcanvas-body">
         <div class="mb-4">
-            <h6 class="text-muted mb-3">
-                <i class="fa-solid fa-sliders me-2"></i>Filtros Disponibles
+            <h6 class="text-muted mb-3 text-uppercase small fw-bold ls-1">
+                <i class="fa-solid fa-sliders me-2"></i>Opciones de Filtrado
             </h6>
 
             <div class="mb-3">
-                <label for="Categoria" class="form-label fw-semibold">
+                <label for="Categoria" class="form-label fw-semibold small">
                     <i class="fa-solid fa-tag me-1 text-primary"></i>Categoría
                 </label>
                 <select class="form-select" id="Categoria">
@@ -269,8 +191,8 @@
             </div>
 
             <div class="mb-3">
-                <label for="Fuente" class="form-label fw-semibold">
-                    <i class="fa-solid fa-database me-1 text-info"></i>Fuente
+                <label for="Fuente" class="form-label fw-semibold small">
+                    <i class="fa-solid fa-database me-1 text-info"></i>Fuente de Datos
                 </label>
                 <select class="form-select" id="Fuente">
                     <option selected value="0">Todas las fuentes</option>
@@ -281,7 +203,7 @@
             </div>
 
             <div class="mb-3">
-                <label for="Coleccion" class="form-label fw-semibold">
+                <label for="Coleccion" class="form-label fw-semibold small">
                     <i class="fa-solid fa-layer-group me-1 text-warning"></i>Colección
                 </label>
                 <select class="form-select" id="Coleccion">
@@ -293,47 +215,43 @@
             </div>
 
             <div class="row g-2 mb-3">
-                <div class="col-md-6">
-                    <label for="fechaDesde" class="form-label fw-semibold">
+                <div class="col-6">
+                    <label for="fechaDesde" class="form-label fw-semibold small">
                         <i class="fa-solid fa-calendar-plus me-1 text-success"></i>Desde
                     </label>
-                    <input type="date" class="form-control" id="fechaDesde">
+                    <input type="date" class="form-control form-control-sm" id="fechaDesde">
                 </div>
-                <div class="col-md-6">
-                    <label for="fechaHasta" class="form-label fw-semibold">
+                <div class="col-6">
+                    <label for="fechaHasta" class="form-label fw-semibold small">
                         <i class="fa-solid fa-calendar-minus me-1 text-danger"></i>Hasta
                     </label>
-                    <input type="date" class="form-control" id="fechaHasta">
+                    <input type="date" class="form-control form-control-sm" id="fechaHasta">
                 </div>
             </div>
 
-            <div class="form-check form-switch mb-4">
-                <input class="form-check-input" type="checkbox" id="filtroConsensuadosSidebar"
-                       style="width: 3em; height: 1.5em; cursor: pointer;">
-                <label class="form-check-label fw-semibold" for="filtroConsensuadosSidebar">
-                    <i class="fa-solid fa-check-circle me-1 text-success"></i>Solo hechos consensuados
-                </label>
+            <div class="card bg-light border-0 p-3 mb-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="filtroConsensuadosSidebar" style="cursor: pointer;">
+                    <label class="form-check-label fw-semibold text-dark" for="filtroConsensuadosSidebar">
+                        Solo hechos consensuados
+                        <i class="fa-solid fa-check-circle ms-1 text-success"></i>
+                    </label>
+                </div>
             </div>
         </div>
 
         <div class="d-grid gap-2 mb-4">
-            <button class="btn btn-primary" type="button" onclick="aplicarFiltros()">
-                <i class="bi bi-funnel me-2"></i>Aplicar Filtros
+            <button class="btn btn-primary shadow-sm" type="button" onclick="aplicarFiltrosLocal()">
+                <i class="bi bi-funnel-fill me-2"></i>Aplicar Filtros
             </button>
-            <button class="btn btn-outline-secondary" type="button" onclick="limpiarFiltros()">
-                <i class="bi bi-trash me-2"></i>Limpiar Filtros
+            <button class="btn btn-outline-secondary" type="button" onclick="limpiarFiltrosLocal()">
+                <i class="bi bi-trash3 me-2"></i>Limpiar Todo
             </button>
         </div>
 
-        <div class="border-top pt-3">
-            <h6 class="text-muted mb-2">
-                <i class="fa-solid fa-info-circle me-1"></i>Notas:
-            </h6>
-            <ul class="small text-muted ps-3 mb-0">
-                <li class="mb-1">Los filtros se aplican a todos los hechos en el mapa</li>
-                <li class="mb-1">Puedes combinar múltiples filtros</li>
-                <li>Los resultados se mostrarán en el panel lateral</li>
-            </ul>
+        <div class="alert alert-info small border-0 bg-opacity-10 mb-0">
+            <i class="fa-solid fa-info-circle me-1"></i>
+            Los filtros se aplican en tiempo real sobre los datos del mapa.
         </div>
     </div>
 </div>
@@ -347,48 +265,50 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // Control de fechas en el sidebar
+    // Wrapper local para asegurar que la UI se limpie aunque la función global falle
+    function limpiarFiltrosLocal() {
+        // Resetear visualmente los campos del sidebar
+        if(document.getElementById('Categoria')) document.getElementById('Categoria').value = "0";
+        if(document.getElementById('Fuente')) document.getElementById('Fuente').value = "0";
+        if(document.getElementById('Coleccion')) document.getElementById('Coleccion').value = "0";
+        if(document.getElementById('fechaDesde')) document.getElementById('fechaDesde').value = "";
+        if(document.getElementById('fechaHasta')) document.getElementById('fechaHasta').value = "";
+        if(document.getElementById('filtroConsensuadosSidebar')) document.getElementById('filtroConsensuadosSidebar').checked = false;
+
+        // Llamar a la función principal si existe
+        if (typeof window.limpiarFiltros === 'function') {
+            window.limpiarFiltros();
+        }
+    }
+
+    function aplicarFiltrosLocal() {
+        if (typeof window.aplicarFiltros === 'function') {
+            window.aplicarFiltros();
+        } else {
+            console.warn("La función aplicarFiltros no está definida en esta vista.");
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const fechaDesde = document.getElementById('fechaDesde');
         const fechaHasta = document.getElementById('fechaHasta');
 
         if (fechaDesde && fechaHasta) {
-            // Establecer fecha máxima como hoy
             const hoy = new Date().toISOString().split('T')[0];
             fechaDesde.max = hoy;
             fechaHasta.max = hoy;
 
             fechaDesde.addEventListener('change', function() {
-                const fechaDesdeValor = this.value;
-
-                if (fechaDesdeValor) {
-                    fechaHasta.min = fechaDesdeValor;
-
-                    // Si la fecha hasta es anterior a la nueva fecha desde, limpiarla
-                    if (fechaHasta.value && fechaHasta.value < fechaDesdeValor) {
+                if (this.value) {
+                    fechaHasta.min = this.value;
+                    if (fechaHasta.value && fechaHasta.value < this.value) {
                         fechaHasta.value = '';
                     }
                 } else {
                     fechaHasta.min = '';
                 }
             });
-
-            // También validar al cargar la página si hay valores
-            if (fechaDesde.value) {
-                fechaHasta.min = fechaDesde.value;
-            }
         }
-
-        // Verificar que las funciones globales estén definidas
-        window.aplicarFiltros = window.aplicarFiltros || function() {
-            console.warn('Función aplicarFiltros() no está definida en la página actual');
-            alert('La función de filtros no está disponible en esta página');
-        };
-
-        window.limpiarFiltros = window.limpiarFiltros || function() {
-            console.warn('Función limpiarFiltros() no está definida en la página actual');
-            alert('La función de limpiar filtros no está disponible en esta página');
-        };
     });
 </script>
 

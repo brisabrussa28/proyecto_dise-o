@@ -8,22 +8,22 @@
 
 {{#partial "contenido"}}
     <div class="container-sm py-4 mx-auto">
-        <div class="bg-white bg-opacity-75 p-3 rounded">
-            <h2 class="fw-bold mb-3 text-center">
+        <div class="bg-white bg-opacity-75 p-3 rounded shadow-sm">
+            <h2 class="fw-bold mb-3 text-center text-primary">
                 <i class="fa-solid fa-map-location-dot me-2"></i>
                 Hechos registrados
             </h2>
 
-            <form id="searchForm" class="mb-3">
+            <form id="searchForm" class="mb-3 p-3 bg-light rounded border">
                 <div class="row g-2 align-items-end">
-                    <div class="col-md-5">
-                        <label for="searchInput" class="form-label">Título</label>
+                    <div class="col-md-4">
+                        <label for="searchInput" class="form-label fw-bold">Título</label>
                         <input id="searchInput" type="text" class="form-control"
                                placeholder="Buscar hechos por título..."
                                name="titulo" value="{{query}}">
                     </div>
                     <div class="col-md-3">
-                        <label for="categoriaSelect" class="form-label">Categoría</label>
+                        <label for="categoriaSelect" class="form-label fw-bold">Categoría</label>
                         <select class="form-select" id="categoriaSelect" name="categoria">
                             <option value="0">Todas las categorías</option>
                             {{#each categorias}}
@@ -32,29 +32,39 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <div class="form-check pt-3">
+                        <div class="form-check pt-4">
                             <input class="form-check-input" type="checkbox"
                                    id="soloConsensuados" name="consensuados"
                                    {{#if soloConsensuados}}checked{{/if}}>
-                            <label class="form-check-label" for="soloConsensuados">
+                            <label class="form-check-label user-select-none" for="soloConsensuados">
                                 Solo consensuados
                             </label>
                         </div>
                     </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-primary w-100" type="submit">
-                            <i class="fa-solid fa-search me-1"></i> Buscar
-                        </button>
+                    <div class="col-md-3">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary flex-grow-1 fw-bold" type="submit">
+                                <i class="fa-solid fa-search me-1"></i> Buscar
+                            </button>
+                            <button class="btn btn-outline-secondary" type="button" id="btnLimpiar" title="Limpiar filtros">
+                                <i class="fa-solid fa-eraser"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </form>
 
             <div class="list-group" id="resultsList">
                 {{#each hechos}}
-                    <a href="/hechos/{{id}}" class="list-group-item list-group-item-action py-3">
+                    <a href="/hechos/{{id}}" class="list-group-item list-group-item-action py-3 border-start-0 border-end-0">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1">
-                                <h6 class="fw-bold text-dark mb-1">{{hecho_titulo}}</h6>
+                                <div class="d-flex align-items-center mb-1">
+                                    <h6 class="fw-bold text-dark mb-0 me-2">{{hecho_titulo}}</h6>
+                                    {{#if colecciones}}
+                                        <span class="badge bg-success" title="Hecho consensuado"><i class="fa-solid fa-check"></i></span>
+                                    {{/if}}
+                                </div>
                                 <p class="mb-2 text-muted small">{{hecho_descripcion}}</p>
                                 <div class="mb-2">
                                     <span class="badge bg-info text-dark">{{hecho_categoria}}</span>
@@ -79,31 +89,31 @@
                                     {{hecho_direccion}}
                                 </div>
                             </div>
-                            {{#if colecciones}}
-                                <span class="badge bg-success ms-2 align-self-start" title="Hecho consensuado">✓</span>
-                            {{/if}}
+                            <div class="ms-3 align-self-center">
+                                <i class="fa-solid fa-chevron-right text-muted"></i>
+                            </div>
                         </div>
                     </a>
                 {{/each}}
             </div>
 
-            <nav class="mt-3">
+            <nav class="mt-4">
                 <ul class="pagination pagination-sm justify-content-center" id="paginationContainer">
                     {{#if (gt paginaActual 1)}}
                         <li class="page-item">
-                            <a class="page-link" href="/api/hechos?page={{subtract paginaActual 1}}">Anterior</a>
+                            <a class="page-link" href="#" data-page="{{subtract paginaActual 1}}">Anterior</a>
                         </li>
                     {{/if}}
 
                     {{#each (range 1 totalPaginas)}}
                         <li class="page-item {{#if (eq this ../paginaActual)}}active{{/if}}">
-                            <a class="page-link" href="/api/hechos?page={{this}}">{{this}}</a>
+                            <a class="page-link" href="#" data-page="{{this}}">{{this}}</a>
                         </li>
                     {{/each}}
 
                     {{#if (lt paginaActual totalPaginas)}}
                         <li class="page-item">
-                            <a class="page-link" href="/api/hechos?page={{add paginaActual 1}}">Siguiente</a>
+                            <a class="page-link" href="#" data-page="{{add paginaActual 1}}">Siguiente</a>
                         </li>
                     {{/if}}
                 </ul>
@@ -117,48 +127,30 @@
             const searchInput = document.getElementById('searchInput');
             const categoriaSelect = document.getElementById('categoriaSelect');
             const soloConsensuados = document.getElementById('soloConsensuados');
+            const btnLimpiar = document.getElementById('btnLimpiar');
             const resultsList = document.getElementById('resultsList');
             const paginationContainer = document.getElementById('paginationContainer');
 
             function formatDate(dateInput, format) {
                 if (!dateInput) return '';
-
                 let date;
-
-                // 1. DETECCIÓN DE ARRAY DE JAVA (Lo más probable)
-                // El formato es [año, mes, dia, hora, minuto, segundo]
                 if (Array.isArray(dateInput)) {
-                    date = new Date(
-                        dateInput[0],       // Año
-                        dateInput[1] - 1,   // Mes (¡OJO! En JS los meses son 0-11, en Java 1-12)
-                        dateInput[2],       // Día
-                        dateInput[3] || 0,  // Hora
-                        dateInput[4] || 0,  // Minuto
-                        dateInput[5] || 0   // Segundo
-                    );
-                }
-                // 2. DETECCIÓN DE STRING O TIMESTAMP
-                else {
+                    date = new Date(dateInput[0], dateInput[1] - 1, dateInput[2], dateInput[3]||0, dateInput[4]||0);
+                } else {
                     date = new Date(dateInput);
                 }
-
-                // Validación extra por seguridad
                 if (isNaN(date.getTime())) return 'Fecha inválida';
 
                 if (format === 'dd/MM/yyyy HH:mm') {
-                    const day = date.getDate().toString().padStart(2, '0');
-                    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                    const year = date.getFullYear();
-                    const hours = date.getHours().toString().padStart(2, '0');
-                    const minutes = date.getMinutes().toString().padStart(2, '0');
-                    return `${day}/${month}/${year} ${hours}:${minutes}`;
+                    return date.toLocaleString('es-AR', {
+                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
                 }
-
                 return date.toLocaleDateString('es-AR');
             }
 
             async function buscarHechos(titulo, categoria, consensuados = false, page = 1) {
-                resultsList.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Buscando...</p></div>';
+                resultsList.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Buscando hechos...</p></div>';
                 paginationContainer.style.display = 'none';
 
                 try {
@@ -173,9 +165,7 @@
                     const url = `/api/hechos/buscar-completo?${params.toString()}`;
                     const resp = await fetch(url);
 
-                    if (!resp.ok) {
-                        throw new Error('Error en la búsqueda');
-                    }
+                    if (!resp.ok) throw new Error('Error en la búsqueda');
 
                     const data = await resp.json();
                     const hechosResultantes = data.resultados || [];
@@ -189,58 +179,38 @@
                         resultsList.innerHTML = `
                             <div class="alert alert-info text-center">
                                 <i class="fa-solid fa-info-circle me-2"></i>
-                                No se encontraron hechos con los criterios de búsqueda
+                                No se encontraron hechos con los criterios seleccionados.
                             </div>
                         `;
                         actualizarPaginacion(paginaActual, totalPaginas, titulo, categoria, consensuados);
                         return;
                     }
 
-                    const resumen = document.createElement('div');
-                    resumen.className = 'alert alert-light mb-3';
-                    resumen.innerHTML = `
-                        <small>
-                            <i class="fa-solid fa-filter me-1"></i>
-                            <strong>${total} resultado(s)</strong>
-                            <span class="ms-2">
-                                ${titulo ? `Título: "${titulo}" • ` : ''}
-                                ${categoria && categoria !== "0" ? `Categoría: ${categoria} • ` : ''}
-                                ${consensuados ? 'Solo consensuados' : ''}
-                            </span>
-                        </small>
-                    `;
-                    resultsList.appendChild(resumen);
-
                     hechosResultantes.forEach(hecho => {
-                        const etiquetasHTML = hecho.etiquetas && hecho.etiquetas.length > 0
-                            ? hecho.etiquetas.map(e => `<span class="badge bg-secondary">${e.nombre}</span>`).join(' ')
-                            : '';
-
                         const esConsensuado = hecho.colecciones && hecho.colecciones.length > 0;
                         const fechaFormateada = formatDate(hecho.hecho_fecha_suceso, 'dd/MM/yyyy HH:mm');
+                        const etiquetasHTML = hecho.etiquetas ? hecho.etiquetas.map(e => `<span class="badge bg-secondary me-1">${e.nombre}</span>`).join('') : '';
 
                         const itemHTML = `
-                            <a href="/hechos/${hecho.id}" class="list-group-item list-group-item-action py-3">
+                            <a href="/hechos/${hecho.id}" class="list-group-item list-group-item-action py-3 border-start-0 border-end-0">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div class="flex-grow-1">
                                         <div class="d-flex align-items-center mb-1">
                                             <h6 class="fw-bold text-dark mb-0 me-2">${hecho.hecho_titulo}</h6>
-                                            ${esConsensuado ? '<span class="badge bg-success" title="Hecho consensuado">✓</span>' : ''}
+                                            ${esConsensuado ? '<span class="badge bg-success" title="Consensuado"><i class="fa-solid fa-check"></i></span>' : ''}
                                         </div>
                                         <p class="mb-2 text-muted small">${hecho.hecho_descripcion || 'Sin descripción'}</p>
                                         <div class="mb-2">
-                                            <span class="badge bg-info text-dark">${hecho.hecho_categoria || 'General'}</span>
+                                            <span class="badge bg-info text-dark me-1">${hecho.hecho_categoria || 'General'}</span>
                                             ${etiquetasHTML}
                                         </div>
                                         <div class="small text-muted">
-                                            <i class="fa-regular fa-calendar me-1"></i>
-                                            ${fechaFormateada}
-                                            <span class="mx-2">•</span>
-                                            <i class="fa-solid fa-location-dot me-1"></i>
-                                            ${hecho.hecho_provincia || 'S/D'} — ${hecho.hecho_direccion || 'Ubicación no especificada'}
+                                            <i class="fa-regular fa-calendar me-1"></i> ${fechaFormateada}
+                                            <br>
+                                            <i class="fa-solid fa-location-dot me-1"></i> ${hecho.hecho_provincia || ''} ${hecho.hecho_direccion || ''}
                                         </div>
                                     </div>
-                                    <div class="ms-3">
+                                    <div class="ms-3 align-self-center">
                                         <i class="fa-solid fa-chevron-right text-muted"></i>
                                     </div>
                                 </div>
@@ -253,59 +223,42 @@
 
                 } catch (error) {
                     console.error(error);
-                    resultsList.innerHTML = `
-                        <div class="alert alert-danger text-center">
-                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                            Ocurrió un error en la búsqueda: ${error.message}
-                        </div>
-                    `;
+                    resultsList.innerHTML = `<div class="alert alert-danger text-center">Error al buscar: ${error.message}</div>`;
                 }
             }
 
             function actualizarPaginacion(paginaActual, totalPaginas, titulo, categoria, consensuados) {
                 paginationContainer.innerHTML = '';
-                paginationContainer.style.display = totalPaginas > 1 ? 'flex' : 'none';
-
-                if (paginaActual > 1) {
-                    const prevLi = document.createElement('li');
-                    prevLi.className = 'page-item';
-                    prevLi.innerHTML = `
-                        <a class="page-link" href="#" data-page="${paginaActual - 1}">Anterior</a>
-                    `;
-                    paginationContainer.appendChild(prevLi);
+                if (totalPaginas <= 1) {
+                    paginationContainer.style.display = 'none';
+                    return;
                 }
+                paginationContainer.style.display = 'flex';
 
-                const startPage = Math.max(1, paginaActual - 2);
-                const endPage = Math.min(totalPaginas, paginaActual + 2);
-
-                for (let i = startPage; i <= endPage; i++) {
+                const createPageItem = (page, text, isActive = false) => {
                     const li = document.createElement('li');
-                    li.className = `page-item ${i === paginaActual ? 'active' : ''}`;
-                    li.innerHTML = `
-                        <a class="page-link" href="#" data-page="${i}">${i}</a>
-                    `;
-                    paginationContainer.appendChild(li);
+                    li.className = `page-item ${isActive ? 'active' : ''}`;
+                    li.innerHTML = `<a class="page-link" href="#" data-page="${page}">${text}</a>`;
+                    return li;
+                };
+
+                if (paginaActual > 1) paginationContainer.appendChild(createPageItem(paginaActual - 1, 'Anterior'));
+
+                const start = Math.max(1, paginaActual - 2);
+                const end = Math.min(totalPaginas, paginaActual + 2);
+
+                for (let i = start; i <= end; i++) {
+                    paginationContainer.appendChild(createPageItem(i, i, i === paginaActual));
                 }
 
-                if (paginaActual < totalPaginas) {
-                    const nextLi = document.createElement('li');
-                    nextLi.className = 'page-item';
-                    nextLi.innerHTML = `
-                        <a class="page-link" href="#" data-page="${paginaActual + 1}">Siguiente</a>
-                    `;
-                    paginationContainer.appendChild(nextLi);
-                }
+                if (paginaActual < totalPaginas) paginationContainer.appendChild(createPageItem(paginaActual + 1, 'Siguiente'));
 
-                document.querySelectorAll('.pagination .page-link').forEach(link => {
-                    link.addEventListener('click', function(e) {
+                paginationContainer.querySelectorAll('.page-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
                         e.preventDefault();
-                        const page = parseInt(this.getAttribute('data-page'));
+                        const page = parseInt(e.target.getAttribute('data-page'));
                         buscarHechos(titulo, categoria, consensuados, page);
-
-                        window.scrollTo({
-                            top: 0,
-                            behavior: 'smooth'
-                        });
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                     });
                 });
             }
@@ -316,34 +269,44 @@
                 const categoria = categoriaSelect.value;
                 const consensuados = soloConsensuados.checked;
 
+                // Actualizar URL
                 const urlParams = new URLSearchParams(window.location.search);
-                urlParams.set('titulo', titulo);
-                urlParams.set('categoria', categoria);
-                urlParams.set('soloConsensuados', consensuados);
+                if (titulo) urlParams.set('titulo', titulo); else urlParams.delete('titulo');
+                if (categoria !== '0') urlParams.set('categoria', categoria); else urlParams.delete('categoria');
+                if (consensuados) urlParams.set('soloConsensuados', 'true'); else urlParams.delete('soloConsensuados');
+                urlParams.delete('page');
 
                 history.replaceState(null, '', `${window.location.pathname}?${urlParams.toString()}`);
 
                 buscarHechos(titulo, categoria, consensuados);
             });
 
+            // Lógica del botón Limpiar
+            btnLimpiar.addEventListener('click', function() {
+                searchInput.value = '';
+                categoriaSelect.value = '0';
+                soloConsensuados.checked = false;
+
+                history.replaceState(null, '', window.location.pathname);
+                buscarHechos('', '0', false, 1);
+            });
+
+            // Inicialización con parámetros URL
             const urlParams = new URLSearchParams(window.location.search);
             const tituloInicial = urlParams.get('titulo') || '';
             const categoriaInicial = urlParams.get('categoria') || '0';
             const consensuadosInicial = urlParams.get('soloConsensuados') === 'true';
+            const pageInicial = parseInt(urlParams.get('page')) || 1;
 
             searchInput.value = tituloInicial;
             categoriaSelect.value = categoriaInicial;
             soloConsensuados.checked = consensuadosInicial;
 
-            if (tituloInicial || categoriaInicial !== '0' || consensuadosInicial) {
-                buscarHechos(tituloInicial, categoriaInicial, consensuadosInicial);
-            } else {
-                const initialPage = parseInt(urlParams.get('page')) || 1;
-                buscarHechos('', '0', false, initialPage);
+            if (tituloInicial || categoriaInicial !== '0' || consensuadosInicial || pageInicial > 1) {
+                buscarHechos(tituloInicial, categoriaInicial, consensuadosInicial, pageInicial);
             }
         });
     </script>
-
 {{/partial}}
 
 {{> templates/layout}}

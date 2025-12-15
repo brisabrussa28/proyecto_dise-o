@@ -3,157 +3,131 @@ package ar.edu.utn.frba.dds.model.fuentes;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.lector.Lector;
 import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLector;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import javax.persistence.CascadeType;
+import java.util.Objects;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 
 /**
  * Fuente estática que carga hechos desde un archivo.
- * Los hechos se cargan una vez y se persisten en la base de datos.
  */
 @Entity
+@Table(name = "fuente_estatica")
+@PrimaryKeyJoinColumn(name = "fuente_id")
 @DiscriminatorValue("ESTATICA")
 public class FuenteEstatica extends FuenteConHechos {
 
-  @Transient
-  private String fuente_ruta_archivo;
+  // FIXED: Cambiado de @Transient a @Column.
+  // Si esto era transient, perdías la ruta al reiniciar la app.
+  @Column(name = "ruta_archivo")
+  private String fuenteRutaArchivo;
 
+  // Este se mantiene Transient porque es configuración lógica,
+  // pero deberías considerar si necesitas reconstruirlo al cargar.
   @Transient
-  private ConfiguracionLector fuente_configuracion_lector;
-
-  // Relación persistente específica para FuenteEstatica
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-  @JoinColumn(name = "fuente_estatica_id")
-  private List<Hecho> hechosPersistidos = new ArrayList<>();
+  private ConfiguracionLector fuenteConfiguracionLector;
 
   public FuenteEstatica() {
     super();
   }
 
-  /**
-   * Crea una FuenteEstatica que carga hechos desde un archivo.
-   * Los hechos se cargan inmediatamente al crear la fuente.
-   */
   public FuenteEstatica(String nombre, ConfiguracionLector configLector) {
     super(nombre);
-    if (configLector == null) {
-      throw new IllegalArgumentException("La configuración del lector no puede ser nula.");
-    }
-    this.fuente_configuracion_lector = configLector;
-    this.cargarHechosDesdeArchivo();
+    Objects.requireNonNull(configLector, "La configuración del lector no puede ser nula.");
+    this.fuenteConfiguracionLector = configLector;
+    // No cargamos inmediatamente en el constructor para no bloquear,
+    // pero guardamos el estado.
   }
 
-  /**
-   * Crea una FuenteEstatica a partir de hechos ya leídos.
-   * Este constructor se usa cuando los hechos ya fueron procesados.
-   */
   public FuenteEstatica(String nombre, List<Hecho> hechosImportados) {
     super(nombre);
-    if (hechosImportados == null) {
-      throw new IllegalArgumentException("La lista de hechos no puede ser nula.");
-    }
-    this.fuente_ruta_archivo = null;
-    this.fuente_configuracion_lector = null;
-    this.hechosPersistidos.clear();
-    this.hechosPersistidos.addAll(hechosImportados);
+    Objects.requireNonNull(hechosImportados, "La lista de hechos no puede ser nula.");
+    this.fuenteRutaArchivo = null;
+    this.fuenteConfiguracionLector = null;
+    this.setHechos(hechosImportados);
+  }
+
+  @Override
+  public String getTipo() {
+    return "ESTATICA";
   }
 
   /**
-   * Método privado que encapsula la lógica de la lectura de hechos desde archivo.
+   * Intenta cargar los hechos. Retorna true si tuvo éxito.
    */
-  private void cargarHechosDesdeArchivo() {
-    if (this.fuente_configuracion_lector == null) {
-      return;
+  public boolean cargarHechosDesdeArchivo() {
+    if (this.fuenteConfiguracionLector == null || this.fuenteRutaArchivo == null) {
+      return false;
     }
-    try {
-      Lector<Hecho> lector = this.fuente_configuracion_lector.build(Hecho.class);
-      List<Hecho> hechosImportados = lector.importar(this.fuente_ruta_archivo);
 
-      this.hechosPersistidos.clear();
-      if (hechosImportados != null) {
-        this.hechosPersistidos.addAll(hechosImportados);
+    try {
+      Lector<Hecho> lector = this.fuenteConfiguracionLector.build(Hecho.class);
+      List<Hecho> hechosImportados = lector.importar(this.fuenteRutaArchivo);
+
+      if (hechosImportados != null && !hechosImportados.isEmpty()) {
+        this.setHechos(hechosImportados);
+        return true;
       }
     } catch (Exception e) {
       System.err.println("Error al cargar hechos desde archivo para la fuente '" +
-                             this.fuente_nombre + "': " + e.getMessage());
-      this.hechosPersistidos.clear();
+                             this.getNombre() + "': " + e.getMessage());
+      // No limpiamos los hechos anteriores en caso de error para no perder datos viejos si falla la lectura
     }
+    return false;
   }
 
-  /**
-   * Obtiene todos los hechos de esta fuente.
-   * Devuelve una lista inmutable.
-   */
-  @Override
-  public List<Hecho> getHechos() {
-    if (this.hechosPersistidos == null || this.hechosPersistidos.isEmpty()) {
-      return Collections.emptyList();
-    }
-    return Collections.unmodifiableList(this.hechosPersistidos);
-  }
-
-  /**
-   * Setter específico para hechos persistidos.
-   * Usado por los repositorios al cargar desde la base de datos.
-   */
-  public void setHechosPersistidos(List<Hecho> hechos) {
-    if (this.hechosPersistidos == null) {
-      this.hechosPersistidos = new ArrayList<>();
-    } else {
-      this.hechosPersistidos.clear();
-    }
-    if (hechos != null) {
-      this.hechosPersistidos.addAll(hechos);
-    }
-  }
-
-  /**
-   * Recarga los hechos desde el archivo.
-   * Útil si el archivo fuente ha sido modificado.
-   */
   public void recargarHechos() {
     this.cargarHechosDesdeArchivo();
   }
 
-  /**
-   * Verifica si esta fuente está vacía.
-   */
   public boolean estaVacia() {
-    return this.hechosPersistidos == null || this.hechosPersistidos.isEmpty();
+    return this.hechos == null || this.hechos.isEmpty();
   }
 
-  /**
-   * Obtiene la ruta del archivo de origen (si existe).
-   */
   public String getRutaArchivo() {
-    return this.fuente_ruta_archivo;
+    return this.fuenteRutaArchivo;
   }
 
-  /**
-   * Establece la ruta del archivo de origen.
-   */
   public void setRutaArchivo(String ruta) {
-    this.fuente_ruta_archivo = ruta;
+    this.fuenteRutaArchivo = ruta;
+    // Si ya tenemos configuración, intentamos recargar
+    if (ruta != null && this.fuenteConfiguracionLector != null) {
+      this.cargarHechosDesdeArchivo();
+    }
   }
 
-  /**
-   * Obtiene la configuración del lector (si existe).
-   */
   public ConfiguracionLector getConfiguracionLector() {
-    return this.fuente_configuracion_lector;
+    return this.fuenteConfiguracionLector;
   }
 
-  /**
-   * Establece la configuración del lector.
-   */
   public void setConfiguracionLector(ConfiguracionLector config) {
-    this.fuente_configuracion_lector = config;
+    this.fuenteConfiguracionLector = config;
+    if (config != null && this.fuenteRutaArchivo != null) {
+      this.cargarHechosDesdeArchivo();
+    }
+  }
+
+  @Override
+  public String toString() {
+    return String.format("FuenteEstatica{id=%d, nombre='%s', ruta='%s'}",
+                         getId(), getNombre(), fuenteRutaArchivo);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof FuenteEstatica)) return false;
+    if (!super.equals(o)) return false;
+    FuenteEstatica that = (FuenteEstatica) o;
+    return Objects.equals(fuenteRutaArchivo, that.fuenteRutaArchivo);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), fuenteRutaArchivo);
   }
 }

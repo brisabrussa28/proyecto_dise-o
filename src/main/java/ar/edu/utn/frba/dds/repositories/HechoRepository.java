@@ -1,13 +1,19 @@
 package ar.edu.utn.frba.dds.repositories;
 
+import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.model.fuentes.Fuente;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteConHechos;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
@@ -21,7 +27,6 @@ public class HechoRepository {
     return INSTANCE;
   }
 
-  // Thread-local para almacenar el total de resultados de la última búsqueda paginada
   private static final ThreadLocal<Long> TOTAL_RESULTS_THREAD_LOCAL = new ThreadLocal<>();
 
   public void save(Hecho hecho) {
@@ -38,15 +43,59 @@ public class HechoRepository {
       DBUtils.commit(em);
     } catch (PersistenceException e) {
       DBUtils.rollback(em);
-      throw new RuntimeException("Error al guardar hecho: " + e.getMessage());
+      throw new RuntimeException("Error al guardar hecho: " + e.getMessage(), e);
     } finally {
       em.close();
+    }
+  }
+
+  // --- LÓGICA DE INTEGRIDAD: Colección -> Fuente -> Hecho ---
+
+  /**
+   * Obtiene los IDs de todas las FuentesConHechos (hojas) que son alcanzables
+   * desde las colecciones activas.
+   */
+  private Set<Long> obtenerIdsFuentesValidas(EntityManager em) {
+    List<Fuente> fuentesRaiz = em.createQuery(
+                                     "SELECT c.coleccion_fuente FROM Coleccion c WHERE c.coleccion_fuente IS NOT NULL", Fuente.class)
+                                 .getResultList();
+
+    Set<Long> idsValidos = new HashSet<>();
+    Set<Long> visitados = new HashSet<>();
+
+    for (Fuente f : fuentesRaiz) {
+      recolectarIdsFuentes(f, idsValidos, visitados, em);
+    }
+
+    return idsValidos;
+  }
+
+  private void recolectarIdsFuentes(Fuente fuente, Set<Long> ids, Set<Long> visitados, EntityManager em) {
+    if (fuente == null || visitados.contains(fuente.getId())) {
+      return;
+    }
+    visitados.add(fuente.getId());
+
+    if (fuente instanceof FuenteConHechos) {
+      ids.add(fuente.getId());
+    } else if (fuente instanceof FuenteDeAgregacion) {
+      // Usamos una query nativa o simple para evitar problemas de proxy con Hibernate
+      List<Fuente> hijos = em.createQuery(
+                                 "SELECT child FROM FuenteDeAgregacion p JOIN p.fuentesCargadas child WHERE p.id = :id", Fuente.class)
+                             .setParameter("id", fuente.getId())
+                             .getResultList();
+
+      for (Fuente hijo : hijos) {
+        recolectarIdsFuentes(hijo, ids, visitados, em);
+      }
     }
   }
 
   public List<Hecho> findAll() {
     EntityManager em = DBUtils.getEntityManager();
     try {
+      // CORRECCIÓN CRÍTICA: findAll trae TODO (sin filtro de integridad).
+      // Esto previene que la app parezca vacía si no hay colecciones configuradas.
       return em.createQuery(
                    "SELECT DISTINCT h FROM Hecho h " +
                        "LEFT JOIN FETCH h.fotos " +
@@ -60,9 +109,7 @@ public class HechoRepository {
   }
 
   public Optional<Hecho> findAny() {
-    return this.findAll()
-               .stream()
-               .findAny();
+    return this.findAll().stream().findAny();
   }
 
   public Hecho findById(Long id) {
@@ -72,6 +119,7 @@ public class HechoRepository {
                    "SELECT h FROM Hecho h " +
                        "LEFT JOIN FETCH h.fotos " +
                        "LEFT JOIN FETCH h.etiquetas " +
+                       "LEFT JOIN FETCH h.colecciones " +
                        "WHERE h.id = :id", Hecho.class)
                .setParameter("id", id)
                .getSingleResult();
@@ -80,10 +128,8 @@ public class HechoRepository {
     }
   }
 
-  // Búsqueda simple por título (para compatibilidad con código existente)
   public List<Hecho> findByTitle(String titulo) {
     EntityManager em = DBUtils.getEntityManager();
-
     int UMBRAL_TOLERANCIA = 3;
 
     String sql = "SELECT * FROM Hecho h " +
@@ -92,20 +138,18 @@ public class HechoRepository {
 
     try {
       Query q = em.createNativeQuery(sql, Hecho.class);
-
       q.setParameter("queryParam", titulo.trim());
       q.setParameter("umbral", UMBRAL_TOLERANCIA);
       q.setParameter("queryParamLike", "%" + titulo.trim() + "%");
-
       return q.getResultList();
-
     } catch (Exception e) {
       e.printStackTrace();
       return Collections.emptyList();
+    } finally {
+      em.close();
     }
   }
 
-  // BÚSQUEDA AVANZADA COMPLETA - Método principal
   public List<Hecho> buscarAvanzadoCompleto(
       String titulo,
       String categoria,
@@ -117,42 +161,75 @@ public class HechoRepository {
 
     EntityManager em = DBUtils.getEntityManager();
     try {
+      Set<Long> idsFuentesValidas = obtenerIdsFuentesValidas(em);
+
+      // Filtro Colección -> Fuente
+      if (coleccion != null && !coleccion.isBlank() && !coleccion.equals("0")) {
+        try {
+          Fuente fuenteColeccion = em.createQuery(
+                                         "SELECT c.coleccion_fuente FROM Coleccion c WHERE c.coleccion_titulo = :titulo", Fuente.class)
+                                     .setParameter("titulo", coleccion)
+                                     .getSingleResult();
+
+          Set<Long> idsFuenteEspecifica = new HashSet<>();
+          recolectarIdsFuentes(fuenteColeccion, idsFuenteEspecifica, new HashSet<>(), em);
+          idsFuentesValidas.retainAll(idsFuenteEspecifica);
+
+        } catch (javax.persistence.NoResultException e) {
+          return Collections.emptyList();
+        }
+      }
+
+      // Filtro Fuente Directa
+      if (fuente != null && !fuente.isBlank() && !fuente.equals("0")) {
+        try {
+          Fuente fuenteObj = em.createQuery(
+                                   "SELECT f FROM Fuente f WHERE f.fuente_nombre = :nombre", Fuente.class)
+                               .setParameter("nombre", fuente)
+                               .getSingleResult();
+
+          Set<Long> idsFuenteSeleccionada = new HashSet<>();
+          recolectarIdsFuentes(fuenteObj, idsFuenteSeleccionada, new HashSet<>(), em);
+          idsFuentesValidas.retainAll(idsFuenteSeleccionada);
+
+        } catch (javax.persistence.NoResultException e) {
+          return Collections.emptyList();
+        }
+      }
+
+      if (idsFuentesValidas.isEmpty()) {
+        return Collections.emptyList();
+      }
+
       StringBuilder queryStr = new StringBuilder(
           "SELECT DISTINCT h FROM Hecho h " +
               "LEFT JOIN FETCH h.fotos " +
               "LEFT JOIN FETCH h.etiquetas " +
-              "LEFT JOIN h.fuente f " +
+              "LEFT JOIN FETCH h.colecciones " +
               "WHERE 1=1"
       );
 
-      Map<String, Object> params = new HashMap<>();
+      // Integridad (Aplicada solo aquí para búsquedas)
+      // Usamos una subquery más segura para evitar conflictos de alias
+      queryStr.append(" AND h.id IN (SELECT fh.id FROM FuenteConHechos f JOIN f.hechos fh WHERE f.id IN :idsFuentesValidas)");
 
-      // Filtro por título (contains)
+      Map<String, Object> params = new HashMap<>();
+      params.put("idsFuentesValidas", idsFuentesValidas);
+
       if (titulo != null && !titulo.isBlank()) {
         queryStr.append(" AND LOWER(h.hecho_titulo) LIKE LOWER(:titulo)");
         params.put("titulo", "%" + titulo + "%");
       }
 
-      // Filtro por categoría
       if (categoria != null && !categoria.isBlank() && !categoria.equals("0")) {
         queryStr.append(" AND LOWER(h.hecho_categoria) = LOWER(:categoria)");
         params.put("categoria", categoria);
       }
 
-      // Filtro por fuente (a través de la relación con fuente)
-      if (fuente != null && !fuente.isBlank() && !fuente.equals("0")) {
-        queryStr.append(" AND (f.nombre = :fuenteNombre OR f.nombre LIKE :fuenteLike)");
-        params.put("fuenteNombre", fuente);
-        params.put("fuenteLike", "%" + fuente + "%");
+      if (soloConsensuados != null && soloConsensuados) {
+        queryStr.append(" AND h IN (SELECT hc FROM Coleccion c JOIN c.hechos hc)");
       }
 
-      // Filtro por colección (hechos que pertenecen a una colección)
-      if (coleccion != null && !coleccion.isBlank() && !coleccion.equals("0")) {
-        queryStr.append(" AND h.id IN (SELECT hc.id FROM Coleccion c JOIN c.hechosConsensuados hc WHERE c.titulo = :coleccionTitulo)");
-        params.put("coleccionTitulo", coleccion);
-      }
-
-      // Filtro por rango de fechas
       if (fechaDesde != null) {
         queryStr.append(" AND h.hecho_fecha_suceso >= :fechaDesde");
         params.put("fechaDesde", fechaDesde.atStartOfDay());
@@ -163,12 +240,6 @@ public class HechoRepository {
         params.put("fechaHasta", fechaHasta.atTime(23, 59, 59));
       }
 
-      // Filtro por hechos consensuados
-      if (soloConsensuados != null && soloConsensuados) {
-        queryStr.append(" AND h.id IN (SELECT hc.id FROM Coleccion c JOIN c.hechosConsensuados hc)");
-      }
-
-      // Ordenar por fecha más reciente
       queryStr.append(" ORDER BY h.hecho_fecha_suceso DESC");
 
       TypedQuery<Hecho> query = em.createQuery(queryStr.toString(), Hecho.class);
@@ -183,7 +254,6 @@ public class HechoRepository {
     }
   }
 
-  // BÚSQUEDA AVANZADA PAGINADA - Para listados grandes
   public Map<String, Object> buscarAvanzadoCompletoPaginated(
       String titulo,
       String categoria,
@@ -197,78 +267,106 @@ public class HechoRepository {
 
     EntityManager em = DBUtils.getEntityManager();
     try {
-      // Query para resultados
+      Set<Long> idsFuentesValidas = obtenerIdsFuentesValidas(em);
+
+      if (coleccion != null && !coleccion.isBlank() && !coleccion.equals("0")) {
+        try {
+          Fuente fuenteColeccion = em.createQuery(
+                                         "SELECT c.coleccion_fuente FROM Coleccion c WHERE c.coleccion_titulo = :titulo", Fuente.class)
+                                     .setParameter("titulo", coleccion)
+                                     .getSingleResult();
+
+          Set<Long> idsFuenteEspecifica = new HashSet<>();
+          recolectarIdsFuentes(fuenteColeccion, idsFuenteEspecifica, new HashSet<>(), em);
+          idsFuentesValidas.retainAll(idsFuenteEspecifica);
+
+        } catch (javax.persistence.NoResultException e) {
+          return Map.of("resultados", Collections.emptyList(), "total", 0L, "paginaActual", page, "totalPaginas", 0);
+        }
+      }
+
+      if (fuente != null && !fuente.isBlank() && !fuente.equals("0")) {
+        try {
+          Fuente fuenteObj = em.createQuery(
+                                   "SELECT f FROM Fuente f WHERE f.fuente_nombre = :nombre", Fuente.class)
+                               .setParameter("nombre", fuente)
+                               .getSingleResult();
+
+          Set<Long> idsFuenteSeleccionada = new HashSet<>();
+          recolectarIdsFuentes(fuenteObj, idsFuenteSeleccionada, new HashSet<>(), em);
+          idsFuentesValidas.retainAll(idsFuenteSeleccionada);
+
+        } catch (javax.persistence.NoResultException e) {
+          return Map.of("resultados", Collections.emptyList(), "total", 0L, "paginaActual", page, "totalPaginas", 0);
+        }
+      }
+
+      if(idsFuentesValidas.isEmpty()) {
+        // Si no hay fuentes válidas (ninguna colección), devolvemos vacío en búsquedas
+        return Map.of("resultados", Collections.emptyList(), "total", 0L, "paginaActual", page, "totalPaginas", 0);
+      }
+
       StringBuilder queryStr = new StringBuilder(
           "SELECT DISTINCT h FROM Hecho h " +
               "LEFT JOIN FETCH h.fotos " +
               "LEFT JOIN FETCH h.etiquetas " +
-              "LEFT JOIN h.fuente f " +
+              "LEFT JOIN FETCH h.colecciones " +
               "WHERE 1=1"
       );
 
-      // Query para contar total
       StringBuilder countQueryStr = new StringBuilder(
-          "SELECT COUNT(DISTINCT h) FROM Hecho h " +
-              "LEFT JOIN h.fuente f " +
-              "WHERE 1=1"
+          "SELECT COUNT(DISTINCT h) FROM Hecho h WHERE 1=1"
       );
+
+      String integridadClause = " AND h.id IN (SELECT fh.id FROM FuenteConHechos f JOIN f.hechos fh WHERE f.id IN :idsFuentesValidas)";
+      queryStr.append(integridadClause);
+      countQueryStr.append(integridadClause);
 
       Map<String, Object> params = new HashMap<>();
+      params.put("idsFuentesValidas", idsFuentesValidas);
 
-      // Aplicar los mismos filtros a ambas queries
       if (titulo != null && !titulo.isBlank()) {
-        queryStr.append(" AND LOWER(h.hecho_titulo) LIKE LOWER(:titulo)");
-        countQueryStr.append(" AND LOWER(h.hecho_titulo) LIKE LOWER(:titulo)");
+        String clause = " AND LOWER(h.hecho_titulo) LIKE LOWER(:titulo)";
+        queryStr.append(clause);
+        countQueryStr.append(clause);
         params.put("titulo", "%" + titulo + "%");
       }
 
       if (categoria != null && !categoria.isBlank() && !categoria.equals("0")) {
-        queryStr.append(" AND LOWER(h.hecho_categoria) = LOWER(:categoria)");
-        countQueryStr.append(" AND LOWER(h.hecho_categoria) = LOWER(:categoria)");
+        String clause = " AND LOWER(h.hecho_categoria) = LOWER(:categoria)";
+        queryStr.append(clause);
+        countQueryStr.append(clause);
         params.put("categoria", categoria);
       }
 
-      if (fuente != null && !fuente.isBlank() && !fuente.equals("0")) {
-        queryStr.append(" AND (f.nombre = :fuenteNombre OR f.nombre LIKE :fuenteLike)");
-        countQueryStr.append(" AND (f.nombre = :fuenteNombre OR f.nombre LIKE :fuenteLike)");
-        params.put("fuenteNombre", fuente);
-        params.put("fuenteLike", "%" + fuente + "%");
-      }
-
-      if (coleccion != null && !coleccion.isBlank() && !coleccion.equals("0")) {
-        queryStr.append(" AND h.id IN (SELECT hc.id FROM Coleccion c JOIN c.hechosConsensuados hc WHERE c.titulo = :coleccionTitulo)");
-        countQueryStr.append(" AND h.id IN (SELECT hc.id FROM Coleccion c JOIN c.hechosConsensuados hc WHERE c.titulo = :coleccionTitulo)");
-        params.put("coleccionTitulo", coleccion);
-      }
-
       if (fechaDesde != null) {
-        queryStr.append(" AND h.hecho_fecha_suceso >= :fechaDesde");
-        countQueryStr.append(" AND h.hecho_fecha_suceso >= :fechaDesde");
+        String clause = " AND h.hecho_fecha_suceso >= :fechaDesde";
+        queryStr.append(clause);
+        countQueryStr.append(clause);
         params.put("fechaDesde", fechaDesde.atStartOfDay());
       }
 
       if (fechaHasta != null) {
-        queryStr.append(" AND h.hecho_fecha_suceso <= :fechaHasta");
-        countQueryStr.append(" AND h.hecho_fecha_suceso <= :fechaHasta");
+        String clause = " AND h.hecho_fecha_suceso <= :fechaHasta";
+        queryStr.append(clause);
+        countQueryStr.append(clause);
         params.put("fechaHasta", fechaHasta.atTime(23, 59, 59));
       }
 
       if (soloConsensuados != null && soloConsensuados) {
-        queryStr.append(" AND h.id IN (SELECT hc.id FROM Coleccion c JOIN c.hechosConsensuados hc)");
-        countQueryStr.append(" AND h.id IN (SELECT hc.id FROM Coleccion c JOIN c.hechosConsensuados hc)");
+        String clause = " AND h.id IN (SELECT hc.id FROM Coleccion c JOIN c.hechos hc)";
+        queryStr.append(clause);
+        countQueryStr.append(clause);
       }
 
-      // Ordenar por fecha
       queryStr.append(" ORDER BY h.hecho_fecha_suceso DESC");
 
-      // Contar total
       TypedQuery<Long> countQuery = em.createQuery(countQueryStr.toString(), Long.class);
       for (Map.Entry<String, Object> entry : params.entrySet()) {
         countQuery.setParameter(entry.getKey(), entry.getValue());
       }
       Long total = countQuery.getSingleResult();
 
-      // Obtener resultados paginados
       TypedQuery<Hecho> query = em.createQuery(queryStr.toString(), Hecho.class);
       for (Map.Entry<String, Object> entry : params.entrySet()) {
         query.setParameter(entry.getKey(), entry.getValue());
@@ -292,16 +390,21 @@ public class HechoRepository {
     }
   }
 
-  // BÚSQUEDA RÁPIDA - Para el mapa principal (solo título y consensuados)
   public List<Hecho> buscarRapido(String titulo, Boolean soloConsensuados) {
     EntityManager em = DBUtils.getEntityManager();
     try {
+      Set<Long> idsFuentesValidas = obtenerIdsFuentesValidas(em);
+      if(idsFuentesValidas.isEmpty()) return Collections.emptyList();
+
       StringBuilder queryStr = new StringBuilder(
-          "SELECT DISTINCT h.* FROM Hecho h " +
-              "WHERE 1=1"
+          "SELECT DISTINCT h.* FROM Hecho h WHERE 1=1"
       );
 
+      queryStr.append(" AND h.fuente_id IN (:idsFuentes)");
+
       Map<String, Object> params = new HashMap<>();
+      params.put("idsFuentes", idsFuentesValidas);
+
       int UMBRAL_TOLERANCIA = 3;
 
       if (titulo != null && !titulo.isBlank()) {
@@ -316,7 +419,7 @@ public class HechoRepository {
       }
 
       if (soloConsensuados != null && soloConsensuados) {
-        queryStr.append(" AND h.id IN (SELECT hc.hecho_id FROM Coleccion_Hecho hc)");
+        queryStr.append(" AND h.hecho_id IN (SELECT hechos_hecho_id FROM coleccion_hecho)");
       }
 
       queryStr.append(" ORDER BY h.hecho_fecha_suceso DESC");
@@ -333,8 +436,6 @@ public class HechoRepository {
     }
   }
 
-
-  // Métodos auxiliares para obtener información de filtros
   public List<String> getCategorias() {
     EntityManager em = DBUtils.getEntityManager();
     try {
@@ -350,7 +451,7 @@ public class HechoRepository {
     EntityManager em = DBUtils.getEntityManager();
     try {
       return em.createQuery(
-                   "SELECT DISTINCT f.nombre FROM Fuente f WHERE f.nombre IS NOT NULL ORDER BY f.nombre", String.class)
+                   "SELECT DISTINCT f.fuente_nombre FROM Fuente f WHERE f.fuente_nombre IS NOT NULL ORDER BY f.fuente_nombre", String.class)
                .getResultList();
     } finally {
       em.close();
@@ -361,7 +462,7 @@ public class HechoRepository {
     EntityManager em = DBUtils.getEntityManager();
     try {
       return em.createQuery(
-                   "SELECT DISTINCT c.titulo FROM Coleccion c WHERE c.titulo IS NOT NULL ORDER BY c.titulo", String.class)
+                   "SELECT DISTINCT c.coleccion_titulo FROM Coleccion c WHERE c.coleccion_titulo IS NOT NULL ORDER BY c.coleccion_titulo", String.class)
                .getResultList();
     } finally {
       em.close();
@@ -372,8 +473,10 @@ public class HechoRepository {
     EntityManager em = DBUtils.getEntityManager();
     try {
       return em.createNativeQuery(
-                   "SELECT DISTINCT etiqueta_nombre FROM hecho_etiquetas ORDER BY etiqueta_nombre")
+                   "SELECT DISTINCT etiquetas_etiqueta_nombre FROM Hecho_etiquetas")
                .getResultList();
+    } catch(Exception e) {
+      return Collections.emptyList();
     } finally {
       em.close();
     }
@@ -382,6 +485,8 @@ public class HechoRepository {
   public Long countAll() {
     EntityManager em = DBUtils.getEntityManager();
     try {
+      // Simplificado: Contar TODOS los hechos del sistema, no solo los "válidos"
+      // para que coincida con findAll()
       return em.createQuery(
                    "SELECT COUNT(DISTINCT h.id) FROM Hecho h", Long.class)
                .getSingleResult();
@@ -426,15 +531,9 @@ public class HechoRepository {
     }
   }
 
-  // Método para obtener el total de la última búsqueda paginada
   public static Long getLastTotalResults() {
     Long total = TOTAL_RESULTS_THREAD_LOCAL.get();
     TOTAL_RESULTS_THREAD_LOCAL.remove();
     return total != null ? total : 0L;
-  }
-
-  // Método auxiliar para configurar el thread-local
-  private static void setLastTotalResults(Long total) {
-    TOTAL_RESULTS_THREAD_LOCAL.set(total);
   }
 }

@@ -1,13 +1,73 @@
+/* --- Navbar Personalizado --- */
+.navbar-custom {
+    background: linear-gradient(90deg, #000000 0%, #005baa 30%, #5287a5 50%, #005baa 70%, #000000 100%);
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    min-height: 60px; /* Altura mínima flexible */
+}
+
+.navbar-brand-centered {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.navbar-logo {
+    height: 40px;
+    width: auto;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    transition: transform 0.3s ease;
+}
+
+.navbar-logo:hover {
+    transform: scale(1.05);
+}
+
+/* En móviles, ajustamos para que no se superponga */
+@media (max-width: 768px) {
+    .navbar-brand-centered {
+        position: static;
+        transform: none;
+        margin: 0 auto;
+    }
+
+    .navbar-custom {
+        flex-wrap: wrap; /* Permitir que los elementos bajen si es necesario */
+    }
+}
+
+/* --- Sidebar de Filtros (Estilo Unificado) --- */
+.sidebar-filtros {
+    border-top: 5px solid #ffc107; /* El borde amarillo característico */
+    background-color: #f8f9fa; /* Fondo claro */
+}
+
+.sidebar-header-custom {
+    border-bottom: 1px solid #dee2e6;
+    background-color: #fff;
+    padding-bottom: 1rem;
+}
+
+.sidebar-title {
+    font-weight: 700;
+    color: #333;
+}
+
+/* --- Estilos previos mantenidos --- */
 .search-controls-overlay {
     position: absolute;
-    top: 15px;
-    left: 50vw;
+    top: 20px;
+    left: 50%;
     transform: translateX(-50%);
-    /* Profundidad: Asegura que esté por encima del mapa */
     z-index: 1000;
     padding: 10px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.8); /* Un poco más oscuro para contraste */
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
+    width: auto;
+    max-width: 90vw;
 }
 
 .leaflet-top .leaflet-control {

@@ -80,12 +80,20 @@ public class Router {
     app.get("/auth/login", userController::mostrarLogin);
 
     app.get("/", ctx -> {
-      List<Hecho> hechos = hechoController.findAll();
-      String hechosJson = mapper.writeValueAsString(hechos);
+      // CORRECCIÓN: El mapa SOLO muestra hechos validados por integridad (Fuente->Colección)
+      // Usamos buscarAvanzadoCompleto sin filtros para obtener todos los válidos
+      Map<String, Object> resultadoValidado = hechoController.buscarAvanzadoCompleto(
+          null, null, null, null, null, null, false
+      );
+
+      @SuppressWarnings("unchecked")
+      List<Map<String, Object>> hechosValidos = (List<Map<String, Object>>) resultadoValidado.get("resultados");
+      String hechosJson = mapper.writeValueAsString(hechosValidos);
 
       Map<String, Object> model = modeloConSesion(ctx);
       model.put("hechosJson", hechosJson);
-      model.put("hechos", hechos);
+      // Para la vista, pasamos la lista de objetos validados
+      model.put("hechos", hechosValidos);
       model.put("categorias", hechoController.getCategorias());
       model.put("colecciones", coleccionController.findAll());
       model.put("fuentes", fuenteController.findAll());
@@ -100,6 +108,7 @@ public class Router {
       int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
       int pageSize = 15;
 
+      // CORRECCIÓN: La lista de administración muestra TODO (findAll)
       List<Hecho> hechos = hechoController.findAll();
       int totalHechos = hechos.size();
       int totalPages = (int) Math.ceil((double) totalHechos / pageSize);
@@ -107,7 +116,9 @@ public class Router {
       int fromIndex = (page - 1) * pageSize;
       int toIndex = Math.min(fromIndex + pageSize, totalHechos);
 
-      List<Hecho> hechosPagina = hechos.subList(fromIndex, toIndex);
+      List<Hecho> hechosPagina = (fromIndex < totalHechos)
+                                 ? hechos.subList(fromIndex, toIndex)
+                                 : Collections.emptyList();
 
       Map<String, Object> model = modeloConSesion(ctx);
       model.put("hechos", hechosPagina);
@@ -180,6 +191,12 @@ public class Router {
 
     app.get("/api/hechos/buscar-completo", ctx -> {
       try {
+        // Logging de parámetros recibidos
+        System.out.println("=== BÚSQUEDA COMPLETA ===");
+        ctx.queryParamMap().forEach((key, values) ->
+                                        System.out.println("  " + key + " = " + values)
+        );
+
         String titulo = ctx.queryParam("titulo");
         String categoria = ctx.queryParam("categoria");
         String fuente = ctx.queryParam("fuente");
@@ -212,9 +229,13 @@ public class Router {
         ctx.json(resultados);
 
       } catch (Exception e) {
+        System.err.println("ERROR en búsqueda completa: " + e.getMessage());
+        e.printStackTrace();
+
         ctx.status(400).json(Map.of(
             "error", true,
-            "mensaje", e.getMessage()
+            "mensaje", e.getMessage(),
+            "detalle", e.getClass().getName()
         ));
       }
     });
@@ -224,7 +245,9 @@ public class Router {
         String titulo = ctx.queryParam("titulo");
         Boolean soloConsensuados = ctx.queryParamAsClass("soloConsensuados", Boolean.class).getOrDefault(false);
 
-        List<Hecho> resultados = hechoController.buscarRapido(titulo, soloConsensuados);
+        // Usamos buscarRapido del repositorio que tiene lógica de integridad
+        List<Hecho> resultados = ar.edu.utn.frba.dds.repositories.HechoRepository.instance()
+                                                                                 .buscarRapido(titulo, soloConsensuados);
         ctx.json(resultados);
 
       } catch (Exception e) {

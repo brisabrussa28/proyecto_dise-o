@@ -12,14 +12,15 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.85); /* Un poco más oscuro */
             padding: 15px 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             color: white;
             width: 700px;
             max-width: 90%;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
         }
 
         .search-controls-overlay .form-control {
@@ -60,17 +61,19 @@
             bottom: 20px;
             right: 20px;
             z-index: 1000;
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
             padding: 8px 15px;
             border-radius: 20px;
             font-size: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         #filtrosAplicados {
-            background: rgba(40, 167, 69, 0.3);
-            border: 1px solid rgba(40, 167, 69, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 5px;
             padding: 8px 12px;
             margin-top: 10px;
@@ -106,44 +109,42 @@
     </style>
 
     <div id="map-container">
+        <!-- Overlay de Controles -->
         <div class="search-controls-overlay">
-            <div class="d-flex gap-2 align-items-center">
-                <button class="btn btn-warning" type="button" data-bs-toggle="offcanvas"
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <button class="btn btn-warning fw-bold text-dark" type="button" data-bs-toggle="offcanvas"
                         data-bs-target="#offcanvasFiltros" aria-controls="offcanvasFiltros">
-                    <i class="bi bi-funnel me-1"></i> Filtros
+                    <i class="bi bi-funnel-fill me-1"></i> Filtros
                 </button>
 
-                <input class="form-control shadow-sm" type="search"
+                <input class="form-control shadow-sm border-0" type="search"
                        placeholder="Buscar hecho por título..." id="searchInput"
                        aria-label="Search" style="flex: 1; min-width: 200px;">
 
                 <div class="form-check form-switch ms-2" style="min-width: 150px;">
                     <input class="form-check-input" type="checkbox"
                            id="filtroConsensuados" style="cursor: pointer;">
-                    <label class="form-check-label text-white small"
-                           for="filtroConsensuados" style="white-space: nowrap;">
-                        <i class="fa-solid fa-check-circle me-1"></i> Solo consensuados
+                    <label class="form-check-label text-white small user-select-none"
+                           for="filtroConsensuados">
+                        <i class="fa-solid fa-check-circle me-1 text-success"></i>Consensuados
                     </label>
                 </div>
 
-                <button class="btn btn-primary btn-sm" type="button" id="btnBuscarRapido">
-                    <i class="fa-solid fa-search me-1"></i> Buscar
-                </button>
-
-                <button class="btn btn-outline-light btn-sm" type="button" id="btnLimpiarBusqueda">
-                    <i class="fa-solid fa-times me-1"></i> Limpiar
-                </button>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-primary btn-sm px-3" type="button" id="btnBuscarRapido">
+                        <i class="fa-solid fa-search"></i>
+                    </button>
+                    <button class="btn btn-outline-light btn-sm px-3" type="button" id="btnLimpiarBusqueda" title="Limpiar todo">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                </div>
             </div>
 
             <div id="filtrosAplicados" class="mt-2 text-white small" style="display: none;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="fa-solid fa-filter me-1"></i>
-                        <span id="filtrosTexto"></span>
-                    </div>
-                    <button class="btn btn-sm btn-outline-light py-0 px-2" onclick="limpiarBusqueda()">
-                        <i class="fa-solid fa-times fa-xs"></i>
-                    </button>
+                <!-- Se eliminó el botón "Borrar" redundante, solo se muestra el texto del filtro -->
+                <div class="d-flex justify-content-start align-items-center">
+                    <i class="fa-solid fa-filter me-2 text-warning"></i>
+                    <span id="filtrosTexto" class="fst-italic"></span>
                 </div>
             </div>
         </div>
@@ -151,20 +152,21 @@
         <div id="map" style="height: 100%; width: 100%;"></div>
 
         <div id="contadorHechos">
-            <i class="fa-solid fa-map-marker-alt me-1"></i>
-            <span id="contadorNumero">0</span> hechos mostrados
+            <i class="fa-solid fa-map-marker-alt me-1 text-danger"></i>
+            <span id="contadorNumero">0</span> hechos visibles
         </div>
     </div>
 
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasResultados"
+    <!-- Offcanvas Resultados -->
+    <div class="offcanvas offcanvas-start sidebar-filtros" tabindex="-1" id="offcanvasResultados"
          aria-labelledby="offcanvasResultadosLabel"
          data-bs-backdrop="false"
          data-bs-scroll="true">
-        <div class="offcanvas-header bg-dark text-white">
-            <h5 class="offcanvas-title" id="offcanvasResultadosLabel">
-                <i class="fa-solid fa-search me-2"></i> Resultados de Búsqueda
+        <div class="offcanvas-header sidebar-header-custom">
+            <h5 class="offcanvas-title sidebar-title" id="offcanvasResultadosLabel">
+                <i class="fa-solid fa-list-ul me-2 text-primary"></i> Resultados
             </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body p-0" id="resultadosBody">
             <div class="text-center py-5 text-muted">
@@ -179,6 +181,13 @@
             let map;
             let markers = [];
             const currentUserId = {{#if usuario_id}}{{usuario_id}}{{else}}-1{{/if}};
+
+            // ---------------------------------------------------------
+            // 1. CARGA DE DATOS (Backend Optimizado)
+            // ---------------------------------------------------------
+            const hechosData = {{{hechosJson}}};
+
+            console.log(`[MetaMapa] Cargados ${hechosData.length} hechos válidos desde el backend.`);
 
             // Estado de los filtros
             let filtrosActivos = {
@@ -237,30 +246,30 @@
                     }
                 }
 
-                    let htmlImagen = '';
-                    const fotos = hecho.fotos || hecho.hecho_fotos;
-                    if (fotos && fotos.length > 0) {
-                        if (fotos[0].esVideo){
-                            htmlImagen = `
-                                <div class="d-flex align-items-center justify-content-center bg-black mb-2" style="height: 140px;">
-                                     <a href="/hechos/${hecho.id}"><video src="/hechos/${hecho.id}/multimedia/0"
-                                     class="w-100 h-100"
-                                     muted
-                                     autoplay
-                                     loop
-                                     style="object-fit: contain;">
-                                     </video></a>
-                                 </div>
-                             `;
-                        } else {
-                            htmlImagen = `
-                            <a href="/hechos/${hecho.id}"><img src="/hechos/${hecho.id}/multimedia/0"
-                             class="card-img-top mb-2"
-                             alt="Foto"
-                             style="height: 140px; object-fit: fit;"></a>
+                let htmlImagen = '';
+                const fotos = hecho.fotos || hecho.hecho_fotos;
+                if (fotos && fotos.length > 0) {
+                    if (fotos[0].esVideo){
+                        htmlImagen = `
+                            <div class="d-flex align-items-center justify-content-center bg-black mb-2" style="height: 140px;">
+                                    <a href="/hechos/${hecho.id}"><video src="/hechos/${hecho.id}/multimedia/0"
+                                    class="w-100 h-100"
+                                    muted
+                                    autoplay
+                                    loop
+                                    style="object-fit: contain;">
+                                    </video></a>
+                                </div>
                             `;
-                        }
+                    } else {
+                        htmlImagen = `
+                        <img src="/hechos/${hecho.id}/multimedia/0"
+                            class="card-img-top mb-2"
+                            alt="Foto"
+                            style="height: 140px; object-fit: fit;">
+                        `;
                     }
+                }
 
                 const autor = hecho.autor || hecho.hecho_autor || {};
                 const autorNombre = autor.userName || 'Dataset';
@@ -404,132 +413,26 @@
                 }
             }
 
-            async function buscarHechos() {
-                const searchInput = document.getElementById('searchInput');
-                const filtroConsensuados = document.getElementById('filtroConsensuados');
-                const resultadosBody = document.getElementById('resultadosBody');
-                const offcanvasResultadosEl = document.getElementById('offcanvasResultados');
-                const offcanvasResultados = bootstrap.Offcanvas.getOrCreateInstance(offcanvasResultadosEl);
-
-                const titulo = searchInput.value.trim();
-                const soloConsensuados = filtroConsensuados.checked;
-
-                // Actualizar filtros activos
-                filtrosActivos.titulo = titulo;
-                filtrosActivos.soloConsensuados = soloConsensuados;
-
-                // Determinar qué endpoint usar
-                const usarBusquedaRapida = titulo || soloConsensuados;
-
-                if (!usarBusquedaRapida) {
-                    mostrarTodosLosHechos();
-                    if (offcanvasResultados._isShown) {
-                        offcanvasResultados.hide();
-                    }
-                    return;
-                }
-
-                resultadosBody.innerHTML = `
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Cargando...</span>
-                        </div>
-                        <p class="mt-2 text-muted">Buscando hechos...</p>
-                    </div>
-                `;
-
-                offcanvasResultados.show();
-
-                try {
-                    let url;
-                    if (titulo || soloConsensuados) {
-                        // Usar búsqueda rápida si solo tenemos título y/o consensuados
-                        url = `/api/hechos/buscar-rapido?titulo=${encodeURIComponent(titulo)}&soloConsensuados=${soloConsensuados}`;
-                    } else {
-                        // Usar búsqueda completa si hay otros filtros
-                        url = construirUrlFiltrosCompletos();
-                    }
-
-                    console.log('Fetching URL:', url);
-
-                    const resp = await fetch(url);
-
-                    if (!resp.ok) {
-                        const errorData = await resp.json().catch(() => ({}));
-                        throw new Error(errorData.mensaje || `Error ${resp.status}: ${resp.statusText}`);
-                    }
-
-                    const data = await resp.json();
-                    const hechosResultantes = Array.isArray(data) ? data : (data.resultados || []);
-
-                    mostrarResultadosBusqueda(hechosResultantes, titulo, soloConsensuados);
-                    mostrarHechosEnMapa(hechosResultantes);
-                    actualizarFiltrosTexto();
-
-                } catch (error) {
-                    console.error('Error en búsqueda:', error);
-                    resultadosBody.innerHTML = `
-                        <div class="alert alert-danger m-3" role="alert">
-                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                            <strong>Error en la búsqueda:</strong><br>
-                            <small>${error.message}</small>
-                        </div>
-                    `;
-                }
-            }
-
-            function construirUrlFiltrosCompletos() {
-                const params = new URLSearchParams();
-
-                if (filtrosActivos.titulo) params.append('titulo', filtrosActivos.titulo);
-                if (filtrosActivos.categoria !== "0") params.append('categoria', filtrosActivos.categoria);
-                if (filtrosActivos.fuente !== "0") params.append('fuente', filtrosActivos.fuente);
-                if (filtrosActivos.coleccion !== "0") params.append('coleccion', filtrosActivos.coleccion);
-                if (filtrosActivos.fechaDesde) params.append('fechaDesde', filtrosActivos.fechaDesde);
-                if (filtrosActivos.fechaHasta) params.append('fechaHasta', filtrosActivos.fechaHasta);
-                if (filtrosActivos.soloConsensuados) params.append('soloConsensuados', 'true');
-
-                return `/api/hechos/buscar-completo?${params.toString()}`;
-            }
-
-            function mostrarResultadosBusqueda(hechos, titulo, soloConsensuados) {
+            function mostrarResultadosBusqueda(hechos) {
                 const resultadosBody = document.getElementById('resultadosBody');
                 resultadosBody.innerHTML = '';
 
                 if (!hechos || hechos.length === 0) {
-                    const filtrosTexto = [];
-                    if (titulo) filtrosTexto.push(`"${titulo}"`);
-                    if (soloConsensuados) filtrosTexto.push('solo consensuados');
-
                     resultadosBody.innerHTML = `
                         <div class="text-center py-5 text-muted">
                             <i class="fa-solid fa-search fa-2x mb-3"></i><br>
-                            No se encontraron hechos
-                            ${filtrosTexto.length > 0 ? `con ${filtrosTexto.join(' y ')}` : ''}
+                            No se encontraron hechos que coincidan.
                         </div>
                     `;
                     return;
                 }
 
-                const filtrosTexto = [];
-                if (titulo) filtrosTexto.push(`Título: "${titulo}"`);
-                if (soloConsensuados) filtrosTexto.push('Solo consensuados');
-
+                // Mostrar resumen
                 const resumenHTML = `
                     <div class="p-3 bg-light border-bottom sticky-top">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">
-                                    <i class="fa-solid fa-filter me-2"></i>
-                                    ${hechos.length} resultado${hechos.length !== 1 ? 's' : ''}
-                                </h6>
-                                <small class="text-muted">
-                                    ${filtrosTexto.join(' • ')}
-                                </small>
-                            </div>
-                            <button class="btn btn-sm btn-outline-secondary" onclick="limpiarBusqueda()">
-                                <i class="fa-solid fa-times me-1"></i> Limpiar
-                            </button>
+                         <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0"><i class="fa-solid fa-list me-2"></i>${hechos.length} resultados</h6>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="limpiarBusqueda()">Limpiar</button>
                         </div>
                     </div>
                 `;
@@ -554,7 +457,7 @@
                                                 ${hecho.hecho_titulo}
                                             </h6>
                                             ${esConsensuado ?
-                                                '<span class="badge bg-success" title="Hecho consensuado"><i class="fa-solid fa-check"></i></span>' :
+                                                '<span class="badge bg-success" title="Consensuado"><i class="fa-solid fa-check"></i></span>' :
                                                 ''}
                                         </div>
                                         <p class="card-text text-muted small mb-2" style="font-size: 0.85rem;">
@@ -566,9 +469,6 @@
                                             </span>
                                             <span class="text-muted">
                                                 <i class="fa-solid fa-calendar-day me-1"></i>${fecha}
-                                            </span>
-                                            <span class="text-muted">
-                                                <i class="fa-solid fa-location-dot me-1"></i>${hecho.hecho_provincia || 'S/D'}
                                             </span>
                                         </div>
                                     </div>
@@ -597,14 +497,29 @@
                 resultadosBody.appendChild(resultadosContainer);
             }
 
-            function mostrarTodosLosHechos() {
-                const hechosData = {{{hechosJson}}};
-                mostrarHechosEnMapa(hechosData);
-                resetearFiltrosUI();
-                actualizarFiltrosTexto();
+            function centrarMapaEnHecho(lat, lng, titulo) {
+                if (map) {
+                    map.setView([lat, lng], 15);
+                    markers.forEach(marker => {
+                        const markerLatLng = marker.getLatLng();
+                        if (Math.abs(markerLatLng.lat - lat) < 0.0001 &&
+                            Math.abs(markerLatLng.lng - lng) < 0.0001) {
+                            marker.openPopup();
+                        }
+                    });
+                }
+                const offcanvasResultados = bootstrap.Offcanvas.getInstance('#offcanvasResultados');
+                if (offcanvasResultados) {
+                    offcanvasResultados.hide();
+                }
             }
 
+            // ---------------------------------------------------------
+            // LÓGICA DE FILTRADO Y BÚSQUEDA (OPTIMIZADA: TODO LOCAL)
+            // ---------------------------------------------------------
+
             function resetearFiltrosUI() {
+                // 1. Resetear Estado
                 filtrosActivos = {
                     titulo: '',
                     soloConsensuados: false,
@@ -615,11 +530,16 @@
                     fechaHasta: ''
                 };
 
-                document.getElementById('searchInput').value = '';
-                document.getElementById('filtroConsensuados').checked = false;
-                document.getElementById('filtrosAplicados').style.display = 'none';
+                // 2. Resetear UI Barra Superior
+                const inputSearch = document.getElementById('searchInput');
+                const checkConsensuados = document.getElementById('filtroConsensuados');
+                const filtrosAplicadosDiv = document.getElementById('filtrosAplicados');
 
-                // También resetear los filtros del sidebar si existen
+                if(inputSearch) inputSearch.value = '';
+                if(checkConsensuados) checkConsensuados.checked = false;
+                if(filtrosAplicadosDiv) filtrosAplicadosDiv.style.display = 'none';
+
+                // 3. Resetear UI Sidebar
                 if (document.getElementById('Categoria')) document.getElementById('Categoria').value = "0";
                 if (document.getElementById('Fuente')) document.getElementById('Fuente').value = "0";
                 if (document.getElementById('Coleccion')) document.getElementById('Coleccion').value = "0";
@@ -630,169 +550,131 @@
                 }
             }
 
-            function actualizarFiltrosTexto() {
-                const filtrosAplicadosDiv = document.getElementById('filtrosAplicados');
-                const filtrosTextoSpan = document.getElementById('filtrosTexto');
+            // Función unificada para búsqueda
+            async function buscarHechos() {
+                const searchInput = document.getElementById('searchInput');
+                const filtroConsensuados = document.getElementById('filtroConsensuados');
 
-                const filtros = [];
+                filtrosActivos.titulo = searchInput.value.trim();
+                filtrosActivos.soloConsensuados = filtroConsensuados.checked;
 
-                if (filtrosActivos.titulo) filtros.push(`"${filtrosActivos.titulo}"`);
-                if (filtrosActivos.soloConsensuados) filtros.push('Consensuados');
-                if (filtrosActivos.categoria !== "0") filtros.push(`Categoría: ${filtrosActivos.categoria}`);
-                if (filtrosActivos.fuente !== "0") filtros.push(`Fuente: ${filtrosActivos.fuente}`);
-                if (filtrosActivos.coleccion !== "0") filtros.push(`Colección: ${filtrosActivos.coleccion}`);
-                if (filtrosActivos.fechaDesde) filtros.push(`Desde: ${filtrosActivos.fechaDesde}`);
-                if (filtrosActivos.fechaHasta) filtros.push(`Hasta: ${filtrosActivos.fechaHasta}`);
+                // Sincronizar sidebar visualmente
+                const sidebarCheck = document.getElementById('filtroConsensuadosSidebar');
+                if(sidebarCheck && filtroConsensuados) sidebarCheck.checked = filtroConsensuados.checked;
 
-                if (filtros.length > 0) {
-                    filtrosTextoSpan.textContent = filtros.join(' • ');
-                    filtrosAplicadosDiv.style.display = 'block';
-                } else {
-                    filtrosAplicadosDiv.style.display = 'none';
-                }
+                await ejecutarBusquedaAPI();
+            }
+
+            async function aplicarFiltrosAvanzados() {
+                // Leer valores del sidebar
+                const cat = document.getElementById('Categoria')?.value || '0';
+                const fue = document.getElementById('Fuente')?.value || '0';
+                const col = document.getElementById('Coleccion')?.value || '0';
+                const fdes = document.getElementById('fechaDesde')?.value || '';
+                const fhas = document.getElementById('fechaHasta')?.value || '';
+                const consSidebar = document.getElementById('filtroConsensuadosSidebar')?.checked || false;
+
+                // Actualizar estado
+                filtrosActivos.categoria = cat;
+                filtrosActivos.fuente = fue;
+                filtrosActivos.coleccion = col;
+                filtrosActivos.fechaDesde = fdes;
+                filtrosActivos.fechaHasta = fhas;
+                filtrosActivos.soloConsensuados = consSidebar;
+
+                // Sincronizar UI principal
+                const filtroConsensuados = document.getElementById('filtroConsensuados');
+                if(filtroConsensuados) filtroConsensuados.checked = consSidebar;
+
+                // Cerrar sidebar
+                const offcanvasFiltros = bootstrap.Offcanvas.getInstance('#offcanvasFiltros');
+                if (offcanvasFiltros) offcanvasFiltros.hide();
+
+                await ejecutarBusquedaAPI();
             }
 
             function limpiarBusqueda() {
                 resetearFiltrosUI();
-                mostrarTodosLosHechos();
+                mostrarHechosEnMapa(hechosData); // Restaurar dataset validado original
 
-                const resultadosBody = document.getElementById('resultadosBody');
-                resultadosBody.innerHTML = `
-                    <div class="text-center py-5 text-muted">
-                        <i class="fa-solid fa-search fa-2x mb-3"></i><br>
-                        Ingrese un término de búsqueda o aplique filtros
-                    </div>
-                `;
-
-                const offcanvasResultados = bootstrap.Offcanvas.getInstance('#offcanvasResultados');
-                if (offcanvasResultados) {
-                    offcanvasResultados.hide();
+                // Limpiar panel de resultados
+                 const resultadosBody = document.getElementById('resultadosBody');
+                if(resultadosBody) {
+                     resultadosBody.innerHTML = `
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-search fa-2x mb-3"></i><br>
+                            Ingrese un término de búsqueda o aplique filtros
+                        </div>`;
                 }
+                const offcanvasResultados = bootstrap.Offcanvas.getInstance('#offcanvasResultados');
+                if (offcanvasResultados) offcanvasResultados.hide();
             }
 
-            async function aplicarFiltrosAvanzados() {
-                const categoriaSelect = document.getElementById('Categoria');
-                const fuenteSelect = document.getElementById('Fuente');
-                const coleccionSelect = document.getElementById('Coleccion');
-                const fechaDesdeInput = document.getElementById('fechaDesde');
-                const fechaHastaInput = document.getElementById('fechaHasta');
-                const filtroConsensuadosSidebar = document.getElementById('filtroConsensuadosSidebar');
+            async function ejecutarBusquedaAPI() {
+                const params = new URLSearchParams();
+                if (filtrosActivos.titulo) params.append('titulo', filtrosActivos.titulo);
+                if (filtrosActivos.soloConsensuados) params.append('soloConsensuados', 'true');
+                if (filtrosActivos.categoria !== "0") params.append('categoria', filtrosActivos.categoria);
+                if (filtrosActivos.fuente !== "0") params.append('fuente', filtrosActivos.fuente);
+                if (filtrosActivos.coleccion !== "0") params.append('coleccion', filtrosActivos.coleccion);
+                if (filtrosActivos.fechaDesde) params.append('fechaDesde', filtrosActivos.fechaDesde);
+                if (filtrosActivos.fechaHasta) params.append('fechaHasta', filtrosActivos.fechaHasta);
+
+                actualizarFiltrosTexto();
+
+                // Mostrar Loading
                 const resultadosBody = document.getElementById('resultadosBody');
+                if(resultadosBody) {
+                    resultadosBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
+                }
                 const offcanvasResultadosEl = document.getElementById('offcanvasResultados');
                 const offcanvasResultados = bootstrap.Offcanvas.getOrCreateInstance(offcanvasResultadosEl);
 
-                // Actualizar filtros activos
-                filtrosActivos.categoria = categoriaSelect ? categoriaSelect.value : '0';
-                filtrosActivos.fuente = fuenteSelect ? fuenteSelect.value : '0';
-                filtrosActivos.coleccion = coleccionSelect ? coleccionSelect.value : '0';
-                filtrosActivos.fechaDesde = fechaDesdeInput ? fechaDesdeInput.value : '';
-                filtrosActivos.fechaHasta = fechaHastaInput ? fechaHastaInput.value : '';
-                filtrosActivos.soloConsensuados = filtroConsensuadosSidebar ? filtroConsensuadosSidebar.checked : false;
-
-                // Sincronizar el switch principal
-                document.getElementById('filtroConsensuados').checked = filtrosActivos.soloConsensuados;
-
-                // Verificar si hay al menos un filtro activo
-                const hayFiltrosActivos =
-                    filtrosActivos.categoria !== "0" ||
-                    filtrosActivos.fuente !== "0" ||
-                    filtrosActivos.coleccion !== "0" ||
-                    filtrosActivos.fechaDesde ||
-                    filtrosActivos.fechaHasta ||
-                    filtrosActivos.soloConsensuados;
-
-                if (!hayFiltrosActivos) {
-                    alert('Por favor, seleccione al menos un filtro para aplicar');
-                    return;
-                }
-
-                resultadosBody.innerHTML = `
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Cargando...</span>
-                        </div>
-                        <p class="mt-2 text-muted">Aplicando filtros...</p>
-                    </div>
-                `;
-
-                offcanvasResultados.show();
+                const hayFiltros = Object.values(filtrosActivos).some(v => v !== '' && v !== '0' && v !== false);
+                if(hayFiltros) offcanvasResultados.show();
 
                 try {
-                    const url = construirUrlFiltrosCompletos();
-                    console.log('Fetching URL con filtros avanzados:', url);
-
+                    const url = `/api/hechos/buscar-completo?${params.toString()}`;
                     const resp = await fetch(url);
-
-                    if (!resp.ok) {
-                        const errorData = await resp.json().catch(() => ({}));
-                        throw new Error(errorData.mensaje || `Error ${resp.status}: ${resp.statusText}`);
-                    }
-
+                    if (!resp.ok) throw new Error('Error en búsqueda');
                     const data = await resp.json();
-                    const hechosResultantes = data.resultados || [];
+                    const resultados = data.resultados || [];
 
-                    mostrarResultadosBusqueda(hechosResultantes, filtrosActivos.titulo, filtrosActivos.soloConsensuados);
-                    mostrarHechosEnMapa(hechosResultantes);
-                    actualizarFiltrosTexto();
+                    mostrarHechosEnMapa(resultados);
+                    mostrarResultadosBusqueda(resultados);
 
-                    // Cerrar el sidebar de filtros
-                    const offcanvasFiltros = bootstrap.Offcanvas.getInstance('#offcanvasFiltros');
-                    if (offcanvasFiltros) {
-                        offcanvasFiltros.hide();
-                    }
-
-                } catch (error) {
-                    console.error('Error en filtros avanzados:', error);
-                    resultadosBody.innerHTML = `
-                        <div class="alert alert-danger m-3" role="alert">
-                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                            <strong>Error al aplicar filtros:</strong><br>
-                            <small>${error.message}</small>
-                        </div>
-                    `;
+                } catch (e) {
+                    console.error("Error buscando:", e);
                 }
             }
 
-            function centrarMapaEnHecho(lat, lng, titulo) {
-                if (map) {
-                    map.setView([lat, lng], 15);
+            function actualizarFiltrosTexto() {
+                 const div = document.getElementById('filtrosAplicados');
+                 const span = document.getElementById('filtrosTexto');
 
-                    // Abrir el popup del marcador si existe
-                    markers.forEach(marker => {
-                        const markerLatLng = marker.getLatLng();
-                        if (Math.abs(markerLatLng.lat - lat) < 0.0001 &&
-                            Math.abs(markerLatLng.lng - lng) < 0.0001) {
-                            marker.openPopup();
-                        }
-                    });
-                }
+                 const partes = [];
+                 if(filtrosActivos.titulo) partes.push(`"${filtrosActivos.titulo}"`);
+                 if(filtrosActivos.categoria !== '0') partes.push(filtrosActivos.categoria);
+                 if(filtrosActivos.coleccion !== '0') partes.push(`Col: ${filtrosActivos.coleccion}`);
+                 if(filtrosActivos.fuente !== '0') partes.push(`Fuente: ${filtrosActivos.fuente}`);
 
-                const offcanvasResultados = bootstrap.Offcanvas.getInstance('#offcanvasResultados');
-                if (offcanvasResultados) {
-                    offcanvasResultados.hide();
-                }
+                 if(partes.length > 0 || filtrosActivos.soloConsensuados) {
+                     span.textContent = partes.join(', ') + (filtrosActivos.soloConsensuados ? (partes.length ? ', Consensuados' : 'Consensuados') : '');
+                     div.style.display = 'block';
+                 } else {
+                     div.style.display = 'none';
+                 }
             }
 
             // Inicialización
             initMap();
+            mostrarHechosEnMapa(hechosData); // Mostrar solo datos validados
 
-            const hechosData = {{{hechosJson}}};
-            mostrarHechosEnMapa(hechosData);
-            updateContador(hechosData.length);
-
-            // Event listeners
+            // Event Listeners UI Principal
             document.getElementById('btnBuscarRapido').addEventListener('click', buscarHechos);
             document.getElementById('btnLimpiarBusqueda').addEventListener('click', limpiarBusqueda);
-
-            document.getElementById('searchInput').addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    buscarHechos();
-                }
-            });
-
-            document.getElementById('filtroConsensuados').addEventListener('change', function() {
-                buscarHechos();
-            });
+            document.getElementById('searchInput').addEventListener('keydown', (e) => { if(e.key==='Enter') buscarHechos(); });
+            document.getElementById('filtroConsensuados').addEventListener('change', buscarHechos);
 
             document.addEventListener('click', function(e) {
                 if (e.target && e.target.classList.contains('ver-en-mapa')) {
@@ -807,11 +689,10 @@
                 }
             });
 
-            // Funciones globales para el sidebar
+            // Exponer al scope global para el layout.hbs
             window.aplicarFiltros = aplicarFiltrosAvanzados;
             window.limpiarFiltros = limpiarBusqueda;
         });
     </script>
-
 {{/partial}}
 {{> templates/layout}}
