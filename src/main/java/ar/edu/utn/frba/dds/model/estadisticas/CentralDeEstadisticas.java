@@ -25,8 +25,16 @@ public class CentralDeEstadisticas {
   private static final Logger logger = Logger.getLogger(CentralDeEstadisticas.class.getName());
   private GestorDeSolicitudes gestor; // AHORA: Depende del Gestor
   private Exportador<Estadistica> exportador;
-  // --- Lógica Principal de Estadísticas ---
 
+  private static final List<String> PROVINCIAS = List.of(
+      "Buenos Aires", "CABA", "Catamarca", "Chaco", "Chubut",
+      "Córdoba", "Corrientes", "Entre Ríos", "Formosa", "Jujuy",
+      "La Pampa", "La Rioja", "Mendoza", "Misiones", "Neuquén",
+      "Río Negro", "Salta", "San Juan", "San Luis", "Santa Cruz",
+      "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"
+  );
+
+  // --- Lógica Principal de Estadísticas ---
   //Cantidad de hechos por provincia segun categoria
   public List<Estadistica> hechosPorProvinciaSegunCategoria(String categoria) {
     List<Hecho> todosLosHechos = obtenerTodosLosHechos();
@@ -41,16 +49,15 @@ public class CentralDeEstadisticas {
                                                                 Collectors.counting()
                                                             ));
 
-    List<Estadistica> estadisticas = cantidadPorProvincia.entrySet().stream()
-                                                         .map(entry -> new Estadistica(
-                                                             entry.getKey(),
-                                                             entry.getValue(),
-                                                             categoria,
-                                                             null,
-                                                             "HECHOS POR PROVINCIA Y CATEGORIA"
-                                                         ))
-                                                         .collect(Collectors.toList());
-    return estadisticas;
+    return PROVINCIAS.stream()
+                     .map(prov -> new Estadistica(
+                         prov,
+                         cantidadPorProvincia.getOrDefault(prov, 0L),
+                         categoria,
+                         null,
+                         "HECHOS POR PROVINCIA Y CATEGORIA"
+                     ))
+                     .toList();
   }
 
   //Cantidad de hechos por hora segun categoria
@@ -67,16 +74,20 @@ public class CentralDeEstadisticas {
                                                              Collectors.counting()
                                                          ));
 
-    List<Estadistica> estadisticas = cantidadPorHora.entrySet().stream()
-                                                         .map(entry -> new Estadistica(
-                                                             entry.getKey(),
-                                                             entry.getValue(),
-                                                             categoria,
-                                                             null,
-                                                             "HECHOS POR HORA Y CATEGORIA"
-                                                         ))
-                                                         .collect(Collectors.toList());
-    return estadisticas;
+    List<String> horas = java.util.stream.IntStream.range(0, 24)
+                                                   .mapToObj(h -> String.format("%02d", h))
+                                                   .toList();
+
+    return horas.stream()
+                .map(h -> new Estadistica(
+                    h,
+                    cantidadPorHora.getOrDefault(h, 0L),
+                    categoria,
+                    null,
+                    "HECHOS POR HORA Y CATEGORIA"
+                ))
+                .toList();
+
   }
   //Cantidad de hechos reportados por categoria
   public List<Estadistica> hechosPorCategoria() {
@@ -113,16 +124,15 @@ public class CentralDeEstadisticas {
                                                                   Collectors.counting()
                                                               ));
 
-    List<Estadistica> estadisticas = cantidadPorProvincia.entrySet().stream()
-                                                    .map(entry -> new Estadistica(
-                                                        entry.getKey(),
-                                                        entry.getValue(),
-                                                        null,
-                                                        coleccion,
-                                                        "HECHOS REPORTADOS POR PROVINCIA Y COLECCION"
-                                                    ))
-                                                    .collect(Collectors.toList());
-    return estadisticas;
+    return PROVINCIAS.stream()
+                     .map(prov -> new Estadistica(
+                         prov,
+                         cantidadPorProvincia.getOrDefault(prov, 0L),
+                         null,
+                         coleccion,
+                         "HECHOS REPORTADOS POR PROVINCIA Y COLECCION"
+                     ))
+                     .toList();
   }
   //Cantidad de hechos
   public Estadistica calcularStatsCantHechos() {

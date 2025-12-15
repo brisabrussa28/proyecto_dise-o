@@ -2,90 +2,202 @@ package ar.edu.utn.frba.dds.server;
 
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.Absoluta;
-import ar.edu.utn.frba.dds.model.estadisticas.Estadistica;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
-import ar.edu.utn.frba.dds.model.hecho.CampoHecho;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
-import ar.edu.utn.frba.dds.model.reportes.Solicitud;
-import ar.edu.utn.frba.dds.model.usuario.Rol;
-import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
-import ar.edu.utn.frba.dds.repositories.EstadisticaRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
-import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
-import ar.edu.utn.frba.dds.repositories.TFIDFRepository;
-import ar.edu.utn.frba.dds.repositories.UserRepository;
 import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Bootstrap implements WithSimplePersistenceUnit {
-
-  private Map<String, List<String>> convertirMapeoAString(Map<CampoHecho, List<String>> mapeoEnum) {
-    return mapeoEnum.entrySet()
-                    .stream()
-                    .collect(Collectors.toMap(
-                        entry -> entry.getKey().name(),
-                        Map.Entry::getValue
-                    ));
-  }
 
   public void init() {
     withTransaction(() -> {
       System.out.println("=== INICIALIZANDO SISTEMA ===");
 
-      // Verificar si ya hay datos inicializados
-      if (yaInicializado()) {
-        System.out.println("El sistema ya fue inicializado anteriormente.");
-        return;
-      }
-
-      LocalDateTime ahora = LocalDateTime.now();
-      PuntoGeografico ubicacion = new PuntoGeografico(-34.60, -58.38);
-
       System.out.println("Creando datos de prueba...");
-
       // Crear hechos
       Hecho h1 = new HechoBuilder()
-          .conTitulo("Robo en Almagro")
-          .conCategoria("Robo")
-          .conProvincia("Buenos Aires")
-          .conFechaSuceso(ahora.minusHours(1))
-          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-          .conUbicacion(ubicacion)
-          .build();
-
-      Hecho h2 = new HechoBuilder()
-          .conTitulo("Hurto en Avellaneda")
-          .conCategoria("Hurto")
-          .conProvincia("Buenos Aires")
-          .conFechaSuceso(ahora.minusHours(2))
-          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-          .conUbicacion(ubicacion)
-          .build();
-
-      Hecho h3 = new HechoBuilder()
-          .conTitulo("Accidente en Córdoba")
-          .conCategoria("Accidente")
-          .conProvincia("Córdoba")
-          .conFechaSuceso(ahora.minusHours(3))
-          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-          .conUbicacion(ubicacion)
-          .build();
-
-      Hecho h4 = new HechoBuilder()
           .conTitulo("Vandalismo en Rosario")
           .conCategoria("Vandalismo")
           .conProvincia("Santa Fe")
-          .conFechaSuceso(ahora.minusHours(4))
+          .conFechaSuceso(LocalDateTime.now().minusHours(4))
           .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
-          .conUbicacion(ubicacion)
+          .conUbicacion(new PuntoGeografico(-32.95, -60.66))
+          .build();
+
+      Hecho h2 = new HechoBuilder()
+          .conTitulo("Accidente de tránsito en Córdoba")
+          .conCategoria("Accidente")
+          .conProvincia("Córdoba")
+          .conFechaSuceso(LocalDateTime.now().minusDays(1))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-31.42, -64.18))
+          .build();
+
+      Hecho h3 = new HechoBuilder()
+          .conTitulo("Incendio en Mendoza")
+          .conCategoria("Incendio")
+          .conProvincia("Mendoza")
+          .conFechaSuceso(LocalDateTime.now().minusHours(12))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-32.89, -68.85))
+          .build();
+
+      Hecho h4 = new HechoBuilder()
+          .conTitulo("Robo en San Miguel de Tucumán")
+          .conCategoria("Robo")
+          .conProvincia("Tucumán")
+          .conFechaSuceso(LocalDateTime.now().minusDays(2))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-26.82, -65.22))
+          .build();
+
+      Hecho h5 = new HechoBuilder()
+          .conTitulo("Accidente en Villa María")
+          .conCategoria("Accidente")
+          .conProvincia("Córdoba")
+          .conFechaSuceso(LocalDateTime.now().minusHours(8))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-32.41, -63.25))
+          .build();
+
+      Hecho h6 = new HechoBuilder()
+          .conTitulo("Incendio forestal en San Rafael")
+          .conCategoria("Incendio")
+          .conProvincia("Mendoza")
+          .conFechaSuceso(LocalDateTime.now().minusDays(3))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-34.61, -68.33))
+          .build();
+
+      Hecho h7 = new HechoBuilder()
+          .conTitulo("Vandalismo en Santa Fe Capital")
+          .conCategoria("Vandalismo")
+          .conProvincia("Santa Fe")
+          .conFechaSuceso(LocalDateTime.now().minusHours(6))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-31.63, -60.70))
+          .build();
+
+      Hecho h8 = new HechoBuilder()
+          .conTitulo("Robo en Yerba Buena")
+          .conCategoria("Robo")
+          .conProvincia("Tucumán")
+          .conFechaSuceso(LocalDateTime.now().minusHours(10))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-26.82, -65.33))
+          .build();
+
+      Hecho h9 = new HechoBuilder()
+          .conTitulo("Accidente en Río Cuarto")
+          .conCategoria("Accidente")
+          .conProvincia("Córdoba")
+          .conFechaSuceso(LocalDateTime.now().minusDays(1))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-33.13, -64.35))
+          .build();
+
+      Hecho h10 = new HechoBuilder()
+          .conTitulo("Incendio en Godoy Cruz")
+          .conCategoria("Incendio")
+          .conProvincia("Mendoza")
+          .conFechaSuceso(LocalDateTime.now().minusHours(5))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-32.92, -68.83))
+          .build();
+
+      Hecho h11 = new HechoBuilder()
+          .conTitulo("Vandalismo en Rafaela")
+          .conCategoria("Vandalismo")
+          .conProvincia("Santa Fe")
+          .conFechaSuceso(LocalDateTime.now().minusDays(2))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-31.25, -61.49))
+          .build();
+
+      Hecho h12 = new HechoBuilder()
+          .conTitulo("Robo en Concepción")
+          .conCategoria("Robo")
+          .conProvincia("Tucumán")
+          .conFechaSuceso(LocalDateTime.now().minusHours(7))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-27.34, -65.59))
+          .build();
+
+      Hecho h13 = new HechoBuilder()
+          .conTitulo("Accidente en Buenos Aires")
+          .conCategoria("Accidente")
+          .conProvincia("Buenos Aires")
+          .conFechaSuceso(LocalDateTime.now().minusHours(9))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-34.61, -58.38))
+          .build();
+
+      Hecho h14 = new HechoBuilder()
+          .conTitulo("Incendio en La Plata")
+          .conCategoria("Incendio")
+          .conProvincia("Buenos Aires")
+          .conFechaSuceso(LocalDateTime.now().minusDays(1))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-34.92, -57.95))
+          .build();
+
+      Hecho h15 = new HechoBuilder()
+          .conTitulo("Robo en Mar del Plata")
+          .conCategoria("Robo")
+          .conProvincia("Buenos Aires")
+          .conFechaSuceso(LocalDateTime.now().minusHours(11))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-38.00, -57.55))
+          .build();
+
+      Hecho h16 = new HechoBuilder()
+          .conTitulo("Accidente en Posadas")
+          .conCategoria("Accidente")
+          .conProvincia("Misiones")
+          .conFechaSuceso(LocalDateTime.now().minusDays(2))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-27.36, -55.89))
+          .build();
+
+      Hecho h17 = new HechoBuilder()
+          .conTitulo("Incendio en San Luis")
+          .conCategoria("Incendio")
+          .conProvincia("San Luis")
+          .conFechaSuceso(LocalDateTime.now().minusHours(14))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-33.30, -66.34))
+          .build();
+
+      Hecho h18 = new HechoBuilder()
+          .conTitulo("Robo en Corrientes")
+          .conCategoria("Robo")
+          .conProvincia("Corrientes")
+          .conFechaSuceso(LocalDateTime.now().minusHours(3))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-27.48, -58.83))
+          .build();
+
+      Hecho h19 = new HechoBuilder()
+          .conTitulo("Accidente en Neuquén")
+          .conCategoria("Accidente")
+          .conProvincia("Neuquén")
+          .conFechaSuceso(LocalDateTime.now().minusDays(1))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-38.95, -68.06))
+          .build();
+
+      Hecho h20 = new HechoBuilder()
+          .conTitulo("Incendio en Bariloche")
+          .conCategoria("Incendio")
+          .conProvincia("Río Negro")
+          .conFechaSuceso(LocalDateTime.now().minusHours(15))
+          .conOrigen(Origen.PROVISTO_CONTRIBUYENTE)
+          .conUbicacion(new PuntoGeografico(-41.13, -71.31))
           .build();
 
       // Crear fuente y colección
@@ -94,242 +206,59 @@ public class Bootstrap implements WithSimplePersistenceUnit {
       fuente.agregarHecho(h2);
       fuente.agregarHecho(h3);
       fuente.agregarHecho(h4);
+      fuente.agregarHecho(h5);
+      fuente.agregarHecho(h6);
+      fuente.agregarHecho(h7);
+      fuente.agregarHecho(h8);
+      fuente.agregarHecho(h9);
+      fuente.agregarHecho(h10);
+      fuente.agregarHecho(h11);
+      fuente.agregarHecho(h12);
+      fuente.agregarHecho(h13);
+      fuente.agregarHecho(h14);
+      fuente.agregarHecho(h15);
+      fuente.agregarHecho(h16);
+      fuente.agregarHecho(h17);
+      fuente.agregarHecho(h18);
+      fuente.agregarHecho(h19);
+      fuente.agregarHecho(h20);
 
       new FuenteRepository().save(fuente);
       System.out.println("Fuente creada: " + fuente.getNombre());
 
-      var coleccion = new Coleccion(
-          "Colección de Hechos",
+      // Colección de Accidentes
+      var coleccionAccidentes = new Coleccion(
+          "Colección de Accidentes",
           fuente,
-          "Colección de prueba",
-          "General",
+          "Hechos relacionados con accidentes de tránsito y urbanos",
+          "Accidentes",
           new Absoluta()
       );
 
-      new ColeccionRepository().save(coleccion);
-      System.out.println("Colección creada: " + coleccion.getTitulo());
+    // Colección de Incendios
+      var coleccionIncendios = new Coleccion(
+          "Colección de Incendios",
+          fuente,
+          "Hechos relacionados con incendios forestales y urbanos",
+          "Incendios",
+          new Absoluta()
+      );
 
-      // Crear usuario admin
-      crearUsuarioAdmin();
+    // Colección de Robos y Vandalismo
+      var coleccionRobosVandalismo = new Coleccion(
+          "Colección de Robos y Vandalismo",
+          fuente,
+          "Hechos relacionados con delitos contra la propiedad",
+          "Delitos",
+          new Absoluta()
+      );
 
-      // Crear estadísticas de prueba
-      crearEstadisticasDePrueba(coleccion);
-
-      // Crear solicitudes de prueba
-      crearSolicitudesDePrueba(h1, h2);
-
-      // ===== INICIALIZACIÓN TF-IDF =====
-      inicializarEjemplosTFIDF();
+      new ColeccionRepository().save(coleccionAccidentes);
+      new ColeccionRepository().save(coleccionIncendios);
+      new ColeccionRepository().save(coleccionRobosVandalismo);
+      System.out.println("Colecciones creadas");
 
       System.out.println("=== INICIALIZACIÓN COMPLETADA ===");
     });
-  }
-
-  /**
-   * Verifica si el sistema ya fue inicializado
-   */
-  private boolean yaInicializado() {
-    try {
-      // Verificar si ya hay vectores TF-IDF
-      TFIDFRepository tfidfRepo = TFIDFRepository.instance();
-      long conteoVectores = tfidfRepo.contarVectoresSpam();
-
-      System.out.println("Verificando estado de inicialización:");
-      System.out.println("  - Vectores TF-IDF: " + conteoVectores);
-
-      // Si ya hay vectores, asumimos que ya fue inicializado
-      return conteoVectores > 0;
-
-    } catch (Exception e) {
-      System.err.println("Error al verificar inicialización: " + e.getMessage());
-      return false; // Si hay error, proceder con inicialización
-    }
-  }
-
-  /**
-   * Crea el usuario administrador
-   */
-  private void crearUsuarioAdmin() {
-    try {
-      UserRepository userRepo = UserRepository.instance();
-      if (userRepo.buscarPorEmail("admin1@mock.com") == null) {
-        Usuario admin = new Usuario(
-            "admin1@mock.com",
-            "administrador",
-            null,
-            "admin123",
-            Rol.ADMINISTRADOR
-        );
-        userRepo.guardar(admin);
-        System.out.println("Usuario admin creado: admin1@mock.com");
-      } else {
-        System.out.println("Usuario admin ya existe: admin1@mock.com");
-      }
-    } catch (Exception e) {
-      System.err.println("Error al crear usuario admin: " + e.getMessage());
-    }
-  }
-
-  /**
-   * Crea estadísticas de prueba
-   */
-  private void crearEstadisticasDePrueba(Coleccion coleccion) {
-    try {
-      EstadisticaRepository repoEst = EstadisticaRepository.instance();
-
-      repoEst.save(new Estadistica("Buenos Aires", 5L, "Robo", null, "HECHOS POR PROVINCIA Y CATEGORIA"));
-      repoEst.save(new Estadistica("Buenos Aires", 3L, "Hurto", null, "HECHOS POR PROVINCIA Y CATEGORIA"));
-      repoEst.save(new Estadistica("Córdoba", 4L, "Accidente", null, "HECHOS POR PROVINCIA Y CATEGORIA"));
-      repoEst.save(new Estadistica("Santa Fe", 2L, "Vandalismo", null, "HECHOS POR PROVINCIA Y CATEGORIA"));
-
-      repoEst.save(new Estadistica("08", 3L, "Robo", null, "HECHOS POR HORA Y CATEGORIA"));
-      repoEst.save(new Estadistica("09", 2L, "Hurto", null, "HECHOS POR HORA Y CATEGORIA"));
-      repoEst.save(new Estadistica("10", 4L, "Accidente", null, "HECHOS POR HORA Y CATEGORIA"));
-      repoEst.save(new Estadistica("11", 1L, "Vandalismo", null, "HECHOS POR HORA Y CATEGORIA"));
-
-      repoEst.save(new Estadistica(null, 5L, "Robo", null, "HECHOS REPORTADOS POR CATEGORIA"));
-      repoEst.save(new Estadistica(null, 3L, "Hurto", null, "HECHOS REPORTADOS POR CATEGORIA"));
-      repoEst.save(new Estadistica(null, 4L, "Accidente", null, "HECHOS REPORTADOS POR CATEGORIA"));
-      repoEst.save(new Estadistica(null, 2L, "Vandalismo", null, "HECHOS REPORTADOS POR CATEGORIA"));
-
-      repoEst.save(new Estadistica("Buenos Aires", 4L, null, coleccion, "HECHOS REPORTADOS POR PROVINCIA Y COLECCION"));
-      repoEst.save(new Estadistica("Córdoba", 2L, null, coleccion, "HECHOS REPORTADOS POR PROVINCIA Y COLECCION"));
-      repoEst.save(new Estadistica("Santa Fe", 1L, null, coleccion, "HECHOS REPORTADOS POR PROVINCIA Y COLECCION"));
-
-      repoEst.save(new Estadistica(null, 110L, null, null, "CANTIDAD DE HECHOS"));
-      repoEst.save(new Estadistica(null, 60L, null, null, "CANTIDAD DE SOLICITUDES PENDIENTES"));
-      repoEst.save(new Estadistica(null, 30L, null, null, "CANTIDAD DE SPAM"));
-
-      System.out.println("Estadísticas de prueba creadas");
-    } catch (Exception e) {
-      System.err.println("Error al crear estadísticas de prueba: " + e.getMessage());
-    }
-  }
-
-  /**
-   * Crea solicitudes de prueba
-   */
-  private void crearSolicitudesDePrueba(Hecho h1, Hecho h2) {
-    try {
-      String motivo = "x".repeat(600);
-      SolicitudesRepository.instance().guardar(new Solicitud(h1, motivo));
-      SolicitudesRepository.instance().guardar(new Solicitud(h2, motivo));
-      System.out.println("Solicitudes de prueba creadas");
-    } catch (Exception e) {
-      System.err.println("Error al crear solicitudes de prueba: " + e.getMessage());
-    }
-  }
-
-  /**
-   * Inicializa la base de datos con ejemplos básicos de spam para TF-IDF
-   */
-  private void inicializarEjemplosTFIDF() {
-    System.out.println("Inicializando ejemplos TF-IDF...");
-
-    TFIDFRepository tfidfRepo = TFIDFRepository.instance();
-
-    try {
-      // Verificar conexión
-      Long totalSpam = tfidfRepo.contarVectoresSpam();
-      System.out.println("Vectores actuales en DB: " + totalSpam);
-
-      if (totalSpam > 0) {
-        System.out.println("TF-IDF ya tiene ejemplos almacenados");
-        return;
-      }
-
-      // Ejemplos básicos de spam
-      String[] ejemplosSpam = {
-          "COMPRA YA!!! OFERTA EXCLUSIVA 50% DESCUENTO",
-          "GANE DINERO RÁPIDO trabajando desde casa",
-          "CLIC AQUÍ para premio sorpresa",
-          "URGENTE: necesita ayuda financiera inmediata",
-          "Producto milagroso que cura todo",
-          "Oportunidad única de inversión garantizada",
-          "Gane millones sin esfuerzo ni experiencia",
-          "Descuento exclusivo solo por tiempo limitado",
-          "Ingrese a este link para reclamar su premio",
-          "Dinero fácil y rápido desde su hogar"
-      };
-
-      int creados = 0;
-      for (String ejemplo : ejemplosSpam) {
-        try {
-          // Verificar si ya existe
-          if (!tfidfRepo.existeTextoSimilar(ejemplo)) {
-            // Crear vector simple
-            Map<String, Double> vectorSimple = crearVectorSimple(ejemplo);
-
-            // Usar el repositorio para guardar
-            tfidfRepo.guardarVector(ejemplo, vectorSimple, true);
-            creados++;
-
-            System.out.println("  ✓ Vector creado para: " +
-                                   ejemplo.substring(0, Math.min(40, ejemplo.length())) + "...");
-          } else {
-            System.out.println("  ⚠ Ya existe: " +
-                                   ejemplo.substring(0, Math.min(40, ejemplo.length())) + "...");
-          }
-        } catch (Exception e) {
-          System.err.println("  ✗ Error al crear vector para: " +
-                                 ejemplo.substring(0, Math.min(40, ejemplo.length())) + "...");
-          System.err.println("    Error: " + e.getMessage());
-        }
-      }
-
-      System.out.println("Inicializados " + creados + " ejemplos de spam para TF-IDF");
-
-      // Verificar que se guardaron
-      Long totalDespues = tfidfRepo.contarVectoresSpam();
-      System.out.println("Total vectores después de inicialización: " + totalDespues);
-
-    } catch (Exception e) {
-      System.err.println("ERROR CRÍTICO al inicializar TF-IDF: " + e.getMessage());
-      e.printStackTrace();
-    }
-  }
-
-  /**
-   * Crea un vector simple para un texto
-   */
-  private Map<String, Double> crearVectorSimple(String texto) {
-    Map<String, Double> vector = new HashMap<>();
-
-    if (texto == null || texto.trim().isEmpty()) {
-      vector.put("vacio", 1.0);
-      return vector;
-    }
-
-    String textoLower = texto.toLowerCase();
-
-    // Palabras clave comunes en spam
-    String[] palabrasClave = {
-        "compra", "oferta", "exclusiva", "descuento", "dinero",
-        "rápido", "trabajar", "casa", "clic", "aquí", "urgente",
-        "ayuda", "financiera", "producto", "milagroso", "cura",
-        "todo", "oportunidad", "única", "inversión", "garantizada",
-        "gane", "millones", "esfuerzo", "experiencia", "exclusivo",
-        "tiempo", "limitado", "ingrese", "link", "reclamar",
-        "premio", "fácil", "hogar"
-    };
-
-    for (String palabra : palabrasClave) {
-      if (textoLower.contains(palabra)) {
-        vector.put(palabra, 1.0);
-      }
-    }
-
-    // Si no hay palabras clave, poner frecuencia básica
-    if (vector.isEmpty()) {
-      // Dividir en palabras y contar frecuencias básicas
-      String[] palabras = textoLower.split("\\s+");
-      for (String palabra : palabras) {
-        if (palabra.length() > 2) {
-          vector.put(palabra, vector.getOrDefault(palabra, 0.0) + 1.0);
-        }
-      }
-    }
-
-    return vector;
   }
 }
