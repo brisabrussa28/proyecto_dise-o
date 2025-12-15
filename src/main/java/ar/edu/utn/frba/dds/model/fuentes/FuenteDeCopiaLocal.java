@@ -4,19 +4,25 @@ import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 
 /**
  * Clase abstracta para fuentes que mantienen una copia local persistida en la base de datos.
  * Las subclases deben implementar la lógica para consultar los datos frescos.
  */
-
-//Esta deberia estar persistida.
-
-//@Entity
+@Entity
+@DiscriminatorValue("COPIA_LOCAL")
 public abstract class FuenteDeCopiaLocal extends FuenteConHechos {
 
-  //@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  private List<Hecho> copiaLocalDeHechos = new ArrayList<>();
+  // Relación persistente específica para copia local
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+  @JoinColumn(name = "copia_local_fuente_id")
+  protected List<Hecho> copiaLocalDeHechos = new ArrayList<>();
 
   protected FuenteDeCopiaLocal() {
     super();
@@ -34,14 +40,11 @@ public abstract class FuenteDeCopiaLocal extends FuenteConHechos {
    */
   protected abstract List<Hecho> consultarNuevosHechos();
 
-  /**
-   * Devuelve la copia local de los hechos que está persistida en la base de datos.
-   * No consulta la fuente original para obtener los datos.
-   *
-   * @return Una lista inmutable de los hechos cacheados.
-   */
   @Override
   public List<Hecho> getHechos() {
+    if (this.copiaLocalDeHechos == null || this.copiaLocalDeHechos.isEmpty()) {
+      return Collections.emptyList();
+    }
     return Collections.unmodifiableList(this.copiaLocalDeHechos);
   }
 
@@ -56,5 +59,18 @@ public abstract class FuenteDeCopiaLocal extends FuenteConHechos {
       this.copiaLocalDeHechos.addAll(nuevosHechos);
     }
   }
-}
 
+  /**
+   * Setter para la copia local.
+   */
+  public void setCopiaLocalDeHechos(List<Hecho> hechos) {
+    if (this.copiaLocalDeHechos == null) {
+      this.copiaLocalDeHechos = new ArrayList<>();
+    } else {
+      this.copiaLocalDeHechos.clear();
+    }
+    if (hechos != null) {
+      this.copiaLocalDeHechos.addAll(hechos);
+    }
+  }
+}

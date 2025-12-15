@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.server;
 import ar.edu.utn.frba.dds.controller.EstadisticaController;
 import ar.edu.utn.frba.dds.dto.EstadisticaDTO;
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 
 import javax.persistence.EntityManager;
@@ -81,14 +82,8 @@ public class EstadisticasScheduler {
       }
 
       System.out.println("Cargando colecciones con hechos...");
-      em = DBUtils.getEntityManager();
-      List<Coleccion> colecciones = em.createQuery(
-                                          "SELECT DISTINCT c FROM Coleccion c " +
-                                              "LEFT JOIN FETCH c.coleccion_fuente f " +
-                                              "LEFT JOIN FETCH f.hechosPersistidos " +
-                                              "WHERE f IS NOT NULL", Coleccion.class)
-                                      .getResultList();
-      em.close();
+      // USAR EL REPOSITORIO EN LUGAR DE JPQL DIRECTAMENTE
+      List<Coleccion> colecciones = ColeccionRepository.instance().findAllConFuentesYHechos();
 
       System.out.println("Se cargaron " + colecciones.size() + " colecciones con hechos");
 

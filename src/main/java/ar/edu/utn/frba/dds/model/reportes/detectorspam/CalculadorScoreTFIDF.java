@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.dds.domain.detectorspam;
+package ar.edu.utn.frba.dds.model.reportes.detectorspam;
 
 import java.util.List;
 import java.util.Map;

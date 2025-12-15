@@ -103,4 +103,21 @@ public class UserRepository {
       em.close();
     }
   }
+
+  /**
+   * Busca un usuario por email
+   */
+  public Usuario buscarPorEmail(String email) {
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      List<Usuario> usuarios = em.createQuery(
+                                     "SELECT u FROM Usuario u WHERE u.email = :email", Usuario.class)
+                                 .setParameter("email", email)
+                                 .getResultList();
+
+      return usuarios.isEmpty() ? null : usuarios.get(0);
+    } finally {
+      em.close();
+    }
+  }
 }

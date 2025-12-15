@@ -1,32 +1,81 @@
 package ar.edu.utn.frba.dds.model.reportes;
 
+import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpamTFIDF;
 import ar.edu.utn.frba.dds.model.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.model.filtro.Filtro;
 import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionPredicado;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpam;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
+import ar.edu.utn.frba.dds.repositories.TFIDFRepository;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Gestor de Solicitudes. Orquesta la lógica de negocio para crear,
  * clasificar y procesar las solicitudes de eliminación de hechos.
+ *
+ * Utiliza DOS detectores de spam en simultáneo:
+ * 1. Detector original (inyectado por método)
+ * 2. Detector TF-IDF (siempre activo, basado en aprendizaje)
+ *
+ * Una solicitud es marcada como spam si CUALQUIERA de los dos detectores la identifica como tal.
  */
 public class GestorDeSolicitudes {
 
   private SolicitudesRepository repositorio;
+  private TFIDFRepository tfidfRepository;
+  private DetectorSpamTFIDF detectorTFIDF;
+
+  // Detector simple por defecto para cuando no se inyecta uno
+  private static class DetectorSpamBasico implements DetectorSpam {
+    @Override
+    public boolean esSpam(String texto) {
+      if (texto == null || texto.trim().isEmpty()) {
+        return false;
+      }
+
+      String textoLower = texto.toLowerCase();
+
+      // Patrones básicos de spam
+      String[] patronesSpam = {
+          "compra ya", "oferta exclusiva", "descuento", "dinero rápido",
+          "trabajar desde casa", "clic aquí", "urgente", "ayuda financiera",
+          "producto milagroso", "gane dinero", "oportunidad única"
+      };
+
+      for (String patron : patronesSpam) {
+        if (textoLower.contains(patron)) {
+          return true;
+        }
+      }
+
+      // Detectar exclamaciones excesivas
+      long exclamaciones = texto.chars().filter(ch -> ch == '!').count();
+      if (exclamaciones > 3) {
+        return true;
+      }
+
+      return false;
+    }
+  }
 
   public GestorDeSolicitudes() {
+    this.repositorio = SolicitudesRepository.instance();
+    this.tfidfRepository = TFIDFRepository.instance();
+    this.detectorTFIDF = new DetectorSpamTFIDF();
   }
 
   public GestorDeSolicitudes(SolicitudesRepository repositorio) {
     this.repositorio = repositorio;
+    this.tfidfRepository = TFIDFRepository.instance();
+    this.detectorTFIDF = new DetectorSpamTFIDF();
   }
 
   /**
-   * Crea una nueva solicitud, la clasifica usando el detector de spam
-   * y la guarda en el repositorio.
+   * Crea una nueva solicitud, la clasifica usando AMBOS detectores simultáneamente.
+   * Si no se proporciona un detector externo, se usa uno básico.
    *
    * @param hecho        El hecho a solicitar eliminación.
    * @param motivo       La razón de la solicitud.
@@ -35,12 +84,32 @@ public class GestorDeSolicitudes {
   public void crearSolicitud(Hecho hecho, String motivo, DetectorSpam detectorSpam) {
     Solicitud nuevaSolicitud = new Solicitud(hecho, motivo);
 
-    if (detectorSpam.esSpam(nuevaSolicitud.getRazonEliminacion())) {
+    // Usar AMBOS detectores simultáneamente
+    DetectorSpam detectorBase = (detectorSpam != null) ? detectorSpam : new DetectorSpamBasico();
+
+    boolean esSpamBase = detectorBase.esSpam(nuevaSolicitud.getRazonEliminacion());
+    boolean esSpamTFIDF = detectorTFIDF.esSpam(nuevaSolicitud.getRazonEliminacion());
+    boolean esSpam = esSpamBase || esSpamTFIDF;
+
+    if (esSpam) {
       nuevaSolicitud.marcarComoSpam();
+
+      // Si TF-IDF detectó el spam y no está ya registrado, aprender de él
+      if (esSpamTFIDF && !tfidfRepository.existeTextoSimilar(motivo.trim())) {
+        detectorTFIDF.entrenarConSpam(motivo);
+      }
     }
     // Si no es spam, se queda como PENDIENTE por defecto.
 
     repositorio.guardar(nuevaSolicitud);
+  }
+
+  /**
+   * Crea una nueva solicitud usando solo los detectores internos.
+   * Equivalente a llamar a crearSolicitud(hecho, motivo, null)
+   */
+  public void crearSolicitud(Hecho hecho, String motivo) {
+    crearSolicitud(hecho, motivo, null);
   }
 
   /**
@@ -112,5 +181,41 @@ public class GestorDeSolicitudes {
   public Filtro filtroExcluyenteDeHechosEliminados() {
     List<Hecho> hechosEliminados = this.obtenerHechosEliminados();
     return new Filtro(new CondicionPredicado(h -> !hechosEliminados.contains(h)));
+  }
+
+  /**
+   * Entrena el detector TF-IDF con un nuevo ejemplo de spam
+   */
+  public void entrenarTFIDFConSpam(String textoSpam) {
+    if (textoSpam != null && !textoSpam.trim().isEmpty()) {
+      detectorTFIDF.entrenarConSpam(textoSpam);
+    }
+  }
+
+  /**
+   * Obtiene estadísticas de ambos detectores
+   */
+  public String obtenerEstadisticasDetectores() {
+    StringBuilder stats = new StringBuilder();
+    stats.append("=== ESTADISTICAS DETECTORES SPAM ===\n");
+
+    // Estadísticas TF-IDF
+    Long totalTFIDF = tfidfRepository.contarVectoresSpam();
+    stats.append("TF-IDF: ").append(totalTFIDF).append(" vectores de spam almacenados\n");
+
+    // Estadísticas del repositorio
+    long totalSolicitudes = repositorio.cantidadTotal();
+    long totalSpam = repositorio.obtenerPorEstado(EstadoSolicitud.SPAM).size();
+    stats.append("Repositorio: ").append(totalSolicitudes).append(" solicitudes totales, ")
+         .append(totalSpam).append(" marcadas como spam\n");
+
+    return stats.toString();
+  }
+
+  /**
+   * Obtiene el detector TF-IDF (para testing o extensión)
+   */
+  public DetectorSpamTFIDF getDetectorTFIDF() {
+    return detectorTFIDF;
   }
 }

@@ -107,4 +107,18 @@ public class EstadisticaRepository {
       em.close();
     }
   }
+
+  /**
+   * Cuenta todas las estadísticas
+   */
+  public long countAll() {
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      Long count = em.createQuery("SELECT COUNT(e) FROM Estadistica e", Long.class)
+                     .getSingleResult();
+      return count != null ? count : 0;
+    } finally {
+      em.close();
+    }
+  }
 }
