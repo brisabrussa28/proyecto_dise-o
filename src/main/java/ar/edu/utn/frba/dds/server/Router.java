@@ -42,7 +42,6 @@ public class Router {
     UserController userController = new UserController();
     AdminController adminController = new AdminController();
 
-    // ========== MIDDLEWARE GLOBAL ==========
     app.before(ctx -> {
       Long id = ctx.sessionAttribute("usuario_id");
 
@@ -65,7 +64,6 @@ public class Router {
       }
     });
 
-    // Middleware para proteger rutas de admin
     app.before("/admin/*", ctx -> {
       Rol rol = ctx.sessionAttribute("usuario_rol");
       if (rol != Rol.ADMINISTRADOR) {
@@ -73,7 +71,6 @@ public class Router {
       }
     });
 
-    // ========== RUTAS DE AUTENTICACIÓN ==========
     app.post("/login", userController::login);
     app.post("/logout", userController::logout);
     app.post("/usuarios", userController::register);
@@ -82,7 +79,6 @@ public class Router {
     app.get("/auth/register", userController::mostrarRegistro);
     app.get("/auth/login", userController::mostrarLogin);
 
-    // ========== RUTAS PRINCIPALES ==========
     app.get("/", ctx -> {
       List<Hecho> hechos = hechoController.findAll();
       String hechosJson = mapper.writeValueAsString(hechos);
@@ -97,7 +93,6 @@ public class Router {
       ctx.render("index.hbs", model);
     });
 
-    // ========== RUTAS DE HECHOS ==========
     app.get("/home", ctx -> ctx.json(hechoController.findAll()));
     app.get("/hechos", ctx -> ctx.json(hechoController.findAll()));
 
@@ -121,6 +116,7 @@ public class Router {
 
       ctx.render("hechos.hbs", model);
     });
+
     app.get(
         "/hechos/nuevo", ctx -> {
           Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
@@ -163,18 +159,82 @@ public class Router {
       }
     });
 
-    // ========== RUTAS DE BÚSQUEDA ==========
     app.get("/api/hechos/buscar", ctx -> {
-      String titulo = ctx.queryParam("titulo");
-      if (titulo == null || titulo.trim().isEmpty()) {
-        ctx.json(Collections.emptyList());
-        return;
+      try {
+        String titulo = ctx.queryParam("titulo");
+        Boolean soloConsensuados = ctx.queryParamAsClass("soloConsensuados", Boolean.class).getOrDefault(false);
+
+        Map<String, Object> resultados = hechoController.buscarAvanzadoCompleto(
+            titulo, null, null, null, null, null, soloConsensuados
+        );
+
+        ctx.json(resultados);
+
+      } catch (Exception e) {
+        ctx.status(400).json(Map.of(
+            "error", true,
+            "mensaje", e.getMessage()
+        ));
       }
-      List<Hecho> resultados = hechoController.findByTitle(titulo);
-      ctx.json(resultados);
     });
 
-    // ========== RUTAS DE CATEGORÍAS Y ETIQUETAS ==========
+    app.get("/api/hechos/buscar-completo", ctx -> {
+      try {
+        String titulo = ctx.queryParam("titulo");
+        String categoria = ctx.queryParam("categoria");
+        String fuente = ctx.queryParam("fuente");
+        String coleccion = ctx.queryParam("coleccion");
+        String fechaDesde = ctx.queryParam("fechaDesde");
+        String fechaHasta = ctx.queryParam("fechaHasta");
+        Boolean soloConsensuados = ctx.queryParamAsClass("soloConsensuados", Boolean.class).getOrDefault(false);
+
+        int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
+        int pageSize = ctx.queryParamAsClass("pageSize", Integer.class).getOrDefault(15);
+
+        boolean usarPaginacion = ctx.queryParam("paginar") != null &&
+            Boolean.parseBoolean(ctx.queryParam("paginar"));
+
+        Map<String, Object> resultados;
+
+        if (usarPaginacion) {
+          resultados = hechoController.buscarAvanzadoCompletoPaginated(
+              titulo, categoria, fuente, coleccion,
+              fechaDesde, fechaHasta, soloConsensuados,
+              page, pageSize
+          );
+        } else {
+          resultados = hechoController.buscarAvanzadoCompleto(
+              titulo, categoria, fuente, coleccion,
+              fechaDesde, fechaHasta, soloConsensuados
+          );
+        }
+
+        ctx.json(resultados);
+
+      } catch (Exception e) {
+        ctx.status(400).json(Map.of(
+            "error", true,
+            "mensaje", e.getMessage()
+        ));
+      }
+    });
+
+    app.get("/api/hechos/buscar-rapido", ctx -> {
+      try {
+        String titulo = ctx.queryParam("titulo");
+        Boolean soloConsensuados = ctx.queryParamAsClass("soloConsensuados", Boolean.class).getOrDefault(false);
+
+        List<Hecho> resultados = hechoController.buscarRapido(titulo, soloConsensuados);
+        ctx.json(resultados);
+
+      } catch (Exception e) {
+        ctx.status(400).json(Map.of(
+            "error", true,
+            "mensaje", e.getMessage()
+        ));
+      }
+    });
+
     app.get("/hechos/categorias", ctx -> {
       List<String> categorias = hechoController.getCategorias();
       ctx.json(categorias);
@@ -186,7 +246,6 @@ public class Router {
       ctx.json(etiquetas);
     });
 
-    // ========== RUTAS DE SOLICITUDES ==========
     app.post("/solicitudes", ctx -> {
       try {
         Solicitud solicitud = solicitudController.crearSolicitud(ctx.bodyAsClass(SolicitudDTO.class));
@@ -210,7 +269,6 @@ public class Router {
       }
     });
 
-    // ========== RUTAS DE FUENTES ==========
     app.get("/fuentes", ctx -> {
       Boolean soloSimples = ctx.queryParamAsClass("soloSimples", Boolean.class).getOrDefault(false);
       ctx.json(fuenteController.obtenerFuentesConTipo(soloSimples));
@@ -225,7 +283,6 @@ public class Router {
     app.post("/admin/fuentes/{id}/agregar-fuente", adminController::agregarFuenteAAgregacion);
     app.post("/admin/fuentes/{id}/quitar-fuente/{idHija}", adminController::quitarFuenteDeAgregacion);
 
-    // ========== RUTAS DE COLECCIONES ==========
     app.get("/admin/colecciones", ctx -> adminController.listarColecciones(ctx, modeloConSesion(ctx)));
     app.get("/admin/colecciones/{id}", ctx -> adminController.editarColeccion(ctx, modeloConSesion(ctx)));
     app.post("/admin/colecciones", ctx -> adminController.crearColeccion(ctx));
@@ -234,7 +291,6 @@ public class Router {
     app.post("/admin/colecciones/{id}/quitarHecho", adminController::removerHechoDeColeccion);
     app.post("/admin/colecciones/{id}/calcular-consenso", coleccionController::calcularConsenso);
 
-    // ========== RUTAS DE ESTADÍSTICAS ==========
     app.before("/admin/estadisticas", ctx -> {
       if (!"OPTIONS".equalsIgnoreCase(String.valueOf(ctx.method()))) {
         tieneRol(Rol.ADMINISTRADOR).handle(ctx);
@@ -407,7 +463,6 @@ public class Router {
       }
     });
 
-    // ========== RUTAS DE PERFILES ==========
     app.get("/perfil", ctx -> {
       Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
       if (estaLogueado == null || !estaLogueado) {
@@ -429,7 +484,6 @@ public class Router {
       ctx.render("perfil.hbs", model);
     });
 
-    // ========== RUTAS DE REPORTES ==========
     app.get("/hechos/reporte/{id}/", ctx -> {
       Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
       if (estaLogueado == null || !estaLogueado) {
@@ -442,19 +496,14 @@ public class Router {
       ctx.render("reportar.hbs", model);
     });
 
-    // ========== RUTAS DE ADMINISTRACIÓN ==========
     app.get("/admin/dashboard", ctx -> adminController.mostrarDashboard(ctx, modeloConSesion(ctx)));
 
-    // ========== MANEJO DE ERRORES ==========
-
-    // Error 404 - Página no encontrada
     app.error(404, ctx -> {
       Map<String, Object> model = modeloConSesion(ctx);
       model.put("errorMessage", "Página no encontrada");
       model.put("errorStatus", 404);
       model.put("timestamp", LocalDateTime.now().toString());
 
-      // Si es una petición API, devolver JSON
       if (ctx.path().startsWith("/api/")) {
         ctx.json(model);
       } else {
@@ -462,7 +511,6 @@ public class Router {
       }
     });
 
-    // Error 500 - Error interno del servidor
     app.error(500, ctx -> {
       Map<String, Object> model = modeloConSesion(ctx);
 
@@ -474,7 +522,6 @@ public class Router {
         errorMessage = error.getMessage() != null ? error.getMessage() : errorMessage;
         errorDetails = getStackTraceAsString(error);
 
-        // Log del error
         System.err.println("Error 500: " + errorMessage);
         if (debugMode) {
           error.printStackTrace();
@@ -490,12 +537,10 @@ public class Router {
       ctx.render("error.hbs", model);
     });
 
-    // Otros códigos de error
     app.error(400, ctx -> mostrarError(ctx, "Solicitud incorrecta", 400));
     app.error(403, ctx -> mostrarError(ctx, "Acceso denegado", 403));
     app.error(401, ctx -> mostrarError(ctx, "No autorizado", 401));
 
-    // Manejo de excepciones no capturadas
     app.exception(Exception.class, (e, ctx) -> {
       System.err.println("Excepción no capturada: " + e.getMessage());
       if (debugMode) {
@@ -512,8 +557,6 @@ public class Router {
       ctx.status(500).render("error.hbs", model);
     });
   }
-
-  // ========== MÉTODOS AUXILIARES ==========
 
   private Handler tieneRol(Rol rol) {
     return ctx -> {

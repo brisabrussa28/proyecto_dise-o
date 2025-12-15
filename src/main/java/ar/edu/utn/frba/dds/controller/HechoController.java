@@ -13,11 +13,13 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.NotFoundResponse;
 import io.javalin.http.UploadedFile;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,8 +44,7 @@ public class HechoController {
   }
 
   public List<Hecho> findByTitle(String titulo) {
-    return HechoRepository.instance()
-                          .findByTitle(titulo);
+    return HechoRepository.instance().findByTitle(titulo);
   }
 
   public List<Hecho> findAll() {
@@ -344,6 +345,107 @@ public class HechoController {
       e.printStackTrace();
       ctx.status(400).result("Error al crear hecho: " + e.getMessage());
     }
+  }
+
+  public Map<String, Object> buscarAvanzadoCompleto(
+      String titulo,
+      String categoria,
+      String fuente,
+      String coleccion,
+      String fechaDesdeStr,
+      String fechaHastaStr,
+      Boolean soloConsensuados) {
+
+    LocalDate fechaDesde = null;
+    LocalDate fechaHasta = null;
+
+    try {
+      if (fechaDesdeStr != null && !fechaDesdeStr.isBlank()) {
+        fechaDesde = LocalDate.parse(fechaDesdeStr);
+      }
+      if (fechaHastaStr != null && !fechaHastaStr.isBlank()) {
+        fechaHasta = LocalDate.parse(fechaHastaStr);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Formato de fecha inválido. Use YYYY-MM-DD");
+    }
+
+    List<Hecho> resultados = HechoRepository.instance().buscarAvanzadoCompleto(
+        titulo, categoria, fuente, coleccion,
+        fechaDesde, fechaHasta, soloConsensuados
+    );
+
+    Map<String, Object> response = new HashMap<>();
+    response.put("resultados", resultados);
+    response.put("total", resultados.size());
+
+    return response;
+  }
+
+  public Map<String, Object> buscarAvanzadoCompletoPaginated(
+      String titulo,
+      String categoria,
+      String fuente,
+      String coleccion,
+      String fechaDesdeStr,
+      String fechaHastaStr,
+      Boolean soloConsensuados,
+      int page,
+      int pageSize) {
+
+    LocalDate fechaDesde = null;
+    LocalDate fechaHasta = null;
+
+    try {
+      if (fechaDesdeStr != null && !fechaDesdeStr.isBlank()) {
+        fechaDesde = LocalDate.parse(fechaDesdeStr);
+      }
+      if (fechaHastaStr != null && !fechaHastaStr.isBlank()) {
+        fechaHasta = LocalDate.parse(fechaHastaStr);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Formato de fecha inválido. Use YYYY-MM-DD");
+    }
+
+    return HechoRepository.instance().buscarAvanzadoCompletoPaginated(
+        titulo, categoria, fuente, coleccion,
+        fechaDesde, fechaHasta, soloConsensuados,
+        page, pageSize
+    );
+  }
+
+  public List<Hecho> buscarRapido(String titulo, Boolean soloConsensuados) {
+    return HechoRepository.instance().buscarRapido(titulo, soloConsensuados);
+  }
+
+  public List<String> getFuentesDisponibles() {
+    return HechoRepository.instance().getFuentesDisponibles();
+  }
+
+  public List<String> getColeccionesDisponibles() {
+    return HechoRepository.instance().getColeccionesDisponibles();
+  }
+
+  public Long countByFiltros(String categoria, String fechaDesdeStr, String fechaHastaStr) {
+    LocalDate fechaDesde = null;
+    LocalDate fechaHasta = null;
+
+    try {
+      if (fechaDesdeStr != null && !fechaDesdeStr.isBlank()) {
+        fechaDesde = LocalDate.parse(fechaDesdeStr);
+      }
+      if (fechaHastaStr != null && !fechaHastaStr.isBlank()) {
+        fechaHasta = LocalDate.parse(fechaHastaStr);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Formato de fecha inválido");
+    }
+
+    return HechoRepository.instance().countByFiltros(categoria, fechaDesde, fechaHasta);
+  }
+
+  public static Long getLastTotalResults() {
+    return HechoRepository.getLastTotalResults();
   }
 
   public void getMultimedia(Context ctx) {
