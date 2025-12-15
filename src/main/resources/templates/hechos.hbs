@@ -18,9 +18,9 @@
                 Hechos registrados
             </h2>
 
-            <form class="mb-3" action="/api/hechos" method="get">
+            <form id="searchForm" class="mb-3" action="/api/hechos" method="get">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control"
+                    <input id="searchInput" type="text" class="form-control"
                            placeholder="Buscar hechos..." name="q">
                     <button class="btn btn-primary" type="submit">
                         <i class="fa-solid fa-search"></i>
@@ -28,7 +28,7 @@
                 </div>
             </form>
 
-            <div class="list-group">
+            <div class="list-group" id="resultsList">
                 {{#each hechos}}
                     <a href="/hechos/{{id}}" class="list-group-item list-group-item-action py-2">
                         <h6 class="fw-bold text-dark mb-1">{{titulo}}</h6>
@@ -77,6 +77,50 @@
 
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchInput');
+            const resultsList = document.getElementById('resultsList');
+
+            async function searchAndDisplayResults(query) {
+                resultsList.innerHTML = '<p>Buscando...</p>';
+                try {
+                    const resp = await fetch(`/api/hechos/buscar?titulo=${encodeURIComponent(query)}`);
+                    const hechosResultantes = await resp.json();
+
+                    resultsList.innerHTML = '';
+
+                    if (hechosResultantes.length === 0) {
+                        resultsList.innerHTML = '<p>No se encontraron hechos.</p>';
+                        return;
+                    }
+                    hechosResultantes.forEach(hecho => {
+                        const itemHTML = `
+                            <a href="/hechos/${hecho.id}" class="list-group-item list-group-item-action py-2">
+                                <h6 class="fw-bold text-dark mb-1">${hecho.hecho_titulo}</h6>
+                                <p class="mb-1 text-muted small">${hecho.hecho_descripcion}</p>
+                            </a>
+                        `;
+                        resultsList.insertAdjacentHTML('beforeend', itemHTML);
+                    });
+                } catch (error) {
+                    resultsList.innerHTML = `<p class="text-danger">Ocurrió un error.</p>`;
+                }
+            }
+
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // Evita que la página se recargue
+                const query = searchInput.value.trim();
+
+                if (query) {
+                    searchAndDisplayResults(query);
+                }
+            });
+        });
+    </script>
+
 
 {{/partial}}
 
