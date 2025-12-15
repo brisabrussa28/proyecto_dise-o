@@ -348,70 +348,74 @@ public class HechoController {
   }
 
   public Map<String, Object> buscarAvanzadoCompleto(
-      String titulo,
-      String categoria,
-      String fuente,
-      String coleccion,
-      String fechaDesdeStr,
-      String fechaHastaStr,
-      Boolean soloConsensuados) {
-
-    LocalDate fechaDesde = null;
-    LocalDate fechaHasta = null;
-
-    try {
-      if (fechaDesdeStr != null && !fechaDesdeStr.isBlank()) {
-        fechaDesde = LocalDate.parse(fechaDesdeStr);
-      }
-      if (fechaHastaStr != null && !fechaHastaStr.isBlank()) {
-        fechaHasta = LocalDate.parse(fechaHastaStr);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException("Formato de fecha inválido. Use YYYY-MM-DD");
-    }
-
-    List<Hecho> resultados = HechoRepository.instance().buscarAvanzadoCompleto(
-        titulo, categoria, fuente, coleccion,
-        fechaDesde, fechaHasta, soloConsensuados
+      String titulo, String categoria, String fuente, String coleccion,
+      String fechaDesdeStr, String fechaHastaStr, Boolean soloConsensuados
+  ) {
+    // Versión sin paginar (devuelve todo)
+    List<Hecho> filtrados = obtenerHechosFiltrados(
+        titulo,
+        categoria,
+        fuente,
+        coleccion,
+        fechaDesdeStr,
+        fechaHastaStr,
+        soloConsensuados
     );
 
-    Map<String, Object> response = new HashMap<>();
-    response.put("resultados", resultados);
-    response.put("total", resultados.size());
+    List<Map<String, Object>> resultadosMapeados = filtrados.stream()
+                                                            .map(this::mapHechoToFrontend)
+                                                            .collect(Collectors.toList());
 
-    return response;
+    Map<String, Object> respuesta = new HashMap<>();
+    respuesta.put("resultados", resultadosMapeados);
+    respuesta.put("total", filtrados.size());
+
+    return respuesta;
   }
 
   public Map<String, Object> buscarAvanzadoCompletoPaginated(
-      String titulo,
-      String categoria,
-      String fuente,
-      String coleccion,
-      String fechaDesdeStr,
-      String fechaHastaStr,
-      Boolean soloConsensuados,
-      int page,
-      int pageSize) {
+      String titulo, String categoria, String fuente, String coleccion,
+      String fechaDesdeStr, String fechaHastaStr, Boolean soloConsensuados,
+      int page, int pageSize
+  ) {
 
-    LocalDate fechaDesde = null;
-    LocalDate fechaHasta = null;
-
-    try {
-      if (fechaDesdeStr != null && !fechaDesdeStr.isBlank()) {
-        fechaDesde = LocalDate.parse(fechaDesdeStr);
-      }
-      if (fechaHastaStr != null && !fechaHastaStr.isBlank()) {
-        fechaHasta = LocalDate.parse(fechaHastaStr);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException("Formato de fecha inválido. Use YYYY-MM-DD");
-    }
-
-    return HechoRepository.instance().buscarAvanzadoCompletoPaginated(
-        titulo, categoria, fuente, coleccion,
-        fechaDesde, fechaHasta, soloConsensuados,
-        page, pageSize
+    // 1. Reutilizamos la lógica de filtrado (ver método de abajo)
+    List<Hecho> filtrados = obtenerHechosFiltrados(
+        titulo,
+        categoria,
+        fuente,
+        coleccion,
+        fechaDesdeStr,
+        fechaHastaStr,
+        soloConsensuados
     );
+
+    // 2. Calcular Paginación
+    int total = filtrados.size();
+    int totalPaginas = (int) Math.ceil((double) total / pageSize);
+
+    int fromIndex = (page - 1) * pageSize;
+    if (fromIndex < 0) {
+      fromIndex = 0;
+    }
+    int toIndex = Math.min(fromIndex + pageSize, total);
+
+    List<Hecho> paginaHechos = (fromIndex >= total) ?
+                               new ArrayList<>() :
+                               filtrados.subList(fromIndex, toIndex);
+
+    // 3. Mapear resultados para el Frontend
+    List<Map<String, Object>> resultadosMapeados = paginaHechos.stream()
+                                                               .map(this::mapHechoToFrontend)
+                                                               .collect(Collectors.toList());
+
+    Map<String, Object> respuesta = new HashMap<>();
+    respuesta.put("resultados", resultadosMapeados);
+    respuesta.put("total", total);
+    respuesta.put("paginaActual", page);
+    respuesta.put("totalPaginas", totalPaginas);
+
+    return respuesta;
   }
 
   public List<Hecho> buscarRapido(String titulo, Boolean soloConsensuados) {
@@ -468,5 +472,59 @@ public class HechoController {
     }
 
     ctx.result(item.getDatos()); // Devuelves los bytes
+  }
+
+  private List<Hecho> obtenerHechosFiltrados(
+      String titulo, String categoria, String fuente, String coleccion,
+      String fechaDesdeStr, String fechaHastaStr, Boolean soloConsensuados
+  ) {
+    List<Hecho> todos = this.findAll();
+
+    // Parseo seguro de fechas
+    LocalDateTime fechaDesde = (fechaDesdeStr != null && !fechaDesdeStr.isBlank()) ?
+                               LocalDateTime.parse(fechaDesdeStr + "T00:00:00") :
+                               null;
+    LocalDateTime fechaHasta = (fechaHastaStr != null && !fechaHastaStr.isBlank()) ?
+                               LocalDateTime.parse(fechaHastaStr + "T23:59:59") :
+                               null;
+
+    return todos.stream()
+                .filter(h -> titulo == null || titulo.isBlank() || (h.getTitulo() != null && h.getTitulo()
+                                                                                              .toLowerCase()
+                                                                                              .contains(
+                                                                                                  titulo.toLowerCase())))
+                .filter(h -> categoria == null || "0".equals(categoria) || categoria.equals(h.getCategoria()))
+                // Filtro de Colección (verificar si el hecho pertenece a la colección por título o ID)
+                .filter(h -> coleccion == null || "0".equals(coleccion) || (h.getColecciones() != null && h.getColecciones()
+                                                                                                           .stream()
+                                                                                                           .anyMatch(
+                                                                                                               c -> c.getTitulo()
+                                                                                                                     .equals(
+                                                                                                                         coleccion))))
+                // Filtro de Fechas
+                .filter(h -> fechaDesde == null || (h.getFechasuceso() != null && !h.getFechasuceso()
+                                                                                    .isBefore(
+                                                                                        fechaDesde)))
+                .filter(h -> fechaHasta == null || (h.getFechasuceso() != null && !h.getFechasuceso()
+                                                                                    .isAfter(
+                                                                                        fechaHasta)))
+                // Filtro Consensuados
+                .filter(h -> !soloConsensuados || (h.getColecciones() != null && !h.getColecciones()
+                                                                                   .isEmpty()))
+                .collect(Collectors.toList());
+  }
+
+  private Map<String, Object> mapHechoToFrontend(Hecho h) {
+    Map<String, Object> map = new HashMap<>();
+    map.put("id", h.getId());
+    map.put("hecho_titulo", h.getTitulo());
+    map.put("hecho_descripcion", h.getDescripcion());
+    map.put("hecho_categoria", h.getCategoria());
+    map.put("hecho_fecha_suceso", h.getFechasuceso());
+    map.put("hecho_provincia", h.getProvincia());
+    map.put("hecho_direccion", h.getDireccion());
+    map.put("etiquetas", h.getEtiquetas());
+    map.put("colecciones", h.getColecciones());
+    return map;
   }
 }

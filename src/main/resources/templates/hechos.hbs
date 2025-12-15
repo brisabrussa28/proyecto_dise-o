@@ -120,9 +120,30 @@
             const resultsList = document.getElementById('resultsList');
             const paginationContainer = document.getElementById('paginationContainer');
 
-            function formatDate(dateString, format) {
-                if (!dateString) return '';
-                const date = new Date(dateString);
+            function formatDate(dateInput, format) {
+                if (!dateInput) return '';
+
+                let date;
+
+                // 1. DETECCIÓN DE ARRAY DE JAVA (Lo más probable)
+                // El formato es [año, mes, dia, hora, minuto, segundo]
+                if (Array.isArray(dateInput)) {
+                    date = new Date(
+                        dateInput[0],       // Año
+                        dateInput[1] - 1,   // Mes (¡OJO! En JS los meses son 0-11, en Java 1-12)
+                        dateInput[2],       // Día
+                        dateInput[3] || 0,  // Hora
+                        dateInput[4] || 0,  // Minuto
+                        dateInput[5] || 0   // Segundo
+                    );
+                }
+                // 2. DETECCIÓN DE STRING O TIMESTAMP
+                else {
+                    date = new Date(dateInput);
+                }
+
+                // Validación extra por seguridad
+                if (isNaN(date.getTime())) return 'Fecha inválida';
 
                 if (format === 'dd/MM/yyyy HH:mm') {
                     const day = date.getDate().toString().padStart(2, '0');

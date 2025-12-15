@@ -8,6 +8,8 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.rendering.FileRenderer;
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +77,25 @@ public class JavalinHandlebars implements FileRenderer {
         return x < y;
       });
 
+      handlebars.registerHelper(
+          "formatDate", (value, options) -> {
+            if (value == null) {
+              return "";
+            }
+
+            // 1. Obtenemos el formato que pasaste en el HBS (param 0).
+            // Si no pasas nada, usamos "dd/MM/yyyy" por defecto.
+            String pattern = options.param(0, "dd/MM/yyyy");
+
+            // 2. Formateamos si es del tipo correcto (LocalDateTime, LocalDate, etc)
+            if (value instanceof TemporalAccessor) {
+              return DateTimeFormatter.ofPattern(pattern)
+                                      .format((TemporalAccessor) value);
+            }
+
+            return value.toString();
+          }
+      );
       template = handlebars.compile("templates/" + path.replace(".hbs", ""));
       return template.apply(model);
     } catch (IOException e) {

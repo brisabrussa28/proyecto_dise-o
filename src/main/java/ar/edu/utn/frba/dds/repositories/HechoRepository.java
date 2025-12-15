@@ -3,7 +3,6 @@ package ar.edu.utn.frba.dds.repositories;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +50,8 @@ public class HechoRepository {
       return em.createQuery(
                    "SELECT DISTINCT h FROM Hecho h " +
                        "LEFT JOIN FETCH h.fotos " +
-                       "LEFT JOIN FETCH h.etiquetas",
+                       "LEFT JOIN FETCH h.etiquetas " +
+                       "LEFT JOIN FETCH h.colecciones",
                    Hecho.class)
                .getResultList();
     } finally {
