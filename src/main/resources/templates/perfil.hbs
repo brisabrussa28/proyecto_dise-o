@@ -51,14 +51,12 @@
                     </div>
                 </div>
 
-                {{!-- CORRECCIÓN: Usamos 'ultimosHechos' directamente. --}}
                 {{#if ultimosHechos}}
                     <div class="px-3 pb-3">
                         <div class="d-flex justify-content-between align-items-end mb-3 border-bottom border-dark pb-2">
                             <h5 class="text-black mb-0">
                                 <i class="fa-solid fa-layer-group me-2"></i>Actividad Reciente
                             </h5>
-                            <small class="text-muted">Mostrando recientes</small>
                         </div>
 
                         <div class="d-flex flex-column gap-3">
@@ -82,14 +80,6 @@
                                     </div>
                                 </a>
                             {{/each}}
-                        </div>
-
-                        {{!-- Botón para ver más --}}
-                        <div class="text-center mt-3">
-                            <a href="/api/hechos?titulo={{perfil.userName}}" class="btn btn-sm
-                            btn-outline-dark">
-                            Ver todos
-                            </a>
                         </div>
                     </div>
                 {{else}}

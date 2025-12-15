@@ -558,7 +558,7 @@ public class Router {
                             .collect(Collectors.toList());
       }
       model.put("perfil", user);
-      model.put("ultimosHechos", user);
+      model.put("ultimosHechos", ultimosHechos);
       ctx.render("perfil.hbs", model);
     });
 
