@@ -44,6 +44,10 @@ public class FuenteController {
     return todas;
   }
 
+  public Fuente findByName(String nombre) {
+    return FuenteRepository.instance().findByName(nombre);
+  }
+
   public List<Map<String, Object>> obtenerFuentesConTipo(boolean soloSimples) {
     List<Fuente> fuentes = this.findAll(soloSimples);
 

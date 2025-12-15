@@ -4,14 +4,15 @@ import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteConHechos;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteExternaAPI;
-import ar.edu.utn.frba.dds.model.fuentes.FuenteDeCopiaLocal;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 
 public class FuenteRepository {
@@ -37,11 +38,26 @@ public class FuenteRepository {
       } else {
         fuente = em.merge(fuente);
       }
-
       DBUtils.commit(em);
     } catch (PersistenceException e) {
       DBUtils.rollback(em);
       throw new RuntimeException("Error al guardar fuente: " + e.getMessage());
+    } finally {
+      em.close();
+    }
+  }
+
+  public Fuente findByName(String nombre) {
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      return em.createQuery(
+                   "SELECT DISTINCT f FROM Fuente f where f.fuente_nombre = :nombre",
+                   Fuente.class
+               )
+               .setParameter("nombre", nombre)
+               .getSingleResult();
+    } catch (NoResultException e) {
+      return null;
     } finally {
       em.close();
     }

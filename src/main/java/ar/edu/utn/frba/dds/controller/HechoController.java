@@ -7,6 +7,7 @@ import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
+import ar.edu.utn.frba.dds.repositories.FuenteRepository;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import ar.edu.utn.frba.dds.repositories.UserRepository;
 import io.javalin.http.Context;
@@ -322,23 +323,23 @@ public class HechoController {
                                         .findById(usuarioId));
       validarHecho(nuevoHecho);
 
-      // Obtener fuente_id si existe
-      String fuenteIdStr = ctx.formParam("fuente_id");
-      if (fuenteIdStr != null && !fuenteIdStr.isEmpty()) {
-        Long fuenteId = Long.parseLong(fuenteIdStr);
-        Fuente fuente = fuenteController.findById(fuenteId);
+      this.subirHecho(nuevoHecho);
 
-        if (fuente instanceof FuenteDinamica) {
-          // Asignar el hecho a la fuente dinámica
-          ((FuenteDinamica) fuente).agregarHecho(nuevoHecho);
-          fuenteController.save(fuente);
-          ctx.redirect("/admin/fuentes/" + fuenteId);
-          return;
+      String fuenteStr = ctx.formParam("fuente");
+
+      if (fuenteStr != null && !fuenteStr.isEmpty()) {
+        Fuente fuente = fuenteController.findByName(fuenteStr);
+
+        if (fuente == null) {
+          FuenteDinamica fuenteNueva = new FuenteDinamica(fuenteStr);
+          fuenteNueva.agregarHecho(nuevoHecho);
+          FuenteRepository.instance().update(fuenteNueva);
+
+        } else {
+          fuenteController.agregarHechoDinamico(fuente, nuevoHecho);
         }
       }
 
-      // Si no hay fuente dinámica, guardar como hecho normal
-      this.subirHecho(nuevoHecho);
       ctx.redirect("/");
 
     } catch (Exception e) {
