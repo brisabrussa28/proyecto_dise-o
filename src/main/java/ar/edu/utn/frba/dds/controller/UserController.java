@@ -152,7 +152,7 @@ public class UserController {
     return UserRepository.instance().findAll();
   }
 
-  public Usuario finById(Long id) {
+  public Usuario findById(Long id) {
     return UserRepository.instance().findById(id);
   }
 

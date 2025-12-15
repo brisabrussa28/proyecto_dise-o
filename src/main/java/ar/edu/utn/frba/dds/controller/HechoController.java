@@ -3,10 +3,12 @@ package ar.edu.utn.frba.dds.controller;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
 import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
+import ar.edu.utn.frba.dds.repositories.UserRepository;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.NotFoundResponse;
@@ -285,7 +287,7 @@ public class HechoController {
       nuevoHecho.setUbicacion(ubicacion);
       nuevoHecho.setFechasuceso(fechaSuceso);
       nuevoHecho.setFechacarga(LocalDateTime.now());
-      nuevoHecho.setOrigen(ar.edu.utn.frba.dds.model.hecho.Origen.PROVISTO_CONTRIBUYENTE);
+      nuevoHecho.setOrigen(Origen.PROVISTO_CONTRIBUYENTE);
 
       // Procesar etiquetas
       String etiquetasInput = ctx.formParam("etiquetas");
@@ -315,6 +317,8 @@ public class HechoController {
       nuevoHecho.setFotos(fotos);
 
       // Validar hecho
+      nuevoHecho.setAutor(UserRepository.instance()
+                                        .findById(usuarioId));
       validarHecho(nuevoHecho);
 
       // Obtener fuente_id si existe
@@ -340,5 +344,27 @@ public class HechoController {
       e.printStackTrace();
       ctx.status(400).result("Error al crear hecho: " + e.getMessage());
     }
+  }
+
+  public void getMultimedia(Context ctx) {
+    int index = ctx.pathParamAsClass("indice", Integer.class)
+                   .get();
+    Long id = ctx.pathParamAsClass("id", Long.class)
+                 .get();
+
+    // Buscas el item en la lista unificada
+    Multimedia item = HechoRepository.instance()
+                                     .findById(id)
+                                     .getFotos()
+                                     .get(index);
+
+    // IMPORTANTE: Definir el Content-Type correcto dinámicamente
+    if (item.esVideo()) {
+      ctx.contentType("video/mp4");
+    } else {
+      ctx.contentType("image/jpeg"); // O image/png según corresponda
+    }
+
+    ctx.result(item.getDatos()); // Devuelves los bytes
   }
 }

@@ -76,12 +76,26 @@
                     let htmlImagen = '';
                     const fotos = hecho.fotos || hecho.hecho_fotos;
                     if (fotos && fotos.length > 0) {
-                        htmlImagen = `
-                        <img src="/hechos/${hecho.id}/fotos/0"
+                        if (fotos[0].esVideo){
+                            htmlImagen = `
+                                <div class="d-flex align-items-center justify-content-center bg-black mb-2" style="height: 140px;">
+                                     <video src="/hechos/${hecho.id}/multimedia/0"
+                                     class="w-100 h-100"
+                                     muted
+                                     autoplay
+                                     loop
+                                     style="object-fit: contain;">
+                                     </video>
+                                 </div>
+                             `;
+                        } else {
+                            htmlImagen = `
+                            <img src="/hechos/${hecho.id}/multimedia/0"
                              class="card-img-top mb-2"
                              alt="Foto"
-                             style="height: 140px; object-fit: scale-down;">
-                    `;
+                             style="height: 140px; object-fit: fit;">
+                            `;
+                        }
                     }
 
                     // Construir HTML del autor

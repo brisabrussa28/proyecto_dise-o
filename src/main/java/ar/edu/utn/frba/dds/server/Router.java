@@ -144,7 +144,7 @@ public class Router {
       hechoController.verHecho(ctx, model);
     });
 
-    app.get("/hechos/{id}/fotos/{indice}", hechoController::getFoto);
+    app.get("/hechos/{id}/multimedia/{indice}", hechoController::getMultimedia);
 
     app.get("/hechos/{id}/editar", ctx -> {
       Map<String, Object> model = modeloConSesion(ctx);

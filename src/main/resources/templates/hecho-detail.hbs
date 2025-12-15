@@ -48,13 +48,24 @@
                     <div id="carouselHecho"
                          class="carousel slide mb-4 shadow-sm rounded overflow-hidden border"
                          data-bs-ride="carousel">
-                        <div class="carousel-inner">
+                        <div class="carousel-inner bg-white">
                             {{#each hecho.fotos}}
-                                <div class="carousel-item {{#if @first}}active{{/if}}">
-                                    <img src="/hechos/{{../hecho.id}}/fotos/{{@index}}"
+                                <div class="carousel-item bg-white {{#if @first}}active{{/if}}"
+                                     style="height: 500px;">
+                                    <div class="d-flex justify-content-center align-items-center w-100 h-100">
+                                        {{#if this.esVideo}}
+                                            <video controls class="d-block"
+                                                   style="max-height: 100%; max-width: 100%;">
+                                                <source src="/hechos/{{../hecho.id}}/multimedia/{{@index}}"
+                                                        type="video/mp4">
+                                            </video>
+                                        {{else}}
+                                            <img src="/hechos/{{../hecho.id}}/multimedia/{{@index}}"
                                          class="d-block w-100"
-                                         style="height: 400px; object-fit: scale-down;"
+                                                 style="height: 500px; object-fit: contain;"
                                          alt="Foto del suceso">
+                                        {{/if}}
+                                    </div>
                                 </div>
                             {{/each}}
                         </div>
