@@ -24,7 +24,7 @@ public class JavalinHandlebars implements FileRenderer {
 
     // --- REGISTRO DE HELPERS (Una sola vez al inicio) ---
 
-    // 1. Helper "eq": Compara si dos valores son iguales (maneja Strings, Longs, Enums)
+    // 1. Helper "eq": Compara igualdad
     this.handlebars.registerHelper("eq", (Object a, Options options) -> {
       Object b = options.param(0);
       return Objects.equals(a, b) || (a != null && b != null && a.toString().equals(b.toString()));
@@ -70,7 +70,7 @@ public class JavalinHandlebars implements FileRenderer {
       }
     });
 
-    // 6. Helper "range": Genera lista de números para iterar
+    // 6. Helper "range": Genera rangos
     this.handlebars.registerHelper("range", (Object start, Options options) -> {
       int s = Integer.parseInt(start.toString());
       int e = Integer.parseInt(options.param(0).toString());
@@ -81,7 +81,7 @@ public class JavalinHandlebars implements FileRenderer {
       return list;
     });
 
-    // 7. Helper "json": Serializa objetos a JSON (CRÍTICO para pasar datos a JS)
+    // 7. Helper "json": Serializa a JSON
     this.handlebars.registerHelper("json", (value, options) -> {
       try {
         return new com.fasterxml.jackson.databind.ObjectMapper()
@@ -93,33 +93,7 @@ public class JavalinHandlebars implements FileRenderer {
       }
     });
 
-            // 2. Formateamos si es del tipo correcto (LocalDateTime, LocalDate, etc)
-            if (value instanceof TemporalAccessor) {
-              return DateTimeFormatter.ofPattern(pattern)
-                                      .format((TemporalAccessor) value);
-            }
-
-            return value.toString();
-          }
-      );
-      handlebars.registerHelper(
-          "or", (value, options) -> {
-            Object otherValue = options.param(0);
-
-            // Función auxiliar para saber si algo es "verdadero" (no nulo, no vacío, no false)
-            boolean a = value != null
-                && !(value instanceof Boolean && !((Boolean) value))
-                && !(value instanceof java.util.Collection && ((java.util.Collection<?>) value).isEmpty());
-
-            boolean b = otherValue != null
-                && !(otherValue instanceof Boolean && !((Boolean) otherValue))
-                && !(otherValue instanceof java.util.Collection && ((java.util.Collection<?>) otherValue).isEmpty());
-
-            return a || b;
-          }
-      );
-      template = handlebars.compile("templates/" + path.replace(".hbs", ""));
-    // 8. Helper "formatDate": Formatea fechas Java (LocalDateTime, ZonedDateTime)
+    // 8. Helper "formatDate": Formatea fechas Java
     this.handlebars.registerHelper("formatDate", (value, options) -> {
       if (value == null) return "";
       String pattern = options.param(0, "dd/MM/yyyy HH:mm");
@@ -127,6 +101,21 @@ public class JavalinHandlebars implements FileRenderer {
         return DateTimeFormatter.ofPattern(pattern).format((TemporalAccessor) value);
       }
       return value.toString();
+    });
+
+    // 9. Helper "or": Lógica booleana OR
+    this.handlebars.registerHelper("or", (value, options) -> {
+      Object otherValue = options.param(0);
+
+      boolean a = value != null
+          && !(value instanceof Boolean && !((Boolean) value))
+          && !(value instanceof java.util.Collection && ((java.util.Collection<?>) value).isEmpty());
+
+      boolean b = otherValue != null
+          && !(otherValue instanceof Boolean && !((Boolean) otherValue))
+          && !(otherValue instanceof java.util.Collection && ((java.util.Collection<?>) otherValue).isEmpty());
+
+      return a || b;
     });
   }
 
@@ -138,10 +127,7 @@ public class JavalinHandlebars implements FileRenderer {
       @NotNull Context context
   ) {
     try {
-      // Mantenemos tu lógica de rutas: asume que los templates están en la carpeta "templates/"
-      // y elimina la extensión .hbs si viene incluida.
       String templatePath = "templates/" + path.replace(".hbs", "");
-
       Template template = handlebars.compile(templatePath);
       return template.apply(model);
     } catch (IOException e) {
