@@ -11,22 +11,25 @@ public class EtiquetaRepository {
 
   public void save(Etiqueta etiqueta) {
     EntityManager em = DBUtils.getEntityManager();
-    DBUtils.comenzarTransaccion(em);
     try {
+      DBUtils.comenzarTransaccion(em);
       em.persist(etiqueta);
+      DBUtils.commit(em); // Commit dentro del try
     } catch (PersistenceException e) {
       DBUtils.rollback(em);
       throw new RuntimeException(e.getMessage());
     } finally {
-      DBUtils.commit(em);
       em.close();
     }
   }
 
   public List<Hecho> findAll() {
     EntityManager em = DBUtils.getEntityManager();
-    return em.createQuery("SELECT h FROM Hecho h", Hecho.class)
-             .getResultList();
-
+    try {
+      return em.createQuery("SELECT h FROM Hecho h", Hecho.class)
+               .getResultList();
+    } finally {
+      em.close();
+    }
   }
 }

@@ -15,19 +15,24 @@ public class AlgoritmoRepository {
 
   public void save(AlgoritmoDeConsenso algoritmo) {
     EntityManager em = DBUtils.getEntityManager();
-    DBUtils.comenzarTransaccion(em);
     try {
+      DBUtils.comenzarTransaccion(em);
       em.persist(algoritmo);
+      DBUtils.commit(em);
     } catch (PersistenceException e) {
       DBUtils.rollback(em);
       throw new RuntimeException(e.getMessage());
     } finally {
-      DBUtils.commit(em);
+      em.close();
     }
   }
 
   public AlgoritmoDeConsenso findById(Long id) {
     EntityManager em = DBUtils.getEntityManager();
-    return em.find(AlgoritmoDeConsenso.class, id);
+    try {
+      return em.find(AlgoritmoDeConsenso.class, id);
+    } finally {
+      em.close();
+    }
   }
 }

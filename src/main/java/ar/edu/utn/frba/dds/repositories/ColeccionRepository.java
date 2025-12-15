@@ -23,12 +23,18 @@ public class ColeccionRepository {
       if (coleccion.getHechos() != null) {
         for (Hecho h : coleccion.getHechos()) {
           DBUtils.enriquecerHecho(h);
-          if (h.getId() == null) em.persist(h);
-          else em.merge(h);
+          if (h.getId() == null) {
+            em.persist(h);
+          } else {
+            em.merge(h);
+          }
         }
       }
-      if (coleccion.getId() == null) em.persist(coleccion);
-      else em.merge(coleccion);
+      if (coleccion.getId() == null) {
+        em.persist(coleccion);
+      } else {
+        em.merge(coleccion);
+      }
       DBUtils.commit(em);
     } catch (PersistenceException e) {
       DBUtils.rollback(em);
@@ -41,21 +47,22 @@ public class ColeccionRepository {
   public List<Coleccion> findAll() {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      return em.createQuery("select c from Coleccion c", Coleccion.class).getResultList();
+      return em.createQuery("select c from Coleccion c", Coleccion.class)
+               .getResultList();
     } finally {
-      em.close();
+      if (em != null && em.isOpen()) {
+        em.close();
+      }
     }
   }
 
-  // MÉTODO MODIFICADO: Ahora carga la fuente y sus hechos con JOIN FETCH
   public Coleccion findById(Long id) {
     EntityManager em = DBUtils.getEntityManager();
     try {
       return em.createQuery(
-                   "SELECT DISTINCT c FROM Coleccion c " +
-                       "LEFT JOIN FETCH c.coleccion_fuente f " +
-                       "LEFT JOIN FETCH f.hechosPersistidos " +
-                       "WHERE c.coleccion_id = :id", Coleccion.class)
+                   "SELECT DISTINCT c FROM Coleccion c " + "LEFT JOIN FETCH c.hechos " + "LEFT JOIN FETCH c.coleccion_fuente f " + "LEFT JOIN FETCH f.hechosPersistidos " + "WHERE c.coleccion_id = :id",
+                   Coleccion.class
+               )
                .setParameter("id", id)
                .getSingleResult();
     } catch (NoResultException e) {
@@ -69,10 +76,9 @@ public class ColeccionRepository {
     EntityManager em = DBUtils.getEntityManager();
     try {
       return em.createQuery(
-                   "SELECT DISTINCT c FROM Coleccion c " +
-                       "LEFT JOIN FETCH c.coleccion_fuente f " +
-                       "LEFT JOIN FETCH f.hechosPersistidos " +
-                       "WHERE f IS NOT NULL", Coleccion.class)
+                   "SELECT DISTINCT c FROM Coleccion c " + "LEFT JOIN FETCH c.coleccion_fuente f " + "LEFT JOIN FETCH f.hechosPersistidos " + "WHERE f IS NOT NULL",
+                   Coleccion.class
+               )
                .getResultList();
     } finally {
       em.close();
@@ -83,7 +89,10 @@ public class ColeccionRepository {
   public List<Coleccion> findByFuenteId(Long fuenteId) {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      return em.createQuery("SELECT c FROM Coleccion c WHERE c.coleccion_fuente.id = :fuenteId", Coleccion.class)
+      return em.createQuery(
+                   "SELECT c FROM Coleccion c WHERE c.coleccion_fuente.id = :fuenteId",
+                   Coleccion.class
+               )
                .setParameter("fuenteId", fuenteId)
                .getResultList();
     } finally {
@@ -109,7 +118,8 @@ public class ColeccionRepository {
   public Long countAll() {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      return em.createQuery("SELECT COUNT(DISTINCT c.coleccion_id) FROM Coleccion c", Long.class).getSingleResult();
+      return em.createQuery("SELECT COUNT(DISTINCT c.coleccion_id) FROM Coleccion c", Long.class)
+               .getSingleResult();
     } finally {
       em.close();
     }
@@ -118,7 +128,8 @@ public class ColeccionRepository {
   public List<String> getCategorias() {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      return em.createQuery("select distinct c.coleccion_categoria from Coleccion c", String.class).getResultList();
+      return em.createQuery("select distinct c.coleccion_categoria from Coleccion c", String.class)
+               .getResultList();
     } finally {
       em.close();
     }
@@ -133,7 +144,8 @@ public class ColeccionRepository {
                        "LEFT JOIN FETCH f.hechosPersistidos h " +
                        "LEFT JOIN FETCH h.etiquetas " +
                        "LEFT JOIN FETCH h.fotos",
-                   Coleccion.class)
+                   Coleccion.class
+               )
                .getResultList();
     } finally {
       em.close();
@@ -147,13 +159,16 @@ public class ColeccionRepository {
       Coleccion coleccion = em.createQuery(
                                   "SELECT DISTINCT c FROM Coleccion c " +
                                       "LEFT JOIN FETCH c.coleccion_fuente f " +
-                                      "WHERE c.coleccion_id = :id", Coleccion.class)
+                                      "WHERE c.coleccion_id = :id", Coleccion.class
+                              )
                               .setParameter("id", id)
                               .getSingleResult();
 
       // Forzar la inicialización de la colección lazy
       if (coleccion != null && coleccion.getFuente() != null) {
-        coleccion.getFuente().getHechos().size(); // Esto fuerza el load
+        coleccion.getFuente()
+                 .getHechos()
+                 .size(); // Esto fuerza el load
       }
 
       return coleccion;

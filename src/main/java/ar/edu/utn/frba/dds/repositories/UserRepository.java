@@ -9,12 +9,8 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import org.hibernate.exception.ConstraintViolationException;
 
-/**
- * Repositorio de Usuarios. Maneja la persistencia.
- */
 public class UserRepository {
-
-  private final EntityManager em = DBUtils.getEntityManager();
+  // BORRADO: private final EntityManager em = ... (¡ESTO ERA EL ERROR!)
 
   private static final UserRepository INSTANCE = new UserRepository();
 
@@ -22,26 +18,16 @@ public class UserRepository {
     return INSTANCE;
   }
 
-  /**
-   * Guarda un nuevo usuario o actualiza uno existente.
-   * Lanza una excepción específica si el usuario ya existe (por unique constraints).
-   *
-   * @param usuario El usuario a persistir o actualizar.
-   * @throws PersistenceException Si ocurre un error al guardar (ej: duplicado).
-   */
   public void guardar(Usuario usuario) {
+    EntityManager em = DBUtils.getEntityManager(); // CREADO AQUÍ
     EntityTransaction tx = em.getTransaction();
     try {
-      if (!tx.isActive()) {
-        tx.begin();
-      }
-
+      tx.begin();
       if (usuario.getId() == null) {
         em.persist(usuario);
       } else {
         em.merge(usuario);
       }
-
       tx.commit();
     } catch (Exception e) {
       if (tx != null && tx.isActive()) {
@@ -50,55 +36,71 @@ public class UserRepository {
 
       Throwable cause = e.getCause();
       if (cause instanceof ConstraintViolationException) {
-        throw new PersistenceException("El usuario o email ya existe en la base de datos.", e);
+        throw new PersistenceException("El usuario o email ya existe.", e);
       }
-
-      throw new PersistenceException("Error al guardar el usuario: " + e.getMessage(), e);
+      throw new PersistenceException("Error al guardar usuario: " + e.getMessage(), e);
+    } finally {
+      em.close(); // IMPRESCINDIBLE
     }
   }
 
-  /**
-   * Busca un usuario por su email.
-   *
-   * @param email El email del usuario.
-   * @return El Usuario si se encuentra, o null si no.
-   */
   public Usuario findByEmail(String email) {
+    EntityManager em = DBUtils.getEntityManager();
     try {
       return em.createQuery("SELECT u FROM Usuario u WHERE u.email = :email", Usuario.class)
                .setParameter("email", email)
                .getSingleResult();
     } catch (NoResultException e) {
       return null;
+    } finally {
+      em.close();
     }
   }
 
   public Usuario findByName(String nombre) {
+    EntityManager em = DBUtils.getEntityManager();
     try {
       return em.createQuery("SELECT u FROM Usuario u WHERE u.userName = :userName", Usuario.class)
                .setParameter("userName", nombre)
                .getSingleResult();
     } catch (NoResultException e) {
       return null;
+    } finally {
+      em.close();
     }
   }
 
-  /**
-   * Valida si un email ya existe.
-   */
   public boolean emailExists(String email) {
-    Long count = em.createQuery("SELECT COUNT(u) FROM Usuario u WHERE u.email = :email", Long.class)
-                   .setParameter("email", email)
-                   .getSingleResult();
-    return count > 0;
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      Long count = em.createQuery(
+                         "SELECT COUNT(u) FROM Usuario u WHERE u.email = :email",
+                         Long.class
+                     )
+                     .setParameter("email", email)
+                     .getSingleResult();
+      return count > 0;
+    } finally {
+      em.close();
+    }
   }
 
   public List<Usuario> findAll() {
-    return em.createQuery("SELECT u FROM Usuario u", Usuario.class)
-             .getResultList();
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      return em.createQuery("SELECT u FROM Usuario u", Usuario.class)
+               .getResultList();
+    } finally {
+      em.close();
+    }
   }
 
   public Usuario findById(Long id) {
-    return em.find(Usuario.class, id);
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      return em.find(Usuario.class, id);
+    } finally {
+      em.close();
+    }
   }
 }
