@@ -45,6 +45,8 @@ public class Solicitud {
 
   @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "El objeto Hecho debe ser mutable y compartido intencionalmente")
   public Solicitud(Hecho hechoSolicitado, String motivo) {
+    System.out.println(">>> Motivo recibido: " + motivo.length() + " caracteres");
+
     if (hechoSolicitado == null) {
       throw new NullPointerException("El hecho solicitado no puede ser null");
     }

@@ -13,6 +13,9 @@
             <div class="d-flex flex-column detalles">
                 <div class="d-flex flex-column">
                     <h5 style="font-weight: 600;">Motivo del reporte</h5>
+
+                    <div id="mensajeEstado"></div>
+
                     <label for="motivoInput" class="form-label"></label>
                     <textarea
                             class="form-control"
@@ -26,7 +29,7 @@
                     </h6>
                     <div class="d-flex flex-row" style="justify-content: end; margin-top: 3vh; gap: 3vh;">
                         <button type="button" class="btn btn-secondary" onclick="vaciarMotivo()">Restablecer</button>
-                        <button type="button" class="btn btn-primary">Enviar</button>
+                        <button type="button" class="btn btn-primary" onclick="enviarSolicitud({{hecho.id}})">Enviar</button>
                     </div>
                 </div>
             </div>
@@ -36,6 +39,58 @@
     <script>
         function vaciarMotivo() {
             document.getElementById('motivoInput').value = "";
+            mostrarMensaje("info", "El motivo fue restablecido.");
+        }
+
+        function enviarSolicitud(hechoId) {
+            const motivo = document.getElementById('motivoInput').value.trim();
+
+            if (motivo.length < 500) {
+                mostrarMensaje("danger", "El motivo debe tener al menos 500 caracteres.");
+                return;
+            }
+
+            if (motivo.length > 1024) {
+                mostrarMensaje("danger", "El motivo debe tener menos de 1024 caracteres.");
+                return;
+            }
+
+            const solicitud = {
+                motivo_solicitud: motivo,
+                hecho_solicitado: hechoId
+            };
+
+            fetch("/solicitudes", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(solicitud)
+            })
+                    .then(async resp => {
+                        if (resp.ok) {
+                            mostrarMensaje("success", "Solicitud enviada correctamente. Redirigiendo...");
+                            setTimeout(() => window.location.href = "/", 1500);
+                        } else {
+                            const error = await resp.text();
+                            mostrarMensaje("danger", "Error al enviar la solicitud: " + error);
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        mostrarMensaje("danger", "Ocurrió un error inesperado.");
+                    });
+        }
+
+        function mostrarMensaje(tipo, texto) {
+            const contenedor = document.getElementById("mensajeEstado");
+
+            contenedor.innerHTML = `
+            <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+                ${texto}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
         }
     </script>
 {{/partial}}

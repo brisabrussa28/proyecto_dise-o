@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.model.estadisticas;
 
+import ar.edu.utn.frba.dds.controller.HechoController;
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.exportador.Exportador;
 import ar.edu.utn.frba.dds.model.filtro.Filtro;
@@ -93,22 +94,24 @@ public class CentralDeEstadisticas {
   public List<Estadistica> hechosPorCategoria() {
     List<Hecho> hechosReportados = gestor.obtenerHechosReportados();
 
+    List<String> categorias = HechoRepository.instance()
+                                             .getCategorias();
+
     Map<String, Long> cantidadPorCategoria = hechosReportados.stream()
                                                            .collect(Collectors.groupingBy(
                                                                Hecho::getCategoria,
                                                                Collectors.counting()
                                                            ));
 
-    List<Estadistica> estadisticas = cantidadPorCategoria.entrySet().stream()
-                                                    .map(entry -> new Estadistica(
-                                                        null,
-                                                        entry.getValue(),
-                                                        entry.getKey(),
-                                                        null,
-                                                        "HECHOS REPORTADOS POR CATEGORIA"
-                                                    ))
-                                                    .collect(Collectors.toList());
-    return estadisticas;
+    return categorias.stream()
+                     .map(cat -> new Estadistica(
+                         null,
+                         cantidadPorCategoria.getOrDefault(cat, 0L),
+                         cat,
+                         null,
+                         "HECHOS REPORTADOS POR CATEGORIA"
+                     ))
+                     .toList();
   }
   //cantidad de hechos reportados por provincia segun coleccion
   public List<Estadistica> hechosPorProvinciaDeUnaColeccion(Coleccion coleccion) {
