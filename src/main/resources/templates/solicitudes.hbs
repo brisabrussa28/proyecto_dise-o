@@ -7,69 +7,73 @@
 {{/partial}}
 
 {{#partial "contenido"}}
-    <div class="container pb-5 bg-white bg-opacity-75 rounded p-3 mt-3 py-2">
-        <body class="general" style="background-color: white;">
-        <h1 class="mt-2 fw-bold">
-            <i class="bi bi-clock-history"></i>
-            Solicitudes Pendientes
-        </h1>
+    <div class="container py-4">
+        <div class="container my-5 bg-white bg-opacity-75 rounded p-3">
+            <body class="general" style="background-color: white;">
+            <h2 class="mb-4 fw-bold">
+                <i class="fa-solid fa-clock"></i>
+                Solicitudes Pendientes
+            </h2>
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-body p-0">
-                <div class="list-group list-group-flush">
-                    {{#each solicitudes}}
-                        <div class="list-group-item d-flex flex-column"
-                             style="border-top: 10px solid #005baa; min-width: 78vw; background-color: white; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%); "
-                             id="{{this.id}}">
-                            <div class="d-flex flex-row"
-                                 style="justify-content: space-between; flex-wrap: wrap; padding-left: 10px; font-weight: bold;">
-                                S-{{this.id}}
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {{#each solicitudes}}
+                            <div class="list-group-item d-flex flex-column"
+                                 style="border-top: 10px solid #005baa; min-width: 78vw; background-color: white; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%); "
+                                 id="{{this.id}}">
                                 <div class="d-flex flex-row"
-                                     style="padding-right: 20px; padding-top: 10px; gap: 20px;">
-                                    <button class="boton btn btn-outline-success"
-                                            style="border: 3px solid rgb(0, 192, 0);"
-                                            onclick="aceptarSolicitud('{{this.id}}')">
-                                        <i class="bi bi-check-lg d-flex align-items-center justify-content-center"></i>
-                                    </button>
-                                    <button class="boton btn btn-danger"
-                                            style="border: 3px solid red;"
-                                            onclick="eliminarSolicitud('{{this.id}}')">
-                                        <i class="bi-x d-flex align-items-center justify-content-center"></i>
-                                    </button>
+                                     style="justify-content: space-between; flex-wrap: wrap; padding-left: 10px; font-weight: bold;">
+                                    S-{{this.id}}
+                                    <div class="d-flex flex-row"
+                                         style="padding-right: 20px; padding-top: 10px; gap: 20px;">
+                                        <button class="boton btn btn-outline-success"
+                                                style="border: 3px solid rgb(0, 192, 0);"
+                                                onclick="aceptarSolicitud('{{this.id}}')">
+                                            <i class="bi bi-check-lg d-flex align-items-center justify-content-center"></i>
+                                        </button>
+                                        <button class="boton btn btn-danger"
+                                                style="border: 3px solid red;"
+                                                onclick="eliminarSolicitud('{{this.id}}')">
+                                            <i class="bi-x d-flex align-items-center justify-content-center"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div style="padding-left: 35px; font-size: 20px; padding-bottom: 10px;">
-                                <div style="font-size: 18px; font-weight:500">
-                                    <strong class="me-1" style="font-size: 20px;">
-                                        Hecho Solicitado:
-                                    </strong>
-                                    {{this.hechoSolicitado.id}}
-                                </div>
-                                <div style="font-size: 18px; font-weight:500">
-                                    <strong class="me-1" style="font-size: 20px;">
-                                        Solicitante:
-                                    </strong>
-                                    {{this.solicitante}}
-                                </div>
-                                <div class="d-flex flex-row align-items-start"
-                                     style="padding-top: 30px; gap: 15px; style=font-size: 18px; font-weight:500; max-width: 67vw;">
-                                    <strong class="me-1" style="font-size: 20px;">
-                                        Descripción:
-                                    </strong>
-                                    <div class="descripcion-pre-formateada"
-                                         style="font-size: 18px; font-weight:500; display: block; max-width: 60vw;">
-                                        {{this.razonEliminacion}}
+                                <div style="padding-left: 35px; font-size: 20px; padding-bottom: 10px;">
+                                    <div style="font-size: 18px; font-weight:500">
+                                        <strong class="me-1" style="font-size: 20px;">
+                                            Hecho Solicitado:
+                                        </strong>
+                                        {{this.hechoSolicitado.id}}
+                                    </div>
+                                    <div style="font-size: 18px; font-weight:500">
+                                        <strong class="me-1" style="font-size: 20px;">
+                                            Solicitante:
+                                        </strong>
+                                        {{this.solicitante}}
+                                    </div>
+                                    <div class="d-flex flex-row align-items-start"
+                                         style="padding-top: 30px; gap: 15px; style=font-size: 18px; font-weight:500; max-width: 67vw;">
+                                        <strong class="me-1" style="font-size: 20px;">
+                                            Descripción:
+                                        </strong>
+                                        <div class="descripcion-pre-formateada"
+                                             style="font-size: 18px; font-weight:500; display: block; max-width: 60vw;">
+                                            {{this.razonEliminacion}}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    {{else}}
-                        <div class="text-muted p-2 text-begin" style="font-weight:">No hay solicitudes.</div>
-                    {{/each}}
+                        {{else}}
+                            <small class="text-muted p-2 text-begin" style="font-weight:">No hay
+                                solicitudes.
+                            </small>
+                        {{/each}}
+                    </div>
                 </div>
             </div>
+            </body>
         </div>
-        </body>
     </div>
 
     <script>

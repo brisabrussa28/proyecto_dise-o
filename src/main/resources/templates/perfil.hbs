@@ -7,16 +7,15 @@
 {{/partial}}
 
 {{#partial "contenido"}}
-    <div class="container d-flex flex-column bg-white rounded p-3 mt-3 py-1 gap-2"
-         style="max-width: 720px;">
-        <div class="d-flex flex-row portada">
+    <div class="container d-flex flex-column bg-white bg-opacity-75 rounded p-3 mt-3 py-1">
+        <div class="d-flex flex-row portada bg-white">
             {{perfil.foto}}
             <i class="bi bi-person-circle" style="font-size: 450%"></i>
             <h2 class="nombre-av">
                 {{perfil.userName}}
             </h2>
         </div>
-        <div class="d-flex flex-column datos">
+        <div class="d-flex flex-column datos bg-white">
             <h3 style="font-weight: 600;">Detalles de usuario</h3>
             <div class="d-flex flex-column detalles">
                 <div class="d-flex flex-column">

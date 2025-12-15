@@ -8,204 +8,270 @@
 
 
 {{#partial "contenido"}}
-    <div class="container py-3 bg-white bg-opacity-75 rounded p-3 mt-3">
+    <div class="container py-4">
+        <div class="container my-5 bg-white bg-opacity-75 rounded p-3">
+            <h2 class="mb-4 fw-bold"><i class="fa-solid fa-server me-2"></i>Gestión de Fuentes</h2>
 
-        <h2 class="mb-4 fw-bold"><i class="fa-solid fa-server me-2"></i>Gestión de Fuentes</h2>
+            <div class="row">
 
-        <div class="row">
+                <!-- Panel de Creación -->
+                <div class="col-md-5">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white fw-bold">Nueva Fuente</div>
+                        <div class="card-body">
 
-            <!-- Panel de Creación -->
-            <div class="col-md-5">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white fw-bold">Nueva Fuente</div>
-                    <div class="card-body">
+                            <form action="/admin/fuentes" method="POST"
+                                  enctype="multipart/form-data" id="formCrearFuente"
+                                  onsubmit="prepararEnvioMapeo()">
 
-                        <form action="/admin/fuentes" method="POST" enctype="multipart/form-data" id="formCrearFuente" onsubmit="prepararEnvioMapeo()">
-
-                            <div class="mb-3">
-                                <label class="form-label">Nombre</label>
-                                <input type="text" name="nueva_fuente_nombre" class="form-control"
-                                       placeholder="Ej: Noticias Combinadas" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Tipo de Fuente</label>
-                                <select id="selectorTipoUI" class="form-select" onchange="gestionarCambioTipo()">
-                                    <option value="DINAMICA" selected>Dinámica</option>
-                                    <option value="ESTATICA_CSV">Importar CSV (Con Mapeo)</option>
-                                    <option value="ESTATICA_JSON">Importar JSON (Directo)</option>
-                                    <option value="API">API Externa</option>
-                                    <option value="AGREGACION">Agregación (Combinada)</option>
-                                </select>
-                                <input type="hidden" name="nueva_fuente_tipo" id="inputTipoReal" value="DINAMICA">
-                            </div>
-
-                            <!-- Campos para API -->
-                            <div id="camposApi" class="d-none bg-light p-2 rounded mb-3 border">
-                                <small class="text-muted d-block mb-2 fw-bold">Configuración API</small>
-                                <div class="mb-2">
-                                    <input type="text" name="url"
-                                           class="form-control form-control-sm"
-                                           placeholder="URL Endpoint (https://...)">
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre</label>
+                                    <input type="text" name="nueva_fuente_nombre"
+                                           class="form-control"
+                                           placeholder="Ej: Noticias de ayer..." required>
                                 </div>
-                                <div class="mb-2">
-                                    <input type="text" name="token"
-                                           class="form-control form-control-sm"
-                                           placeholder="Token (Opcional)">
+
+                                <div class="mb-3">
+                                    <label class="form-label">Tipo de Fuente</label>
+                                    <select id="selectorTipoUI" class="form-select"
+                                            onchange="gestionarCambioTipo()">
+                                        <option value="DINAMICA" selected>Dinámica</option>
+                                        <option value="ESTATICA_CSV">Importar CSV (Con Mapeo)
+                                        </option>
+                                        <option value="ESTATICA_JSON">Importar JSON (Directo)
+                                        </option>
+                                        <option value="API">API Externa</option>
+                                        <option value="AGREGACION">Agregación (Combinada)</option>
+                                    </select>
+                                    <input type="hidden" name="nueva_fuente_tipo" id="inputTipoReal"
+                                           value="DINAMICA">
                                 </div>
-                            </div>
 
-                            <!-- Campos para Archivo Estático (CSV o JSON) -->
-                            <div id="camposEstatica" class="d-none bg-light p-2 rounded mb-3 border">
-
-                                <!-- CONFIGURACIONES CSV -->
-                                <div id="configCsv" class="d-none mb-3 border-bottom pb-2">
-                                    <label class="small fw-bold text-primary mb-2">Configuración CSV</label>
-                                    <div class="row g-2">
-                                        <div class="col-6">
-                                            <label class="form-label x-small mb-1">Separador</label>
-                                            <select name="csv_separador" class="form-select form-select-sm">
-                                                <option value="," selected>Coma (,)</option>
-                                                <option value=";">Punto y coma (;)</option>
-                                                <option value="|">Barra (|)</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="form-label x-small mb-1">Formato Fecha</label>
-                                            <input type="text" name="csv_formato_fecha"
-                                                   class="form-control form-control-sm"
-                                                   value="dd/MM/yyyy HH:mm"
-                                                   title="Ej: dd/MM/yyyy HH:mm o yyyy-MM-dd">
-                                        </div>
+                                <!-- Campos para API -->
+                                <div id="camposApi" class="d-none bg-light p-2 rounded mb-3 border">
+                                    <small class="text-muted d-block mb-2 fw-bold">Configuración
+                                        API</small>
+                                    <div class="mb-2">
+                                        <input type="text" name="url"
+                                               class="form-control form-control-sm"
+                                               placeholder="URL Endpoint (https://...)">
                                     </div>
-                                    <div class="form-text x-small mt-1 text-muted">
-                                        Usá patrón Java: <code>dd/MM/yyyy</code>.
+                                    <div class="mb-2">
+                                        <input type="text" name="token"
+                                               class="form-control form-control-sm"
+                                               placeholder="Token (Opcional)">
                                     </div>
                                 </div>
 
-                                <label class="small fw-bold text-primary">Archivo de Datos</label>
-                                <input type="file" name="archivo_fuente" id="inputArchivo"
-                                       class="form-control form-control-sm mb-2">
+                                <!-- Campos para Archivo Estático (CSV o JSON) -->
+                                <div id="camposEstatica"
+                                     class="d-none bg-light p-2 rounded mb-3 border">
 
-                                <div id="msgAyudaMapeo" class="d-none alert alert-info py-2 px-2 mb-2" style="font-size: 0.8rem;">
-                                    <i class="fa-solid fa-arrow-up me-1"></i> Subí tu archivo <b>.csv</b> para configurar el mapeo.
+                                    <!-- CONFIGURACIONES CSV -->
+                                    <div id="configCsv" class="d-none mb-3 border-bottom pb-2">
+                                        <label class="small fw-bold text-primary mb-2">Configuración
+                                            CSV</label>
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label class="form-label x-small mb-1">Separador</label>
+                                                <select name="csv_separador"
+                                                        class="form-select form-select-sm">
+                                                    <option value="," selected>Coma (,)</option>
+                                                    <option value=";">Punto y coma (;)</option>
+                                                    <option value="|">Barra (|)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label x-small mb-1">Formato
+                                                    Fecha</label>
+                                                <input type="text" name="csv_formato_fecha"
+                                                       class="form-control form-control-sm"
+                                                       value="dd/MM/yyyy HH:mm"
+                                                       title="Ej: dd/MM/yyyy HH:mm o yyyy-MM-dd">
+                                            </div>
+                                        </div>
+                                        <div class="form-text x-small mt-1 text-muted">
+                                            Usá patrón Java: <code>dd/MM/yyyy</code>.
+                                        </div>
+                                    </div>
+
+                                    <label class="small fw-bold text-primary">Archivo de
+                                        Datos</label>
+                                    <input type="file" name="archivo_fuente" id="inputArchivo"
+                                           class="form-control form-control-sm mb-2">
+
+                                    <div id="msgAyudaMapeo"
+                                         class="d-none alert alert-info py-2 px-2 mb-2"
+                                         style="font-size: 0.8rem;">
+                                        <i class="fa-solid fa-arrow-up me-1"></i> Subí tu archivo
+                                        <b>.csv</b> para configurar el mapeo.
+                                    </div>
+
+                                    <!-- Ayuda JSON Expandible con TODOS los campos -->
+                                    <div id="msgAyudaJson" class="d-none mb-2">
+                                        <div class="alert alert-light border py-2 px-2 mb-2 d-flex justify-content-between align-items-center"
+                                             style="font-size: 0.8rem;">
+                                            <span><i class="fa-solid fa-code me-1"></i> El JSON debe respetar la estructura.</span>
+                                            <button class="btn btn-sm btn-outline-info py-0 px-2"
+                                                    type="button" data-bs-toggle="collapse"
+                                                    data-bs-target="#jsonStructureInfo"
+                                                    aria-expanded="false"
+                                                    aria-controls="jsonStructureInfo"
+                                                    title="Ver estructura requerida">
+                                                <i class="fa-solid fa-info"></i>
+                                            </button>
+                                        </div>
+                                        <div class="collapse" id="jsonStructureInfo">
+                                            <div class="card card-body bg-white p-2 border"
+                                                 style="font-size: 0.75rem;">
+                                                <strong class="d-block mb-1 text-dark">Campos
+                                                    requeridos (Keys):</strong>
+                                                <ul class="list-unstyled mb-0 font-monospace text-muted ps-2 border-start border-3 border-info">
+                                                    <li><span class="text-danger fw-bold">*</span>
+                                                        "hecho_titulo": "Texto"
+                                                    </li>
+                                                    <li><span class="text-danger fw-bold">*</span>
+                                                        "hecho_fecha_suceso": "ISO-8601"
+                                                    </li>
+                                                    <li>"hecho_descripcion": "Texto"</li>
+                                                    <li>"hecho_categoria": "Texto"</li>
+                                                    <li><span class="text-warning fw-bold">*</span>
+                                                        "hecho_direccion": "Texto"
+                                                    </li>
+                                                    <li><span class="text-warning fw-bold">*</span>
+                                                        "hecho_provincia": "Texto"
+                                                    </li>
+                                                    <li>"hecho_fecha_carga": "ISO-8601"</li>
+                                                    <li><span class="text-warning fw-bold">*</span>
+                                                        "hecho_ubicacion": { "latitud": double,
+                                                        "longitud": double }
+                                                    </li>
+                                                    <li class="mt-1 fw-bold text-dark">
+                                                        Colecciones:
+                                                    </li>
+                                                    <li>"hecho_etiquetas": [ { "etiqueta_nombre":
+                                                        "Tag1" } ]
+                                                    </li>
+                                                    <li>"hecho_fotos": [ { "nombre": "...", "tipo":
+                                                        "...", "datos": "..." } ]
+                                                    </li>
+                                                </ul>
+                                                <small class="d-block mt-2 text-muted fst-italic">
+                                                    * Nota: El campo "hecho_origen" es ignorado y se
+                                                    fuerza a DATASET.
+                                                    <br> <span class="text-warning fw-bold">*</span>
+                                                    Al menos uno de estos campos de ubicación es
+                                                    obligatorio.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SECCION DE MAPEO DINAMICO -->
+                                    <div id="seccionMapeo" class="d-none mt-2 pt-2 border-top">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="small fw-bold text-dark mb-0">Mapeo de
+                                                Columnas</h6>
+                                            <span class="badge bg-success text-white border"
+                                                  style="font-size: 0.6rem;">CSV LEÍDO</span>
+                                        </div>
+                                        <p class="x-small text-muted mb-2">
+                                            Asigna las columnas detectadas a los campos del sistema.
+                                        </p>
+                                        <div id="contenedorFilasMapeo" class="d-grid gap-2"></div>
+                                    </div>
+
+                                    <input type="hidden" name="mapeo_columnas_json"
+                                           id="inputMapeoJson">
                                 </div>
 
-                                <!-- Ayuda JSON Expandible con TODOS los campos -->
-                                <div id="msgAyudaJson" class="d-none mb-2">
-                                    <div class="alert alert-light border py-2 px-2 mb-2 d-flex justify-content-between align-items-center" style="font-size: 0.8rem;">
-                                        <span><i class="fa-solid fa-code me-1"></i> El JSON debe respetar la estructura.</span>
-                                        <button class="btn btn-sm btn-outline-info py-0 px-2" type="button" data-bs-toggle="collapse" data-bs-target="#jsonStructureInfo" aria-expanded="false" aria-controls="jsonStructureInfo" title="Ver estructura requerida">
-                                            <i class="fa-solid fa-info"></i>
+                                <!-- Campos para Agregación -->
+                                <div id="camposAgregacion"
+                                     class="d-none bg-light p-2 rounded mb-3 border">
+                                    <label class="small fw-bold text-primary mb-2">Componer
+                                        Agregación</label>
+                                    <div class="input-group input-group-sm mb-2">
+                                        <select id="selectFuenteOrigen" class="form-select">
+                                            <option value="" disabled selected>Cargando fuentes...
+                                            </option>
+                                        </select>
+                                        <button type="button" class="btn btn-outline-primary"
+                                                onclick="agregarFuenteALista()">
+                                            <i class="fa-solid fa-plus"></i>
                                         </button>
                                     </div>
-                                    <div class="collapse" id="jsonStructureInfo">
-                                        <div class="card card-body bg-white p-2 border" style="font-size: 0.75rem;">
-                                            <strong class="d-block mb-1 text-dark">Campos requeridos (Keys):</strong>
-                                            <ul class="list-unstyled mb-0 font-monospace text-muted ps-2 border-start border-3 border-info">
-                                                <li><span class="text-danger fw-bold">*</span> "hecho_titulo": "Texto"</li>
-                                                <li><span class="text-danger fw-bold">*</span> "hecho_fecha_suceso": "ISO-8601"</li>
-                                                <li>"hecho_descripcion": "Texto"</li>
-                                                <li>"hecho_categoria": "Texto"</li>
-                                                <li><span class="text-warning fw-bold">*</span> "hecho_direccion": "Texto"</li>
-                                                <li><span class="text-warning fw-bold">*</span> "hecho_provincia": "Texto"</li>
-                                                <li>"hecho_fecha_carga": "ISO-8601"</li>
-                                                <li><span class="text-warning fw-bold">*</span> "hecho_ubicacion": { "latitud": double, "longitud": double }</li>
-                                                <li class="mt-1 fw-bold text-dark">Colecciones:</li>
-                                                <li>"hecho_etiquetas": [ { "etiqueta_nombre": "Tag1" } ]</li>
-                                                <li>"hecho_fotos": [ { "nombre": "...", "tipo": "...", "datos": "..." } ]</li>
-                                            </ul>
-                                            <small class="d-block mt-2 text-muted fst-italic">
-                                                * Nota: El campo "hecho_origen" es ignorado y se fuerza a DATASET.
-                                                <br> <span class="text-warning fw-bold">*</span> Al menos uno de estos campos de ubicación es obligatorio.
-                                            </small>
-                                        </div>
-                                    </div>
+                                    <ul id="listaFuentesSeleccionadas"
+                                        class="list-group list-group-flush mb-2 border rounded bg-white"
+                                        style="min-height: 50px; max-height: 200px; overflow-y: auto;">
+                                        <li class="list-group-item text-center text-muted small fst-italic"
+                                            id="placeholder-lista">
+                                            Sin fuentes seleccionadas
+                                        </li>
+                                    </ul>
+                                    <div id="inputsOcultosContainer"></div>
                                 </div>
 
-                                <!-- SECCION DE MAPEO DINAMICO -->
-                                <div id="seccionMapeo" class="d-none mt-2 pt-2 border-top">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h6 class="small fw-bold text-dark mb-0">Mapeo de Columnas</h6>
-                                        <span class="badge bg-success text-white border" style="font-size: 0.6rem;">CSV LEÍDO</span>
-                                    </div>
-                                    <p class="x-small text-muted mb-2">
-                                        Asigna las columnas detectadas a los campos del sistema.
-                                    </p>
-                                    <div id="contenedorFilasMapeo" class="d-grid gap-2"></div>
-                                </div>
-
-                                <input type="hidden" name="mapeo_columnas_json" id="inputMapeoJson">
-                            </div>
-
-                            <!-- Campos para Agregación -->
-                            <div id="camposAgregacion" class="d-none bg-light p-2 rounded mb-3 border">
-                                <label class="small fw-bold text-primary mb-2">Componer Agregación</label>
-                                <div class="input-group input-group-sm mb-2">
-                                    <select id="selectFuenteOrigen" class="form-select">
-                                        <option value="" disabled selected>Cargando fuentes...</option>
-                                    </select>
-                                    <button type="button" class="btn btn-outline-primary" onclick="agregarFuenteALista()">
-                                        <i class="fa-solid fa-plus"></i>
-                                    </button>
-                                </div>
-                                <ul id="listaFuentesSeleccionadas" class="list-group list-group-flush mb-2 border rounded bg-white" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
-                                    <li class="list-group-item text-center text-muted small fst-italic" id="placeholder-lista">
-                                        Sin fuentes seleccionadas
-                                    </li>
-                                </ul>
-                                <div id="inputsOcultosContainer"></div>
-                            </div>
-
-                            <button type="submit" class="btn btn-warning w-100">Crear Fuente</button>
-                        </form>
+                                <button type="submit" class="btn btn-warning w-100">Crear Fuente
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Listado de Fuentes -->
-            <div class="col-md-7">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0" style="font-weight: 600;">Fuentes Existentes</h5>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="cargarTodasLasFuentes()" title="Refrescar lista">
-                            <i class="fa-solid fa-rotate"></i>
-                        </button>
-                    </div>
-
-                    <div class="card-body p-0">
-                        <div id="loaderFuentes" class="text-center p-4 d-none">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Cargando...</span>
-                            </div>
+                <!-- Listado de Fuentes -->
+                <div class="col-md-7">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0" style="font-weight: 600;">Fuentes Existentes</h5>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    onclick="cargarTodasLasFuentes()" title="Refrescar lista">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
                         </div>
 
-                        <div id="errorFuentes" class="alert alert-warning m-3 d-none align-items-center" role="alert">
-                            <div>
-                                <i class="fa-solid fa-triangle-exclamation me-2"></i>
-                                <span id="msgError"></span>
+                        <div class="card-body p-0">
+                            <div id="loaderFuentes" class="text-center p-4 d-none">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
                             </div>
+
+                            <div id="errorFuentes"
+                                 class="alert alert-warning m-3 d-none align-items-center"
+                                 role="alert">
+                                <div>
+                                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                    <span id="msgError"></span>
+                                </div>
+                            </div>
+
+                            <ul id="listaFuentesDinamica"
+                                class="list-group list-group-flush d-none"></ul>
+
+                            <ul id="listaFuentesServer" class="list-group list-group-flush">
+                                {{#each fuentes}}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="mb-0"
+                                                style="font-weight: 600;">{{this.nombre}}</h5>
+                                            <span class="badge bg-secondary"
+                                                  style="font-size: 0.7rem">Tipo: {{this.tipo}}
+                                                (ID: {{this.id}})</span>
+                                        </div>
+                                        <div class="btn-group">
+                                            <a href="/admin/fuentes/{{this.id}}"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fa-solid fa-gear"></i> Configurar
+                                            </a>
+                                        </div>
+                                    </li>
+                                {{else}}
+                                    <div class="p-4 text-center text-muted">No hay fuentes cargadas
+                                        (Local).
+                                    </div>
+                                {{/each}}
+                            </ul>
                         </div>
-
-                        <ul id="listaFuentesDinamica" class="list-group list-group-flush d-none"></ul>
-
-                        <ul id="listaFuentesServer" class="list-group list-group-flush">
-                            {{#each fuentes}}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5 class="mb-0" style="font-weight: 600;">{{this.nombre}}</h5>
-                                        <span class="badge bg-secondary" style="font-size: 0.7rem">Tipo: {{this.tipo}} (ID: {{this.id}})</span>
-                                    </div>
-                                    <div class="btn-group">
-                                        <a href="/admin/fuentes/{{this.id}}" class="btn btn-sm btn-outline-primary">
-                                            <i class="fa-solid fa-gear"></i> Configurar
-                                        </a>
-                                    </div>
-                                </li>
-                            {{else}}
-                                <div class="p-4 text-center text-muted">No hay fuentes cargadas (Local).</div>
-                            {{/each}}
-                        </ul>
                     </div>
                 </div>
             </div>

@@ -6,218 +6,287 @@
 {{/partial}}
 
 {{#partial "contenido"}}
-    <div class="container py-3 mt-3 bg-white bg-opacity-75 rounded p-3">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h2 class="fw-bold"><i class="fa-solid fa-layer-group me-2"></i>Gestión de
-                    Colecciones</h2>
-                <p class="text-muted">Agrupa hechos, define fuentes y aplica algoritmos de
-                    consenso.</p>
-            </div>
-        </div>
-
-        <div class="row">
-            <!-- Panel de Creación -->
-            <div class="col-md-5"> <!-- Aumentado a col-md-5 para dar espacio al mapeo -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white fw-bold">
-                        <i class="fa-solid fa-plus me-2"></i>Nueva Colección
-                    </div>
-                    <div class="card-body">
-                        <!-- Agregamos ID y onsubmit para procesar el mapeo antes de enviar -->
-                        <form action="/admin/colecciones" method="POST" enctype="multipart/form-data" id="formCrearColeccion" onsubmit="prepararEnvioMapeo()">
-
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Nombre</label>
-                                <input type="text" name="nombre" class="form-control"
-                                       placeholder="Ej: Reportes de Tránsito" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Descripción</label>
-                                <textarea name="descripcion" class="form-control" rows="2"></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Categoría</label>
-                                <input type="text" name="categoria" class="form-control"
-                                       placeholder="Ej: Tráfico">
-                            </div>
-
-                            <hr>
-
-                            <!-- SELECCIÓN DE FUENTE -->
-                            <div class="mb-3">
-                                <label class="form-label fw-bold text-primary">Fuente de Datos</label>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="modo_fuente" id="modoExistente" value="existente" checked onchange="togglemodo_fuente()">
-                                    <label class="form-check-label" for="modoExistente">
-                                        Usar Fuente Existente
-                                    </label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="modo_fuente" id="modoNueva" value="nueva" onchange="togglemodo_fuente()">
-                                    <label class="form-check-label" for="modoNueva">
-                                        Crear Nueva Fuente
-                                    </label>
-                                </div>
-
-                                <!-- OPCIÓN A: Fuente Existente -->
-                                <div id="panelFuenteExistente">
-                                    <select name="fuente_id" class="form-select">
-                                        <option value="" selected disabled>Seleccionar...</option>
-                                        {{#each fuentes}}
-                                            <option value="{{this.id}}">{{this.nombre}} ({{this.tipo}})</option>
-                                        {{/each}}
-                                    </select>
-                                </div>
-
-                                <!-- OPCIÓN B: Nueva Fuente (Replicada de fuentes-lista.hbs) -->
-                                <div id="panelFuenteNueva" class="d-none bg-light p-3 rounded border">
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold">Nombre de la Fuente</label>
-                                        <input type="text" name="nueva_fuente_nombre" class="form-control form-control-sm"
-                                               placeholder="Ej: Fuente CSV Importada">
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold">Tipo</label>
-                                        <select id="selectorTipoUI" class="form-select form-select-sm" onchange="gestionarCambioTipo()">
-                                            <option value="DINAMICA" selected>Dinámica</option>
-                                            <option value="ESTATICA_CSV">Importar CSV (Con Mapeo)</option>
-                                            <option value="ESTATICA_JSON">Importar JSON (Directo)</option>
-                                            <option value="API">API Externa</option>
-                                            <option value="AGREGACION">Agregación</option>
-                                        </select>
-                                        <!-- Input oculto para el backend -->
-                                        <input type="hidden" name="nueva_fuente_tipo" id="inputTipoReal" value="DINAMICA">
-                                    </div>
-
-                                    <!-- Campos API -->
-                                    <div id="camposApi" class="d-none border-top pt-2">
-                                        <input type="text" name="url" class="form-control form-control-sm mb-2" placeholder="URL Endpoint">
-                                        <input type="text" name="token" class="form-control form-control-sm" placeholder="Token (Opcional)">
-                                    </div>
-
-                                    <!-- Campos Estática (CSV/JSON) -->
-                                    <div id="camposEstatica" class="d-none border-top pt-2">
-
-                                        <!-- Config CSV -->
-                                        <div id="configCsv" class="d-none mb-2">
-                                            <div class="row g-2">
-                                                <div class="col-6">
-                                                    <label class="form-label x-small mb-0">Separador</label>
-                                                    <select name="csv_separador" class="form-select form-select-sm" style="font-size: 0.75rem;">
-                                                        <option value="," selected>Coma (,)</option>
-                                                        <option value=";">Punto y coma (;)</option>
-                                                        <option value="|">Barra (|)</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-6">
-                                                    <label class="form-label x-small mb-0">Formato Fecha</label>
-                                                    <input type="text" name="csv_formato_fecha" class="form-control form-control-sm" value="dd/MM/yyyy HH:mm" style="font-size: 0.75rem;">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <label class="form-label small fw-bold">Archivo</label>
-                                        <input type="file" name="archivo_fuente" id="inputArchivo" class="form-control form-control-sm mb-2">
-
-                                        <!-- Ayuda CSV -->
-                                        <div id="msgAyudaMapeo" class="d-none alert alert-info py-1 px-2 mb-2" style="font-size: 0.7rem;">
-                                            <i class="fa-solid fa-arrow-up me-1"></i> Subí tu <b>.csv</b> para mapear.
-                                        </div>
-
-                                        <!-- Ayuda JSON -->
-                                        <div id="msgAyudaJson" class="d-none mb-2">
-                                            <div class="alert alert-light border py-1 px-2 mb-1 d-flex justify-content-between align-items-center" style="font-size: 0.7rem;">
-                                                <span><i class="fa-solid fa-code me-1"></i> Estructura JSON requerida.</span>
-                                                <button class="btn btn-sm btn-outline-info py-0 px-1" type="button" data-bs-toggle="collapse" data-bs-target="#jsonStructureInfo" aria-expanded="false" aria-controls="jsonStructureInfo">
-                                                    <i class="fa-solid fa-info"></i>
-                                                </button>
-                                            </div>
-                                            <div class="collapse" id="jsonStructureInfo">
-                                                <div class="card card-body bg-white p-2 border" style="font-size: 0.7rem;">
-                                                    <strong class="d-block mb-1">Keys requeridas:</strong>
-                                                    <ul class="list-unstyled mb-0 font-monospace text-muted ps-2 border-start border-2 border-info">
-                                                        <li>"hecho_titulo", "hecho_fecha_suceso"</li>
-                                                        <li>"hecho_ubicacion": { "latitud":.., "longitud":.. }</li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- SECCION MAPEO DINAMICO -->
-                                        <div id="seccionMapeo" class="d-none mt-2 border-top pt-2">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <h6 class="small fw-bold text-dark mb-0" style="font-size: 0.8rem;">Mapeo de Columnas</h6>
-                                                <span class="badge bg-success text-white border" style="font-size: 0.6rem;">LEÍDO</span>
-                                            </div>
-                                            <div id="contenedorFilasMapeo" class="d-grid gap-1"></div>
-                                        </div>
-
-                                        <!-- Input oculto para el JSON del mapeo -->
-                                        <input type="hidden" name="mapeo_columnas_json" id="inputMapeoJson">
-                                    </div>
-
-                                    <!-- Campos Agregación -->
-                                    <div id="camposAgregacion" class="d-none border-top pt-2">
-                                        <label class="form-label small fw-bold">Fuentes Hijas</label>
-                                        <div class="input-group input-group-sm mb-2">
-                                            <select id="selectFuenteAgregacion" class="form-select">
-                                                {{#each fuentes}}
-                                                    <option value="{{this.id}}">{{this.nombre}}</option>
-                                                {{/each}}
-                                            </select>
-                                            <button type="button" class="btn btn-outline-secondary" onclick="agregarFuenteAgregacion()">
-                                                <i class="fa-solid fa-plus"></i>
-                                            </button>
-                                        </div>
-                                        <ul id="listaAgregacion" class="list-group list-group-flush border rounded bg-white" style="min-height: 40px; max-height: 150px; overflow-y: auto;">
-                                            <li class="list-group-item text-center text-muted small fst-italic" id="placeholder-agregacion">Sin fuentes</li>
-                                        </ul>
-                                        <div id="inputsAgregacionContainer"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <hr>
-
-                            <!-- CORRECCIÓN APLICADA AQUÍ: Cambiado "algoritmo" por "algoritmo_tipo" y los valores -->
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Algoritmo de Consenso</label>
-                                <select name="algoritmo_tipo" class="form-select">
-                                    <option value="May_simple">Mayoría Simple</option>
-                                    <option value="Absoluta">Unanimidad / Absoluta</option>
-                                    <option value="Mult_menciones">Múltiples Menciones</option>
-                                </select>
-                            </div>
-
-                            <button type="submit" class="btn btn-success w-100">
-                                <i class="fa-solid fa-save me-2"></i>Crear Colección
-                            </button>
-                        </form>
-                    </div>
+    <div class="container py-3">
+        <div class="container my-5 rounded p-3 bg-white bg-opacity-75">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="fw-bold"><i class="fa-solid fa-layer-group me-2"></i>Gestión de
+                        Colecciones</h2>
+                    <p class="text-muted">Agrupa hechos, define fuentes y aplica algoritmos de
+                        consenso.</p>
                 </div>
             </div>
 
-            <!-- Listado de Colecciones -->
-            <div class="col-md-7">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white fw-bold">Colecciones Existentes</div>
-                    <ul class="list-group list-group-flush">
-                        {{#each colecciones}}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="mb-0 fw-bold">{{this.titulo}}</h5>
-                                    <small class="text-muted">{{this.categoria}}</small>
+            <div class="row">
+                <!-- Panel de Creación -->
+                <div class="col-md-5"> <!-- Aumentado a col-md-5 para dar espacio al mapeo -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white fw-bold">
+                            <i class="fa-solid fa-plus me-2"></i>Nueva Colección
+                        </div>
+                        <div class="card-body">
+                            <!-- Agregamos ID y onsubmit para procesar el mapeo antes de enviar -->
+                            <form action="/admin/colecciones" method="POST"
+                                  enctype="multipart/form-data" id="formCrearColeccion"
+                                  onsubmit="prepararEnvioMapeo()">
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Nombre</label>
+                                    <input type="text" name="nombre" class="form-control"
+                                           placeholder="Ej: Reportes de Tránsito" required>
                                 </div>
-                                <a href="/admin/colecciones/{{this.id}}" class="btn btn-sm btn-outline-primary">
-                                    <i class="fa-solid fa-gear"></i> Configurar
-                                </a>
-                            </li>
-                        {{else}}
-                            <div class="p-4 text-center text-muted">No hay colecciones creadas.</div>
-                        {{/each}}
-                    </ul>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Descripción</label>
+                                    <textarea name="descripcion" class="form-control"
+                                              rows="2"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Categoría</label>
+                                    <input type="text" name="categoria" class="form-control"
+                                           placeholder="Ej: Tráfico">
+                                </div>
+
+                                <hr>
+
+                                <!-- SELECCIÓN DE FUENTE -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-primary">Fuente de
+                                        Datos</label>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio"
+                                               name="modo_fuente" id="modoExistente"
+                                               value="existente" checked
+                                               onchange="togglemodo_fuente()">
+                                        <label class="form-check-label" for="modoExistente">
+                                            Usar Fuente Existente
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio"
+                                               name="modo_fuente" id="modoNueva" value="nueva"
+                                               onchange="togglemodo_fuente()">
+                                        <label class="form-check-label" for="modoNueva">
+                                            Crear Nueva Fuente
+                                        </label>
+                                    </div>
+
+                                    <!-- OPCIÓN A: Fuente Existente -->
+                                    <div id="panelFuenteExistente">
+                                        <select name="fuente_id" class="form-select">
+                                            <option value="" selected disabled>Seleccionar...
+                                            </option>
+                                            {{#each fuentes}}
+                                                <option value="{{this.id}}">{{this.nombre}}
+                                                    ({{this.tipo}})
+                                                </option>
+                                            {{/each}}
+                                        </select>
+                                    </div>
+
+                                    <!-- OPCIÓN B: Nueva Fuente (Replicada de fuentes-lista.hbs) -->
+                                    <div id="panelFuenteNueva"
+                                         class="d-none bg-light p-3 rounded border">
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold">Nombre de la
+                                                Fuente</label>
+                                            <input type="text" name="nueva_fuente_nombre"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="Ej: Fuente CSV Importada">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold">Tipo</label>
+                                            <select id="selectorTipoUI"
+                                                    class="form-select form-select-sm"
+                                                    onchange="gestionarCambioTipo()">
+                                                <option value="DINAMICA" selected>Dinámica</option>
+                                                <option value="ESTATICA_CSV">Importar CSV (Con
+                                                    Mapeo)
+                                                </option>
+                                                <option value="ESTATICA_JSON">Importar JSON
+                                                    (Directo)
+                                                </option>
+                                                <option value="API">API Externa</option>
+                                                <option value="AGREGACION">Agregación</option>
+                                            </select>
+                                            <!-- Input oculto para el backend -->
+                                            <input type="hidden" name="nueva_fuente_tipo"
+                                                   id="inputTipoReal" value="DINAMICA">
+                                        </div>
+
+                                        <!-- Campos API -->
+                                        <div id="camposApi" class="d-none border-top pt-2">
+                                            <input type="text" name="url"
+                                                   class="form-control form-control-sm mb-2"
+                                                   placeholder="URL Endpoint">
+                                            <input type="text" name="token"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="Token (Opcional)">
+                                        </div>
+
+                                        <!-- Campos Estática (CSV/JSON) -->
+                                        <div id="camposEstatica" class="d-none border-top pt-2">
+
+                                            <!-- Config CSV -->
+                                            <div id="configCsv" class="d-none mb-2">
+                                                <div class="row g-2">
+                                                    <div class="col-6">
+                                                        <label class="form-label x-small mb-0">Separador</label>
+                                                        <select name="csv_separador"
+                                                                class="form-select form-select-sm"
+                                                                style="font-size: 0.75rem;">
+                                                            <option value="," selected>Coma (,)
+                                                            </option>
+                                                            <option value=";">Punto y coma (;)
+                                                            </option>
+                                                            <option value="|">Barra (|)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="form-label x-small mb-0">Formato
+                                                            Fecha</label>
+                                                        <input type="text" name="csv_formato_fecha"
+                                                               class="form-control form-control-sm"
+                                                               value="dd/MM/yyyy HH:mm"
+                                                               style="font-size: 0.75rem;">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <label class="form-label small fw-bold">Archivo</label>
+                                            <input type="file" name="archivo_fuente"
+                                                   id="inputArchivo"
+                                                   class="form-control form-control-sm mb-2">
+
+                                            <!-- Ayuda CSV -->
+                                            <div id="msgAyudaMapeo"
+                                                 class="d-none alert alert-info py-1 px-2 mb-2"
+                                                 style="font-size: 0.7rem;">
+                                                <i class="fa-solid fa-arrow-up me-1"></i> Subí tu
+                                                <b>.csv</b> para mapear.
+                                            </div>
+
+                                            <!-- Ayuda JSON -->
+                                            <div id="msgAyudaJson" class="d-none mb-2">
+                                                <div class="alert alert-light border py-1 px-2 mb-1 d-flex justify-content-between align-items-center"
+                                                     style="font-size: 0.7rem;">
+                                                    <span><i class="fa-solid fa-code me-1"></i> Estructura JSON requerida.</span>
+                                                    <button class="btn btn-sm btn-outline-info py-0 px-1"
+                                                            type="button" data-bs-toggle="collapse"
+                                                            data-bs-target="#jsonStructureInfo"
+                                                            aria-expanded="false"
+                                                            aria-controls="jsonStructureInfo">
+                                                        <i class="fa-solid fa-info"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="collapse" id="jsonStructureInfo">
+                                                    <div class="card card-body bg-white p-2 border"
+                                                         style="font-size: 0.7rem;">
+                                                        <strong class="d-block mb-1">Keys
+                                                            requeridas:</strong>
+                                                        <ul class="list-unstyled mb-0 font-monospace text-muted ps-2 border-start border-2 border-info">
+                                                            <li>"hecho_titulo",
+                                                                "hecho_fecha_suceso"
+                                                            </li>
+                                                            <li>"hecho_ubicacion": { "latitud":..,
+                                                                "longitud":.. }
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- SECCION MAPEO DINAMICO -->
+                                            <div id="seccionMapeo"
+                                                 class="d-none mt-2 border-top pt-2">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <h6 class="small fw-bold text-dark mb-0"
+                                                        style="font-size: 0.8rem;">Mapeo de
+                                                        Columnas</h6>
+                                                    <span class="badge bg-success text-white border"
+                                                          style="font-size: 0.6rem;">LEÍDO</span>
+                                                </div>
+                                                <div id="contenedorFilasMapeo"
+                                                     class="d-grid gap-1"></div>
+                                            </div>
+
+                                            <!-- Input oculto para el JSON del mapeo -->
+                                            <input type="hidden" name="mapeo_columnas_json"
+                                                   id="inputMapeoJson">
+                                        </div>
+
+                                        <!-- Campos Agregación -->
+                                        <div id="camposAgregacion" class="d-none border-top pt-2">
+                                            <label class="form-label small fw-bold">Fuentes
+                                                Hijas</label>
+                                            <div class="input-group input-group-sm mb-2">
+                                                <select id="selectFuenteAgregacion"
+                                                        class="form-select">
+                                                    {{#each fuentes}}
+                                                        <option value="{{this.id}}">{{this.nombre}}</option>
+                                                    {{/each}}
+                                                </select>
+                                                <button type="button"
+                                                        class="btn btn-outline-secondary"
+                                                        onclick="agregarFuenteAgregacion()">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </button>
+                                            </div>
+                                            <ul id="listaAgregacion"
+                                                class="list-group list-group-flush border rounded bg-white"
+                                                style="min-height: 40px; max-height: 150px; overflow-y: auto;">
+                                                <li class="list-group-item text-center text-muted small fst-italic"
+                                                    id="placeholder-agregacion">Sin fuentes
+                                                </li>
+                                            </ul>
+                                            <div id="inputsAgregacionContainer"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <!-- CORRECCIÓN APLICADA AQUÍ: Cambiado "algoritmo" por "algoritmo_tipo" y los valores -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Algoritmo de Consenso</label>
+                                    <select name="algoritmo_tipo" class="form-select">
+                                        <option value="May_simple">Mayoría Simple</option>
+                                        <option value="Absoluta">Unanimidad / Absoluta</option>
+                                        <option value="Mult_menciones">Múltiples Menciones</option>
+                                    </select>
+                                </div>
+
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fa-solid fa-save me-2"></i>Crear Colección
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Listado de Colecciones -->
+                <div class="col-md-7">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white fw-bold">Colecciones Existentes</div>
+                        <ul class="list-group list-group-flush">
+                            {{#each colecciones}}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-0 fw-bold">{{this.titulo}}</h5>
+                                        <small class="text-muted">{{this.categoria}}</small>
+                                    </div>
+                                    <a href="/admin/colecciones/{{this.id}}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fa-solid fa-gear"></i> Configurar
+                                    </a>
+                                </li>
+                            {{else}}
+                                <div class="p-4 text-center text-muted">No hay colecciones
+                                    creadas.
+                                </div>
+                            {{/each}}
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
