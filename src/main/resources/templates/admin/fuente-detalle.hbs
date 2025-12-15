@@ -115,7 +115,8 @@
                                     {{#each fuente.hechos}}
                                     <tr>
                                         <td>{{this.titulo}}</td>
-                                        <td>{{this.fechasuceso}}</td>
+                                        <td>{{# formatDate this.fechaSuceso
+                                                           "dd/MM/yyyy hh:mm"}}{{/formatDate}}</td>
                                         <td class="text-end">
                                             <form action="/admin/fuentes/{{../fuente.id}}/hechos/{{this.id}}/borrar" method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar este hecho?');">
                                                 <button type="submit" class="btn btn-link text-danger p-0"><i class="fa-solid fa-times"></i></button>

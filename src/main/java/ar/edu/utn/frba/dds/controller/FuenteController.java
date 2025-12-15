@@ -107,7 +107,7 @@ public class FuenteController {
               if (h.getTitulo() == null || h.getTitulo().isBlank()) {
                 throw new RuntimeException("Error en fila " + (i+1) + ": Falta el título (hecho_titulo).");
               }
-              if (h.getFechasuceso() == null) {
+              if (h.getFechaSuceso() == null) {
                 throw new RuntimeException("Error en fila " + (i+1) + ": Falta la fecha de suceso (hecho_fecha_suceso).");
               }
 

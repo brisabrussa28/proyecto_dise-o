@@ -63,7 +63,7 @@ public class ExportadorJsonTest {
     List<Hecho> hechosLeidos = mapper.readValue(outputFile, new TypeReference<List<Hecho>>() {});
     assertEquals(2, hechosLeidos.size());
     assertEquals("Hecho de prueba 1", hechosLeidos.get(0).getTitulo());
-    assertEquals(fechaSuceso, hechosLeidos.get(0).getFechasuceso());
+    assertEquals(fechaSuceso, hechosLeidos.get(0).getFechaSuceso());
   }
 
   @Test

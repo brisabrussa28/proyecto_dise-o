@@ -16,9 +16,9 @@ import ar.edu.utn.frba.dds.model.hecho.HechoBuilder;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 
 public class HechoTest {
@@ -46,7 +46,7 @@ public class HechoTest {
     assertEquals("DELITO", hecho.getCategoria());
     assertEquals("Calle falsa 123", hecho.getDireccion());
     assertEquals(ubicacion, hecho.getUbicacion());
-    assertEquals(fechaSuceso, hecho.getFechasuceso());
+    assertEquals(fechaSuceso, hecho.getFechaSuceso());
     assertEquals(Origen.PROVISTO_CONTRIBUYENTE, hecho.getOrigen());
     assertNotNull(hecho.getFechacarga());
   }

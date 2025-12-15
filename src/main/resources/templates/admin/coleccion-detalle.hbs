@@ -125,7 +125,7 @@
                                         <span class="fw-bold">{{this.titulo}}</span>
                                         <div class="small text-muted">{{this.descripcion}}</div>
                                         <div class="x-small text-muted fst-italic mt-1">
-                                            <i class="fa-solid fa-calendar-day me-1"></i>{{this.fechaSuceso}}
+                                            <i class="fa-solid fa-calendar-day me-1"></i>{{# formatDate this.fechaSuceso "dd/MM/yyyy hh:mm"}}{{/formatDate}}
                                         </div>
                                     </div>
                                     <span class="badge bg-light text-dark border">ID: {{this.id}}</span>

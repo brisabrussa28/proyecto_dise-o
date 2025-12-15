@@ -1,15 +1,11 @@
 package ar.edu.utn.frba.dds.model.estadisticas;
 
-import ar.edu.utn.frba.dds.controller.HechoController;
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.exportador.Exportador;
 import ar.edu.utn.frba.dds.model.filtro.Filtro;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.GestorDeSolicitudes;
-import ar.edu.utn.frba.dds.model.reportes.Solicitud;
-import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -71,7 +67,7 @@ public class CentralDeEstadisticas {
 
     Map<String, Long> cantidadPorHora = hechosFiltrados.stream()
                                                          .collect(Collectors.groupingBy(
-                                                             h -> String.format("%02d", h.getFechasuceso().getHour()),
+                                                             h -> String.format("%02d", h.getFechaSuceso().getHour()),
                                                              Collectors.counting()
                                                          ));
 
