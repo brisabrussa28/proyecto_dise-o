@@ -93,6 +93,32 @@ public class JavalinHandlebars implements FileRenderer {
       }
     });
 
+            // 2. Formateamos si es del tipo correcto (LocalDateTime, LocalDate, etc)
+            if (value instanceof TemporalAccessor) {
+              return DateTimeFormatter.ofPattern(pattern)
+                                      .format((TemporalAccessor) value);
+            }
+
+            return value.toString();
+          }
+      );
+      handlebars.registerHelper(
+          "or", (value, options) -> {
+            Object otherValue = options.param(0);
+
+            // Función auxiliar para saber si algo es "verdadero" (no nulo, no vacío, no false)
+            boolean a = value != null
+                && !(value instanceof Boolean && !((Boolean) value))
+                && !(value instanceof java.util.Collection && ((java.util.Collection<?>) value).isEmpty());
+
+            boolean b = otherValue != null
+                && !(otherValue instanceof Boolean && !((Boolean) otherValue))
+                && !(otherValue instanceof java.util.Collection && ((java.util.Collection<?>) otherValue).isEmpty());
+
+            return a || b;
+          }
+      );
+      template = handlebars.compile("templates/" + path.replace(".hbs", ""));
     // 8. Helper "formatDate": Formatea fechas Java (LocalDateTime, ZonedDateTime)
     this.handlebars.registerHelper("formatDate", (value, options) -> {
       if (value == null) return "";
