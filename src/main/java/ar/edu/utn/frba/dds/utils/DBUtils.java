@@ -68,6 +68,7 @@ public class DBUtils {
       tx.begin();
 
       em.createNativeQuery("CREATE EXTENSION IF NOT EXISTS fuzzystrmatch").executeUpdate();
+      em.createNativeQuery("CREATE EXTENSION IF NOT EXISTS unaccent").executeUpdate();
 
       tx.commit();
       System.out.println("✅ Extensión fuzzystrmatch verificada/creada correctamente.");

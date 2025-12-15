@@ -46,7 +46,7 @@ public class CentralDeEstadisticas {
 
     Map<String, Long> cantidadPorProvincia = hechosFiltrados.stream()
                                                             .collect(Collectors.groupingBy(
-                                                                Hecho::getProvincia,
+                                                                h -> normalizarProvincia(h.getProvincia()),
                                                                 Collectors.counting()
                                                             ));
 
@@ -123,7 +123,7 @@ public class CentralDeEstadisticas {
 
     Map<String, Long> cantidadPorProvincia = hechosDeColeccion.stream()
                                                               .collect(Collectors.groupingBy(
-                                                                  Hecho::getProvincia,
+                                                                  h -> normalizarProvincia(h.getProvincia()),
                                                                   Collectors.counting()
                                                               ));
 
@@ -189,6 +189,20 @@ public class CentralDeEstadisticas {
   }
 
   // --- Métodos Auxiliares y de Configuración ---
+  private String normalizarProvincia(String provincia) {
+    if (provincia == null) return "";
+    switch (provincia.trim().toLowerCase()) {
+      case "caba":
+      case "ciudad autonoma de buenos aires":
+      case "ciudad autónoma de buenos aires":
+        return "CABA";
+      case "bs as":
+      case "buenos aires":
+        return "Buenos Aires";
+      default:
+        return provincia;
+    }
+  }
 
   public void setExportador(Exportador<Estadistica> exportador) {
     this.exportador = exportador;
