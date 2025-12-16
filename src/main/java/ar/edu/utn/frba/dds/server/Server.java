@@ -1,5 +1,4 @@
 package ar.edu.utn.frba.dds.server;
-
 import ar.edu.utn.frba.dds.server.templates.JavalinHandlebars;
 import ar.edu.utn.frba.dds.server.templates.JavalinRenderer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,19 +9,19 @@ import io.github.cdimascio.dotenv.Dotenv;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JavalinJackson;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 
 public class Server {
-
   public static void main(String[] args) {
-
     // Cargar configuración de entorno
     Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-
     String timezone = dotenv.get("TIMEZONE", "America/Argentina/Buenos_Aires");
     int port = Integer.parseInt(dotenv.get("PORT", "9001"));
+    String host = dotenv.get("HOST", "0.0.0.0"); // ← NUEVO: permite conexiones externas
     boolean corsAllowAnyOrigin = Boolean.parseBoolean(dotenv.get("CORS_ALLOW_ANY_ORIGIN", "false"));
     String allowedOriginsStr = dotenv.get("ALLOWED_ORIGINS", "http://localhost:3000");
     boolean debugMode = Boolean.parseBoolean(dotenv.get("DEBUG_MODE", "true"));
@@ -37,10 +36,20 @@ public class Server {
     mapper.registerModule(new Jdk8Module());
 
     Javalin app = Javalin.create(javalinConfig -> {
+      // IMPORTANTE: Configurar Jetty para escuchar en el host correcto
+      javalinConfig.jetty.server(() -> {
+        org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server();
+        ServerConnector connector = new ServerConnector(server);
+        connector.setHost(host); // ← Escucha en 0.0.0.0 para Render
+        connector.setPort(port);
+        server.setConnectors(new org.eclipse.jetty.server.Connector[]{connector});
+        return server;
+      });
+
       // 1. IMPORTANTE: Usar el mapper configurado arriba para APIs JSON
       javalinConfig.jsonMapper(new JavalinJackson());
 
-      // 2. Registrar el motor de plantillas (JavalinHandlebars ya tiene los helpers configurados internamente)
+      // 2. Registrar el motor de plantillas
       javalinConfig.fileRenderer(new JavalinRenderer().register("hbs", new JavalinHandlebars()));
 
       // Configurar archivos estáticos
@@ -67,7 +76,6 @@ public class Server {
                                          .map(String::trim)
                                          .filter(s -> !s.isEmpty())
                                          .toList();
-
             if (!origins.isEmpty()) {
               String firstOrigin = origins.get(0);
               String[] otherOrigins = origins.subList(1, origins.size()).toArray(new String[0]);
@@ -83,16 +91,15 @@ public class Server {
     new Router().configure(app, mapper, debugMode);
 
     // Iniciar el servidor
-    System.out.println("Iniciando servidor en http://localhost:" + port);
+    System.out.println("Iniciando servidor en http://" + host + ":" + port);
     System.out.println("Modo debug: " + (debugMode ? "HABILITADO" : "DESHABILITADO"));
-
     if (corsAllowAnyOrigin) {
       System.out.println("CORS: Permitido CUALQUIER origen (Modo Inseguro/Dev)");
     } else {
       System.out.println("CORS: Restringido a los orígenes: " + allowedOriginsStr);
     }
 
-    app.start(port);
+    app.start(); // Ya no necesitas pasar el puerto aquí
 
     // Iniciar scheduler de estadísticas
     new EstadisticasScheduler().iniciar();
