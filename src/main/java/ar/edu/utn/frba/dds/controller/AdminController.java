@@ -44,7 +44,7 @@ public class AdminController {
     List<Fuente> fuentes = fuenteController.findAll();
     model.put("colecciones", colecciones);
     model.put("fuentes", fuentes);
-    ctx.render("/admin/colecciones-lista.hbs", model);
+    ctx.render("admin/colecciones-lista.hbs", model);
   }
 
   public void crearColeccion(Context ctx) {
@@ -57,7 +57,7 @@ public class AdminController {
     List<Fuente> fuentes = fuenteController.findAll();
     model.put("coleccion", coleccion);
     model.put("fuentesDisponibles", fuentes);
-    ctx.render("/admin/coleccion-detalle.hbs", model);
+    ctx.render("admin/coleccion-detalle.hbs", model);
   }
 
   public void configurarColeccion(Context ctx) {
@@ -126,7 +126,7 @@ public class AdminController {
   public void listarFuentes(Context ctx, Map<String, Object> model) {
     List<Fuente> fuentes = fuenteController.findAll();
     model.put("fuentes", fuentes);
-    ctx.render("/admin/fuentes-lista.hbs", model);
+    ctx.render("admin/fuentes-lista.hbs", model);
   }
 
   public void crearFuente(Context ctx) {
@@ -187,7 +187,7 @@ public class AdminController {
     model.put("coleccionesIndirectas", coleccionesIndirectas);
 
     model.put("fuente", fuente);
-    ctx.render("/admin/fuente-detalle.hbs", model);
+    ctx.render("admin/fuente-detalle.hbs", model);
   }
 
   public void configurarFuente(Context ctx) {
