@@ -29,8 +29,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
 
 /**
  * Hecho.
@@ -56,10 +56,10 @@ public class Hecho {
   @Column(name = "hecho_origen", nullable = false)
   private Origen fuenteOrigen; // Ya no es final
 
-  @FullTextField
+  @Field
   private String hecho_titulo;
 
-  @FullTextField
+  @Field
   private String hecho_descripcion;
 
   private String hecho_categoria;

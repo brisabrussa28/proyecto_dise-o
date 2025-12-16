@@ -2,57 +2,45 @@ package ar.edu.utn.frba.dds.model.hibernate;
 
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
-import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.session.SearchSession;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.jpa.FullTextEntityManager;
+import org.hibernate.search.jpa.Search;
+import org.hibernate.search.query.dsl.QueryBuilder;
 
-
-/**
- * AccesoHecho.
- */
 public class AccesoHecho {
   public final EntityManager em;
-  private static final String[] campos = obtenerCamposIndexados(Hecho.class);
   private HechoRepository repo = new HechoRepository();
 
   public AccesoHecho(EntityManager em) {
     this.em = em;
   }
 
-  /**
-  * Guarda un hecho
-  *
-  * @param hecho Hecho a guardar
-  */
   public void guardar(Hecho hecho) {
     repo.save(hecho);
   }
 
   public List<Hecho> fullTextSearch(String palabraClave, int cantidadResultados) {
-    // Obtiene una sesión de búsqueda de Hibernate Search
-    SearchSession searchSession = Search.session(em);
-    // Define que se va a buscar en la entidad Texto
-    return searchSession.search(Hecho.class)
-                        // Realiza una búsqueda de coincidencia en los campos especificados
-                        .where(f -> f.match()
-                                     .fields(campos)
-                                     .matching(palabraClave)
-                                     .fuzzy(2))
-                        // Devuelve una lista de resultados que coinciden con la búsqueda
-                        .fetchHits(cantidadResultados);
-  }
+    FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(em);
 
-  /**
-   * Devuelve una cadena String con los nombres de las columnas indexadas
-   */
-  public static String[] obtenerCamposIndexados(Class<?> clase) {
-    return Arrays.stream(clase.getDeclaredFields())
-                 .filter(f -> f.isAnnotationPresent(FullTextField.class))
-                 .map(Field::getName)
-                 .toArray(String[]::new);
+    QueryBuilder qb = fullTextEntityManager.getSearchFactory()
+                                           .buildQueryBuilder()
+                                           .forEntity(Hecho.class)
+                                           .get();
+
+    org.apache.lucene.search.Query luceneQuery = qb
+        .keyword()
+        .fuzzy()
+        .withEditDistanceUpTo(2)
+        .onFields("hecho_titulo", "hecho_descripcion")
+        .matching(palabraClave)
+        .createQuery();
+
+    javax.persistence.Query jpaQuery =
+        fullTextEntityManager.createFullTextQuery(luceneQuery, Hecho.class);
+
+    jpaQuery.setMaxResults(cantidadResultados);
+
+    return jpaQuery.getResultList();
   }
 }
