@@ -73,27 +73,8 @@
                                 </div>
                                 <div class="small text-muted">
                                     <i class="fa-regular fa-calendar me-1"></i>
-                                    {{#if fechaSuceso}}
-                                        <script>
-                                            document.write(
-                                                (function(dateInput) {
-                                                    if (!dateInput) return 'Fecha no disponible';
-                                                    let date;
-                                                    if (Array.isArray(dateInput)) {
-                                                        date = new Date(dateInput[0], dateInput[1] - 1, dateInput[2], dateInput[3]||0, dateInput[4]||0);
-                                                    } else {
-                                                        date = new Date(dateInput);
-                                                    }
-                                                    if (isNaN(date.getTime())) return 'Fecha inválida';
-                                                    return date.toLocaleString('es-AR', {
-                                                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                                                    });
-                                                })({{{json fechaSuceso}}})
-                                            );
-                                        </script>
-                                    {{else}}
-                                        Fecha no disponible
-                                    {{/if}}
+                                    <!-- FIX: Uso de data attribute para renderizado seguro de fechas -->
+                                    <span class="fecha-render" data-fecha="{{fechaSuceso}}">Procesando fecha...</span>
                                     <br>
                                     <i class="fa-solid fa-location-dot me-1"></i>
                                     {{#if provincia}}
@@ -146,20 +127,43 @@
             const resultsList = document.getElementById('resultsList');
             const paginationContainer = document.getElementById('paginationContainer');
 
+            // --- Lógica de renderizado de fechas segura ---
+            function renderizarFechas() {
+                document.querySelectorAll('.fecha-render').forEach(span => {
+                    const raw = span.getAttribute('data-fecha');
+                    span.textContent = formatDate(raw);
+                });
+            }
+
+            // Parseador robusto (acepta Arrays [y,m,d] y Strings ISO)
             function formatDate(dateInput) {
                 if (!dateInput) return 'Fecha no disponible';
                 let date;
-                if (Array.isArray(dateInput)) {
-                    date = new Date(dateInput[0], dateInput[1] - 1, dateInput[2], dateInput[3]||0, dateInput[4]||0);
-                } else {
+
+                // Detectar si es un array formato string "[2023, 10, 1]"
+                if (typeof dateInput === 'string' && dateInput.trim().startsWith('[')) {
+                    try {
+                        const parts = JSON.parse(dateInput);
+                        if (Array.isArray(parts)) {
+                            // Mes en JS es base 0
+                            date = new Date(parts[0], parts[1] - 1, parts[2], parts[3]||0, parts[4]||0);
+                        }
+                    } catch(e) { /* Fallback */ }
+                }
+
+                if (!date) {
                     date = new Date(dateInput);
                 }
+
                 if (isNaN(date.getTime())) return 'Fecha inválida';
 
                 return date.toLocaleString('es-AR', {
                     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
             }
+
+            // Ejecutar al cargar para renderizar fechas iniciales
+            renderizarFechas();
 
             async function buscarHechos(titulo, categoria, consensuados = false, page = 1) {
                 resultsList.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Buscando hechos...</p></div>';
@@ -200,7 +204,7 @@
 
                     hechosResultantes.forEach(hecho => {
                         const esConsensuado = hecho.colecciones && hecho.colecciones.length > 0;
-                        const fechaFormateada = formatDate(hecho.hecho_fecha_suceso);
+                        const fechaFormateada = formatDate(hecho.hecho_fecha_suceso || hecho.fechaSuceso);
                         const etiquetasHTML = hecho.etiquetas ? hecho.etiquetas.map(e => `<span class="badge bg-secondary me-1">${e.nombre}</span>`) : '';
 
                         const itemHTML = `

@@ -1,5 +1,6 @@
 {{#partial "nav_izquierda"}}
-    <a href="javascript:history.back()" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+    <a href="javascript:history.back()"
+       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
        title="Volver al panel">
         <i class="fa-solid fa-arrow-left"></i>
         <span class="d-none d-sm-block">Volver</span>
@@ -8,114 +9,222 @@
 
 {{#partial "contenido"}}
     <div class="container py-4">
-        <div class="container my-5 bg-white bg-opacity-75 rounded p-3">
-            <body class="general" style="background-color: white;">
-            <h2 class="mb-4 fw-bold">
-                <i class="fa-solid fa-clock"></i>
-                Solicitudes Pendientes
-            </h2>
+        <div class="row justify-content-center">
+            <div class="col-lg-11">
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        {{#each solicitudes}}
-                            <div class="list-group-item d-flex flex-column"
-                                 style="border-top: 10px solid #0d6efd; min-width: 78vw; background-color: white;
-                                 clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%); "
-                                 id="{{this.id}}">
-                                <div class="d-flex flex-row"
-                                     style="justify-content: space-between; flex-wrap: wrap; padding-left: 10px; font-weight: bold;">
-                                    S-{{this.id}}
-                                    <div class="d-flex flex-row"
-                                         style="padding-right: 20px; padding-top: 10px; gap: 20px;">
-                                        <button class="boton btn btn-outline-success"
-                                                style="border: 3px solid rgb(0, 192, 0);"
-                                                onclick="aceptarSolicitud('{{this.id}}')">
-                                            <i class="bi bi-check-lg d-flex align-items-center justify-content-center"></i>
-                                        </button>
-                                        <button class="boton btn btn-danger"
-                                                style="border: 3px solid red;"
-                                                onclick="eliminarSolicitud('{{this.id}}')">
-                                            <i class="bi-x d-flex align-items-center justify-content-center"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div style="padding-left: 35px; font-size: 20px; padding-bottom: 10px;">
-                                    <div style="font-size: 18px; font-weight:500">
-                                        <strong class="me-1" style="font-size: 20px;">
-                                            Hecho Solicitado:
-                                        </strong>
-                                        {{this.hechoSolicitado.id}}
-                                    </div>
-                                    <div style="font-size: 18px; font-weight:500">
-                                        <strong class="me-1" style="font-size: 20px;">
-                                            Solicitante:
-                                        </strong>
-                                        {{this.solicitante}}
-                                    </div>
-                                    <div class="d-flex flex-row align-items-start"
-                                         style="padding-top: 30px; gap: 15px; style=font-size: 18px; font-weight:500; max-width: 67vw;">
-                                        <strong class="me-1" style="font-size: 20px;">
-                                            Descripción:
-                                        </strong>
-                                        <div class="descripcion-pre-formateada"
-                                             style="font-size: 18px; font-weight:500; display: block; max-width: 60vw;">
-                                            {{this.razonEliminacion}}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {{else}}
-                            <small class="text-muted p-2 text-begin" style="font-weight:">No hay
-                                solicitudes.
-                            </small>
-                        {{/each}}
+                <div class="bg-white bg-opacity-75 p-4 rounded shadow-sm border border-light">
+
+                    <div class="d-flex align-items-center mb-4 border-bottom pb-3 border-secondary border-opacity-25">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3 text-warning border border-warning">
+                            <i class="fa-solid fa-user-clock fa-2x"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0 text-dark">Gestión de Solicitudes</h3>
+                            <p class="text-muted mb-0 small">Administra las peticiones pendientes de
+                                revisión.</p>
+                        </div>
                     </div>
+
+                    {{#if solicitudes}}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle bg-white rounded overflow-hidden shadow-sm">
+                                <thead class="table-light text-secondary small text-uppercase">
+                                <tr>
+                                    <th scope="col" class="py-3 ps-4">ID</th>
+                                    <th scope="col" class="py-3">Solicitante</th>
+                                    <th scope="col" class="py-3">Hecho Reportado</th>
+                                    <th scope="col" class="py-3">Motivo</th>
+                                    <th scope="col" class="py-3 text-end pe-4">Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{#each solicitudes}}
+                                    <tr id="fila-{{this.id}}">
+                                        <td class="ps-4 fw-bold text-muted">
+                                            #{{this.id}}
+                                        </td>
+
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {{#if this.usuario}}
+                                                    {{#if this.usuario.foto}}
+                                                        <div class="rounded-circle border border-1 border-white shadow-sm overflow-hidden me-2"
+                                                             style="width: 40px; height: 40px; min-width: 40px;">
+                                                            <img src="/usuarios/{{this.usuario.id}}/foto"
+                                                                 alt="{{this.usuario.userName}}"
+                                                                 class="w-100 h-100"
+                                                                 style="object-fit: cover;">
+                                                        </div>
+                                                    {{else}}
+                                                        <div class="bg-primary bg-opacity-10 rounded-circle d-flex justify-content-center align-items-center me-2 text-primary"
+                                                             style="width: 40px; height: 40px; min-width: 40px;">
+                                                            <i class="fa-solid fa-user"></i>
+                                                        </div>
+                                                    {{/if}}
+
+                                                    <span class="fw-bold text-dark text-truncate"
+                                                          style="max-width: 150px;"
+                                                          title="{{this.usuario.userName}}">
+                                                        {{this.usuario.userName}}
+                                                    </span>
+                                                {{else}}
+                                                    <div class="bg-secondary bg-opacity-10 rounded-circle d-flex justify-content-center align-items-center me-2 text-secondary"
+                                                         style="width: 40px; height: 40px; min-width: 40px;">
+                                                        <i class="fa-solid fa-user-secret"></i>
+                                                    </div>
+                                                    <span class="fst-italic text-muted">Anónimo</span>
+                                                {{/if}}
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <a href="/hechos/{{this.hechoSolicitado.id}}"
+                                               target="_blank"
+                                               class="text-decoration-none fw-bold text-primary d-flex align-items-center gap-2 group-hover"
+                                               title="Ver hecho en nueva pestaña">
+                                                <i class="fa-solid fa-up-right-from-square small opacity-50"></i>
+                                                {{this.hechoSolicitado.titulo}}
+                                            </a>
+                                            <small class="text-muted d-block mt-1"
+                                                   style="font-size: 0.75rem;">
+                                                ID Hecho: {{this.hechoSolicitado.id}}
+                                            </small>
+                                        </td>
+
+                                        <td style="max-width: 250px;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                    <span class="d-block text-secondary small text-truncate"
+                                                          style="max-width: 180px;">
+                                                        {{this.razonEliminacion}}
+                                                    </span>
+                                                <button type="button"
+                                                        class="btn btn-outline-secondary btn-sm border-0 py-0 px-1"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalDetalle{{this.id}}"
+                                                        title="Leer completo">
+                                                    <i class="fa-regular fa-eye"></i>
+                                                </button>
+                                            </div>
+
+                                            <div class="modal fade" id="modalDetalle{{this.id}}"
+                                                 tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content shadow border-0">
+                                                        <div class="modal-header bg-light">
+                                                            <h6 class="modal-title fw-bold">
+                                                                <i class="fa-solid fa-circle-info me-2 text-primary"></i>Detalle
+                                                                Solicitud #{{this.id}}
+                                                            </h6>
+                                                            <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <label class="small text-uppercase fw-bold text-muted mb-1">Motivo
+                                                                del reporte:</label>
+                                                            <div class="p-3 bg-light rounded border text-dark"
+                                                                 style="white-space: pre-wrap; word-break: break-word; font-size: 0.9rem;">{{this.razonEliminacion}}</div>
+                                                        </div>
+                                                        <div class="modal-footer bg-light p-2">
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-secondary"
+                                                                    data-bs-dismiss="modal">Cerrar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td class="text-end pe-4">
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-success btn-sm d-flex align-items-center gap-2 shadow-sm"
+                                                        onclick="aceptarSolicitud('{{this.id}}')"
+                                                        title="Aceptar (Eliminar Hecho)">
+                                                    <i class="fa-solid fa-check"></i>
+                                                    <span class="d-none d-md-inline">Aceptar</span>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm d-flex align-items-center gap-2 shadow-sm text-white"
+                                                        onclick="eliminarSolicitud('{{this.id}}')"
+                                                        title="Rechazar solicitud">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                    <span class="d-none d-md-inline">Rechazar</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
+                    {{else}}
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <span class="fa-stack fa-2x text-muted opacity-25">
+                                  <i class="fa-solid fa-circle fa-stack-2x"></i>
+                                  <i class="fa-solid fa-check-double fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </div>
+                            <h5 class="text-muted">¡Todo al día!</h5>
+                            <p class="small text-secondary">No hay solicitudes pendientes de
+                                revisión.</p>
+                        </div>
+                    {{/if}}
+
                 </div>
             </div>
-            </body>
         </div>
     </div>
 
     <script>
-        async function eliminarSolicitud(idDelElemento) {
+        // Función auxiliar para animar la eliminación de la fila
+        function removerFila(id) {
+            const fila = document.getElementById('fila-' + id);
+            if (fila) {
+                fila.style.transition = 'all 0.5s ease';
+                fila.style.opacity = '0';
+                fila.style.transform = 'translateX(20px)';
+                setTimeout(() => fila.remove(), 500);
+            }
+            // Cerrar modal si estaba abierto
+            const modalEl = document.getElementById('modalDetalle' + id);
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+        }
+
+        async function eliminarSolicitud(id) {
+            if(!confirm('¿Estás seguro de RECHAZAR esta solicitud? El hecho permanecerá visible.')) return;
+
             try {
-                const response = await fetch(`/admin/solicitudes?id=${idDelElemento}&aceptada=false`, {
-                    method: "PUT"
-                });
+                const response = await fetch(`/admin/solicitudes?id=${id}&aceptada=false`, { method: "PUT" });
+
                 if (response.ok) {
-                    const solicitudAEliminar = document.getElementById(idDelElemento);
-                    if (solicitudAEliminar) {
-                        solicitudAEliminar.remove();
-                        console.log("Solicitud " + idDelElemento + " rechazada y eliminada.");
-                    }
+                    removerFila(id);
+                    // Opcional: Mostrar toast de éxito
                 } else {
                     const errorText = await response.text();
-                    console.error("Error al rechazar solicitud:", errorText);
-                    alert("No se pudo rechazar la solicitud: " + errorText);
+                    alert("Error al rechazar: " + errorText);
                 }
             } catch (err) {
-                console.error("Error de red:", err);
+                console.error(err);
+                alert("Error de conexión");
             }
         }
-        async function aceptarSolicitud(idDelElemento) {
+
+        async function aceptarSolicitud(id) {
+            if(!confirm('¿Estás seguro de ACEPTAR la solicitud? El hecho será ELIMINADO permanentemente.')) return;
+
             try {
-                const response = await fetch(`/admin/solicitudes?id=${idDelElemento}&aceptada=true`, {
-                    method: "PUT"
-                });
+                const response = await fetch(`/admin/solicitudes?id=${id}&aceptada=true`, { method: "PUT" });
+
                 if (response.ok) {
-                    const solicitudAEliminar = document.getElementById(idDelElemento);
-                    if (solicitudAEliminar) {
-                        solicitudAEliminar.remove();
-                        console.log("Solicitud " + idDelElemento + " aceptada y eliminada.");
-                    }
+                    removerFila(id);
                 } else {
                     const errorText = await response.text();
-                    console.error("Error al aceptar solicitud:", errorText);
-                    alert("No se pudo aceptar la solicitud: " + errorText);
+                    alert("Error al aceptar: " + errorText);
                 }
             } catch (err) {
-                console.error("Error de red:", err);
+                console.error(err);
+                alert("Error de conexión");
             }
         }
     </script>

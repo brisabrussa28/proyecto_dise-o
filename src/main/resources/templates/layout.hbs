@@ -82,12 +82,17 @@
                 <div class="dropdown">
                     <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
                        id="dropdownUserMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center me-2 border border-1 border-light overflow-hidden"
+                        <!-- FIX: Imagen de perfil con fallback a icono si no existe -->
+                        <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center me-2 border border-1 border-light overflow-hidden position-relative"
                              style="width: 35px; height: 35px;">
+                            <!-- Icono de fondo (Fallback) -->
+                            <i class="fa-solid fa-user text-white position-absolute" style="font-size: 1.2rem;"></i>
+                            <!-- Imagen por encima. Si falla (onerror), se oculta y muestra el icono -->
                             <img src="/usuarios/{{usuario_id}}/foto"
                                  alt="Foto"
-                                 class="w-100 h-100"
-                                 style="object-fit: cover;">
+                                 class="w-100 h-100 position-relative"
+                                 style="object-fit: cover;"
+                                 onerror="this.style.display='none'">
                         </div>
                         <span class="d-none d-md-inline fw-bold small">{{nombreUsuario}}</span>
                     </a>
@@ -106,18 +111,10 @@
                             <li><a class="dropdown-item" href="/admin/dashboard">
                                 <i class="fa-solid fa-gauge-high me-2 text-success"></i>Panel de Control
                             </a></li>
-                            <li><a class="dropdown-item" href="/admin/fuentes">
-                                <i class="fa-solid fa-database me-2 text-info"></i>Gestión de Fuentes
-                            </a></li>
-                            <li><a class="dropdown-item" href="/admin/colecciones">
-                                <i class="fa-solid fa-layer-group me-2 text-warning"></i>Colecciones
-                            </a></li>
                         {{/if}}
-                        {{#if esUsuario}}
-                            <li><a class="dropdown-item" href="/mis-hechos">
+                            <li><a class="dropdown-item" href="/solicitudes/mis-solicitudes">
                                 <i class="fa-solid fa-list me-2 text-primary"></i>Mis Reportes
                             </a></li>
-                        {{/if}}
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form action="/logout" method="POST" class="m-0">

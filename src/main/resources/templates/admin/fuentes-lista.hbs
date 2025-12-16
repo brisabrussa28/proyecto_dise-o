@@ -1,7 +1,9 @@
 {{#partial "nav_izquierda"}}
-    <a href="/" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+    <a href="javascript:history.back()"
+       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+       title="Volver al panel">
         <i class="fa-solid fa-arrow-left"></i>
-        <span class="d-none d-sm-block">Volver al Inicio</span>
+        <span class="d-none d-sm-block">Volver</span>
     </a>
 {{/partial}}
 
@@ -31,11 +33,13 @@
                     <!-- Nombre y Tipo -->
                     <div class="col-md-6">
                         <label class="form-label small fw-bold">Nombre de la Fuente</label>
-                        <input type="text" name="nueva_fuente_nombre" class="form-control" placeholder="Ej: Reporte Policial 2024" required>
+                        <label>
+                            <input type="text" name="nueva_fuente_nombre" class="form-control" placeholder="Ej: Reporte Policial 2024" required>
+                        </label>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label small fw-bold">Tipo de Origen</label>
-                        <select id="selectorTipoFuente" class="form-select" onchange="cambiarTipoFuente()">
+                        <label for="selectorTipoFuente"></label><select id="selectorTipoFuente" class="form-select" onchange="cambiarTipoFuente()">
                             <option value="DINAMICA" selected>Dinámica (Editable manualmente)</option>
                             <option value="ESTATICA_CSV">Importar Archivo CSV</option>
                             <option value="ESTATICA_JSON">Importar Archivo JSON</option>
@@ -58,14 +62,18 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label x-small text-muted mb-0">Separador</label>
-                                    <select name="csv_separador" class="form-select form-select-sm">
-                                        <option value=",">Coma (,)</option>
-                                        <option value=";">Punto y coma (;)</option>
-                                    </select>
+                                    <label>
+                                        <select name="csv_separador" class="form-select form-select-sm">
+                                            <option value=",">Coma (,)</option>
+                                            <option value=";">Punto y coma (;)</option>
+                                        </select>
+                                    </label>
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label x-small text-muted mb-0">Formato Fecha (Java)</label>
-                                    <input type="text" name="csv_formato_fecha" class="form-control form-control-sm" value="dd/MM/yyyy HH:mm">
+                                    <label>
+                                        <input type="text" name="csv_formato_fecha" class="form-control form-control-sm" value="dd/MM/yyyy HH:mm">
+                                    </label>
                                 </div>
                             </div>
                             <!-- Mapeo (Simplificado visualmente) -->
@@ -91,11 +99,15 @@
                             <div class="row g-3">
                                 <div class="col-md-8">
                                     <label class="form-label small fw-bold">URL Endpoint</label>
-                                    <input type="url" name="url" class="form-control" placeholder="https://api.ejemplo.com/v1/incidentes">
+                                    <label>
+                                        <input type="url" name="url" class="form-control" placeholder="https://api.ejemplo.com/v1/incidentes">
+                                    </label>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label small fw-bold">Token (Bearer)</label>
-                                    <input type="text" name="token" class="form-control" placeholder="Opcional">
+                                    <label>
+                                        <input type="text" name="token" class="form-control" placeholder="Opcional">
+                                    </label>
                                 </div>
                             </div>
                         </div>

@@ -106,9 +106,6 @@ public class Coleccion {
     if (coleccion_fuente == null) {
       return new ArrayList<>();
     }
-
-    // IMPORTANTE: Este método debería ser llamado solo dentro de un contexto transaccional
-    // donde la fuente esté managed y sus hechos puedan ser cargados
     List<Hecho> hechosFuente = coleccion_fuente.getHechos();
     List<Hecho> hechosSinExcluidos = filtroExcluyente.filtrar(hechosFuente);
     return this.filtro.filtrar(hechosSinExcluidos);
@@ -147,16 +144,27 @@ public class Coleccion {
     if (this.coleccion_fuente == null || this.coleccion_algoritmo == null) {
       return;
     }
-    List<Hecho> hechosCrudos = this.coleccion_fuente.getHechos();
-    List<Hecho> hechosFiltrados = this.coleccion_algoritmo.listaDeHechosConsensuados(
-        hechosCrudos,
+    Filtro filtroNeutro = new Filtro(new CondicionTrue());
+    List<Hecho> hechosFiltrados = this.obtenerHechosFiltrados(filtroNeutro);
+
+    List<Hecho> hechosConsensuados = this.coleccion_algoritmo.listaDeHechosConsensuados(
+        hechosFiltrados,
         List.of(coleccion_fuente)
     );
+
     this.hechos.clear();
-    this.hechos.addAll(hechosFiltrados);
+    this.hechos.addAll(hechosConsensuados);
   }
 
-  // --- Método Helper para la Vista (Handlebars) ---
+  // --- Helper para la Vista: Mostrar si hay condición amigable ---
+  // Modificado para retornar null si es CondicionTrue (o sea, sin filtro activo)
+  public String getCondicionLegible() {
+    if (this.coleccion_condicion == null || this.coleccion_condicion instanceof CondicionTrue) {
+      return null;
+    }
+    return "Filtros Activos"; // Solo indicamos que existe si NO es CondicionTrue
+  }
+
   public String getAlgoritmoTipo() {
     if (this.coleccion_algoritmo == null) return "";
 
@@ -167,7 +175,6 @@ public class Coleccion {
     return "";
   }
 
-  // --- Getters y Setters Básicos ---
   public String getTitulo() { return coleccion_titulo; }
   public String getDescripcion() { return coleccion_descripcion; }
   public String getCategoria() { return coleccion_categoria; }
@@ -176,11 +183,21 @@ public class Coleccion {
   public AlgoritmoDeConsenso getAlgoritmo() { return this.coleccion_algoritmo; }
   public Long getId() { return this.coleccion_id; }
   public Set<Hecho> getHechos() { return this.hechos; }
+  public Condicion getCondicion() { return this.coleccion_condicion; }
 
   public void setCondicion(Condicion coleccion_condicion) {
     this.coleccion_condicion = coleccion_condicion;
-    this.filtro.setCondicion(coleccion_condicion);
+    // Para el objeto Filtro en memoria (transient), nunca usamos null.
+    // Si viene null, usamos CondicionTrue para que "pase todo".
+    Condicion condicionParaFiltro = (coleccion_condicion != null) ? coleccion_condicion : new CondicionTrue();
+
+    if (this.filtro != null) {
+      this.filtro.setCondicion(condicionParaFiltro);
+    } else {
+      this.filtro = new Filtro(condicionParaFiltro);
+    }
   }
+
   public void setId(Long id) { this.coleccion_id = id; }
   public void setTitulo(String titulo) { this.coleccion_titulo = titulo; }
   public void setCategoria(String categoria) { this.coleccion_categoria = categoria; }
@@ -188,7 +205,6 @@ public class Coleccion {
   public void setFuente(Fuente fuente) { this.coleccion_fuente = fuente; }
   public void setAlgoritmoDeConsenso(AlgoritmoDeConsenso algoritmo) { this.coleccion_algoritmo = algoritmo; }
 
-  // --- Identidad ---
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

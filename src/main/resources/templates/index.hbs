@@ -108,15 +108,18 @@
             margin-top: 10px;
         }
 
+        /* FIX: Estilo "Al revés" para el botón del mapa */
         .ver-en-mapa {
             transition: all 0.2s;
-            background-color: white;
+            /* Por defecto es btn-primary: Fondo Azul, Icono Blanco */
         }
 
         .ver-en-mapa:hover {
             transform: scale(1.05);
-            background-color: #0d6efd !important;
-            color: white !important;
+            /* Hover: Fondo Blanco, Icono Azul, Borde Azul */
+            background-color: white !important;
+            color: #0d6efd !important;
+            border: 1px solid #0d6efd !important;
         }
 
         .offcanvas-start {
@@ -312,10 +315,12 @@
                             `;
                     } else {
                         htmlImagen = `
-                        <img src="/hechos/${hecho.id}/multimedia/0"
-                            class="card-img-top mb-2"
-                            alt="Foto"
-                            style="height: 140px; object-fit: fit;">
+                            <a href="/hechos/${hecho.id}">
+                            <img src="/hechos/${hecho.id}/multimedia/0"
+                                class="card-img-top mb-2"
+                                alt="Foto"
+                                style="height: 140px; object-fit: fit;">
+                            </a>
                         `;
                     }
                 }
@@ -505,6 +510,7 @@
                         }
                     }
 
+                    // FIX: Botón de mapa cambiado a btn-primary (relleno azul)
                     const resultadoHTML = `
                         <div class="card mb-2 hecho-card ${esConsensuado ? 'consensuado' : ''}"
                              style="border: 1px solid #dee2e6; border-radius: 8px;">
@@ -533,7 +539,7 @@
                                     </div>
                                     <div class="d-flex flex-column gap-1">
                                         <button type="button"
-                                                class="btn btn-outline-primary btn-sm ver-en-mapa"
+                                                class="btn btn-primary btn-sm ver-en-mapa"
                                                 data-latitud="${hecho.hecho_ubicacion?.latitud || '-34.6037'}"
                                                 data-longitud="${hecho.hecho_ubicacion?.longitud || '-58.3816'}"
                                                 data-titulo="${hecho.hecho_titulo}"

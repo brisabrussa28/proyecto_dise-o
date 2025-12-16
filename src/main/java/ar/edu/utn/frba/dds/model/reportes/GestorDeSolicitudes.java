@@ -1,14 +1,14 @@
 package ar.edu.utn.frba.dds.model.reportes;
 
-import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpamTFIDF;
 import ar.edu.utn.frba.dds.model.exceptions.SolicitudInexistenteException;
 import ar.edu.utn.frba.dds.model.filtro.Filtro;
 import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionPredicado;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpam;
+import ar.edu.utn.frba.dds.model.reportes.detectorspam.DetectorSpamTFIDF;
+import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import ar.edu.utn.frba.dds.repositories.TFIDFRepository;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -81,8 +81,13 @@ public class GestorDeSolicitudes {
    * @param motivo       La razón de la solicitud.
    * @param detectorSpam El detector de spam a utilizar. (Inyectado por método)
    */
-  public void crearSolicitud(Hecho hecho, String motivo, DetectorSpam detectorSpam) {
-    Solicitud nuevaSolicitud = new Solicitud(hecho, motivo);
+  public Solicitud crearSolicitud(
+      Hecho hecho,
+      String motivo,
+      Usuario usuarie,
+      DetectorSpam detectorSpam
+  ) {
+    Solicitud nuevaSolicitud = new Solicitud(hecho, motivo, usuarie);
 
     // Usar AMBOS detectores simultáneamente
     DetectorSpam detectorBase = (detectorSpam != null) ? detectorSpam : new DetectorSpamBasico();
@@ -102,14 +107,15 @@ public class GestorDeSolicitudes {
     // Si no es spam, se queda como PENDIENTE por defecto.
 
     repositorio.guardar(nuevaSolicitud);
+    return nuevaSolicitud;
   }
 
   /**
    * Crea una nueva solicitud usando solo los detectores internos.
    * Equivalente a llamar a crearSolicitud(hecho, motivo, null)
    */
-  public void crearSolicitud(Hecho hecho, String motivo) {
-    crearSolicitud(hecho, motivo, null);
+  public Solicitud crearSolicitud(Hecho hecho, String motivo, Usuario usuario) {
+    return crearSolicitud(hecho, motivo, usuario, null);
   }
 
   /**

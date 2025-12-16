@@ -3,7 +3,9 @@ package ar.edu.utn.frba.dds.model.reportes;
 import ar.edu.utn.frba.dds.model.exceptions.RazonInvalidaException;
 import ar.edu.utn.frba.dds.model.hecho.Estado;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,6 +31,10 @@ public class Solicitud {
   public Long id;
 
   @ManyToOne
+  @JoinColumn(name = "usuario_id")
+  private Usuario usuario;
+
+  @ManyToOne
   @JoinColumn(name = "hecho_id")
   private Hecho hechoSolicitado;
 
@@ -39,33 +45,62 @@ public class Solicitud {
   @Column(name = "solicitud_estado", nullable = false)
   private EstadoSolicitud estado;
 
-  public void setHechoSolicitado(Hecho hechoSolicitado) {
-    this.hechoSolicitado = hechoSolicitado;
+  @Column(name = "solicitud_fecha")
+  private LocalDateTime fechaReporte;
+
+  /**
+   * Constructor vacío para JPA.
+   */
+  public Solicitud() {
   }
 
-  @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "El objeto Hecho debe ser mutable y compartido intencionalmente")
-  public Solicitud(Hecho hechoSolicitado, String motivo) {
-    System.out.println(">>> Motivo recibido: " + motivo.length() + " caracteres");
-
+  /**
+   * Constructor completo.
+   */
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP",
+      justification = "El objeto Hecho debe ser mutable y compartido intencionalmente")
+  public Solicitud(Hecho hechoSolicitado, String motivo, Usuario usuario) {
     if (hechoSolicitado == null) {
-      throw new NullPointerException("El hecho solicitado no puede ser null");
+      throw new NullPointerException("El hecho no puede ser null");
     }
     if (motivo == null) {
       throw new RazonInvalidaException("El motivo no puede ser null");
     }
+    if (usuario == null) {
+      throw new IllegalArgumentException("El usuario no puede ser null");
+    }
+
     this.validarMotivo(motivo);
 
     this.hechoSolicitado = hechoSolicitado;
     this.razonEliminacion = motivo;
+    this.usuario = usuario;
     this.estado = EstadoSolicitud.PENDIENTE;
+    this.fechaReporte = LocalDateTime.now();
   }
 
-  public Solicitud() {
+  public Long getId() {
+    return this.id;
+  }
 
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Usuario getUsuario() {
+    return this.usuario;
+  }
+
+  public void setUsuario(Usuario usuario) {
+    this.usuario = usuario;
   }
 
   public Hecho getHechoSolicitado() {
     return this.hechoSolicitado;
+  }
+
+  public void setHechoSolicitado(Hecho hechoSolicitado) {
+    this.hechoSolicitado = hechoSolicitado;
   }
 
   public String getRazonEliminacion() {
@@ -74,6 +109,10 @@ public class Solicitud {
 
   public EstadoSolicitud getEstado() {
     return this.estado;
+  }
+
+  public LocalDateTime getFechaReporte() {
+    return this.fechaReporte;
   }
 
   public void marcarComoSpam() {
@@ -89,17 +128,11 @@ public class Solicitud {
     this.estado = EstadoSolicitud.RECHAZADA;
   }
 
-  public Long getId() {
-    return this.id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
   void validarMotivo(String motivo) {
     if (motivo.length() < 500 || motivo.length() > 1024) {
-      throw new RazonInvalidaException("La longitud del mensaje se encuentra fuera del rango (500 < caracteres < 1024");
+      throw new RazonInvalidaException(
+          "La longitud del mensaje se encuentra fuera del rango (500 < caracteres < 1024"
+      );
     }
   }
 
@@ -118,7 +151,6 @@ public class Solicitud {
 
   @Override
   public int hashCode() {
-    // CORRECCIÓN: El estado (que es mutable) se excluye del hash code.
     return Objects.hash(hechoSolicitado, razonEliminacion);
   }
 }

@@ -3,18 +3,34 @@ package ar.edu.utn.frba.dds.controller;
 import ar.edu.utn.frba.dds.dto.SolicitudDTO;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
+import ar.edu.utn.frba.dds.model.reportes.GestorDeSolicitudes;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
+import ar.edu.utn.frba.dds.model.usuario.Usuario;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
+import ar.edu.utn.frba.dds.repositories.UserRepository;
+import io.javalin.http.Context;
+import java.util.Map;
 
 public class SolicitudController {
-  public Solicitud crearSolicitud(SolicitudDTO solicitudDTO) {
+  public Solicitud crearSolicitud(Context ctx, SolicitudDTO solicitudDTO) {
     Hecho hecho = HechoRepository.instance()
                                  .findById(solicitudDTO.hecho_solicitado);
-    Solicitud solicitud = new Solicitud(hecho, solicitudDTO.motivo_solicitud);
-    SolicitudesRepository.instance()
-                         .guardar(solicitud);
-    return solicitud;
+
+    Long usuarioId = ctx.sessionAttribute("usuario_id");
+    Usuario usuario = UserRepository.instance()
+                                    .findById(usuarioId);
+
+    if (usuario == null) {
+      ctx.status(401)
+         .result("Debes iniciar sesión");
+      return null;
+    }
+    GestorDeSolicitudes gestor = new GestorDeSolicitudes(SolicitudesRepository.instance());
+    Solicitud soli = gestor.crearSolicitud(hecho, solicitudDTO.getMotivo(), usuario);
+    ctx.status(201)
+       .json(Map.of("mensaje", "Solicitud creada"));
+    return soli;
   }
 
   public void aceptar(Solicitud solicitud) {

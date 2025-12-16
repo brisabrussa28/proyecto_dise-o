@@ -83,8 +83,6 @@ public class Router {
     app.get("/auth/login", userController::mostrarLogin);
 
     app.get("/", ctx -> {
-      // CORRECCIÓN: El mapa SOLO muestra hechos validados por integridad (Fuente->Colección)
-      // Usamos buscarAvanzadoCompleto sin filtros para obtener todos los válidos
       Map<String, Object> resultadoValidado = hechoController.buscarAvanzadoCompleto(
           null, null, null, null, null, null, false
       );
@@ -96,7 +94,6 @@ public class Router {
 
       Map<String, Object> model = modeloConSesion(ctx);
       model.put("hechosJson", hechosJson);
-      // Para la vista, pasamos la lista de objetos validados
       model.put("hechos", hechosValidos);
       model.put("categorias", hechoController.getCategorias());
       model.put("colecciones", coleccionController.findAll());
@@ -112,7 +109,6 @@ public class Router {
       int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
       int pageSize = 15;
 
-      // CORRECCIÓN: La lista de administración muestra TODO (findAll)
       List<Hecho> hechos = hechoController.findAll();
       int totalHechos = hechos.size();
       int totalPages = (int) Math.ceil((double) totalHechos / pageSize);
@@ -195,7 +191,6 @@ public class Router {
 
     app.get("/api/hechos/buscar-completo", ctx -> {
       try {
-        // Logging de parámetros recibidos
         System.out.println("=== BÚSQUEDA COMPLETA ===");
         ctx.queryParamMap()
            .forEach((key, values) ->
@@ -252,11 +247,8 @@ public class Router {
       try {
         String titulo = ctx.queryParam("titulo");
         Boolean soloConsensuados = ctx.queryParamAsClass("soloConsensuados", Boolean.class).getOrDefault(false);
-
-        // Usamos el controlador en lugar del repositorio directamente para mayor robustez
         List<Hecho> resultados = hechoController.buscarRapido(titulo, soloConsensuados);
         ctx.json(resultados);
-
       } catch (Exception e) {
         ctx.status(400).json(Map.of(
             "error", true,
@@ -274,7 +266,7 @@ public class Router {
             List<Coleccion> resultados = coleccionController.buscarRapido(titulo, categoria);
             ctx.json(resultados);
           } catch (Exception e) {
-            e.printStackTrace(); // Esto te permite ver el error real en la consola de IntelliJ
+            e.printStackTrace();
             ctx.status(500)
                .json(Map.of("mensaje", "Error en la base de datos: " + e.getMessage()));
           }
@@ -294,7 +286,10 @@ public class Router {
 
     app.post("/solicitudes", ctx -> {
       try {
-        Solicitud solicitud = solicitudController.crearSolicitud(ctx.bodyAsClass(SolicitudDTO.class));
+        Solicitud solicitud = solicitudController.crearSolicitud(
+            ctx,
+            ctx.bodyAsClass(SolicitudDTO.class)
+        );
         ctx.status(201).json(solicitud);
       } catch (RazonInvalidaException e) {
         ctx.status(400).result("Error: " + e.getMessage());
@@ -343,6 +338,11 @@ public class Router {
     app.post("/admin/colecciones/{id}/agregarHecho", adminController::agregarHechoAColeccion);
     app.post("/admin/colecciones/{id}/quitarHecho", adminController::removerHechoDeColeccion);
     app.post("/admin/colecciones/{id}/calcular-consenso", coleccionController::calcularConsenso);
+
+    // NUEVA RUTA: Agregar condiciones a la colección
+    app.post("/admin/colecciones/{id}/agregar-condicion", coleccionController::agregarCondicion);
+    // NUEVA RUTA: Eliminar condiciones de la colección
+    app.post("/admin/colecciones/{id}/eliminar-condicion", coleccionController::eliminarCondicion);
 
     app.before("/admin/estadisticas", ctx -> {
       if (!"OPTIONS".equalsIgnoreCase(String.valueOf(ctx.method()))) {
@@ -634,6 +634,37 @@ public class Router {
 
       ctx.status(500).render("error.hbs", model);
     });
+
+    app.get(
+        "/solicitudes/mis-solicitudes", ctx -> {
+          Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
+          if (estaLogueado == null || !estaLogueado) {
+            ctx.redirect("/auth/login?redirect=/solicitudes/mis-solicitudes");
+            return;
+          }
+
+          Long usuarioId = ctx.sessionAttribute("usuario_id");
+
+          // 2. Buscar solicitudes del usuario
+          // (Idealmente esto iría en el Repository como 'findByUsuarioId', pero aquí filtramos en Java)
+          List<Solicitud> todas = SolicitudesRepository.instance()
+                                                       .findAll();
+          List<Solicitud> misSolicitudes = todas.stream()
+                                                .filter(s -> s.getUsuario() != null && s.getUsuario()
+                                                                                        .getId()
+                                                                                        .equals(
+                                                                                            usuarioId))
+                                                .sorted((a, b) -> b.getId()
+                                                                   .compareTo(a.getId())) // Las más nuevas primero
+                                                .collect(Collectors.toList());
+
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("solicitudes", misSolicitudes);
+
+          ctx.render("solicitudes-info.hbs", model);
+        }
+    );
+
   }
 
   private Handler tieneRol(Rol rol) {

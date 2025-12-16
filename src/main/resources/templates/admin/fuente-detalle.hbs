@@ -1,7 +1,9 @@
 {{#partial "nav_izquierda"}}
-    <a href="/admin/fuentes" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+    <a href="javascript:history.back()"
+       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+       title="Volver al panel">
         <i class="fa-solid fa-arrow-left"></i>
-        <span class="d-none d-sm-block">Volver al listado</span>
+        <span class="d-none d-sm-block">Volver</span>
     </a>
 {{/partial}}
 
@@ -18,8 +20,8 @@
                 <small class="text-muted">ID de Fuente: #{{fuente.id}}</small>
             </div>
 
-            <form action="/admin/fuentes/{{fuente.id}}/borrar" method="POST"
-                  onsubmit="return confirm('ATENCIÓN:\n\nBorrar esta fuente eliminará CASCADAMENTE las colecciones que dependen de ella.\n\n¿Estás seguro de continuar?');">
+            <!-- Botón de Borrar SIN ALERTA (Action directa) -->
+            <form action="/admin/fuentes/{{fuente.id}}/borrar" method="POST">
                 <button type="submit" class="btn btn-outline-danger btn-sm transition-hover">
                     <i class="fa-regular fa-trash-can me-2"></i>Eliminar Fuente
                 </button>
@@ -42,7 +44,9 @@
                             <div class="row g-3 align-items-end">
                                 <div class="col-md-9">
                                     <label class="form-label small fw-bold text-secondary">Nombre de la Fuente</label>
-                                    <input type="text" name="nombre" class="form-control" value="{{fuente.nombre}}" required>
+                                    <label>
+                                        <input type="text" name="nombre" class="form-control" value="{{fuente.nombre}}" required>
+                                    </label>
                                 </div>
                                 <div class="col-md-3">
                                     <button type="submit" class="btn btn-primary w-100">
@@ -76,12 +80,14 @@
                         <div class="bg-light p-3 rounded mb-3">
                             <form action="/admin/fuentes/{{fuente.id}}/agregar-fuente" method="POST" class="row g-2">
                                 <div class="col-sm-9">
-                                    <select name="fuente_hija_id" class="form-select form-select-sm">
-                                        <option value="" disabled selected>Seleccionar fuente para agregar...</option>
-                                        {{#each fuentesDisponiblesAgregacion}}
-                                            <option value="{{this.id}}">{{this.nombre}} ({{this.tipo}})</option>
-                                        {{/each}}
-                                    </select>
+                                    <label>
+                                        <select name="fuente_hija_id" class="form-select form-select-sm">
+                                            <option value="" disabled selected>Seleccionar fuente para agregar...</option>
+                                            {{#each fuentesDisponiblesAgregacion}}
+                                                <option value="{{this.id}}">{{this.nombre}} ({{this.tipo}})</option>
+                                            {{/each}}
+                                        </select>
+                                    </label>
                                 </div>
                                 <div class="col-sm-3">
                                     <button type="submit" class="btn btn-sm btn-dark w-100">Agregar</button>
@@ -149,11 +155,20 @@
                                             </span>
                                         </td>
                                         <td class="text-end pe-4">
+                                            <!-- Botón Editar -->
+                                            <a href="/hechos/{{this.id}}/editar"
+                                               class="btn btn-link text-muted p-0 me-2 hover-primary"
+                                               onclick="event.stopPropagation()"
+                                               title="Editar">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </a>
+
+                                            <!-- Botón Borrar (Sin Confirmar) -->
                                             <form action="/admin/fuentes/{{../fuente.id}}/hechos/{{this.id}}/borrar"
                                                   method="POST"
-                                                  onsubmit="return confirm('¿Eliminar este hecho permanentemente?');"
-                                                  onclick="event.stopPropagation()"> <!-- Evita navegar al detalle -->
-                                                <button type="submit" class="btn btn-link text-muted p-0 hover-danger">
+                                                  class="d-inline"
+                                                  onclick="event.stopPropagation()">
+                                                <button type="submit" class="btn btn-link text-muted p-0 hover-danger" title="Eliminar">
                                                     <i class="fa-regular fa-trash-can"></i>
                                                 </button>
                                             </form>
@@ -184,6 +199,7 @@
                         <div class="card-body">
 
                             <!-- Alerta de Impacto -->
+                            {{#if (or coleccionesDirectas.size agregacionesPadre.size)}}
                             <div class="alert alert-warning border-0 d-flex align-items-start small mb-4">
                                 <i class="fa-solid fa-triangle-exclamation mt-1 me-2"></i>
                                 <div>
@@ -193,6 +209,7 @@
                                     </div>
                                 </div>
                             </div>
+                            {{/if}}
 
                             <!-- Listado de Colecciones Directas -->
                             <h6 class="small fw-bold text-uppercase text-muted mb-2">Colecciones Directas</h6>
@@ -247,6 +264,7 @@
 
     <style>
         .hover-danger:hover { color: #dc3545 !important; }
+        .hover-primary:hover { color: #0d6efd !important; }
         .transition-hover { transition: all 0.2s; }
     </style>
 {{/partial}}

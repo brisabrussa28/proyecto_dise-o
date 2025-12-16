@@ -1,5 +1,6 @@
 {{#partial "nav_izquierda"}}
-    <a href="javascript:history.back()" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+    <a href="javascript:history.back()"
+       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
        title="Volver al panel">
         <i class="fa-solid fa-arrow-left"></i>
         <span class="d-none d-sm-block">Volver</span>
@@ -8,7 +9,6 @@
 
 {{#partial "contenido"}}
 
-    <body class="principal">
     <div class="container py-4">
         <div class="container my-5 bg-white bg-opacity-75 rounded p-3">
             <h1 class="mt-2 fw-bold">
@@ -77,8 +77,8 @@
                                         <div class="w-100">
                                             <label class="form-label fw-bold mb-1">Filtrar
                                                 por:</label>
-                                            <select id="selectFiltroHechos"
-                                                    class="form-select w-100">
+                                            <label for="selectFiltroHechos"></label><select id="selectFiltroHechos"
+                                                                                            class="form-select w-100">
                                                 <option value="" selected>Filtrar por:
                                                 </option>
                                                 <option value="1">Provincia</option>
@@ -88,8 +88,8 @@
 
                                         <div class="w-100">
                                             <label class="form-label fw-bold mb-1">Categoría:</label>
-                                            <select id="selectCategoriaHechos"
-                                                    class="form-select w-100">
+                                            <label for="selectCategoriaHechos"></label><select id="selectCategoriaHechos"
+                                                                                               class="form-select w-100">
                                                 <option value="">Seleccione una categoria:</option>
                                                 {{#each categorias}}
                                                     <option value="{{this}}">{{this}}</option>
@@ -135,7 +135,7 @@
                                     <div class="d-flex flex-column gap-3">
                                         <div class="w-100">
                                             <label class="form-label fw-bold mb-1">Colección:</label>
-                                            <select id="selectColeccion" class="form-select w-100">
+                                            <label for="selectColeccion"></label><select id="selectColeccion" class="form-select w-100">
                                                 <option value="">Seleccione una colección</option>
                                                 {{#each colecciones}}
                                                     <option value="{{id}}">{{titulo}}</option>
@@ -179,8 +179,8 @@
                                         <div class="w-100">
                                             <label class="form-label fw-bold mb-1">Obtener
                                                 Top:</label>
-                                            <select id="selectTopCategorias"
-                                                    class="form-select w-100">
+                                            <label for="selectTopCategorias"></label><select id="selectTopCategorias"
+                                                                                             class="form-select w-100">
                                                 <option selected>Seleccionar top</option>
                                                 <option value="1">Top 1</option>
                                                 <option value="3">Top 3</option>
@@ -209,7 +209,6 @@
             </div>
         </div>
     </div>
-    </body>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 

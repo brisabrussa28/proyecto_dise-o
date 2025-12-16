@@ -39,9 +39,8 @@ import org.hibernate.search.annotations.Indexed;
 @Entity
 @Indexed
 @Table(name = "Hecho")
-@JsonIgnoreProperties(ignoreUnknown = true) // Ignora campos extra en el JSON si los hubiera
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Hecho {
-  // Quiza deberiamos poner el allocation a 10 pq la mayoria de los hechos se cargan en bulk
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "hecho_id")
@@ -54,7 +53,7 @@ public class Hecho {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "hecho_origen", nullable = false)
-  private Origen fuenteOrigen; // Ya no es final
+  private Origen fuenteOrigen;
 
   @Field
   private String hecho_titulo;
@@ -158,22 +157,11 @@ public class Hecho {
     );
   }
 
-
-  /**
-   * Obtiene el titulo del hecho.
-   *
-   * @return string titulo del hecho
-   */
   @JsonProperty("hecho_titulo")
   public String getTitulo() {
     return hecho_titulo;
   }
 
-  /**
-   * Obtiene la descripción del hecho.
-   *
-   * @return string descripción del hecho
-   */
   @JsonProperty("hecho_descripcion")
   public String getDescripcion() {
     return hecho_descripcion;
@@ -183,81 +171,41 @@ public class Hecho {
     return id;
   }
 
-  /**
-   * Obtiene la categoría del hecho.
-   *
-   * @return string categoría del hecho
-   */
   @JsonProperty("hecho_categoria")
   public String getCategoria() {
     return hecho_categoria;
   }
 
-  /**
-   * Obtiene la dirección del hecho.
-   *
-   * @return string dirección del hecho
-   */
   @JsonProperty("hecho_direccion")
   public String getDireccion() {
     return hecho_direccion;
   }
 
-  /**
-   * Obtiene la ubicación del hecho.
-   *
-   * @return PuntoGeografico ubicación del hecho
-   */
   @JsonProperty("hecho_ubicacion")
   public PuntoGeografico getUbicacion() {
     return hecho_ubicacion;
   }
 
-  /**
-   * Obtiene la fecha del suceso del hecho.
-   *
-   * @return Date fecha del suceso
-   */
   @JsonProperty("hecho_fecha_suceso")
   public LocalDateTime getFechaSuceso() {
     return hecho_fecha_suceso;
   }
 
-  /**
-   * Obtiene la fecha de carga del hecho.
-   *
-   * @return Date fecha de carga del hecho
-   */
   @JsonProperty("hecho_fecha_carga")
   public LocalDateTime getFechacarga() {
     return hecho_fecha_carga;
   }
 
-  /**
-   * Obtiene el origen del hecho.
-   *
-   * @return Origen fuente del hecho
-   */
   @JsonProperty("hecho_origen")
   public Origen getOrigen() {
     return fuenteOrigen;
   }
 
-  /**
-   * Obtiene el ID del usuario creador del hecho.
-   *
-   * @return UUID del usuario creador
-   */
   @JsonProperty("hecho_etiquetas")
   public List<Etiqueta> getEtiquetas() {
     return new ArrayList<>(this.etiquetas);
   }
 
-  /**
-   * Obtiene el estado del del hecho.
-   *
-   * @return estado del del hecho.
-   */
   @JsonProperty("hecho_estado")
   public Estado getEstado() {
     return estado;
@@ -276,7 +224,6 @@ public class Hecho {
     this.autor = autor;
   }
 
-  //  @JsonProperty("hecho_fotos")
   public List<Multimedia> getFotos() {
     return new ArrayList<>(fotos);
   }
@@ -292,8 +239,6 @@ public class Hecho {
   public void agregarFoto(Multimedia foto) {
     this.fotos.add(foto);
   }
-
-  // --- SETTERS CON ANOTACIONES PARA IMPORTACIÓN JSON ---
 
   @JsonProperty("hecho_titulo")
   public void setTitulo(String hecho_titulo) {
@@ -345,8 +290,6 @@ public class Hecho {
     this.hecho_provincia = hecho_provincia;
   }
 
-  // REMOVIDO @JsonProperty("hecho_origen") para evitar errores de parseo con valores inválidos
-  // El origen se setea manualmente a DATASET en el Controller
   @JsonIgnore
   public void setOrigen(Origen fuenteOrigen) {
     this.fuenteOrigen = fuenteOrigen;
@@ -364,9 +307,10 @@ public class Hecho {
    */
   public boolean esEditable(Usuario usuarioEditor) {
     return LocalDateTime.now()
-                        .isBefore(hecho_fecha_carga.plusWeeks(1)) && usuarioEditor != null && this.autor.getId()
-                                                                                                        .equals(
-                                                                                                            usuarioEditor.getId());
+                        .isBefore(hecho_fecha_carga.plusWeeks(1))
+        && usuarioEditor != null
+        && this.autor != null
+        && this.autor.getId().equals(usuarioEditor.getId());
   }
 
   @Override
@@ -390,8 +334,11 @@ public class Hecho {
   public int hashCode() {
     return Objects.hash(
         hecho_titulo,
-        hecho_descripcion, hecho_categoria, hecho_direccion,
-        hecho_ubicacion, hecho_fecha_suceso
+        hecho_descripcion,
+        hecho_categoria,
+        hecho_direccion,
+        hecho_ubicacion,
+        hecho_fecha_suceso
     );
   }
 }

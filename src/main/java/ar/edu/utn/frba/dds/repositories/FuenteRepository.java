@@ -10,6 +10,7 @@ import ar.edu.utn.frba.dds.model.fuentes.FuenteExternaAPI;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
@@ -26,7 +27,6 @@ public class FuenteRepository {
 
     // Enriquecer hechos antes de guardar si corresponde
     if (fuente instanceof FuenteConHechos) {
-      // Convertimos a lista para iterar si es necesario, aunque el enriquecimiento suele ser previo
       ((FuenteConHechos) fuente).getHechos().forEach(DBUtils::enriquecerHecho);
     }
 
@@ -58,7 +58,6 @@ public class FuenteRepository {
                         .getSingleResult();
 
       if (fuente != null) {
-        // Corrección: Usar el método interno para cargar dependencias en lugar de uno no definido
         cargarDependenciasLazy(em, fuente);
       }
 
@@ -106,7 +105,6 @@ public class FuenteRepository {
       Fuente fuente = em.find(Fuente.class, id);
 
       if (fuente != null) {
-        // Cargar colecciones Lazy dentro de la sesión activa
         cargarDependenciasLazy(em, fuente);
       }
 
@@ -117,22 +115,16 @@ public class FuenteRepository {
   }
 
   public Fuente findByIdConHechos(Long id) {
-    return findById(id); // findById ya llama a cargarDependenciasLazy
+    return findById(id);
   }
 
-  /**
-   * Carga las dependencias perezosas (Lazy) de una fuente.
-   * Centraliza la lógica para FuenteConHechos y FuenteDeAgregacion.
-   */
   private void cargarDependenciasLazy(EntityManager em, Fuente fuente) {
     if (fuente == null) {
       return;
     }
 
     try {
-      // 1. Si es una Fuente de Agregación, cargar sus fuentes hijas
       if (fuente instanceof FuenteDeAgregacion) {
-        // Usamos una query específica para inicializar la colección
         FuenteDeAgregacion agregacion = em.createQuery(
                                               "SELECT DISTINCT f FROM FuenteDeAgregacion f " +
                                                   "LEFT JOIN FETCH f.fuentesCargadas " +
@@ -141,11 +133,7 @@ public class FuenteRepository {
                                           .getSingleResult();
 
         ((FuenteDeAgregacion) fuente).setFuentesCargadas(agregacion.getFuentesCargadas());
-      }
-
-      // 2. Si es una Fuente con Hechos (Cualquiera: Estática, Dinámica, API, Copia Local)
-      else if (fuente instanceof FuenteConHechos) {
-        // Aprovechamos el polimorfismo: cargamos FuenteConHechos y sus hechos
+      } else if (fuente instanceof FuenteConHechos) {
         FuenteConHechos conHechos = em.createQuery(
                                           "SELECT DISTINCT f FROM FuenteConHechos f " +
                                               "LEFT JOIN FETCH f.hechos " +
@@ -153,7 +141,6 @@ public class FuenteRepository {
                                       .setParameter("id", fuente.getId())
                                       .getSingleResult();
 
-        // Forzamos la inicialización accediendo a la colección
         ((FuenteConHechos) fuente).getHechos();
       }
 
@@ -181,19 +168,32 @@ public class FuenteRepository {
   }
 
   private void eliminarRecursivamente(Fuente fuente, EntityManager em) {
-    // Buscar colecciones que usan esta fuente directamente
+    // 1. Buscar colecciones que usan esta fuente directamente
     List<Coleccion> coleccionesDirectas = em.createQuery(
                                                 "SELECT c FROM Coleccion c WHERE c.coleccion_fuente.id = :id",
                                                 Coleccion.class)
                                             .setParameter("id", fuente.getId())
                                             .getResultList();
 
+    // 2. FIX: Borrar estadísticas que referencian a estas colecciones ANTES de borrar las colecciones
+    if (!coleccionesDirectas.isEmpty()) {
+      List<Long> idsColecciones = coleccionesDirectas.stream()
+                                                     .map(Coleccion::getId)
+                                                     .collect(Collectors.toList());
+
+      // Ejecutar borrado masivo de estadísticas para evitar Constraint Violation
+      em.createQuery("DELETE FROM Estadistica e WHERE e.estadistica_coleccion.id IN :ids")
+        .setParameter("ids", idsColecciones)
+        .executeUpdate();
+    }
+
+    // 3. Ahora sí, borrar las colecciones
     for (Coleccion c : coleccionesDirectas) {
       Coleccion managedCol = em.contains(c) ? c : em.merge(c);
       em.remove(managedCol);
     }
 
-    // Buscar fuentes de agregación que contienen esta fuente como hija
+    // 4. Buscar fuentes de agregación que contienen esta fuente como hija
     List<FuenteDeAgregacion> padres = em.createQuery(
                                             "SELECT DISTINCT f FROM FuenteDeAgregacion f JOIN f.fuentesCargadas hija WHERE hija.id = :hijoId",
                                             FuenteDeAgregacion.class)
@@ -201,19 +201,16 @@ public class FuenteRepository {
                                         .getResultList();
 
     for (FuenteDeAgregacion padre : padres) {
-      // Necesitamos hacer merge si no está en el contexto
       padre = em.contains(padre) ? padre : em.merge(padre);
-
       padre.removerFuente(fuente);
-      em.merge(padre); // Guardar cambios en el padre
+      em.merge(padre);
 
-      // Si el padre queda vacío, ¿eliminamos recursivamente? (Según lógica original sí)
       if (padre.cantidadFuentes() == 0) {
         eliminarRecursivamente(padre, em);
       }
     }
 
-    // Eliminar la fuente
+    // 5. Finalmente, eliminar la fuente
     Fuente managed = em.contains(fuente) ? fuente : em.merge(fuente);
     em.remove(managed);
   }
@@ -249,16 +246,14 @@ public class FuenteRepository {
   public List<Fuente> findByTipo(String tipoDiscriminador) {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      // Usamos TYPE(f) que es estándar JPA
       return em.createQuery(
                    "SELECT f FROM Fuente f WHERE TYPE(f) = :tipo",
                    Fuente.class)
                .getResultList();
     } catch (IllegalArgumentException e) {
-      // Fallback: traer todos y filtrar
       return findAll().stream()
                       .filter(f -> f.getTipo().equalsIgnoreCase(tipoDiscriminador))
-                      .collect(java.util.stream.Collectors.toList());
+                      .collect(Collectors.toList());
     } finally {
       em.close();
     }
@@ -267,7 +262,6 @@ public class FuenteRepository {
   public List<Fuente> findByHechoId(Long hechoId) {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      // Solo fuentes con hechos tienen hechos directos
       return em.createQuery(
                    "SELECT DISTINCT f FROM FuenteConHechos f JOIN f.hechos h WHERE h.id = :hechoId",
                    Fuente.class)

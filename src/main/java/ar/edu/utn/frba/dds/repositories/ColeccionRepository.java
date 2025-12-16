@@ -1,17 +1,17 @@
 package ar.edu.utn.frba.dds.repositories;
 
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.Condicion;
+import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionCompuesta;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteConHechos;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.utils.DBUtils;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
@@ -68,8 +68,6 @@ public class ColeccionRepository {
   public Coleccion findById(Long id) {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      // FIX CRÍTICO: Agregado LEFT JOIN FETCH c.hechos para inicializar la colección
-      // y evitar LazyInitializationException en la vista
       Coleccion coleccion = em.createQuery(
                                   "SELECT DISTINCT c FROM Coleccion c "
                                       + "LEFT JOIN FETCH c.coleccion_fuente "
@@ -86,11 +84,37 @@ public class ColeccionRepository {
         cargarHechosParaFuente(em, coleccion.getFuente());
       }
 
+      // Inicialización robusta del árbol de condiciones
+      if (coleccion.getCondicion() != null) {
+        inicializarCondicionRecursiva(coleccion.getCondicion());
+      }
+
       return coleccion;
     } catch (NoResultException e) {
       return null;
     } finally {
       em.close();
+    }
+  }
+
+  // Helper para inicializar el árbol de condiciones (Composite Pattern)
+  private void inicializarCondicionRecursiva(Condicion condicion) {
+    if (condicion == null) return;
+
+    // Eliminada la llamada a condicion.getId() que causaba error.
+    // La inicialización importante es la de las listas hijas en CondicionCompuesta.
+
+    if (condicion instanceof CondicionCompuesta) {
+      CondicionCompuesta compuesta = (CondicionCompuesta) condicion;
+      if (compuesta.getCondiciones() != null) {
+        // Inicializar la colección Lazy accediendo a su tamaño
+        compuesta.getCondiciones().size();
+
+        // Recursión para inicializar los nietos/bisnietos
+        for (Condicion hija : compuesta.getCondiciones()) {
+          inicializarCondicionRecursiva(hija);
+        }
+      }
     }
   }
 
@@ -270,6 +294,10 @@ public class ColeccionRepository {
       if(col.getFuente() != null) {
         cargarHechosParaFuente(em, col.getFuente());
       }
+      if (col.getCondicion() != null) {
+        inicializarCondicionRecursiva(col.getCondicion());
+      }
+
       return col;
     } catch (NoResultException e) {
       return null;

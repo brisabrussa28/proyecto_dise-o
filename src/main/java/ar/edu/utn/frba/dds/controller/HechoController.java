@@ -72,10 +72,9 @@ public class HechoController {
       hechoOriginal.setUbicacion(hechoModificado.getUbicacion());
     }
     if (hechoModificado.getFechaSuceso() != null) {
-      if (hechoModificado.getFechaSuceso()
-                         .isBefore(hechoOriginal.getFechaSuceso())) {
-        hechoOriginal.setFechasuceso(hechoModificado.getFechaSuceso());
-      }
+      // Permitir cambio de fecha sin restricción estricta de "isBefore" al editar,
+      // pero validando que no sea futuro en validarHecho
+      hechoOriginal.setFechasuceso(hechoModificado.getFechaSuceso());
     }
     List<Multimedia> fotosNuevas = hechoModificado.getFotos();
     if (fotosNuevas != null && !fotosNuevas.isEmpty()) {
@@ -94,8 +93,7 @@ public class HechoController {
   }
 
   private void validarHecho(Hecho hecho) {
-    if (hecho.getFechaSuceso()
-             .isAfter(LocalDateTime.now())) {
+    if (hecho.getFechaSuceso() != null && hecho.getFechaSuceso().isAfter(LocalDateTime.now())) {
       throw new RuntimeException("EL HECHO NO PUEDE SUCEDER EN EL FUTURO");
     }
   }
@@ -109,108 +107,157 @@ public class HechoController {
   }
 
   public void editarHecho(Context ctx, Map<String, Object> model) {
-    Long idHecho = Long.parseLong(ctx.pathParam("id"));
-    Long idUsuario = ctx.sessionAttribute("usuario_id");
-    Hecho hecho = this.findById(idHecho);
+    try {
+      Long idHecho = Long.parseLong(ctx.pathParam("id"));
+      Long idUsuario = ctx.sessionAttribute("usuario_id");
+      Boolean esAdmin = Boolean.TRUE.equals(ctx.sessionAttribute("esAdmin")); // Check seguro de rol
 
-    if (hecho.getFechaSuceso() != null) {
-      String fechaFormateada = hecho.getFechaSuceso()
-                                    .truncatedTo(ChronoUnit.MINUTES) // Elimina segundos y nanos
-                                    .toString();
+      Hecho hecho = this.findById(idHecho);
 
-      model.put("fechaLimite", fechaFormateada);
-    }
+      if (hecho == null) {
+        ctx.status(HttpStatus.NOT_FOUND).result("Hecho no encontrado");
+        return;
+      }
 
-    if (!hecho.getAutor().getId().equals(idUsuario)) {
-      ctx.status(HttpStatus.FORBIDDEN);
+      if (hecho.getFechaSuceso() != null) {
+        String fechaFormateada = hecho.getFechaSuceso()
+                                      .truncatedTo(ChronoUnit.MINUTES)
+                                      .toString();
+        model.put("fechaLimite", fechaFormateada);
+      }
+
+      // --- VALIDACIÓN DE PERMISOS CORREGIDA ---
+      boolean esAutor = false;
+      if (hecho.getAutor() != null && idUsuario != null) {
+        esAutor = hecho.getAutor().getId().equals(idUsuario);
+      }
+
+      // Permitir si es el autor O si es administrador
+      if (!esAutor && !esAdmin) {
+        ctx.status(HttpStatus.FORBIDDEN).result("No tienes permiso para editar este hecho.");
+        return; // Importante detener la ejecución
+      }
+
+      model.put("hecho", hecho);
+      if (hecho.getEtiquetas() != null) {
+        String etiquetasStr = String.join(", ",
+                                          hecho.getEtiquetas()
+                                               .stream()
+                                               .map(e -> e.getNombre())
+                                               .toList()
+        );
+        model.put("etiquetasTexto", etiquetasStr);
+      }
+      ctx.render("hecho-editar.hbs", model); // Ruta relativa corregida (sin / inicial a veces ayuda al resolver)
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).result("Error al cargar el editor.");
     }
-    model.put("hecho", hecho);
-    if (hecho.getEtiquetas() != null) {
-      String etiquetasStr = String.join(", ",
-                                        hecho.getEtiquetas()
-                                             .stream()
-                                             .map(e -> e.getNombre())
-                                             .toList()
-      );
-      model.put("etiquetasTexto", etiquetasStr);
-    }
-    ctx.render("/hecho-editar.hbs", model);
   }
 
   public void actualizarHecho(Context ctx) {
-    Long idHecho = Long.parseLong(ctx.pathParam("id"));
-    Hecho hechoOriginal = findById(idHecho);
-    Hecho hechoModificado = new Hecho();
+    try {
+      Long idHecho = Long.parseLong(ctx.pathParam("id"));
+      Hecho hechoOriginal = findById(idHecho);
 
-    hechoModificado.setTitulo(ctx.formParam("titulo"));
-    hechoModificado.setCategoria(ctx.formParam("categoria"));
-    hechoModificado.setDescripcion(ctx.formParam("descripcion"));
+      if (hechoOriginal == null) {
+        ctx.status(HttpStatus.NOT_FOUND).result("Hecho no encontrado");
+        return;
+      }
 
-    String etiquetasInput = ctx.formParam("etiquetas");
-    if (etiquetasInput != null) {
-      List<Etiqueta> nuevasEtiquetas = Arrays.stream(etiquetasInput.split(","))
-                                             .map(String::trim)
-                                             .filter(s -> !s.isEmpty())
-                                             .map(nombre -> new Etiqueta(nombre))
+      // --- VALIDACIÓN DE PERMISOS EN POST ---
+      Long idUsuario = ctx.sessionAttribute("usuario_id");
+      Boolean esAdmin = Boolean.TRUE.equals(ctx.sessionAttribute("esAdmin"));
+
+      boolean esAutor = false;
+      if (hechoOriginal.getAutor() != null && idUsuario != null) {
+        esAutor = hechoOriginal.getAutor().getId().equals(idUsuario);
+      }
+
+      if (!esAutor && !esAdmin) {
+        ctx.status(HttpStatus.FORBIDDEN).result("No tienes permiso para modificar este hecho.");
+        return;
+      }
+
+      Hecho hechoModificado = new Hecho();
+
+      hechoModificado.setTitulo(ctx.formParam("titulo"));
+      hechoModificado.setCategoria(ctx.formParam("categoria"));
+      hechoModificado.setDescripcion(ctx.formParam("descripcion"));
+
+      String etiquetasInput = ctx.formParam("etiquetas");
+      if (etiquetasInput != null) {
+        List<Etiqueta> nuevasEtiquetas = Arrays.stream(etiquetasInput.split(","))
+                                               .map(String::trim)
+                                               .filter(s -> !s.isEmpty())
+                                               .map(nombre -> new Etiqueta(nombre))
+                                               .collect(Collectors.toList());
+
+        hechoModificado.setEtiquetas(nuevasEtiquetas);
+      }
+      String fechaStr = ctx.formParam("fechaSuceso");
+
+      if (fechaStr != null && !fechaStr.isBlank()) {
+        hechoModificado.setFechasuceso(LocalDateTime.parse(fechaStr));
+      }
+
+      List<String> indicesBorrar = ctx.formParams("fotos_borrar");
+      if (!indicesBorrar.isEmpty() && hechoOriginal.getFotos() != null) {
+        List<Integer> indices = indicesBorrar.stream()
+                                             .map(Integer::parseInt)
+                                             .sorted(Comparator.reverseOrder())
                                              .collect(Collectors.toList());
 
-      hechoModificado.setEtiquetas(nuevasEtiquetas);
-    }
-    String fechaStr = ctx.formParam("fechaSuceso");
-
-    if (fechaStr != null && !fechaStr.isBlank()) {
-      hechoModificado.setFechasuceso(LocalDateTime.parse(fechaStr));
-    }
-
-    List<String> indicesBorrar = ctx.formParams("fotos_borrar");
-    if (!indicesBorrar.isEmpty() && hechoOriginal.getFotos() != null) {
-      List<Integer> indices = indicesBorrar.stream()
-                                           .map(Integer::parseInt)
-                                           .sorted(Comparator.reverseOrder())
-                                           .collect(Collectors.toList());
-
-      for (int i : indices) {
-        if (i >= 0 && i < hechoOriginal.getFotos().size()) {
-          hechoOriginal.quitar(i);
+        for (int i : indices) {
+          if (i >= 0 && i < hechoOriginal.getFotos().size()) {
+            hechoOriginal.quitar(i);
+          }
         }
       }
-    }
 
-    List<UploadedFile> archivos = ctx.uploadedFiles("nuevas_fotos");
-    List<Multimedia> listaNuevasFotos = new ArrayList<>();
-    for (UploadedFile archivo : archivos) {
-      if (archivo.size() > 0) {
-        try {
-          byte[] bytesImagen = archivo.content().readAllBytes();
-          Multimedia nuevaFoto = new Multimedia(
-              archivo.filename(),
-              archivo.contentType(),
-              bytesImagen
-          );
-          listaNuevasFotos.add(nuevaFoto);
-        } catch (Exception e) {
-          e.printStackTrace();
+      List<UploadedFile> archivos = ctx.uploadedFiles("nuevas_fotos");
+      List<Multimedia> listaNuevasFotos = new ArrayList<>();
+      for (UploadedFile archivo : archivos) {
+        if (archivo.size() > 0) {
+          try {
+            byte[] bytesImagen = archivo.content().readAllBytes();
+            Multimedia nuevaFoto = new Multimedia(
+                archivo.filename(),
+                archivo.contentType(),
+                bytesImagen
+            );
+            listaNuevasFotos.add(nuevaFoto);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
         }
       }
-    }
-    if (!listaNuevasFotos.isEmpty()) {
-      hechoModificado.setFotos(listaNuevasFotos);
-    }
+      if (!listaNuevasFotos.isEmpty()) {
+        hechoModificado.setFotos(listaNuevasFotos);
+      }
 
-    String direccion = ctx.formParam("direccion");
-    hechoModificado.setDireccion(direccion);
-    Double lat = Double.valueOf(Objects.requireNonNull(ctx.formParam("latitud")));
-    Double lng = Double.valueOf(Objects.requireNonNull(ctx.formParam("longitud")));
+      String direccion = ctx.formParam("direccion");
+      hechoModificado.setDireccion(direccion);
+      Double lat = Double.valueOf(Objects.requireNonNull(ctx.formParam("latitud")));
+      Double lng = Double.valueOf(Objects.requireNonNull(ctx.formParam("longitud")));
 
-    hechoModificado.setUbicacion(new PuntoGeografico(lat, lng));
-    String provincia = ctx.formParam("provincia");
-    if (provincia != null & !provincia.isBlank()) {
-      hechoModificado.setProvincia(provincia);
+      hechoModificado.setUbicacion(new PuntoGeografico(lat, lng));
+      String provincia = ctx.formParam("provincia");
+      if (provincia != null & !provincia.isBlank()) {
+        hechoModificado.setProvincia(provincia);
+      }
+
+      modificarHecho(hechoOriginal, hechoModificado);
+      HechoRepository.instance().save(hechoOriginal);
+
+      // Redirigir al detalle del hecho editado
+      ctx.redirect("/hechos/" + idHecho);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).result("Error al actualizar: " + e.getMessage());
     }
-
-    modificarHecho(hechoOriginal, hechoModificado);
-    HechoRepository.instance().save(hechoOriginal);
-    ctx.redirect("/");
   }
 
   public void getFoto(Context ctx) {
@@ -238,8 +285,20 @@ public class HechoController {
 
     model.put("hecho", hecho);
 
-    Long usuarioId = ctx.sessionAttribute("usuario_id");
-    boolean esPropietario = hecho.getAutor() != null && hecho.getAutor().getId().equals(usuarioId);
+    Long usuarioId = (Long) ctx.sessionAttribute("usuario_id");
+    boolean esAdmin = Boolean.TRUE.equals(ctx.sessionAttribute("esAdmin"));
+
+    // Lógica segura para determinar propiedad
+    boolean esPropietario = false;
+    if (hecho.getAutor() != null && usuarioId != null) {
+      esPropietario = hecho.getAutor().getId().equals(usuarioId);
+    }
+
+    // Si es admin, también lo consideramos con permisos de propietario (para editar/borrar)
+    if (esAdmin) {
+      esPropietario = true;
+    }
+
     model.put("esPropietario", esPropietario);
 
     if (hecho.getFechaSuceso() != null) {

@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.dds.controller;
 
+import ar.edu.utn.frba.dds.model.coleccion.Coleccion; // Import necesario para el fix de borrado
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
@@ -15,14 +16,18 @@ import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLector;
 import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLectorCsv;
 import ar.edu.utn.frba.dds.model.lector.configuracion.ConfiguracionLectorJson;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
+import ar.edu.utn.frba.dds.utils.DBUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.http.Context;
 import io.javalin.http.UploadedFile;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 
 public class FuenteController {
 
@@ -172,6 +177,36 @@ public class FuenteController {
   // --- EDICIÓN Y GESTIÓN ---
 
   public void borrar(Fuente fuente) {
+    // FIX FK CONSTRAINT: Eliminamos estadísticas huérfanas antes de borrar la fuente/colección
+    EntityManager em = DBUtils.getEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    try {
+      tx.begin();
+
+      // 1. Obtener IDs de colecciones vinculadas a esta fuente
+      List<Long> coleccionIds = em.createQuery(
+                                      "SELECT c.coleccion_id FROM Coleccion c WHERE c.coleccion_fuente.id = :fuenteId", Long.class)
+                                  .setParameter("fuenteId", fuente.getId())
+                                  .getResultList();
+
+      if (!coleccionIds.isEmpty()) {
+        // 2. Borrar estadísticas que referencian a estas colecciones
+        em.createQuery("DELETE FROM Estadistica e WHERE e.estadistica_coleccion.id IN :ids")
+          .setParameter("ids", coleccionIds)
+          .executeUpdate();
+      }
+
+      tx.commit();
+    } catch (Exception e) {
+      if (tx != null && tx.isActive()) {
+        tx.rollback();
+      }
+      System.err.println("Advertencia al limpiar estadísticas: " + e.getMessage());
+      // Continuamos para intentar borrar la fuente, ya que el error podría no ser bloqueante
+    } finally {
+      em.close();
+    }
+
     FuenteRepository.instance().delete(fuente);
   }
 
@@ -182,10 +217,24 @@ public class FuenteController {
     }
   }
 
+  // FIX: Se crea una copia mutable de la lista antes de eliminar para evitar UnsupportedOperationException
   public void borrarHechoDinamico(Fuente fuente, Long idHecho) {
     if (fuente instanceof FuenteDinamica) {
       FuenteDinamica fd = (FuenteDinamica) fuente;
-      fd.getHechos().removeIf(h -> h.getId().equals(idHecho));
+
+      // 1. Obtener la lista actual (posiblemente inmutable)
+      List<Hecho> listaOriginal = fd.getHechos();
+
+      // 2. Crear una copia MUTABLE (ArrayList)
+      List<Hecho> listaModificable = new ArrayList<>(listaOriginal);
+
+      // 3. Modificar la copia
+      listaModificable.removeIf(h -> h.getId().equals(idHecho));
+
+      // 4. Setear la nueva lista en la entidad
+      fd.setHechos(listaModificable);
+
+      // 5. Guardar
       FuenteRepository.instance().save(fuente);
     }
   }

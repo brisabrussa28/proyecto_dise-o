@@ -117,6 +117,9 @@ public class JavalinHandlebars implements FileRenderer {
 
       return a || b;
     });
+    handlebars.registerHelper("toString", (value, options) -> {
+      return value != null ? value.toString() : "";
+    });
   }
 
   @NotNull

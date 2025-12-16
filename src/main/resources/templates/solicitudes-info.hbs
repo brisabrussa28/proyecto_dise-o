@@ -1,0 +1,190 @@
+{{#partial "nav_izquierda"}}
+    <a href="javascript:history.back()"
+       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+       title="Volver al panel">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="d-none d-sm-block">Volver</span>
+    </a>
+{{/partial}}
+
+{{#partial "contenido"}}
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                <div class="bg-white bg-opacity-75 p-4 rounded shadow-sm">
+
+                    <div class="d-flex align-items-center mb-4 border-bottom pb-3 border-secondary">
+                        <i class="fa-solid fa-clipboard-list text-primary fa-2x me-3"></i>
+                        <div>
+                            <h3 class="fw-bold mb-0 text-dark">Mis Solicitudes</h3>
+                            <p class="text-muted mb-0 small">Consultá por el estado de tus
+                                solicitudes acá.</p>
+                        </div>
+                    </div>
+
+                    {{#if solicitudes}}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle bg-white rounded overflow-hidden shadow-sm">
+                                <thead class="table-light text-secondary small text-uppercase">
+                                <tr>
+                                    <th scope="col" class="py-3 ps-4">Fecha</th>
+                                    <th scope="col" class="py-3">Hecho Afectado</th>
+                                    <th scope="col" class="py-3">Razón / Detalle</th>
+                                    <th scope="col" class="py-3 text-center">Estado</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{#each solicitudes}}
+                                    <tr>
+                                        <td class="ps-4 text-nowrap text-secondary">
+                                            <i class="fa-regular fa-calendar me-1"></i>
+                                            {{#if this.fechaReporte}}
+                                                {{formatDate this.fechaReporte "dd/MM/yyyy"}}
+                                            {{else}}
+                                                -
+                                            {{/if}}
+                                        </td>
+
+                                        <td>
+                                            {{#if this.hechoSolicitado}}
+                                                <a href="/hechos/{{this.hechoSolicitado.id}}"
+                                                   class="text-decoration-none fw-bold text-primary d-flex align-items-center gap-2 group-hover">
+                                                    <i class="fa-solid fa-link small"></i>
+                                                    {{this.hechoSolicitado.titulo}}
+                                                </a>
+                                            {{else}}
+                                                <span class="text-muted fst-italic">Hecho eliminado o no disponible</span>
+                                            {{/if}}
+                                        </td>
+
+                                        <td style="max-width: 300px;">
+                                            <div class="d-flex justify-content-between align-items-center">
+        <span class="d-block text-secondary small text-truncate me-2"
+              style="max-width: 250px;"
+              title="Click en el ojo para leer completo">
+            {{this.razonEliminacion}}
+        </span>
+
+                                                <button type="button"
+                                                        class="btn btn-outline-primary btn-sm border-0 rounded-circle"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalRazon{{this.id}}"
+                                                        title="Leer motivo completo">
+                                                    <i class="fa-regular fa-eye"></i>
+                                                </button>
+                                            </div>
+
+                                            <div class="modal fade" id="modalRazon{{this.id}}"
+                                                 tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                                    <div class="modal-content shadow">
+                                                        <div class="modal-header bg-light">
+                                                            <h5 class="modal-title fw-bold text-dark">
+                                                                <i class="fa-solid fa-file-lines me-2 text-primary"></i>Detalle
+                                                                de la Solicitud
+                                                            </h5>
+                                                            <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal"
+                                                                    aria-label="Close"></button>
+                                                        </div>
+
+                                                        <div class="modal-body p-4">
+                                                            <div class="mb-3 pb-3 border-bottom">
+                                                                <small class="text-uppercase text-muted fw-bold"
+                                                                       style="font-size: 0.75rem;">Hecho
+                                                                    Afectado</small>
+                                                                <h5 class="mb-0 text-primary">{{this.hechoSolicitado.titulo}}</h5>
+                                                            </div>
+
+                                                            <div class="mb-4">
+                                                                <small class="text-uppercase text-muted fw-bold"
+                                                                       style="font-size: 0.75rem;">Motivo
+                                                                    de la solicitud
+                                                                </small>
+
+                                                                <div class="p-3 bg-light rounded mt-1 border"
+                                                                     style="white-space: pre-wrap;
+                                                                    word-wrap: break-word;
+                                                                    word-break: break-word;
+                                                                    overflow-wrap: break-word;
+                                                                    font-size: 0.95rem;
+                                                                    line-height: 1.6;">{{this.razonEliminacion}}
+                                                                </div>
+                                                            </div>
+
+                                                            {{#if this.observacionesAdmin}}
+                                                                <div class="alert alert-secondary border-secondary mb-0">
+                                                                    <div class="d-flex align-items-center mb-2">
+                                                                        <i class="fa-solid fa-user-shield me-2"></i>
+                                                                        <strong class="text-dark">Respuesta
+                                                                            del
+                                                                            Administrador:</strong>
+                                                                    </div>
+                                                                    <p class="mb-0 fst-italic">{{this.observacionesAdmin}}</p>
+                                                                </div>
+                                                            {{/if}}
+                                                        </div>
+
+                                                        <div class="modal-footer bg-light">
+                                                            <small class="text-muted me-auto">
+                                                                Fecha: {{formatDate
+                                                                    this.fechaReporte
+                                                                    "dd/MM/yyyy"}}
+                                                            </small>
+                                                            <button type="button"
+                                                                    class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Cerrar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td class="text-center">
+                                            {{#if (eq (toString this.estado) "PENDIENTE")}}
+                                                <span class="badge bg-warning text-dark border border-warning">
+                                                        <i class="fa-regular fa-clock me-1"></i>Pendiente
+                                                    </span>
+                                            {{else}}
+                                                {{#if (eq (toString this.estado) "ACEPTADA")}}
+                                                    <span class="badge bg-success border border-success">
+                                                            <i class="fa-solid fa-check me-1"></i>Aceptada
+                                                        </span>
+                                                {{else}}
+                                                    <span class="badge bg-danger border border-danger">
+                                                            <i class="fa-solid fa-xmark me-1"></i>Rechazada
+                                                        </span>
+                                                {{/if}}
+                                            {{/if}}
+                                        </td>
+                                    </tr>
+                                {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
+                    {{else}}
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <span class="fa-stack fa-2x text-muted opacity-50">
+                                  <i class="fa-solid fa-circle fa-stack-2x"></i>
+                                  <i class="fa-solid fa-inbox fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </div>
+                            <h5 class="text-muted">No tienes solicitudes registradas</h5>
+                            <p class="small text-secondary">Tus reportes o solicitudes de edición
+                                aparecerán aquí.</p>
+                            <a href="/" class="btn btn-outline-primary btn-sm mt-2">
+                                Volver al Mapa
+                            </a>
+                        </div>
+                    {{/if}}
+
+                </div>
+            </div>
+        </div>
+    </div>
+{{/partial}}
+
+{{> templates/layout}}
