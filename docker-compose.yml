@@ -13,6 +13,9 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=1234abcd
       - PORT=9001
+      - TIMEZONE=America/New_York
+      - CORS_ALLOW_ANY_ORIGIN=true
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
 
   db:
     image: postgres:15
