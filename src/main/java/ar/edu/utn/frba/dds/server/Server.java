@@ -9,8 +9,6 @@ import io.github.cdimascio.dotenv.Dotenv;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JavalinJackson;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
@@ -21,7 +19,6 @@ public class Server {
     Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
     String timezone = dotenv.get("TIMEZONE", "America/Argentina/Buenos_Aires");
     int port = Integer.parseInt(dotenv.get("PORT", "9001"));
-    String host = dotenv.get("HOST", "0.0.0.0"); // ← NUEVO: permite conexiones externas
     boolean corsAllowAnyOrigin = Boolean.parseBoolean(dotenv.get("CORS_ALLOW_ANY_ORIGIN", "false"));
     String allowedOriginsStr = dotenv.get("ALLOWED_ORIGINS", "http://localhost:3000");
     boolean debugMode = Boolean.parseBoolean(dotenv.get("DEBUG_MODE", "true"));
@@ -36,16 +33,6 @@ public class Server {
     mapper.registerModule(new Jdk8Module());
 
     Javalin app = Javalin.create(javalinConfig -> {
-      // IMPORTANTE: Configurar Jetty para escuchar en el host correcto
-      javalinConfig.jetty.server(() -> {
-        org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server();
-        ServerConnector connector = new ServerConnector(server);
-        connector.setHost(host); // ← Escucha en 0.0.0.0 para Render
-        connector.setPort(port);
-        server.setConnectors(new org.eclipse.jetty.server.Connector[]{connector});
-        return server;
-      });
-
       // 1. IMPORTANTE: Usar el mapper configurado arriba para APIs JSON
       javalinConfig.jsonMapper(new JavalinJackson());
 
@@ -91,7 +78,7 @@ public class Server {
     new Router().configure(app, mapper, debugMode);
 
     // Iniciar el servidor
-    System.out.println("Iniciando servidor en http://" + host + ":" + port);
+    System.out.println("Iniciando servidor en puerto " + port);
     System.out.println("Modo debug: " + (debugMode ? "HABILITADO" : "DESHABILITADO"));
     if (corsAllowAnyOrigin) {
       System.out.println("CORS: Permitido CUALQUIER origen (Modo Inseguro/Dev)");
@@ -99,7 +86,7 @@ public class Server {
       System.out.println("CORS: Restringido a los orígenes: " + allowedOriginsStr);
     }
 
-    app.start(); // Ya no necesitas pasar el puerto aquí
+    app.start(port);
 
     // Iniciar scheduler de estadísticas
     new EstadisticasScheduler().iniciar();
