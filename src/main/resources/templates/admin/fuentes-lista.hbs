@@ -8,178 +8,177 @@
 {{/partial}}
 
 {{#partial "contenido"}}
-<div class="container py-4">
-
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-        <div>
-            <h2 class="fw-light text-dark mb-0">Repositorio de Fuentes</h2>
-            <p class="text-muted small mb-0">Gestiona orígenes de datos, importaciones y conexiones API.</p>
-        </div>
-        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCrear" aria-expanded="false">
-            <i class="fa-solid fa-plus me-2"></i>Nueva Fuente
-        </button>
-    </div>
-
-    <!-- PANEL COLAPSABLE DE CREACIÓN (Oculto por defecto) -->
-    <div class="collapse mb-4" id="collapseCrear">
-        <div class="card border-0 shadow bg-light">
-            <div class="card-header bg-primary text-white py-2">
-                <h6 class="mb-0 fw-bold small text-uppercase">Alta de Fuente</h6>
+    <div class="container-sm py-4 mx-auto">
+        <div class="bg-white bg-opacity-75 p-3 rounded shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold"><i class="fa-solid fa-server me-2"></i>Repositorio de Fuentes</h2>
+                    <p class="text-muted">Gestiona orígenes de datos, importaciones y conexiones API</p>
+                </div>
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCrear" aria-expanded="false">
+                    <i class="fa-solid fa-plus me-2"></i>Nueva Fuente
+                </button>
             </div>
-            <div class="card-body">
-                <form action="/admin/fuentes" method="POST" enctype="multipart/form-data" id="formCrearFuente" class="row g-3" onsubmit="prepararEnvioMapeoFuente()">
 
-                    <!-- Nombre y Tipo -->
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold">Nombre de la Fuente</label>
-                        <label>
-                            <input type="text" name="nueva_fuente_nombre" class="form-control" placeholder="Ej: Reporte Policial 2024" required>
-                        </label>
+            <!-- PANEL COLAPSABLE DE CREACIÓN (Oculto por defecto) -->
+            <div class="collapse mb-4" id="collapseCrear">
+                <div class="card border-0 shadow bg-light">
+                    <div class="card-header bg-primary text-white py-2">
+                        <h6 class="mb-0 fw-bold small text-uppercase">Alta de Fuente</h6>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold">Tipo de Origen</label>
-                        <label for="selectorTipoFuente"></label><select id="selectorTipoFuente" class="form-select" onchange="cambiarTipoFuente()">
-                            <option value="DINAMICA" selected>Dinámica (Editable manualmente)</option>
-                            <option value="ESTATICA_CSV">Importar Archivo CSV</option>
-                            <option value="ESTATICA_JSON">Importar Archivo JSON</option>
-                            <option value="API">API Externa (Endpoint)</option>
-                            <option value="AGREGACION">Agregación (Grupo de fuentes)</option>
-                        </select>
-                        <input type="hidden" name="nueva_fuente_tipo" id="inputTipoFuenteReal" value="DINAMICA">
-                    </div>
-
-                    <!-- Configuración Específica (Dinámica) -->
-                    <div class="col-12 mt-3">
-
-                        <!-- Panel CSV -->
-                        <div id="panelCsv" class="d-none bg-white p-3 rounded border">
-                            <h6 class="small fw-bold border-bottom pb-2 mb-3">Configuración CSV</h6>
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label x-small text-muted mb-0">Archivo .csv</label>
-                                    <input type="file" name="archivo_fuente" id="fileCsv" class="form-control form-control-sm" accept=".csv">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label x-small text-muted mb-0">Separador</label>
-                                    <label>
-                                        <select name="csv_separador" class="form-select form-select-sm">
-                                            <option value=",">Coma (,)</option>
-                                            <option value=";">Punto y coma (;)</option>
-                                        </select>
-                                    </label>
-                                </div>
-                                <div class="col-md-5">
-                                    <label class="form-label x-small text-muted mb-0">Formato Fecha (Java)</label>
-                                    <label>
-                                        <input type="text" name="csv_formato_fecha" class="form-control form-control-sm" value="dd/MM/yyyy HH:mm">
-                                    </label>
-                                </div>
-                            </div>
-                            <!-- Mapeo (Simplificado visualmente) -->
-                            <div id="areaMapeo" class="d-none mt-3 pt-2 border-top">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge bg-success">Archivo Leído</span>
-                                    <small class="text-muted">Asigna las columnas del archivo a los campos del sistema.</small>
-                                </div>
-                                <div id="gridMapeo" class="row g-2"></div>
-                            </div>
-                            <input type="hidden" name="mapeo_columnas_json" id="jsonMapeo">
-                        </div>
-
-                        <!-- Panel JSON -->
-                        <div id="panelJson" class="d-none bg-white p-3 rounded border text-center">
-                            <i class="fa-solid fa-file-code fa-2x text-muted mb-2"></i>
-                            <p class="small text-muted mb-2">Sube un archivo JSON con una lista de objetos.<br>Las claves deben coincidir con: <code>hecho_titulo</code>, <code>hecho_fecha_suceso</code>, etc.</p>
-                            <input type="file" name="archivo_fuente_json" id="fileJson" class="form-control w-50 mx-auto" accept=".json">
-                        </div>
-
-                        <!-- Panel API -->
-                        <div id="panelApi" class="d-none bg-white p-3 rounded border">
-                            <div class="row g-3">
-                                <div class="col-md-8">
-                                    <label class="form-label small fw-bold">URL Endpoint</label>
-                                    <label>
-                                        <input type="url" name="url" class="form-control" placeholder="https://api.ejemplo.com/v1/incidentes">
-                                    </label>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label small fw-bold">Token (Bearer)</label>
-                                    <label>
-                                        <input type="text" name="token" class="form-control" placeholder="Opcional">
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Panel Agregación -->
-                        <div id="panelAgg" class="d-none bg-white p-3 rounded border">
-                            <label class="form-label small fw-bold">Seleccionar fuentes hijas:</label>
-                            <div class="d-flex flex-wrap gap-2">
-                                {{#each fuentes}}
-                                    <div class="form-check form-check-inline border rounded px-3 py-1 m-0">
-                                        <input class="form-check-input" type="checkbox" name="fuentes_seleccionadas" value="{{this.id}}" id="chk-{{this.id}}">
-                                        <label class="form-check-label small" for="chk-{{this.id}}">{{this.nombre}}</label>
-                                    </div>
-                                {{/each}}
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="col-12 text-end">
-                        <button type="button" class="btn btn-link text-muted text-decoration-none me-2" data-bs-toggle="collapse" data-bs-target="#collapseCrear">Cancelar</button>
-                        <button type="submit" class="btn btn-success fw-bold px-4">Crear Fuente</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- LISTADO DE FUENTES -->
-    <div class="row g-4">
-        {{#each fuentes}}
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title fw-bold text-dark mb-0 text-truncate" title="{{this.nombre}}">
-                                {{this.nombre}}
-                            </h5>
-                            <!-- Icono según tipo -->
-                            <div class="text-muted">
-                                {{#if (eq this.tipo "DINAMICA")}}<i class="fa-solid fa-pen-to-square" title="Dinámica"></i>{{/if}}
-                                {{#if (eq this.tipo "ESTATICA")}}<i class="fa-solid fa-file-csv" title="Estática"></i>{{/if}}
-                                {{#if (eq this.tipo "API")}}<i class="fa-solid fa-cloud" title="API"></i>{{/if}}
-                                {{#if (eq this.tipo "AGREGACION")}}<i class="fa-solid fa-layer-group" title="Agregación"></i>{{/if}}
+                        <form action="/admin/fuentes" method="POST" enctype="multipart/form-data" id="formCrearFuente" class="row g-3" onsubmit="prepararEnvioMapeoFuente()">
+
+                            <!-- Nombre y Tipo -->
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Nombre de la Fuente</label>
+                                <label>
+                                    <input type="text" name="nueva_fuente_nombre" class="form-control" placeholder="Ej: Reporte Policial 2024" required>
+                                </label>
                             </div>
-                        </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Tipo de Origen</label>
+                                <label for="selectorTipoFuente"></label><select id="selectorTipoFuente" class="form-select" onchange="cambiarTipoFuente()">
+                                    <option value="DINAMICA" selected>Dinámica (Editable manualmente)</option>
+                                    <option value="ESTATICA_CSV">Importar Archivo CSV</option>
+                                    <option value="ESTATICA_JSON">Importar Archivo JSON</option>
+                                    <option value="API">API Externa (Endpoint)</option>
+                                    <option value="AGREGACION">Agregación (Grupo de fuentes)</option>
+                                </select>
+                                <input type="hidden" name="nueva_fuente_tipo" id="inputTipoFuenteReal" value="DINAMICA">
+                            </div>
 
-                        <p class="card-text small text-muted mb-3">
-                            ID: #{{this.id}} <br>
-                            Tipo: <span class="badge bg-light text-dark border">{{this.tipo}}</span>
-                        </p>
+                            <!-- Configuración Específica (Dinámica) -->
+                            <div class="col-12 mt-3">
 
-                        <div class="d-grid">
-                            <a href="/admin/fuentes/{{this.id}}" class="btn btn-outline-primary btn-sm rounded-pill">
-                                Administrar <i class="fa-solid fa-chevron-right ms-1"></i>
-                            </a>
-                        </div>
+                                <!-- Panel CSV -->
+                                <div id="panelCsv" class="d-none bg-white p-3 rounded border">
+                                    <h6 class="small fw-bold border-bottom pb-2 mb-3">Configuración CSV</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label x-small text-muted mb-0">Archivo .csv</label>
+                                            <input type="file" name="archivo_fuente" id="fileCsv" class="form-control form-control-sm" accept=".csv">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label x-small text-muted mb-0">Separador</label>
+                                            <label>
+                                                <select name="csv_separador" class="form-select form-select-sm">
+                                                    <option value=",">Coma (,)</option>
+                                                    <option value=";">Punto y coma (;)</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="form-label x-small text-muted mb-0">Formato Fecha (Java)</label>
+                                            <label>
+                                                <input type="text" name="csv_formato_fecha" class="form-control form-control-sm" value="dd/MM/yyyy HH:mm">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <!-- Mapeo (Simplificado visualmente) -->
+                                    <div id="areaMapeo" class="d-none mt-3 pt-2 border-top">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-success">Archivo Leído</span>
+                                            <small class="text-muted">Asigna las columnas del archivo a los campos del sistema.</small>
+                                        </div>
+                                        <div id="gridMapeo" class="row g-2"></div>
+                                    </div>
+                                    <input type="hidden" name="mapeo_columnas_json" id="jsonMapeo">
+                                </div>
+
+                                <!-- Panel JSON -->
+                                <div id="panelJson" class="d-none bg-white p-3 rounded border text-center">
+                                    <i class="fa-solid fa-file-code fa-2x text-muted mb-2"></i>
+                                    <p class="small text-muted mb-2">Sube un archivo JSON con una lista de objetos.<br>Las claves deben coincidir con: <code>hecho_titulo</code>, <code>hecho_fecha_suceso</code>, etc.</p>
+                                    <input type="file" name="archivo_fuente_json" id="fileJson" class="form-control w-50 mx-auto" accept=".json">
+                                </div>
+
+                                <!-- Panel API -->
+                                <div id="panelApi" class="d-none bg-white p-3 rounded border">
+                                    <div class="row g-3">
+                                        <div class="col-md-8">
+                                            <label class="form-label small fw-bold">URL Endpoint</label>
+                                            <label>
+                                                <input type="url" name="url" class="form-control" placeholder="https://api.ejemplo.com/v1/incidentes">
+                                            </label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Token (Bearer)</label>
+                                            <label>
+                                                <input type="text" name="token" class="form-control" placeholder="Opcional">
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Panel Agregación -->
+                                <div id="panelAgg" class="d-none bg-white p-3 rounded border">
+                                    <label class="form-label small fw-bold">Seleccionar fuentes hijas:</label>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {{#each fuentes}}
+                                            <div class="form-check form-check-inline border rounded px-3 py-1 m-0">
+                                                <input class="form-check-input" type="checkbox" name="fuentes_seleccionadas" value="{{this.id}}" id="chk-{{this.id}}">
+                                                <label class="form-check-label small" for="chk-{{this.id}}">{{this.nombre}}</label>
+                                            </div>
+                                        {{/each}}
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-12 text-end">
+                                <button type="button" class="btn btn-link text-muted text-decoration-none me-2" data-bs-toggle="collapse" data-bs-target="#collapseCrear">Cancelar</button>
+                                <button type="submit" class="btn btn-success fw-bold px-4">Crear Fuente</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-        {{else}}
-            <div class="col-12">
-                <div class="text-center py-5 text-muted bg-light rounded border border-dashed">
-                    <i class="fa-solid fa-database fa-3x mb-3 opacity-25"></i>
-                    <h4>No hay fuentes creadas</h4>
-                    <p>Comienza creando una nueva fuente de datos arriba.</p>
-                </div>
-            </div>
-        {{/each}}
-    </div>
-</div>
 
+            <!-- LISTADO DE FUENTES -->
+            <div class="row g-4">
+                {{#each fuentes}}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title fw-bold text-dark mb-0 text-truncate" title="{{this.nombre}}">
+                                        {{this.nombre}}
+                                    </h5>
+                                    <!-- Icono según tipo -->
+                                    <div class="text-muted">
+                                        {{#if (eq this.tipo "DINAMICA")}}<i class="fa-solid fa-pen-to-square" title="Dinámica"></i>{{/if}}
+                                        {{#if (eq this.tipo "ESTATICA")}}<i class="fa-solid fa-file-csv" title="Estática"></i>{{/if}}
+                                        {{#if (eq this.tipo "API")}}<i class="fa-solid fa-cloud" title="API"></i>{{/if}}
+                                        {{#if (eq this.tipo "AGREGACION")}}<i class="fa-solid fa-layer-group" title="Agregación"></i>{{/if}}
+                                    </div>
+                                </div>
+
+                                <p class="card-text small text-muted mb-3">
+                                    ID: #{{this.id}} <br>
+                                    Tipo: <span class="badge bg-light text-dark border">{{this.tipo}}</span>
+                                </p>
+
+                                <div class="d-grid">
+                                    <a href="/admin/fuentes/{{this.id}}" class="btn btn-outline-primary btn-sm rounded-pill">
+                                        Administrar <i class="fa-solid fa-chevron-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {{else}}
+                    <div class="col-12">
+                        <div class="text-center py-5 text-muted bg-light rounded border border-dashed">
+                            <i class="fa-solid fa-database fa-3x mb-3 opacity-25"></i>
+                            <h4>No hay fuentes creadas</h4>
+                            <p>Comienza creando una nueva fuente de datos arriba.</p>
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
 <style>
     .hover-shadow:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
     .transition-all { transition: all 0.3s ease; }

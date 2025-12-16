@@ -1,262 +1,258 @@
 {{#partial "nav_izquierda"}}
-    <a href="/" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+    <a href="javascript:history.back()"
+       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+       title="Volver al panel">
         <i class="fa-solid fa-arrow-left"></i>
-        <span class="d-none d-sm-block">Volver al Inicio</span>
+        <span class="d-none d-sm-block">Volver</span>
     </a>
 {{/partial}}
 
 {{#partial "contenido"}}
-<div class="container py-4">
-
-    <!-- Encabezado Principal -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-        <div>
-            <h2 class="fw-light text-dark mb-1">Gestión de Colecciones</h2>
-            <p class="text-muted small mb-0">
-                Organiza y agrupa hechos provenientes de múltiples fuentes bajo criterios unificados.
-            </p>
-        </div>
-        <div>
-            <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">
-                <i class="fa-solid fa-layer-group me-2 text-primary"></i>Colecciones Activas: {{colecciones.size}}
-            </span>
-        </div>
-    </div>
-
-    <div class="row g-4">
-
-        <!-- COLUMNA IZQUIERDA: CREACIÓN -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white py-3 border-bottom">
-                    <h6 class="mb-0 fw-bold text-primary">
-                        <i class="fa-solid fa-plus-circle me-2"></i>Nueva Colección
-                    </h6>
+    <div class="container-sm py-4 mx-auto">
+        <div class="bg-white bg-opacity-75 p-3 rounded shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold"><i class="fa-solid fa-layer-group me-2"></i>Gestión de
+                        Colecciones</h2>
+                    <p class="text-muted">Agrupa hechos, define fuentes y aplica algoritmos de
+                        consenso.</p>
                 </div>
-                <div class="card-body bg-light">
+            </div>
 
-                    <form action="/admin/colecciones" method="POST" enctype="multipart/form-data" id="formCrearColeccion" onsubmit="prepararEnvioMapeo()">
+            <div class="row g-4">
 
-                        <!-- 1. Datos Básicos -->
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-secondary text-uppercase mb-2">
-                                <i class="fa-regular fa-file-lines me-1"></i>Datos Generales
-                            </label>
-                            <div class="bg-white p-3 rounded border">
-                                <div class="mb-2">
-                                    <input type="text" name="nombre" class="form-control form-control-sm" placeholder="Nombre de la colección (Ej: Accidentes 2023)" required>
-                                </div>
-                                <div class="mb-2">
-                                    <input type="text" name="categoria" class="form-control form-control-sm" placeholder="Categoría (Ej: Tráfico)">
-                                </div>
-                                <div>
-                                    <textarea name="descripcion" class="form-control form-control-sm" rows="2" placeholder="Breve descripción..."></textarea>
-                                </div>
-                            </div>
+                <!-- COLUMNA IZQUIERDA: CREACIÓN -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white py-3 border-bottom">
+                            <h6 class="mb-0 fw-bold text-primary">
+                                <i class="fa-solid fa-plus-circle me-2"></i>Nueva Colección
+                            </h6>
                         </div>
+                        <div class="card-body bg-light">
 
-                        <!-- 2. Fuente de Datos -->
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-secondary text-uppercase mb-2">
-                                <i class="fa-solid fa-database me-1"></i>Fuente de Datos
-                            </label>
+                            <form action="/admin/colecciones" method="POST" enctype="multipart/form-data" id="formCrearColeccion" onsubmit="prepararEnvioMapeo()">
 
-                            <div class="bg-white p-3 rounded border">
-                                <!-- Toggle Fuente -->
-                                <div class="btn-group w-100 mb-3" role="group">
-                                    <input type="radio" class="btn-check" name="modo_fuente" id="modoExistente" value="existente" checked onchange="togglemodo_fuente()">
-                                    <label class="btn btn-outline-secondary btn-sm" for="modoExistente">Existente</label>
-
-                                    <input type="radio" class="btn-check" name="modo_fuente" id="modoNueva" value="nueva" onchange="togglemodo_fuente()">
-                                    <label class="btn btn-outline-secondary btn-sm" for="modoNueva">Crear Nueva</label>
+                                <!-- 1. Datos Básicos -->
+                                <div class="mb-4">
+                                    <label class="form-label small fw-bold text-secondary text-uppercase mb-2">
+                                        <i class="fa-regular fa-file-lines me-1"></i>Datos Generales
+                                    </label>
+                                    <div class="bg-white p-3 rounded border">
+                                        <div class="mb-2">
+                                            <input type="text" name="nombre" class="form-control form-control-sm" placeholder="Nombre de la colección (Ej: Accidentes 2023)" required>
+                                        </div>
+                                        <div class="mb-2">
+                                            <input type="text" name="categoria" class="form-control form-control-sm" placeholder="Categoría (Ej: Tráfico)">
+                                        </div>
+                                        <div>
+                                            <textarea name="descripcion" class="form-control form-control-sm" rows="2" placeholder="Breve descripción..."></textarea>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <!-- A) Fuente Existente -->
-                                <div id="panelFuenteExistente">
-                                    <select name="fuente_id" class="form-select form-select-sm bg-light">
-                                        <option value="" selected disabled>Seleccionar fuente...</option>
-                                        {{#each fuentes}}
-                                            <option value="{{this.id}}">{{this.nombre}} ({{this.tipo}})</option>
-                                        {{/each}}
-                                    </select>
-                                </div>
+                                <!-- 2. Fuente de Datos -->
+                                <div class="mb-4">
+                                    <label class="form-label small fw-bold text-secondary text-uppercase mb-2">
+                                        <i class="fa-solid fa-database me-1"></i>Fuente de Datos
+                                    </label>
 
-                                <!-- B) Fuente Nueva -->
-                                <div id="panelFuenteNueva" class="d-none">
-                                    <div class="mb-2">
-                                        <input type="text" name="nueva_fuente_nombre" class="form-control form-control-sm" placeholder="Nombre de la nueva fuente">
-                                    </div>
+                                    <div class="bg-white p-3 rounded border">
+                                        <!-- Toggle Fuente -->
+                                        <div class="btn-group w-100 mb-3" role="group">
+                                            <input type="radio" class="btn-check" name="modo_fuente" id="modoExistente" value="existente" checked onchange="togglemodo_fuente()">
+                                            <label class="btn btn-outline-secondary btn-sm" for="modoExistente">Existente</label>
 
-                                    <div class="mb-3">
-                                        <select id="selectorTipoUI" class="form-select form-select-sm" onchange="gestionarCambioTipo()">
-                                            <option value="DINAMICA" selected>Dinámica (Vacía)</option>
-                                            <option value="ESTATICA_CSV">Importar CSV</option>
-                                            <option value="ESTATICA_JSON">Importar JSON</option>
-                                            <option value="API">API Externa</option>
-                                            <option value="AGREGACION">Agregación</option>
-                                        </select>
-                                        <input type="hidden" name="nueva_fuente_tipo" id="inputTipoReal" value="DINAMICA">
-                                    </div>
-
-                                    <!-- Sub-formularios Dinámicos -->
-                                    <div id="contenedorConfigExtra" class="border-top pt-2 mt-2">
-
-                                        <!-- API Config -->
-                                        <div id="camposApi" class="d-none animate-fade">
-                                            <label class="form-label x-small fw-bold text-muted">Configuración API</label>
-                                            <input type="text" name="url" class="form-control form-control-sm mb-2" placeholder="URL Endpoint (http://...)">
-                                            <input type="text" name="token" class="form-control form-control-sm" placeholder="Token Auth (Opcional)">
+                                            <input type="radio" class="btn-check" name="modo_fuente" id="modoNueva" value="nueva" onchange="togglemodo_fuente()">
+                                            <label class="btn btn-outline-secondary btn-sm" for="modoNueva">Crear Nueva</label>
                                         </div>
 
-                                        <!-- CSV/JSON Config -->
-                                        <div id="camposEstatica" class="d-none animate-fade">
-
-                                            <div id="configCsv" class="d-none row g-2 mb-2">
-                                                <div class="col-6">
-                                                    <label class="form-label x-small mb-0 text-muted">Separador</label>
-                                                    <select name="csv_separador" class="form-select form-select-sm py-0" style="font-size: 0.8rem;">
-                                                        <option value="," selected>Coma (,)</option>
-                                                        <option value=";">Punto y coma (;)</option>
-                                                        <option value="|">Barra (|)</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-6">
-                                                    <label class="form-label x-small mb-0 text-muted">Formato Fecha</label>
-                                                    <input type="text" name="csv_formato_fecha" class="form-control form-control-sm py-0" value="dd/MM/yyyy HH:mm" style="font-size: 0.8rem;">
-                                                </div>
-                                            </div>
-
-                                            <label class="form-label x-small fw-bold text-muted mb-1">Archivo de Datos</label>
-                                            <input type="file" name="archivo_fuente" id="inputArchivo" class="form-control form-control-sm mb-2">
-
-                                            <!-- Mapeo Dinámico -->
-                                            <div id="seccionMapeo" class="d-none bg-light p-2 rounded border mt-2">
-                                                <h6 class="x-small fw-bold text-success mb-2 border-bottom pb-1">
-                                                    <i class="fa-solid fa-table-columns me-1"></i>Mapeo de Columnas
-                                                </h6>
-                                                <div id="contenedorFilasMapeo" class="d-grid gap-1"></div>
-                                            </div>
-                                            <input type="hidden" name="mapeo_columnas_json" id="inputMapeoJson">
+                                        <!-- A) Fuente Existente -->
+                                        <div id="panelFuenteExistente">
+                                            <select name="fuente_id" class="form-select form-select-sm bg-light">
+                                                <option value="" selected disabled>Seleccionar fuente...</option>
+                                                {{#each fuentes}}
+                                                    <option value="{{this.id}}">{{this.nombre}} ({{this.tipo}})</option>
+                                                {{/each}}
+                                            </select>
                                         </div>
 
-                                        <!-- Agregación Config -->
-                                        <div id="camposAgregacion" class="d-none animate-fade">
-                                            <label class="form-label x-small fw-bold text-muted">Fuentes a Agrupar</label>
-                                            <div class="input-group input-group-sm mb-2">
-                                                <select id="selectFuenteAgregacion" class="form-select">
-                                                    {{#each fuentes}}
-                                                        <option value="{{this.id}}">{{this.nombre}}</option>
-                                                    {{/each}}
+                                        <!-- B) Fuente Nueva -->
+                                        <div id="panelFuenteNueva" class="d-none">
+                                            <div class="mb-2">
+                                                <input type="text" name="nueva_fuente_nombre" class="form-control form-control-sm" placeholder="Nombre de la nueva fuente">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <select id="selectorTipoUI" class="form-select form-select-sm" onchange="gestionarCambioTipo()">
+                                                    <option value="DINAMICA" selected>Dinámica (Vacía)</option>
+                                                    <option value="ESTATICA_CSV">Importar CSV</option>
+                                                    <option value="ESTATICA_JSON">Importar JSON</option>
+                                                    <option value="API">API Externa</option>
+                                                    <option value="AGREGACION">Agregación</option>
                                                 </select>
-                                                <button type="button" class="btn btn-outline-secondary" onclick="agregarFuenteAgregacion()">
-                                                    <i class="fa-solid fa-plus"></i>
-                                                </button>
+                                                <input type="hidden" name="nueva_fuente_tipo" id="inputTipoReal" value="DINAMICA">
                                             </div>
-                                            <ul id="listaAgregacion" class="list-group list-group-flush border rounded bg-white small" style="max-height: 100px; overflow-y: auto;">
-                                                <li class="list-group-item text-center text-muted fst-italic py-2 small" id="placeholder-agregacion">
-                                                    No hay fuentes seleccionadas
-                                                </li>
-                                            </ul>
-                                            <div id="inputsAgregacionContainer"></div>
+
+                                            <!-- Sub-formularios Dinámicos -->
+                                            <div id="contenedorConfigExtra" class="border-top pt-2 mt-2">
+
+                                                <!-- API Config -->
+                                                <div id="camposApi" class="d-none animate-fade">
+                                                    <label class="form-label x-small fw-bold text-muted">Configuración API</label>
+                                                    <input type="text" name="url" class="form-control form-control-sm mb-2" placeholder="URL Endpoint (http://...)">
+                                                    <input type="text" name="token" class="form-control form-control-sm" placeholder="Token Auth (Opcional)">
+                                                </div>
+
+                                                <!-- CSV/JSON Config -->
+                                                <div id="camposEstatica" class="d-none animate-fade">
+
+                                                    <div id="configCsv" class="d-none row g-2 mb-2">
+                                                        <div class="col-6">
+                                                            <label class="form-label x-small mb-0 text-muted">Separador</label>
+                                                            <select name="csv_separador" class="form-select form-select-sm py-0" style="font-size: 0.8rem;">
+                                                                <option value="," selected>Coma (,)</option>
+                                                                <option value=";">Punto y coma (;)</option>
+                                                                <option value="|">Barra (|)</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label class="form-label x-small mb-0 text-muted">Formato Fecha</label>
+                                                            <input type="text" name="csv_formato_fecha" class="form-control form-control-sm py-0" value="dd/MM/yyyy HH:mm" style="font-size: 0.8rem;">
+                                                        </div>
+                                                    </div>
+
+                                                    <label class="form-label x-small fw-bold text-muted mb-1">Archivo de Datos</label>
+                                                    <input type="file" name="archivo_fuente" id="inputArchivo" class="form-control form-control-sm mb-2">
+
+                                                    <!-- Mapeo Dinámico -->
+                                                    <div id="seccionMapeo" class="d-none bg-light p-2 rounded border mt-2">
+                                                        <h6 class="x-small fw-bold text-success mb-2 border-bottom pb-1">
+                                                            <i class="fa-solid fa-table-columns me-1"></i>Mapeo de Columnas
+                                                        </h6>
+                                                        <div id="contenedorFilasMapeo" class="d-grid gap-1"></div>
+                                                    </div>
+                                                    <input type="hidden" name="mapeo_columnas_json" id="inputMapeoJson">
+                                                </div>
+
+                                                <!-- Agregación Config -->
+                                                <div id="camposAgregacion" class="d-none animate-fade">
+                                                    <label class="form-label x-small fw-bold text-muted">Fuentes a Agrupar</label>
+                                                    <div class="input-group input-group-sm mb-2">
+                                                        <select id="selectFuenteAgregacion" class="form-select">
+                                                            {{#each fuentes}}
+                                                                <option value="{{this.id}}">{{this.nombre}}</option>
+                                                            {{/each}}
+                                                        </select>
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="agregarFuenteAgregacion()">
+                                                            <i class="fa-solid fa-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                    <ul id="listaAgregacion" class="list-group list-group-flush border rounded bg-white small" style="max-height: 100px; overflow-y: auto;">
+                                                        <li class="list-group-item text-center text-muted fst-italic py-2 small" id="placeholder-agregacion">
+                                                            No hay fuentes seleccionadas
+                                                        </li>
+                                                    </ul>
+                                                    <div id="inputsAgregacionContainer"></div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- 3. Algoritmo -->
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-secondary text-uppercase mb-2">
-                                <i class="fa-solid fa-gavel me-1"></i>Criterio de Consenso
-                            </label>
-                            <div class="bg-white p-3 rounded border">
-                                <select name="algoritmo_tipo" class="form-select form-select-sm">
-                                    <option value="May_simple">Mayoría Simple</option>
-                                    <option value="Absoluta">Unanimidad / Absoluta</option>
-                                    <option value="Mult_menciones">Múltiples Menciones</option>
-                                </select>
-                                <div class="form-text x-small mt-1 text-muted">
-                                    Define cómo se validan los hechos dentro de la colección.
+                                <!-- 3. Algoritmo -->
+                                <div class="mb-4">
+                                    <label class="form-label small fw-bold text-secondary text-uppercase mb-2">
+                                        <i class="fa-solid fa-gavel me-1"></i>Criterio de Consenso
+                                    </label>
+                                    <div class="bg-white p-3 rounded border">
+                                        <select name="algoritmo_tipo" class="form-select form-select-sm">
+                                            <option value="May_simple">Mayoría Simple</option>
+                                            <option value="Absoluta">Unanimidad / Absoluta</option>
+                                            <option value="Mult_menciones">Múltiples Menciones</option>
+                                        </select>
+                                        <div class="form-text x-small mt-1 text-muted">
+                                            Define cómo se validan los hechos dentro de la colección.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid pt-2">
+                                    <button type="submit" class="btn btn-primary fw-bold shadow-sm">
+                                        <i class="fa-solid fa-check me-2"></i>Crear Colección
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA: LISTADO -->
+                <div class="col-lg-8">
+
+                    <!-- Buscador -->
+                    <form id="searchForm" class="card border-0 shadow-sm p-3 mb-4">
+                        <div class="row g-2">
+                            <div class="col-md-5">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-search"></i></span>
+                                    <input id="searchInput" type="text" name="titulo" class="form-control border-start-0 ps-0" placeholder="Buscar por título..." value="{{query}}">
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="d-grid pt-2">
-                            <button type="submit" class="btn btn-primary fw-bold shadow-sm">
-                                <i class="fa-solid fa-check me-2"></i>Crear Colección
-                            </button>
+                            <div class="col-md-4">
+                                <select class="form-select" id="categoriaSelect" name="categoria">
+                                    <option value="0">Todas las Categorías</option>
+                                    {{#each categorias}}
+                                        <option value="{{this}}" {{#if (eq this ../categoriaSeleccionada)}}selected{{/if}}>{{this}}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-dark w-100 fw-bold" type="submit">Filtrar</button>
+                            </div>
                         </div>
                     </form>
-                </div>
-            </div>
-        </div>
 
-        <!-- COLUMNA DERECHA: LISTADO -->
-        <div class="col-lg-8">
-
-            <!-- Buscador -->
-            <form id="searchForm" class="card border-0 shadow-sm p-3 mb-4">
-                <div class="row g-2">
-                    <div class="col-md-5">
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-search"></i></span>
-                            <input id="searchInput" type="text" name="titulo" class="form-control border-start-0 ps-0" placeholder="Buscar por título..." value="{{query}}">
+                    <!-- Lista -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-uppercase text-muted small">
+                                <i class="fa-solid fa-list-ul me-2"></i>Colecciones Disponibles
+                            </h6>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <select class="form-select" id="categoriaSelect" name="categoria">
-                            <option value="0">Todas las Categorías</option>
-                            {{#each categorias}}
-                                <option value="{{this}}" {{#if (eq this ../categoriaSeleccionada)}}selected{{/if}}>{{this}}</option>
-                            {{/each}}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-dark w-100 fw-bold" type="submit">Filtrar</button>
-                    </div>
-                </div>
-            </form>
-
-            <!-- Lista -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 fw-bold text-uppercase text-muted small">
-                        <i class="fa-solid fa-list-ul me-2"></i>Colecciones Disponibles
-                    </h6>
-                </div>
-                <div class="list-group list-group-flush" id="resultsList">
-                    {{#each colecciones}}
-                        <div class="list-group-item list-group-item-action p-3 border-start-0 border-end-0">
-                            <div class="d-flex w-100 justify-content-between align-items-center">
-                                <div class="d-flex flex-column gap-1">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <h6 class="mb-0 fw-bold text-dark">{{this.titulo}}</h6>
-                                        <span class="badge bg-light text-dark border">{{this.categoria}}</span>
+                        <div class="list-group list-group-flush" id="resultsList">
+                            {{#each colecciones}}
+                                <div class="list-group-item list-group-item-action p-3 border-start-0 border-end-0">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div class="d-flex flex-column gap-1">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <h6 class="mb-0 fw-bold text-dark">{{this.titulo}}</h6>
+                                                <span class="badge bg-light text-dark border">{{this.categoria}}</span>
+                                            </div>
+                                            <small class="text-muted text-truncate" style="max-width: 450px;">
+                                                {{#if this.descripcion}}{{this.descripcion}}{{else}}Sin descripción{{/if}}
+                                            </small>
+                                        </div>
+                                        <a href="/admin/colecciones/{{this.id}}" class="btn btn-sm btn-outline-primary rounded-pill px-3 ms-3">
+                                            Configurar <i class="fa-solid fa-gear ms-1"></i>
+                                        </a>
                                     </div>
-                                    <small class="text-muted text-truncate" style="max-width: 450px;">
-                                        {{#if this.descripcion}}{{this.descripcion}}{{else}}Sin descripción{{/if}}
-                                    </small>
                                 </div>
-                                <a href="/admin/colecciones/{{this.id}}" class="btn btn-sm btn-outline-primary rounded-pill px-3 ms-3">
-                                    Configurar <i class="fa-solid fa-gear ms-1"></i>
-                                </a>
-                            </div>
+                            {{else}}
+                                <div class="text-center py-5 text-muted">
+                                    <div class="mb-3">
+                                        <i class="fa-regular fa-folder-open fa-3x opacity-25"></i>
+                                    </div>
+                                    <h6 class="fw-bold">No hay colecciones creadas</h6>
+                                    <p class="small mb-0">Utiliza el formulario de la izquierda para comenzar.</p>
+                                </div>
+                            {{/each}}
                         </div>
-                    {{else}}
-                        <div class="text-center py-5 text-muted">
-                            <div class="mb-3">
-                                <i class="fa-regular fa-folder-open fa-3x opacity-25"></i>
-                            </div>
-                            <h6 class="fw-bold">No hay colecciones creadas</h6>
-                            <p class="small mb-0">Utiliza el formulario de la izquierda para comenzar.</p>
-                        </div>
-                    {{/each}}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
 <style>
     .x-small { font-size: 0.75rem; }
     .animate-fade { animation: fadeIn 0.3s ease-in-out; }
@@ -397,7 +393,7 @@
         if (!id || document.getElementById('agg-'+id)) return;
 
         const li = document.createElement('li');
-        li.className = 'list-group-item d-flex justify-content-between py-1 small';
+        li.className = 'list-group-item d-flex justify-content-between py-1';
         li.innerHTML = `<span>${txt}</span> <button type="button" class="btn btn-link text-danger p-0" onclick="this.parentElement.remove(); document.getElementById('agg-${id}').remove();"><i class="fa-solid fa-times"></i></button>`;
         document.getElementById('listaAgregacion').appendChild(li);
         document.getElementById('placeholder-agregacion').classList.add('d-none');
@@ -414,7 +410,7 @@
         const cat = document.getElementById('categoriaSelect').value;
         const list = document.getElementById('resultsList');
 
-        list.innerHTML = '<div class="text-center p-5 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando...</div>';
+        list.innerHTML = '<div class="text-center p-3 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando...</div>';
 
         try {
             const res = await fetch(`/api/admin/colecciones/buscar?titulo=${encodeURIComponent(titulo)}&categoria=${encodeURIComponent(cat)}`);
@@ -422,32 +418,26 @@
             list.innerHTML = '';
 
             if(data.length === 0) {
-                list.innerHTML = `
-                    <div class="text-center py-5 text-muted">
-                        <i class="fa-solid fa-search fa-2x mb-3 opacity-25"></i>
-                        <p class="mb-0">No se encontraron resultados para tu búsqueda.</p>
-                    </div>`;
+                list.innerHTML = '<div class="text-center p-4 text-muted">No se encontraron resultados.</div>';
                 return;
             }
 
             data.forEach(c => {
                 list.innerHTML += `
-                    <div class="list-group-item list-group-item-action p-3 border-start-0 border-end-0">
+                    <div class="list-group-item list-group-item-action p-3">
                         <div class="d-flex w-100 justify-content-between align-items-center">
-                            <div class="d-flex flex-column gap-1">
-                                <div class="d-flex align-items-center gap-2">
-                                    <h6 class="mb-0 fw-bold text-dark">${c.titulo || c.coleccion_titulo}</h6>
-                                    <span class="badge bg-light text-dark border">${c.categoria || c.coleccion_categoria}</span>
-                                </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-primary">${c.titulo || c.coleccion_titulo}</h6>
+                                <span class="badge bg-light text-dark border mt-1">${c.categoria || c.coleccion_categoria}</span>
                             </div>
-                            <a href="/admin/colecciones/${c.id}" class="btn btn-sm btn-outline-primary rounded-pill px-3 ms-3">
-                                Configurar <i class="fa-solid fa-gear ms-1"></i>
+                            <a href="/admin/colecciones/${c.id}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                                Configurar <i class="fa-solid fa-arrow-right ms-1"></i>
                             </a>
                         </div>
                     </div>`;
             });
         } catch (err) {
-            list.innerHTML = `<div class="alert alert-danger m-3 border-0 shadow-sm"><i class="fa-solid fa-circle-exclamation me-2"></i>Error: ${err.message}</div>`;
+            list.innerHTML = `<div class="alert alert-danger m-3">Error: ${err.message}</div>`;
         }
     });
 </script>

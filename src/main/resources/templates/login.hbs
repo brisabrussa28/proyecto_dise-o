@@ -2,6 +2,16 @@
     <div class="container d-flex flex-column justify-content-center align-items-center"
          style="min-height: 85vh;">
 
+        {{#if error}}
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center shadow-sm mb-4"
+                 role="alert"
+                 style="max-width: 400px; width: 100%;">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                <div>{{error}}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {{/if}}
+
         <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px;">
             <div class="card-body p-5">
 
@@ -18,21 +28,36 @@
                     {{#if redirect}}
                         <input type="hidden" name="redirect" value="{{redirect}}">
                     {{/if}}
+
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="usuario_nombre" name="email"
-                               placeholder="E-Mail" required>
-                        <label for="usuario_nombre"><i
-                                class="fa-regular fa-user me-2"></i>E-Mail</label>
+                        <input type="text"
+                               class="form-control {{#if error}}is-invalid{{/if}}"
+                               id="usuario_nombre"
+                               name="email"
+                               value="{{email}}"
+                               placeholder="E-Mail"
+                               required
+                               autofocus>
+                        <label for="usuario_nombre">
+                            <i class="fa-regular fa-user me-2"></i>E-Mail
+                        </label>
                     </div>
 
                     <div class="form-floating mb-4">
-                        <input type="password" class="form-control" id="usuario_contrasenia"
-                               name="password" placeholder="Contraseña" required>
-                        <label for="usuario_contrasenia"><i class="fa-solid fa-lock me-2"></i>Contraseña</label>
+                        <input type="password"
+                               class="form-control {{#if error}}is-invalid{{/if}}"
+                               id="usuario_contrasenia"
+                               name="password"
+                               placeholder="Contraseña"
+                               required>
+                        <label for="usuario_contrasenia">
+                            <i class="fa-solid fa-lock me-2"></i>Contraseña
+                        </label>
                     </div>
 
                     <div class="d-grid gap-2 mb-3">
                         <button type="submit" class="btn btn-primary btn-lg fw-bold">
+                            <i class="fa-solid fa-right-to-bracket me-2"></i>
                             Ingresar
                         </button>
                     </div>
@@ -40,21 +65,15 @@
                     <div class="text-center">
                         <span class="text-muted small">¿No tienes cuenta?</span>
                         <a href="/auth/register{{#if redirect}}?redirect={{redirect}}{{/if}}"
-                        class="text-decoration-none fw-bold ms-1">Regístrate
-                            aquí</a>
+                           class="text-decoration-none fw-bold ms-1">
+                            Regístrate aquí
+                        </a>
                     </div>
 
                 </form>
             </div>
         </div>
     </div>
-
-    {{#if error}}
-        <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
-            <i class="fa-solid fa-triangle-exclamation me-2"></i>
-            <div>{{error}}</div>
-        </div>
-    {{/if}}
 {{/partial}}
 
 {{> templates/layout}}

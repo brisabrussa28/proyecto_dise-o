@@ -28,7 +28,8 @@
                         <select class="form-select" id="categoriaSelect" name="categoria">
                             <option value="0">Todas las categorías</option>
                             {{#each categorias}}
-                                <option value="{{this}}" {{#if (eq this ../categoriaSeleccionada)}}selected{{/if}}>{{this}}</option>
+                                <option value="{{this}}"
+                                        {{#if (eq this ../categoriaSeleccionada)}}selected{{/if}}>{{this}}</option>
                             {{/each}}
                         </select>
                     </div>
@@ -51,44 +52,54 @@
             </form>
 
             <div class="list-group" id="resultsList">
-                {{#each hechos}}
-                    <a href="/hechos/{{this.id}}"
-                       class="list-group-item list-group-item-action py-3 border">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="d-flex align-items-center mb-1">
-                                    <h6 class="fw-bold text-dark mb-0 me-2">{{titulo}}</h6>
-                                    {{#if colecciones}}
-                                        <span class="badge bg-success" title="Hecho consensuado"><i class="fa-solid fa-check"></i></span>
-                                    {{/if}}
+                {{# if hechos}}
+
+                    {{#each hechos}}
+                        <a href="/hechos/{{this.id}}"
+                           class="list-group-item list-group-item-action py-3 border">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <h6 class="fw-bold text-dark mb-0 me-2">{{titulo}}</h6>
+                                        {{#if colecciones}}
+                                            <span class="badge bg-success"
+                                                  title="Hecho consensuado"><i
+                                                    class="fa-solid fa-check"></i></span>
+                                        {{/if}}
+                                    </div>
+                                    <p class="mb-2 text-muted small">{{descripcion}}</p>
+                                    <div class="mb-2">
+                                        <span class="badge bg-info text-dark">{{categoria}}</span>
+                                        {{#if etiquetas}}
+                                            {{#each etiquetas}}
+                                                <span class="badge bg-secondary">{{nombre}}</span>
+                                            {{/each}}
+                                        {{/if}}
+                                    </div>
+                                    <div class="small text-muted">
+                                        <i class="fa-regular fa-calendar me-1"></i>
+                                        <!-- FIX: Uso de data attribute para renderizado seguro de fechas -->
+                                        <span class="fecha-render" data-fecha="{{fechaSuceso}}">Procesando fecha...</span>
+                                        <br>
+                                        <i class="fa-solid fa-location-dot me-1"></i>
+                                        {{#if provincia}}
+                                            {{provincia}} —
+                                        {{/if}}
+                                        {{direccion}}
+                                    </div>
                                 </div>
-                                <p class="mb-2 text-muted small">{{descripcion}}</p>
-                                <div class="mb-2">
-                                    <span class="badge bg-info text-dark">{{categoria}}</span>
-                                    {{#if etiquetas}}
-                                        {{#each etiquetas}}
-                                            <span class="badge bg-secondary">{{nombre}}</span>
-                                        {{/each}}
-                                    {{/if}}
-                                </div>
-                                <div class="small text-muted">
-                                    <i class="fa-regular fa-calendar me-1"></i>
-                                    <!-- FIX: Uso de data attribute para renderizado seguro de fechas -->
-                                    <span class="fecha-render" data-fecha="{{fechaSuceso}}">Procesando fecha...</span>
-                                    <br>
-                                    <i class="fa-solid fa-location-dot me-1"></i>
-                                    {{#if provincia}}
-                                        {{provincia}} —
-                                    {{/if}}
-                                    {{direccion}}
+                                <div class="ms-3 align-self-center">
+                                    <i class="fa-solid fa-chevron-right text-muted"></i>
                                 </div>
                             </div>
-                            <div class="ms-3 align-self-center">
-                                <i class="fa-solid fa-chevron-right text-muted"></i>
-                            </div>
-                        </div>
-                    </a>
-                {{/each}}
+                        </a>
+                    {{/each}}
+                {{else}}
+                    <div class="alert alert-info text-center">
+                        <i class="fa-solid fa-info-circle me-2"></i>
+                        No se encontraron hechos con los criterios seleccionados.
+                    </div>
+                {{/if}}
             </div>
 
             <nav class="mt-4">
@@ -146,9 +157,10 @@
                         const parts = JSON.parse(dateInput);
                         if (Array.isArray(parts)) {
                             // Mes en JS es base 0
-                            date = new Date(parts[0], parts[1] - 1, parts[2], parts[3]||0, parts[4]||0);
+                            date = new Date(parts[0], parts[1] - 1, parts[2], parts[3] || 0, parts[4] || 0);
                         }
-                    } catch(e) { /* Fallback */ }
+                    } catch (e) { /* Fallback */
+                    }
                 }
 
                 if (!date) {
@@ -158,7 +170,11 @@
                 if (isNaN(date.getTime())) return 'Fecha inválida';
 
                 return date.toLocaleString('es-AR', {
-                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
                 });
             }
 
@@ -205,7 +221,7 @@
                     hechosResultantes.forEach(hecho => {
                         const esConsensuado = hecho.colecciones && hecho.colecciones.length > 0;
                         const fechaFormateada = formatDate(hecho.hecho_fecha_suceso || hecho.fechaSuceso);
-                        const etiquetasHTML = hecho.etiquetas ? hecho.etiquetas.map(e => `<span class="badge bg-secondary me-1">${e.nombre}</span>`) : '';
+                        const etiquetasHTML = hecho.etiquetas ? hecho.etiquetas.map(e => `<span class="badge bg-secondary me-1">${e.nombre.replace(/,\s*/g, " ")}</span>`) : '';
 
                         const itemHTML = `
                             <a href="/hechos/${hecho.id}" class="list-group-item list-group-item-action py-3 border-start-0 border-end-0">
@@ -275,12 +291,12 @@
                         e.preventDefault();
                         const page = parseInt(e.target.getAttribute('data-page'));
                         buscarHechos(titulo, categoria, consensuados, page);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        window.scrollTo({top: 0, behavior: 'smooth'});
                     });
                 });
             }
 
-            searchForm.addEventListener('submit', function(e) {
+            searchForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const titulo = searchInput.value.trim();
                 const categoria = categoriaSelect.value;

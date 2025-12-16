@@ -8,213 +8,197 @@
 {{/partial}}
 
 {{#partial "contenido"}}
-    <div class="container py-4">
-
-        <!-- Encabezado -->
-        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-            <div>
-                <h2 class="fw-light text-dark mb-0">{{coleccion.titulo}}</h2>
-                <small class="text-muted">
-                    {{#if coleccion.descripcion}}{{coleccion.descripcion}}{{else}}Sin descripción{{/if}}
-                </small>
-            </div>
-            <span class="badge rounded-pill bg-dark fw-normal px-3 py-2">
-                {{#if coleccion.categoria}}{{coleccion.categoria}}{{else}}General{{/if}}
-            </span>
-        </div>
-
-        <div class="row g-4">
-
-            <!-- PANEL CONFIGURACIÓN -->
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm bg-light">
-                    <div class="card-body p-4">
-                        <h6 class="card-title fw-bold text-uppercase text-muted mb-3 small">
-                            <i class="fa-solid fa-gear me-2"></i>Configuración
-                        </h6>
-
-                        <form action="/admin/colecciones/{{coleccion.id}}/configurar" method="POST">
-                            <!-- Campos de configuración existentes -->
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Título</label>
-                                <label>
-                                    <input type="text" name="titulo" class="form-control" value="{{coleccion.titulo}}" required>
-                                </label>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Categoría</label>
-                                <label>
-                                    <input type="text" name="categoria" class="form-control" value="{{coleccion.categoria}}" required>
-                                </label>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Descripción</label>
-                                <label>
-                                    <textarea name="descripcion" class="form-control" rows="2" required>{{coleccion.descripcion}}</textarea>
-                                </label>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Fuente de Datos</label>
-                                <label>
-                                    <select name="fuente_id" class="form-select" required>
-                                        <option value="" disabled {{#unless coleccion.fuente}}selected{{/unless}}>Seleccionar...</option>
-                                        {{#each fuentesDisponibles}}
-                                            <option value="{{this.id}}" {{#if (eq this.id ../coleccion.fuente.id)}}selected{{/if}}>
-                                                {{this.nombre}}
-                                            </option>
-                                        {{/each}}
-                                    </select>
-                                </label>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="form-label small fw-bold">Algoritmo de Consenso</label>
-                                <label>
-                                    <select name="algoritmo_tipo" class="form-select" required>
-                                        <option value="May_simple" {{#if (eq coleccion.algoritmoTipo "May_simple")}}selected{{/if}}>Mayoría Simple</option>
-                                        <option value="Absoluta" {{#if (eq coleccion.algoritmoTipo "Absoluta")}}selected{{/if}}>Unanimidad / Absoluta</option>
-                                        <option value="Mult_menciones" {{#if (eq coleccion.algoritmoTipo "Mult_menciones")}}selected{{/if}}>Múltiples Menciones</option>
-                                    </select>
-                                </label>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">
-                                    Guardar Cambios
-                                </button>
-                            </div>
-                        </form>
-
-                        <hr class="my-4">
-
-                        <!-- SECCIÓN: Visualización de Estado de Filtros (Simplificada) -->
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                             <h6 class="card-title fw-bold text-uppercase text-muted mb-0 small">
-                                <i class="fa-solid fa-filter me-2"></i>Filtros
-                            </h6>
-
-                            {{#if coleccion.condicionLegible}}
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
-                                        <i class="fa-solid fa-check me-1"></i> Activo
-                                    </span>
-
-                                    <form action="/admin/colecciones/{{coleccion.id}}/eliminar-condicion" method="POST" class="m-0">
-                                        <button type="submit" class="btn btn-link text-danger p-0 small text-decoration-none" title="Limpiar Filtros">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            {{else}}
-                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill">
-                                    Inactivo
-                                </span>
-                            {{/if}}
-                        </div>
-
-                        <!-- SECCIÓN: Agregar Condición Dinámica -->
-                        <h6 class="card-title fw-bold text-uppercase text-muted mb-3 small">
-                            <i class="fa-solid fa-plus me-2"></i>Agregar Regla
-                        </h6>
-
-                        <form action="/admin/colecciones/{{coleccion.id}}/agregar-condicion" method="POST">
-                            <div class="mb-2">
-                                <label class="form-label small fw-bold">Lógica de Unión</label>
-                                <label>
-                                    <select name="cond_logica" class="form-select form-select-sm">
-                                        <option value="AND">Y (Cumplir con todo)</option>
-                                        <option value="OR">O (Alternativa)</option>
-                                    </select>
-                                </label>
-                            </div>
-
-                            <div class="row g-2 mb-3">
-                                <div class="col-12">
-                                    <label class="form-label small fw-bold">Campo</label>
-                                    <!-- Agregamos data-tipo para ayudar al JS -->
-                                    <label for="cond_campo"></label><select name="cond_campo" id="cond_campo" class="form-select form-select-sm" onchange="actualizarFormularioCondicion()">
-                                        <option value="titulo" data-tipo="texto">Título</option>
-                                        <option value="descripcion" data-tipo="texto">Descripción</option>
-                                        <option value="categoria" data-tipo="texto">Categoría</option>
-                                        <option value="anio" data-tipo="numero">Año</option>
-                                        <option value="fechaSuceso" data-tipo="fecha">Fecha del Suceso</option>
-                                        <option value="duracion" data-tipo="numero">Duración</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-12">
-                                    <label class="form-label small fw-bold">Operador</label>
-                                    <label for="cond_operador"></label><select name="cond_operador" id="cond_operador" class="form-select form-select-sm" onchange="actualizarInputsValor()">
-                                        <!-- Se llena con JS -->
-                                        <option value="IGUAL">Igual a</option>
-                                        <option value="CONTIENE">Contiene</option>
-                                    </select>
-                                </div>
-
-                                <!-- Contenedor de Valor 1 -->
-                                <div class="col-12">
-                                    <label class="form-label small fw-bold" id="label_valor_1">Valor</label>
-                                    <label for="cond_valor_1"></label><input type="text" name="cond_valor" id="cond_valor_1" class="form-control form-control-sm" placeholder="Valor" required>
-                                </div>
-
-                                <!-- Contenedor de Valor 2 (Oculto por defecto) -->
-                                <div class="col-12" id="container_valor_2" style="display: none;">
-                                    <label class="form-label small fw-bold">Hasta</label>
-                                    <label for="cond_valor_2"></label><input type="text" name="cond_valor_2" id="cond_valor_2" class="form-control form-control-sm" placeholder="Valor máximo">
-                                </div>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-outline-dark btn-sm">
-                                    <i class="fa-solid fa-plus me-1"></i> Agregar Condición
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+    <div class="container-sm py-4 mx-auto">
+        <div class="bg-white bg-opacity-75 p-3 rounded shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3><i class="fa-solid fa-folder-open text-warning me-2"></i>Colección:
+                        <strong>{{coleccion.titulo}}</strong></h3>
+                    <span class="badge bg-secondary">{{coleccion.categoria}}</span>
+                    <span class="text-muted ms-2 small">{{coleccion.descripcion}}</span>
                 </div>
             </div>
 
-            <!-- PANEL HECHOS -->
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                        <span class="fw-bold small text-uppercase text-muted">
-                            Hechos Consensuados ({{#if coleccion.hechos}}{{coleccion.hechos.size}}{{else}}0{{/if}})
-                        </span>
+            <div class="row g-4">
 
-                        <form action="/admin/colecciones/{{coleccion.id}}/calcular-consenso" method="POST" class="m-0">
-                            <button type="submit" class="btn btn-sm btn-outline-dark">
-                                <i class="fa-solid fa-sync me-1"></i> Recalcular
-                            </button>
-                        </form>
-                    </div>
+                <!-- PANEL CONFIGURACIÓN -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm bg-light">
+                        <div class="card-body p-4">
+                            <h6 class="card-title fw-bold text-uppercase text-muted mb-3 small">
+                                <i class="fa-solid fa-gear me-2"></i>Configuración
+                            </h6>
 
-                    <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
-                        <ul class="list-group list-group-flush">
-                            {{#each coleccion.hechos}}
-                                <li class="list-group-item p-3 item-hecho">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1 fw-bold">{{this.titulo}}</h6>
-                                        <small class="text-muted">ID: {{this.id}}</small>
-                                    </div>
-                                    <p class="mb-1 small text-muted text-truncate">
-                                        {{#if this.descripcion}}{{this.descripcion}}{{else}}Sin descripción{{/if}}
-                                    </p>
-                                    <small class="text-primary">
-                                        <i class="fa-regular fa-calendar me-1"></i>
-                                        {{formatDate this.fechaSuceso "dd/MM/yyyy HH:mm"}}
-                                    </small>
-                                </li>
-                            {{else}}
-                                <div class="text-center py-5 text-muted">
-                                    <i class="fa-regular fa-folder-open fa-2x mb-3 opacity-50"></i>
-                                    <p class="mb-0">No hay hechos consensuados.</p>
+                            <form action="/admin/colecciones/{{coleccion.id}}/configurar" method="POST">
+                                <!-- Campos de configuración existentes -->
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Título</label>
+                                        <input type="text" name="titulo" class="form-control" value="{{coleccion.titulo}}" required>
                                 </div>
-                            {{/each}}
-                        </ul>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Categoría</label>
+                                        <input type="text" name="categoria" class="form-control" value="{{coleccion.categoria}}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Descripción</label>
+                                        <textarea name="descripcion" class="form-control" rows="2" required>{{coleccion.descripcion}}</textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Fuente de Datos</label>
+                                        <select name="fuente_id" class="form-select" required>
+                                            <option value="" disabled {{#unless coleccion.fuente}}selected{{/unless}}>Seleccionar...</option>
+                                            {{#each fuentesDisponibles}}
+                                                <option value="{{this.id}}" {{#if (eq this.id ../coleccion.fuente.id)}}selected{{/if}}>
+                                                    {{this.nombre}}
+                                                </option>
+                                            {{/each}}
+                                        </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label small fw-bold">Algoritmo de Consenso</label>
+                                        <select name="algoritmo_tipo" class="form-select" required>
+                                            <option value="May_simple" {{#if (eq coleccion.algoritmoTipo "May_simple")}}selected{{/if}}>Mayoría Simple</option>
+                                            <option value="Absoluta" {{#if (eq coleccion.algoritmoTipo "Absoluta")}}selected{{/if}}>Unanimidad / Absoluta</option>
+                                            <option value="Mult_menciones" {{#if (eq coleccion.algoritmoTipo "Mult_menciones")}}selected{{/if}}>Múltiples Menciones</option>
+                                        </select>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        Guardar Cambios
+                                    </button>
+                                </div>
+                            </form>
+
+                            <hr class="my-4">
+                            <!-- SECCIÓN: Visualización de Estado de Filtros (Simplificada) -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                 <h6 class="card-title fw-bold text-uppercase text-muted mb-0 small">
+                                    <i class="fa-solid fa-filter me-2"></i>Filtros
+                                </h6>
+
+                                {{#if coleccion.condicionLegible}}
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                            <i class="fa-solid fa-check me-1"></i> Activo
+                                        </span>
+
+                                        <form action="/admin/colecciones/{{coleccion.id}}/eliminar-condicion" method="POST" class="m-0">
+                                            <button type="submit" class="btn btn-link text-danger p-0 small text-decoration-none" title="Limpiar Filtros">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                {{else}}
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill">
+                                        Inactivo
+                                    </span>
+                                {{/if}}
+                            </div>
+
+                            <!-- SECCIÓN: Agregar Condición Dinámica -->
+                            <h6 class="card-title fw-bold text-uppercase text-muted mb-3 small">
+                                <i class="fa-solid fa-plus me-2"></i>Agregar Regla
+                            </h6>
+
+                            <form action="/admin/colecciones/{{coleccion.id}}/agregar-condicion" method="POST">
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Lógica de Unión</label>
+                                        <select name="cond_logica" class="form-select form-select-sm">
+                                            <option value="AND">Y (Cumplir con todo)</option>
+                                            <option value="OR">O (Alternativa)</option>
+                                        </select>
+                                </div>
+
+                                <div class="row g-2 mb-3">
+                                    <div class="col-12">
+                                        <label class="form-label small fw-bold">Campo</label>
+                                        <!-- Agregamos data-tipo para ayudar al JS -->
+                                        <label for="cond_campo"></label><select name="cond_campo" id="cond_campo" class="form-select form-select-sm" onchange="actualizarFormularioCondicion()">
+                                            <option value="titulo" data-tipo="texto">Título</option>
+                                            <option value="descripcion" data-tipo="texto">Descripción</option>
+                                            <option value="categoria" data-tipo="texto">Categoría</option>
+                                            <option value="anio" data-tipo="numero">Año</option>
+                                            <option value="fechaSuceso" data-tipo="fecha">Fecha del Suceso</option>
+                                            <option value="duracion" data-tipo="numero">Duración</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label small fw-bold">Operador</label>
+                                        <label for="cond_operador"></label><select name="cond_operador" id="cond_operador" class="form-select form-select-sm" onchange="actualizarInputsValor()">
+                                            <!-- Se llena con JS -->
+                                            <option value="IGUAL">Igual a</option>
+                                            <option value="CONTIENE">Contiene</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Contenedor de Valor 1 -->
+                                    <div class="col-12">
+                                        <label class="form-label small fw-bold" id="label_valor_1">Valor</label>
+                                        <label for="cond_valor_1"></label><input type="text" name="cond_valor" id="cond_valor_1" class="form-control form-control-sm" placeholder="Valor" required>
+                                    </div>
+
+                                    <!-- Contenedor de Valor 2 (Oculto por defecto) -->
+                                    <div class="col-12" id="container_valor_2" style="display: none;">
+                                        <label class="form-label small fw-bold">Hasta</label>
+                                        <label for="cond_valor_2"></label><input type="text" name="cond_valor_2" id="cond_valor_2" class="form-control form-control-sm" placeholder="Valor máximo">
+                                    </div>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-outline-dark btn-sm">
+                                        <i class="fa-solid fa-plus me-1"></i> Agregar Condición
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL HECHOS -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold small text-uppercase text-muted">
+                                Hechos Consensuados ({{#if coleccion.hechos}}{{coleccion.hechos.size}}{{else}}0{{/if}})
+                            </span>
+
+                            <form action="/admin/colecciones/{{coleccion.id}}/calcular-consenso" method="POST" class="m-0">
+                                <button type="submit" class="btn btn-sm btn-outline-dark">
+                                    <i class="fa-solid fa-sync me-1"></i> Recalcular
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
+                            <ul class="list-group list-group-flush">
+                                {{#each coleccion.hechos}}
+                                    <li class="list-group-item p-3 item-hecho">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1 fw-bold">{{this.titulo}}</h6>
+                                            <small class="text-muted">ID: {{this.id}}</small>
+                                        </div>
+                                        <p class="mb-1 small text-muted text-truncate">
+                                            {{#if this.descripcion}}{{this.descripcion}}{{else}}Sin descripción{{/if}}
+                                        </p>
+                                        <small class="text-primary">
+                                            <i class="fa-regular fa-calendar me-1"></i>
+                                            {{formatDate this.fechaSuceso "dd/MM/yyyy HH:mm"}}
+                                        </small>
+                                    </li>
+                                {{else}}
+                                    <div class="text-center py-5 text-muted">
+                                        <i class="fa-regular fa-folder-open fa-2x mb-3 opacity-50"></i>
+                                        <p class="mb-0">No hay hechos consensuados.</p>
+                                    </div>
+                                {{/each}}
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>

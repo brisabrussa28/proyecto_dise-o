@@ -8,257 +8,257 @@
 {{/partial}}
 
 {{#partial "contenido"}}
-    <div class="container py-4">
-
-        <!-- ENCABEZADO PRINCIPAL -->
-        <div class="d-flex justify-content-between align-items-start mb-4 border-bottom pb-3">
-            <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <h2 class="fw-light text-dark mb-0">{{fuente.nombre}}</h2>
-                    <span class="badge rounded-pill bg-dark fw-normal px-3">{{tipoFuente}}</span>
+    <div class="container-sm py-4 mx-auto">
+        <div class="bg-white bg-opacity-75 p-3 rounded shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="mb-0"><i class="fa-solid fa-database text-primary me-2"></i>Fuente: <strong>{{fuente.nombre}}</strong></h3>
+                    <div class="mt-1">
+                        <span class="badge bg-secondary">ID: {{fuente.id}}</span>
+                        <span class="badge bg-info text-dark">{{tipoFuente}}</span>
+                    </div>
                 </div>
-                <small class="text-muted">ID de Fuente: #{{fuente.id}}</small>
+
+
+                <!-- Botón de Borrar SIN ALERTA (Action directa) -->
+                <form action="/admin/fuentes/{{fuente.id}}/borrar" method="POST">
+                    <button type="submit" class="btn btn-outline-danger btn-sm transition-hover">
+                        <i class="fa-regular fa-trash-can me-2"></i>Eliminar Fuente
+                    </button>
+                </form>
             </div>
 
-            <!-- Botón de Borrar SIN ALERTA (Action directa) -->
-            <form action="/admin/fuentes/{{fuente.id}}/borrar" method="POST">
-                <button type="submit" class="btn btn-outline-danger btn-sm transition-hover">
-                    <i class="fa-regular fa-trash-can me-2"></i>Eliminar Fuente
-                </button>
-            </form>
-        </div>
+            <div class="row g-4">
 
-        <div class="row g-4">
+                <!-- COLUMNA PRINCIPAL (Izquierda) -->
+                <div class="col-lg-8">
 
-            <!-- COLUMNA PRINCIPAL (Izquierda) -->
-            <div class="col-lg-8">
+                    <!-- 1. TARJETA DE CONFIGURACIÓN -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h6 class="text-uppercase text-muted fw-bold small mb-3">
+                                <i class="fa-solid fa-sliders me-2"></i>Configuración General
+                            </h6>
 
-                <!-- 1. TARJETA DE CONFIGURACIÓN -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body p-4">
-                        <h6 class="text-uppercase text-muted fw-bold small mb-3">
-                            <i class="fa-solid fa-sliders me-2"></i>Configuración General
-                        </h6>
-
-                        <form action="/admin/fuentes/{{fuente.id}}/configurar" method="POST">
-                            <div class="row g-3 align-items-end">
-                                <div class="col-md-9">
-                                    <label class="form-label small fw-bold text-secondary">Nombre de la Fuente</label>
-                                    <label>
-                                        <input type="text" name="nombre" class="form-control" value="{{fuente.nombre}}" required>
-                                    </label>
-                                </div>
-                                <div class="col-md-3">
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="fa-solid fa-check me-1"></i> Guardar
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Alerta si es API (Solo lectura) -->
-                            {{#if esApi}}
-                                <div class="alert alert-light border d-flex align-items-center mt-3 mb-0 py-2 text-muted small">
-                                    <i class="fa-solid fa-server me-2 text-info"></i>
-                                    <div>
-                                        <strong>Fuente Externa (API):</strong> La URL y configuración de conexión no son editables desde aquí.
+                            <form action="/admin/fuentes/{{fuente.id}}/configurar" method="POST">
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-9">
+                                        <label class="form-label small fw-bold text-secondary">Nombre de la Fuente</label>
+                                        <label>
+                                            <input type="text" name="nombre" class="form-control" value="{{fuente.nombre}}" required>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fa-solid fa-check me-1"></i> Guardar
+                                        </button>
                                     </div>
                                 </div>
-                            {{/if}}
-                        </form>
-                    </div>
-                </div>
 
-                <!-- 2. GESTIÓN DE AGREGACIÓN (Solo si aplica) -->
-                {{#if esAgregacion}}
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3 border-bottom-0">
-                        <h6 class="text-uppercase text-muted fw-bold small mb-0">
-                            <i class="fa-solid fa-layer-group me-2"></i>Fuentes Agregadas
-                        </h6>
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="bg-light p-3 rounded mb-3">
-                            <form action="/admin/fuentes/{{fuente.id}}/agregar-fuente" method="POST" class="row g-2">
-                                <div class="col-sm-9">
-                                    <label>
-                                        <select name="fuente_hija_id" class="form-select form-select-sm">
-                                            <option value="" disabled selected>Seleccionar fuente para agregar...</option>
-                                            {{#each fuentesDisponiblesAgregacion}}
-                                                <option value="{{this.id}}">{{this.nombre}} ({{this.tipo}})</option>
-                                            {{/each}}
-                                        </select>
-                                    </label>
-                                </div>
-                                <div class="col-sm-3">
-                                    <button type="submit" class="btn btn-sm btn-dark w-100">Agregar</button>
-                                </div>
+                                <!-- Alerta si es API (Solo lectura) -->
+                                {{#if esApi}}
+                                    <div class="alert alert-light border d-flex align-items-center mt-3 mb-0 py-2 text-muted small">
+                                        <i class="fa-solid fa-server me-2 text-info"></i>
+                                        <div>
+                                            <strong>Fuente Externa (API):</strong> La URL y configuración de conexión no son editables desde aquí.
+                                        </div>
+                                    </div>
+                                {{/if}}
                             </form>
                         </div>
-
-                        <ul class="list-group list-group-flush border rounded">
-                            {{#each fuente.fuentesCargadas}}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <i class="fa-solid fa-database text-muted me-3"></i>
-                                        <span>{{this.nombre}}</span>
-                                    </div>
-                                    <form action="/admin/fuentes/{{../fuente.id}}/quitar-fuente/{{this.id}}" method="POST" class="m-0">
-                                        <button type="submit" class="btn btn-link text-danger p-0 text-decoration-none small" title="Quitar">
-                                            <span class="fw-bold">Quitar</span> <i class="fa-solid fa-times ms-1"></i>
-                                        </button>
-                                    </form>
-                                </li>
-                            {{else}}
-                                <li class="list-group-item text-center text-muted fst-italic py-4">
-                                    No hay fuentes agregadas a este grupo.
-                                </li>
-                            {{/each}}
-                        </ul>
-                    </div>
-                </div>
-                {{/if}}
-
-                <!-- 3. LISTADO DE HECHOS (Solo si es Dinámica o Estática) -->
-                {{#if esDinamica}}
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                        <h6 class="text-uppercase text-muted fw-bold small mb-0">
-                            <i class="fa-solid fa-list-check me-2"></i>Hechos Registrados
-                        </h6>
-                        <a href="/hechos/nuevo?fuente_id={{fuente.id}}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                            <i class="fa-solid fa-plus me-1"></i>Nuevo Hecho
-                        </a>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light small text-uppercase">
-                                <tr>
-                                    <th class="ps-4">Título / Descripción</th>
-                                    <th>Fecha</th>
-                                    <th class="text-end pe-4">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody class="border-top-0">
-                                {{#each fuente.hechos}}
-                                    <tr style="cursor: pointer;" onclick="window.location.href='/hechos/{{this.id}}'">
-                                        <td class="ps-4">
-                                            <div class="fw-bold text-dark">{{this.titulo}}</div>
-                                            <div class="small text-muted text-truncate" style="max-width: 300px;">
-                                                {{#if this.descripcion}}{{this.descripcion}}{{else}}Sin descripción{{/if}}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <!-- USO DEL NUEVO HELPER DE SERVIDOR -->
-                                            <span class="badge bg-light text-dark border">
-                                                {{formatDate this.fechaSuceso "dd/MM/yyyy"}}
-                                            </span>
-                                        </td>
-                                        <td class="text-end pe-4">
-                                            <!-- Botón Editar -->
-                                            <a href="/hechos/{{this.id}}/editar"
-                                               class="btn btn-link text-muted p-0 me-2 hover-primary"
-                                               onclick="event.stopPropagation()"
-                                               title="Editar">
-                                                <i class="fa-solid fa-pen"></i>
-                                            </a>
-
-                                            <!-- Botón Borrar (Sin Confirmar) -->
-                                            <form action="/admin/fuentes/{{../fuente.id}}/hechos/{{this.id}}/borrar"
-                                                  method="POST"
-                                                  class="d-inline"
-                                                  onclick="event.stopPropagation()">
-                                                <button type="submit" class="btn btn-link text-muted p-0 hover-danger" title="Eliminar">
-                                                    <i class="fa-regular fa-trash-can"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                {{else}}
-                                    <tr>
-                                        <td colspan="3" class="text-center py-5 text-muted">
-                                            <i class="fa-regular fa-folder-open fa-2x mb-2 opacity-25"></i>
-                                            <p class="mb-0">No hay hechos cargados en esta fuente.</p>
-                                        </td>
-                                    </tr>
-                                {{/each}}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                {{/if}}
-            </div>
-
-            <!-- COLUMNA LATERAL (Derecha) - Información de Dependencias -->
-            <div class="col-lg-4">
-                <div class="sticky-top" style="top: 20px; z-index: 1;">
-                    <div class="card border shadow-sm">
-                        <div class="card-header bg-light fw-bold py-3">
-                            <i class="fa-solid fa-diagram-project me-2 text-warning"></i>Mapa de Dependencias
+                    <!-- 2. GESTIÓN DE AGREGACIÓN (Solo si aplica) -->
+                    {{#if esAgregacion}}
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white py-3 border-bottom-0">
+                            <h6 class="text-uppercase text-muted fw-bold small mb-0">
+                                <i class="fa-solid fa-layer-group me-2"></i>Fuentes Agregadas
+                            </h6>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body pt-0">
+                            <div class="bg-light p-3 rounded mb-3">
+                                <form action="/admin/fuentes/{{fuente.id}}/agregar-fuente" method="POST" class="row g-2">
+                                    <div class="col-sm-9">
+                                        <label>
+                                            <select name="fuente_hija_id" class="form-select form-select-sm">
+                                                <option value="" disabled selected>Seleccionar fuente para agregar...</option>
+                                                {{#each fuentesDisponiblesAgregacion}}
+                                                    <option value="{{this.id}}">{{this.nombre}} ({{this.tipo}})</option>
+                                                {{/each}}
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <button type="submit" class="btn btn-sm btn-dark w-100">Agregar</button>
+                                    </div>
+                                </form>
+                            </div>
 
-                            <!-- Alerta de Impacto -->
-                            {{#if (or coleccionesDirectas.size agregacionesPadre.size)}}
-                            <div class="alert alert-warning border-0 d-flex align-items-start small mb-4">
-                                <i class="fa-solid fa-triangle-exclamation mt-1 me-2"></i>
-                                <div>
-                                    <strong>Analisis de Impacto:</strong>
-                                    <div class="mt-1">
-                                        Eliminar esta fuente afectará a <strong>{{coleccionesDirectas.size}}</strong> colecciones y <strong>{{agregacionesPadre.size}}</strong> grupos de agregación.
+                            <ul class="list-group list-group-flush border rounded">
+                                {{#each fuente.fuentesCargadas}}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fa-solid fa-database text-muted me-3"></i>
+                                            <span>{{this.nombre}}</span>
+                                        </div>
+                                        <form action="/admin/fuentes/{{../fuente.id}}/quitar-fuente/{{this.id}}" method="POST" class="m-0">
+                                            <button type="submit" class="btn btn-link text-danger p-0 text-decoration-none small" title="Quitar">
+                                                <span class="fw-bold">Quitar</span> <i class="fa-solid fa-times ms-1"></i>
+                                            </button>
+                                        </form>
+                                    </li>
+                                {{else}}
+                                    <li class="list-group-item text-center text-muted fst-italic py-4">
+                                        No hay fuentes agregadas a este grupo.
+                                    </li>
+                                {{/each}}
+                            </ul>
+                        </div>
+                    </div>
+                    {{/if}}
+
+                    <!-- 3. LISTADO DE HECHOS (Solo si es Dinámica o Estática) -->
+                    {{#if esDinamica}}
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="text-uppercase text-muted fw-bold small mb-0">
+                                <i class="fa-solid fa-list-check me-2"></i>Hechos Registrados
+                            </h6>
+                            <a href="/hechos/nuevo?fuente_id={{fuente.id}}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                <i class="fa-solid fa-plus me-1"></i>Nuevo Hecho
+                            </a>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light small text-uppercase">
+                                    <tr>
+                                        <th class="ps-4">Título / Descripción</th>
+                                        <th>Fecha</th>
+                                        <th class="text-end pe-4">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="border-top-0">
+                                    {{#each fuente.hechos}}
+                                        <tr style="cursor: pointer;" onclick="window.location.href='/hechos/{{this.id}}'">
+                                            <td class="ps-4">
+                                                <div class="fw-bold text-dark">{{this.titulo}}</div>
+                                                <div class="small text-muted text-truncate" style="max-width: 300px;">
+                                                    {{#if this.descripcion}}{{this.descripcion}}{{else}}Sin descripción{{/if}}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <!-- USO DEL NUEVO HELPER DE SERVIDOR -->
+                                                <span class="badge bg-light text-dark border">
+                                                    {{formatDate this.fechaSuceso "dd/MM/yyyy"}}
+                                                </span>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <!-- Botón Editar -->
+                                                <a href="/hechos/{{this.id}}/editar"
+                                                   class="btn btn-link text-muted p-0 me-2 hover-primary"
+                                                   onclick="event.stopPropagation()"
+                                                   title="Editar">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                </a>
+
+                                                <!-- Botón Borrar (Sin Confirmar) -->
+                                                <form action="/admin/fuentes/{{../fuente.id}}/hechos/{{this.id}}/borrar"
+                                                      method="POST"
+                                                      class="d-inline"
+                                                      onclick="event.stopPropagation()">
+                                                    <button type="submit" class="btn btn-link text-muted p-0 hover-danger" title="Eliminar">
+                                                        <i class="fa-regular fa-trash-can"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {{else}}
+                                        <tr>
+                                            <td colspan="3" class="text-center py-5 text-muted">
+                                                <i class="fa-regular fa-folder-open fa-2x mb-2 opacity-25"></i>
+                                                <p class="mb-0">No hay hechos cargados en esta fuente.</p>
+                                            </td>
+                                        </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {{/if}}
+                </div>
+
+                <!-- COLUMNA LATERAL (Derecha) - Información de Dependencias -->
+                <div class="col-lg-4">
+                    <div class="sticky-top" style="top: 20px; z-index: 1;">
+                        <div class="card border shadow-sm">
+                            <div class="card-header bg-light fw-bold py-3">
+                                <i class="fa-solid fa-diagram-project me-2 text-warning"></i>Mapa de Dependencias
+                            </div>
+                            <div class="card-body">
+
+                                <!-- Alerta de Impacto -->
+                                {{#if (or coleccionesDirectas.size agregacionesPadre.size)}}
+                                <div class="alert alert-warning border-0 d-flex align-items-start small mb-4">
+                                    <i class="fa-solid fa-triangle-exclamation mt-1 me-2"></i>
+                                    <div>
+                                        <strong>Análisis de Impacto:</strong>
+                                        <div class="mt-1">
+                                            Eliminar esta fuente afectará a <strong>{{coleccionesDirectas.size}}</strong> colecciones y <strong>{{agregacionesPadre.size}}</strong> grupos de agregación.
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            {{/if}}
+                                {{/if}}
 
-                            <!-- Listado de Colecciones Directas -->
-                            <h6 class="small fw-bold text-uppercase text-muted mb-2">Colecciones Directas</h6>
-                            <ul class="list-group list-group-flush mb-4 small border rounded">
-                                {{#each coleccionesDirectas}}
-                                    <li class="list-group-item d-flex justify-content-between align-items-center px-3">
-                                        <span class="text-truncate" title="{{this.titulo}}">{{this.titulo}}</span>
-                                        <a href="/admin/colecciones/{{this.id}}" class="text-decoration-none">
-                                            <i class="fa-solid fa-arrow-right text-muted"></i>
-                                        </a>
-                                    </li>
-                                {{else}}
-                                    <li class="list-group-item text-muted fst-italic px-3">Ninguna colección usa esta fuente directamente.</li>
-                                {{/each}}
-                            </ul>
-
-                            <!-- Listado de Colecciones Indirectas -->
-                            {{#if coleccionesIndirectas}}
-                                <h6 class="small fw-bold text-uppercase text-muted mb-2">Uso Indirecto (Heredado)</h6>
-                                <ul class="list-group list-group-flush mb-4 small border rounded bg-light">
-                                    {{#each coleccionesIndirectas}}
-                                        <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-3">
-                                            <span class="text-truncate">{{this.titulo}}</span>
-                                            <i class="fa-solid fa-link text-muted" title="Heredada"></i>
+                                <!-- Listado de Colecciones Directas -->
+                                <h6 class="small fw-bold text-uppercase text-muted mb-2">Colecciones Directas</h6>
+                                <ul class="list-group list-group-flush mb-4 small border rounded">
+                                    {{#each coleccionesDirectas}}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center px-3">
+                                            <span class="text-truncate" title="{{this.titulo}}">{{this.titulo}}</span>
+                                            <a href="/admin/colecciones/{{this.id}}" class="text-decoration-none">
+                                                <i class="fa-solid fa-arrow-right text-muted"></i>
+                                            </a>
                                         </li>
+                                    {{else}}
+                                        <li class="list-group-item text-muted fst-italic px-3">Ninguna colección usa esta fuente directamente.</li>
                                     {{/each}}
                                 </ul>
-                            {{/if}}
 
-                            <!-- Listado de Agregaciones -->
-                            <h6 class="small fw-bold text-uppercase text-muted mb-2">Pertenece a Grupos</h6>
-                            <ul class="list-group list-group-flush small border rounded">
-                                {{#each agregacionesPadre}}
-                                    <li class="list-group-item d-flex justify-content-between align-items-center px-3">
-                                        <span>{{this.nombre}}</span>
-                                        <a href="/admin/fuentes/{{this.id}}" class="text-decoration-none">
-                                            <i class="fa-solid fa-external-link-alt text-muted"></i>
-                                        </a>
-                                    </li>
-                                {{else}}
-                                    <li class="list-group-item text-muted fst-italic px-3">No pertenece a ningún grupo.</li>
-                                {{/each}}
-                            </ul>
+                                <!-- Listado de Colecciones Indirectas -->
+                                {{#if coleccionesIndirectas}}
+                                    <h6 class="small fw-bold text-uppercase text-muted mb-2">Uso Indirecto (Heredado)</h6>
+                                    <ul class="list-group list-group-flush mb-4 small border rounded bg-light">
+                                        {{#each coleccionesIndirectas}}
+                                            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-3">
+                                                <span class="text-truncate">{{this.titulo}}</span>
+                                                <i class="fa-solid fa-link text-muted" title="Heredada"></i>
+                                            </li>
+                                        {{/each}}
+                                    </ul>
+                                {{/if}}
 
+                                <!-- Listado de Agregaciones -->
+                                <h6 class="small fw-bold text-uppercase text-muted mb-2">Pertenece a Grupos</h6>
+                                <ul class="list-group list-group-flush small border rounded">
+                                    {{#each agregacionesPadre}}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center px-3">
+                                            <span>{{this.nombre}}</span>
+                                            <a href="/admin/fuentes/{{this.id}}" class="text-decoration-none">
+                                                <i class="fa-solid fa-external-link-alt text-muted"></i>
+                                            </a>
+                                        </li>
+                                    {{else}}
+                                        <li class="list-group-item text-muted fst-italic px-3">No pertenece a ningún grupo.</li>
+                                    {{/each}}
+                                </ul>
+
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 

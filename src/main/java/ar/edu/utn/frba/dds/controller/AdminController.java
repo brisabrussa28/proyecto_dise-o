@@ -11,13 +11,11 @@ import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteEstatica;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteExternaAPI;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
-import ar.edu.utn.frba.dds.model.hecho.Origen;
-import ar.edu.utn.frba.dds.model.info.PuntoGeografico;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
+import ar.edu.utn.frba.dds.repositories.HechoRepository;
+import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import io.javalin.http.Context;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -105,7 +103,8 @@ public class AdminController {
     Coleccion col = coleccionController.findById(idColeccion);
     Hecho hecho = hechoController.findById(idHecho);
     if (col != null && hecho != null) {
-      col.getHechosConsensuados().add(hecho);
+      col.getHechosConsensuados()
+         .add(hecho);
       coleccionController.persist(col);
     }
     ctx.redirect("/admin/colecciones/" + idColeccion);
@@ -115,7 +114,9 @@ public class AdminController {
     Long idColeccion = Long.parseLong(ctx.pathParam("id"));
     Long idHecho = Long.parseLong(ctx.pathParam("hecho_id"));
     Coleccion col = coleccionController.findById(idColeccion);
-    col.getHechosConsensuados().removeIf(hecho -> hecho.getId().equals(idHecho));
+    col.getHechosConsensuados()
+       .removeIf(hecho -> hecho.getId()
+                               .equals(idHecho));
     coleccionController.persist(col);
     ctx.redirect("/admin/colecciones" + idColeccion);
   }
@@ -138,7 +139,8 @@ public class AdminController {
     Fuente fuente = fuenteController.findById(id);
 
     if (fuente == null) {
-      ctx.status(404).result("Fuente no encontrada");
+      ctx.status(404)
+         .result("Fuente no encontrada");
       return;
     }
 
@@ -157,7 +159,8 @@ public class AdminController {
 
       // Excluir las que ya están agregadas Y la misma fuente
       FuenteDeAgregacion fda = (FuenteDeAgregacion) fuente;
-      List<Long> idsYaAgregados = fda.getFuentesCargadas().stream()
+      List<Long> idsYaAgregados = fda.getFuentesCargadas()
+                                     .stream()
                                      .map(Fuente::getId)
                                      .collect(Collectors.toList());
       idsYaAgregados.add(id); // Excluir la misma fuente
@@ -170,14 +173,17 @@ public class AdminController {
     }
 
     // Buscar Dependencias Directas
-    List<Coleccion> coleccionesDirectas = ColeccionRepository.instance().findByFuenteId(id);
-    List<FuenteDeAgregacion> agregacionesPadre = FuenteRepository.instance().findAgregacionesByHija(id);
+    List<Coleccion> coleccionesDirectas = ColeccionRepository.instance()
+                                                             .findByFuenteId(id);
+    List<FuenteDeAgregacion> agregacionesPadre = FuenteRepository.instance()
+                                                                 .findAgregacionesByHija(id);
 
     model.put("coleccionesDirectas", coleccionesDirectas);
     model.put("agregacionesPadre", agregacionesPadre);
 
     // Colecciones Indirectas (a través de agregaciones padre)
-    List<Coleccion> coleccionesIndirectas = FuenteRepository.instance().findColeccionesIndirectas(id);
+    List<Coleccion> coleccionesIndirectas = FuenteRepository.instance()
+                                                            .findColeccionesIndirectas(id);
     model.put("coleccionesIndirectas", coleccionesIndirectas);
 
     model.put("fuente", fuente);
@@ -189,7 +195,8 @@ public class AdminController {
     Fuente fte = fuenteController.findById(id);
 
     if (fte == null) {
-      ctx.status(404).result("Fuente no encontrada");
+      ctx.status(404)
+         .result("Fuente no encontrada");
       return;
     }
 
@@ -210,14 +217,17 @@ public class AdminController {
     if (fuente != null) {
       try {
         // El repositorio maneja la lógica recursiva completa
-        FuenteRepository.instance().delete(fuente);
+        FuenteRepository.instance()
+                        .delete(fuente);
         ctx.redirect("/admin/fuentes");
       } catch (Exception e) {
         e.printStackTrace();
-        ctx.status(500).result("Error al eliminar fuente: " + e.getMessage());
+        ctx.status(500)
+           .result("Error al eliminar fuente: " + e.getMessage());
       }
     } else {
-      ctx.status(404).result("Fuente no encontrada");
+      ctx.status(404)
+         .result("Fuente no encontrada");
     }
   }
 
@@ -240,11 +250,13 @@ public class AdminController {
         fuenteController.agregarFuenteAAgregacion(padre, idHija);
         ctx.redirect("/admin/fuentes/" + idPadre);
       } else {
-        ctx.status(400).result("La fuente no es de tipo agregación");
+        ctx.status(400)
+           .result("La fuente no es de tipo agregación");
       }
     } catch (Exception e) {
       e.printStackTrace();
-      ctx.status(500).result("Error: " + e.getMessage());
+      ctx.status(500)
+         .result("Error: " + e.getMessage());
     }
   }
 
@@ -259,17 +271,15 @@ public class AdminController {
         fuenteController.removerFuenteDeAgregacion(padre, idHija);
         ctx.redirect("/admin/fuentes/" + idPadre);
       } else {
-        ctx.status(400).result("La fuente no es de tipo agregación");
+        ctx.status(400)
+           .result("La fuente no es de tipo agregación");
       }
     } catch (Exception e) {
       e.printStackTrace();
-      ctx.status(500).result("Error: " + e.getMessage());
+      ctx.status(500)
+         .result("Error: " + e.getMessage());
     }
   }
-
-  // --- GESTIÓN DE HECHOS (DINÁMICAS) ---
-
-  // MÉTODO ELIMINADO - ahora se usa el formulario completo en /hechos/nuevo
 
   public void borrarHechoDeFuente(Context ctx) {
     Long idFuente = Long.parseLong(ctx.pathParam("id"));
@@ -278,5 +288,51 @@ public class AdminController {
 
     fuenteController.borrarHechoDinamico(fuente, idHecho);
     ctx.redirect("/admin/fuentes/" + idFuente);
+  }
+
+  public void atenderSolicitud(Context ctx) {
+    String idStr = ctx.queryParam("id");
+    String aceptadaStr = ctx.queryParam("aceptada");
+
+    if (idStr == null || aceptadaStr == null) {
+      ctx.status(400)
+         .result("Faltan parámetros obligatorios: id o aceptada");
+      return;
+    }
+
+    try {
+      Long id = Long.parseLong(idStr);
+      boolean aceptada = Boolean.parseBoolean(aceptadaStr);
+
+      var repo = SolicitudesRepository.instance();
+      var solicitud = repo.findById(id);
+
+      if (solicitud == null) {
+        ctx.status(404)
+           .result("La solicitud no existe.");
+        return;
+      }
+
+      if (aceptada) {
+        solicitud.aceptar();
+        HechoRepository.instance()
+                       .save(solicitud.getHechoSolicitado());
+      } else {
+        solicitud.rechazar();
+      }
+
+      repo.guardar(solicitud);
+
+      ctx.status(200)
+         .result("Solicitud procesada correctamente.");
+
+    } catch (NumberFormatException e) {
+      ctx.status(400)
+         .result("El ID debe ser un número válido.");
+    } catch (Exception e) {
+      e.printStackTrace();
+      ctx.status(500)
+         .result("Error interno: " + e.getMessage());
+    }
   }
 }

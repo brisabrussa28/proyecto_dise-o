@@ -91,7 +91,7 @@ public class SolicitudesRepository {
   public Long cantidadTotal() {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      return em.createQuery("SELECT COUNT(s) FROM Solicitud s", Long.class)
+      return em.createQuery("SELECT COUNT(s) FROM Solicitud s where s.estado = 'PENDIENTE'", Long.class)
                .getSingleResult();
     } finally {
       em.close();
