@@ -1,6 +1,5 @@
 package ar.edu.utn.frba.dds.controller;
 
-import ar.edu.utn.frba.dds.model.coleccion.Coleccion; // Import necesario para el fix de borrado
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
@@ -217,25 +216,24 @@ public class FuenteController {
     }
   }
 
-  // FIX: Se crea una copia mutable de la lista antes de eliminar para evitar UnsupportedOperationException
   public void borrarHechoDinamico(Fuente fuente, Long idHecho) {
     if (fuente instanceof FuenteDinamica) {
       FuenteDinamica fd = (FuenteDinamica) fuente;
 
-      // 1. Obtener la lista actual (posiblemente inmutable)
+      ColeccionController coleccionController = new ColeccionController();
+      coleccionController.findAndRemoveHecho(idHecho);
+      HechoController hechoController = new HechoController();
+      hechoController.findAndDelete(idHecho);
+
+      findAndRemoveHecho(fuente.getId(), idHecho);
+
       List<Hecho> listaOriginal = fd.getHechos();
 
-      // 2. Crear una copia MUTABLE (ArrayList)
       List<Hecho> listaModificable = new ArrayList<>(listaOriginal);
 
-      // 3. Modificar la copia
       listaModificable.removeIf(h -> h.getId().equals(idHecho));
 
-      // 4. Setear la nueva lista en la entidad
       fd.setHechos(listaModificable);
-
-      // 5. Guardar
-      FuenteRepository.instance().save(fuente);
     }
   }
 
@@ -350,5 +348,14 @@ public class FuenteController {
     return mapeoEnum.entrySet().stream().collect(Collectors.toMap(
         entry -> entry.getKey().name(), Map.Entry::getValue
     ));
+  }
+
+  public Long countAll() {
+    return FuenteRepository.instance().countAll();
+  }
+
+  public void findAndRemoveHecho(Long idFuente, Long idHecho) {
+    FuenteRepository.instance()
+                    .findAndRemoveHecho(idFuente, idHecho);
   }
 }

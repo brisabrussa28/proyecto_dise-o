@@ -1,11 +1,18 @@
 package ar.edu.utn.frba.dds.server;
 
-import ar.edu.utn.frba.dds.controller.*;
+import ar.edu.utn.frba.dds.controller.AdminController;
+import ar.edu.utn.frba.dds.controller.ColeccionController;
+import ar.edu.utn.frba.dds.controller.EstadisticaController;
+import ar.edu.utn.frba.dds.controller.FuenteController;
+import ar.edu.utn.frba.dds.controller.HechoController;
+import ar.edu.utn.frba.dds.controller.SolicitudController;
+import ar.edu.utn.frba.dds.controller.UserController;
 import ar.edu.utn.frba.dds.dto.EstadisticaDTO;
 import ar.edu.utn.frba.dds.dto.SolicitudDTO;
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.estadisticas.Estadistica;
 import ar.edu.utn.frba.dds.model.exceptions.RazonInvalidaException;
+import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
@@ -58,7 +65,8 @@ public class Router {
     return ctx -> {
       Rol rolUsuario = ctx.sessionAttribute("usuario_rol");
       if (rolUsuario != rolRequerido) {
-        ctx.status(403).result("Acceso denegado");
+        ctx.status(403)
+           .result("Acceso denegado");
       }
     };
   }
@@ -72,7 +80,8 @@ public class Router {
   private void mostrarError(Context ctx, String mensaje, int status) {
     ctx.status(status);
 
-    if (ctx.path().startsWith("/api/")) {
+    if (ctx.path()
+           .startsWith("/api/")) {
       ctx.json(Map.of(
           "error", true,
           "mensaje", mensaje,
@@ -82,7 +91,11 @@ public class Router {
       Map<String, Object> model = modeloConSesion(ctx);
       model.put("errorMessage", mensaje);
       model.put("errorStatus", status);
-      model.put("timestamp", LocalDateTime.now().toString());
+      model.put(
+          "timestamp",
+          LocalDateTime.now()
+                       .toString()
+      );
 
       switch (status) {
         case 404:
@@ -136,13 +149,25 @@ public class Router {
       }
     });
 
-    // Middleware de administración
-    app.before("/admin/*", ctx -> {
-      Rol rol = ctx.sessionAttribute("usuario_rol");
-      if (rol != Rol.ADMINISTRADOR) {
-        ctx.redirect("/");
-      }
-    });
+    app.before(
+        ctx -> {
+          String path = ctx.path();
+          if (path.startsWith("/admin/") || path.startsWith("/api/admin/")) {
+
+            Rol rol = ctx.sessionAttribute("usuario_rol");
+
+            if (rol != Rol.ADMINISTRADOR) {
+              if (path.startsWith("/api/")) {
+                ctx.status(403)
+                   .json(Map.of("error", "Requiere permisos de administrador"));
+              } else {
+                ctx.redirect("/");
+              }
+              ctx.result("Acceso denegado");
+            }
+          }
+        }
+    );
 
     // ==================== AUTENTICACIÓN ====================
     app.get("/auth/register", userController::mostrarRegistro);
@@ -155,253 +180,323 @@ public class Router {
 
     // ==================== HECHOS ====================
     app.get("/", ctx -> {
-      // Usar el método paginado por defecto
-      Map<String, Object> resultado = hechoController.buscarAvanzadoCompletoPaginated(
-          null, null, null, null, null, null, false, false, 1, 15
-      );
+          // CORRECCIÓN: Usamos buscarAvanzadoCompleto (SIN paginación) para traer TODOS los hechos al mapa
+          Map<String, Object> resultado = hechoController.buscarAvanzadoCompleto(
+              null, null, null, null, null, null, null, false, false
+          );
 
-      @SuppressWarnings("unchecked")
-      List<Map<String, Object>> hechosValidos = (List<Map<String, Object>>) resultado.get("resultados");
-      String hechosJson = mapper.writeValueAsString(hechosValidos);
+          @SuppressWarnings("unchecked")
+          List<Map<String, Object>> hechosValidos = (List<Map<String, Object>>) resultado.get(
+              "resultados");
+          String hechosJson = mapper.writeValueAsString(hechosValidos);
 
-      Map<String, Object> model = modeloConSesion(ctx);
-      model.put("hechosJson", hechosJson);
-      model.put("hechos", hechosValidos);
-      model.put("categorias", hechoController.getCategorias());
-      model.put("colecciones", coleccionController.findAll());
-      model.put("fuentes", fuenteController.findAll());
-      model.put("totalHechos", resultado.get("total"));
-      model.put("totalPages", resultado.get("totalPages"));
-      model.put("paginaActual", 1);
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("hechosJson", hechosJson);
+          model.put("hechos", hechosValidos);
+          model.put("categorias", hechoController.getCategorias());
+          model.put("colecciones", coleccionController.findAll());
+          model.put("fuentes", fuenteController.findAll());
+          model.put("totalHechos", resultado.get("total"));
 
-      ctx.render("index.hbs", model);
-    });
+          // Valores dummy para el template, ya que no paginamos en el mapa
+          model.put("totalPages", 1);
+          model.put("paginaActual", 1);
+
+          ctx.render("index.hbs", model);
+        }
+    );
 
     app.get("/home", ctx -> ctx.redirect("/"));
     app.get("/hechos", ctx -> ctx.json(hechoController.findAll()));
 
-    app.get("/api/hechos", ctx -> {
-      int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
-      int pageSize = 15;
+    app.get(
+        "/api/hechos", ctx -> {
+          int page = ctx.queryParamAsClass("page", Integer.class)
+                        .getOrDefault(1);
+          int pageSize = 15;
 
-      List<Hecho> hechos = hechoController.findAll();
-      int totalHechos = hechos.size();
-      int totalPages = (int) Math.ceil((double) totalHechos / pageSize);
+          String categoria = ctx.queryParam("categoria");
 
-      int fromIndex = (page - 1) * pageSize;
-      int toIndex = Math.min(fromIndex + pageSize, totalHechos);
+          List<Hecho> hechos = hechoController.findAll();
+          int totalHechos = hechos.size();
+          int totalPages = (int) Math.ceil((double) totalHechos / pageSize);
 
-      List<Hecho> hechosPagina = (fromIndex < totalHechos)
-                                 ? hechos.subList(fromIndex, toIndex)
-                                 : Collections.emptyList();
+          int fromIndex = (page - 1) * pageSize;
+          int toIndex = Math.min(fromIndex + pageSize, totalHechos);
 
-      Map<String, Object> model = modeloConSesion(ctx);
-      model.put("hechos", hechosPagina);
-      model.put("paginaActual", page);
-      model.put("totalPaginas", totalPages);
+          List<Hecho> hechosPagina = (fromIndex < totalHechos)
+                                     ? hechos.subList(fromIndex, toIndex)
+                                     : Collections.emptyList();
 
-      ctx.render("hechos.hbs", model);
-    });
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("hechos", hechosPagina);
+          model.put("paginaActual", page);
+          model.put("totalPaginas", totalPages);
 
-    app.get("/hechos/nuevo", ctx -> {
-      Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
-      if (estaLogueado == null || !estaLogueado) {
-        String redirect = "/hechos/nuevo";
-        String fuenteId = ctx.queryParam("fuente_id");
-        if (fuenteId != null) {
-          redirect += "?fuente_id=" + fuenteId;
+          model.put("categorias", hechoController.getCategorias());
+          model.put("categoriaSeleccionada", categoria);
+
+          ctx.render("hechos.hbs", model);
         }
-        ctx.redirect("/auth/login?redirect=" + redirect);
-        return;
-      }
-      Map<String, Object> model = modeloConSesion(ctx);
-      model.put("fuente_id", ctx.queryParam("fuente_id"));
-      ctx.render("hecho-nuevo.hbs", model);
-    });
+    );
+
+    app.get(
+        "/hechos/nuevo", ctx -> {
+          Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
+          if (estaLogueado == null || !estaLogueado) {
+            String redirect = "/hechos/nuevo";
+            String fuenteId = ctx.queryParam("fuente_id");
+            if (fuenteId != null) {
+              redirect += "?fuente_id=" + fuenteId;
+            }
+            ctx.redirect("/auth/login?redirect=" + redirect);
+            return;
+          }
+          Map<String, Object> model = modeloConSesion(ctx);
+          if (ctx.queryParamMap()
+                 .containsKey("fuente_id")) {
+            String fuente_id = ctx.queryParam("fuente_id");
+            if (fuente_id != null && !fuente_id.isEmpty()) {
+              Fuente fuenteOriginal = fuenteController.findById(Long.parseLong(fuente_id));
+              model.put("fuente", fuenteOriginal);
+            }
+          }
+
+          ctx.render("hecho-nuevo.hbs", model);
+        }
+    );
 
     app.post("/hechos/nuevo", hechoController::crearHecho);
 
-    app.get("/hechos/{id}", ctx -> {
-      Map<String, Object> model = modeloConSesion(ctx);
-      hechoController.verHecho(ctx, model);
-    });
+    app.get(
+        "/hechos/{id}", ctx -> {
+          Map<String, Object> model = modeloConSesion(ctx);
+          hechoController.verHecho(ctx, model);
+        }
+    );
 
     app.get("/hechos/{id}/multimedia/{indice}", hechoController::getMultimedia);
 
-    app.get("/hechos/{id}/editar", ctx -> {
-      Map<String, Object> model = modeloConSesion(ctx);
-      hechoController.editarHecho(ctx, model);
-    });
+    app.get(
+        "/hechos/{id}/editar", ctx -> {
+          Map<String, Object> model = modeloConSesion(ctx);
+          hechoController.editarHecho(ctx, model);
+        }
+    );
+
+    app.get(
+        "/hechos/{id}/editar/{fuenteId}", ctx -> {
+          Map<String, Object> model = modeloConSesion(ctx);
+          hechoController.editarHecho(ctx, model);
+        }
+    );
 
     app.post("/hechos/{id}/editar", hechoController::actualizarHecho);
 
     // Método alternativo si aún necesitas getFoto para compatibilidad
-    app.get("/hechos/{id}/foto/{indice}", ctx -> {
-      Long idHecho = Long.parseLong(ctx.pathParam("id"));
-      int indice = Integer.parseInt(ctx.pathParam("indice"));
+    app.get(
+        "/hechos/{id}/foto/{indice}", ctx -> {
+          Long idHecho = Long.parseLong(ctx.pathParam("id"));
+          int indice = Integer.parseInt(ctx.pathParam("indice"));
 
-      Hecho hecho = hechoController.findById(idHecho);
+          Hecho hecho = hechoController.findById(idHecho);
 
-      if (hecho != null && hecho.getFotos() != null && indice < hecho.getFotos().size()) {
-        var foto = hecho.getFotos().get(indice);
-        ctx.contentType(foto.getMimetype());
-        ctx.result(foto.getDatos());
-      } else {
-        ctx.status(404);
-      }
-    });
+          if (hecho != null && hecho.getFotos() != null && indice < hecho.getFotos()
+                                                                         .size()) {
+            var foto = hecho.getFotos()
+                            .get(indice);
+            ctx.contentType(foto.getMimetype());
+            ctx.result(foto.getDatos());
+          } else {
+            ctx.status(404);
+          }
+        }
+    );
 
     // ==================== BÚSQUEDAS API ====================
-    app.get("/api/hechos/buscar", ctx -> {
-      try {
-        String titulo = ctx.queryParam("titulo");
-        Boolean soloConsensuados = ctx.queryParamAsClass("soloConsensuados", Boolean.class)
-                                      .getOrDefault(false);
+    app.get(
+        "/api/hechos/buscar", ctx -> {
+          try {
+            String titulo = ctx.queryParam("titulo");
+            Boolean soloConsensuados = ctx.queryParamAsClass("soloConsensuados", Boolean.class)
+                                          .getOrDefault(false);
 
-        Map<String, Object> resultados = hechoController.buscarAvanzadoCompleto(
-            titulo, null, null, null, null, null, soloConsensuados, false
-        );
+            Map<String, Object> resultados = hechoController.buscarAvanzadoCompleto(
+                titulo, null, null, null, null, null, null, soloConsensuados, false
+            );
 
-        ctx.json(resultados);
-      } catch (Exception e) {
-        ctx.status(400).json(Map.of(
-            "error", true,
-            "mensaje", e.getMessage()
-        ));
-      }
-    });
-
-    app.get("/api/hechos/buscar-completo", ctx -> {
-      try {
-        System.out.println("=== BÚSQUEDA COMPLETA ===");
-        ctx.queryParamMap().forEach((key, values) ->
-                                        System.out.println("  " + key + " = " + values)
-        );
-
-        String titulo = ctx.queryParam("titulo");
-        String categoria = ctx.queryParam("categoria");
-        String fuente = ctx.queryParam("fuente");
-        String coleccion = ctx.queryParam("coleccion");
-        String fechaDesde = ctx.queryParam("fechaDesde");
-        String fechaHasta = ctx.queryParam("fechaHasta");
-        Boolean soloConsensuados = ctx.queryParamAsClass("soloConsensuados", Boolean.class)
-                                      .getOrDefault(false);
-        Boolean incluirEliminados = ctx.queryParamAsClass("incluirEliminados", Boolean.class)
-                                       .getOrDefault(false);
-
-        int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
-        int pageSize = ctx.queryParamAsClass("pageSize", Integer.class).getOrDefault(15);
-
-        boolean usarPaginacion = ctx.queryParam("paginar") != null &&
-            Boolean.parseBoolean(ctx.queryParam("paginar"));
-
-        Map<String, Object> resultados;
-
-        if (usarPaginacion) {
-          resultados = hechoController.buscarAvanzadoCompletoPaginated(
-              titulo, categoria, fuente, coleccion,
-              fechaDesde, fechaHasta, soloConsensuados, incluirEliminados,
-              page, pageSize
-          );
-        } else {
-          resultados = hechoController.buscarAvanzadoCompleto(
-              titulo, categoria, fuente, coleccion,
-              fechaDesde, fechaHasta, soloConsensuados, incluirEliminados
-          );
+            ctx.json(resultados);
+          } catch (Exception e) {
+            ctx.status(400)
+               .json(Map.of(
+                   "error", true,
+                   "mensaje", e.getMessage()
+               ));
+          }
         }
+    );
 
-        ctx.json(resultados);
-      } catch (Exception e) {
-        System.err.println("ERROR en búsqueda completa: " + e.getMessage());
-        e.printStackTrace();
+    app.get(
+        "/api/hechos/buscar-completo", ctx -> {
+          try {
+            System.out.println("=== BÚSQUEDA COMPLETA ===");
+            ctx.queryParamMap()
+               .forEach((key, values) ->
+                            System.out.println("  " + key + " = " + values)
+               );
 
-        ctx.status(400).json(Map.of(
-            "error", true,
-            "mensaje", e.getMessage(),
-            "detalle", e.getClass().getName()
-        ));
-      }
-    });
+            String titulo = ctx.queryParam("titulo");
+            String categoria = ctx.queryParam("categoria");
+            String fuente = ctx.queryParam("fuente");
+            String coleccion = ctx.queryParam("coleccion");
+            String fechaDesde = ctx.queryParam("fechaDesde");
+            String fechaHasta = ctx.queryParam("fechaHasta");
+            Boolean soloConsensuados = ctx.queryParamAsClass("soloConsensuados", Boolean.class)
+                                          .getOrDefault(false);
+            Boolean incluirEliminados = ctx.queryParamAsClass("incluirEliminados", Boolean.class)
+                                           .getOrDefault(false);
 
-    app.get("/api/hechos/buscar-rapido", ctx -> {
-      try {
-        String titulo = ctx.queryParam("titulo");
-        Boolean soloConsensuados = ctx.queryParamAsClass("soloConsensuados", Boolean.class)
-                                      .getOrDefault(false);
-        List<Hecho> resultados = hechoController.buscarRapido(titulo, soloConsensuados);
-        ctx.json(resultados);
-      } catch (Exception e) {
-        ctx.status(400).json(Map.of(
-            "error", true,
-            "mensaje", e.getMessage()
-        ));
-      }
-    });
+            // CORRECCIÓN: Si 'paginar' es false o null, usamos la búsqueda completa sin límites.
+            boolean usarPaginacion = ctx.queryParam("paginar") != null &&
+                Boolean.parseBoolean(ctx.queryParam("paginar"));
+
+            Map<String, Object> resultados;
+
+            if (usarPaginacion) {
+              int page = ctx.queryParamAsClass("page", Integer.class)
+                            .getOrDefault(1);
+              int pageSize = ctx.queryParamAsClass("pageSize", Integer.class)
+                                .getOrDefault(15);
+
+              resultados = hechoController.buscarAvanzadoCompletoPaginated(
+                  titulo, categoria, fuente, coleccion,
+                  fechaDesde, fechaHasta, soloConsensuados, incluirEliminados,
+                  page, pageSize
+              );
+            } else {
+              resultados = hechoController.buscarAvanzadoCompleto(
+                  titulo, categoria, fuente, coleccion, null,
+                  fechaDesde, fechaHasta, soloConsensuados, incluirEliminados
+              );
+            }
+
+            ctx.json(resultados);
+          } catch (Exception e) {
+            System.err.println("ERROR en búsqueda completa: " + e.getMessage());
+            e.printStackTrace();
+
+            ctx.status(400)
+               .json(Map.of(
+                   "error",
+                   true,
+                   "mensaje",
+                   e.getMessage(),
+                   "detalle",
+                   e.getClass()
+                    .getName()
+               ));
+          }
+        }
+    );
+
+    app.get(
+        "/api/hechos/buscar-rapido", ctx -> {
+          try {
+            String titulo = ctx.queryParam("titulo");
+            Boolean soloConsensuados = ctx.queryParamAsClass("soloConsensuados", Boolean.class)
+                                          .getOrDefault(false);
+            List<Hecho> resultados = hechoController.buscarRapido(titulo, soloConsensuados);
+            ctx.json(resultados);
+          } catch (Exception e) {
+            ctx.status(400)
+               .json(Map.of(
+                   "error", true,
+                   "mensaje", e.getMessage()
+               ));
+          }
+        }
+    );
 
     // ==================== CATEGORÍAS Y ETIQUETAS ====================
-    app.get("/hechos/categorias", ctx -> {
-      List<String> categorias = hechoController.getCategorias();
-      ctx.json(categorias);
-    });
+    app.get(
+        "/hechos/categorias", ctx -> {
+          List<String> categorias = hechoController.getCategorias();
+          ctx.json(categorias);
+        }
+    );
 
-    app.get("/etiquetas", ctx -> {
-      List<String> etiquetas = hechoController.getEtiquetas();
-      ctx.json(etiquetas);
-    });
+    app.get(
+        "/etiquetas", ctx -> {
+          List<String> etiquetas = hechoController.getEtiquetas();
+          ctx.json(etiquetas);
+        }
+    );
 
     // ==================== SOLICITUDES ====================
-    app.post("/solicitudes", ctx -> {
-      try {
-        Solicitud solicitud = solicitudController.crearSolicitud(
-            ctx,
-            ctx.bodyAsClass(SolicitudDTO.class)
-        );
-        ctx.status(201).json(solicitud);
-      } catch (RazonInvalidaException e) {
-        ctx.status(400).result("Error: " + e.getMessage());
-      }
-    });
+    app.post(
+        "/solicitudes", ctx -> {
+          try {
+            Solicitud solicitud = solicitudController.crearSolicitud(
+                ctx,
+                ctx.bodyAsClass(SolicitudDTO.class)
+            );
+            ctx.status(201)
+               .json(solicitud);
+          } catch (RazonInvalidaException e) {
+            ctx.status(400)
+               .result("Error: " + e.getMessage());
+          }
+        }
+    );
 
-    app.get("/admin/solicitudes", ctx -> {
-      List<Solicitud> pendientes = SolicitudesRepository.instance()
-                                                        .obtenerPorEstado(EstadoSolicitud.PENDIENTE);
-      Map<String, Object> model = modeloConSesion(ctx);
-      model.put("solicitudes", pendientes);
-      ctx.render("solicitudes.hbs", model);
-    });
+    app.get(
+        "/admin/solicitudes", ctx -> {
+          List<Solicitud> pendientes = SolicitudesRepository.instance()
+                                                            .obtenerPorEstado(EstadoSolicitud.PENDIENTE);
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("solicitudes", pendientes);
+          ctx.render("solicitudes.hbs", model);
+        }
+    );
 
-    app.put("/admin/solicitudes", ctx -> {
-      if ("PUT".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-        tieneRol(Rol.ADMINISTRADOR).handle(ctx);
-      }
-    });
+    app.put("/admin/solicitudes", adminController::atenderSolicitud);
 
-    app.get("/solicitudes/mis-solicitudes", ctx -> {
-      Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
-      if (estaLogueado == null || !estaLogueado) {
-        ctx.redirect("/auth/login?redirect=/solicitudes/mis-solicitudes");
-        return;
-      }
+    app.get(
+        "/solicitudes/mis-solicitudes", ctx -> {
+          Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
+          if (estaLogueado == null || !estaLogueado) {
+            ctx.redirect("/auth/login?redirect=/solicitudes/mis-solicitudes");
+            return;
+          }
 
-      Long usuarioId = ctx.sessionAttribute("usuario_id");
+          Long usuarioId = ctx.sessionAttribute("usuario_id");
 
-      List<Solicitud> todas = SolicitudesRepository.instance().findAll();
-      List<Solicitud> misSolicitudes = todas.stream()
-                                            .filter(s -> s.getUsuario() != null && s.getUsuario().getId().equals(usuarioId))
-                                            .sorted((a, b) -> b.getId().compareTo(a.getId()))
-                                            .collect(Collectors.toList());
+          List<Solicitud> todas = SolicitudesRepository.instance()
+                                                       .findAll();
+          List<Solicitud> misSolicitudes = todas.stream()
+                                                .filter(s -> s.getUsuario() != null && s.getUsuario()
+                                                                                        .getId()
+                                                                                        .equals(
+                                                                                            usuarioId))
+                                                .sorted((a, b) -> b.getId()
+                                                                   .compareTo(a.getId()))
+                                                .collect(Collectors.toList());
 
-      Map<String, Object> model = modeloConSesion(ctx);
-      model.put("solicitudes", misSolicitudes);
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("solicitudes", misSolicitudes);
 
-      ctx.render("solicitudes-info.hbs", model);
-    });
+          ctx.render("solicitudes-info.hbs", model);
+        }
+    );
 
     // ==================== FUENTES ====================
-    app.get("/fuentes", ctx -> {
-      Boolean soloSimples = ctx.queryParamAsClass("soloSimples", Boolean.class).getOrDefault(false);
-      ctx.json(fuenteController.obtenerFuentesConTipo(soloSimples));
-    });
+    app.get(
+        "/fuentes", ctx -> {
+          Boolean soloSimples = ctx.queryParamAsClass("soloSimples", Boolean.class)
+                                   .getOrDefault(false);
+          ctx.json(fuenteController.obtenerFuentesConTipo(soloSimples));
+        }
+    );
 
     app.post("/admin/fuentes", ctx -> adminController.crearFuente(ctx));
     app.get("/admin/fuentes", ctx -> adminController.listarFuentes(ctx, modeloConSesion(ctx)));
@@ -409,35 +504,156 @@ public class Router {
     app.post("/admin/fuentes/{id}/configurar", adminController::configurarFuente);
     app.post("/admin/fuentes/{id}/borrar", adminController::borrarFuente);
     app.post("/admin/fuentes/{id}/hechos/{idHecho}/borrar", adminController::borrarHechoDeFuente);
+    app.post("/admin/fuentes/{id}/hechos/{idHecho}/agregar", adminController::agregarHechoDeFuente);
     app.post("/admin/fuentes/{id}/agregar-fuente", adminController::agregarFuenteAAgregacion);
-    app.post("/admin/fuentes/{id}/quitar-fuente/{idHija}",
-             adminController::quitarFuenteDeAgregacion);
+    app.post(
+        "/admin/fuentes/{id}/quitar-fuente/{idHija}",
+        adminController::quitarFuenteDeAgregacion
+    );
 
     // ==================== COLECCIONES ====================
-    app.get("/api/admin/colecciones/buscar", ctx -> {
-      try {
-        String titulo = ctx.queryParam("titulo");
-        String categoria = ctx.queryParam("categoria");
+    app.get(
+        "/api/colecciones", ctx -> {
+          Map<String, Object> model = modeloConSesion(ctx);
 
-        List<Coleccion> resultados = coleccionController.buscarRapido(titulo, categoria);
-        ctx.json(resultados);
-      } catch (Exception e) {
-        e.printStackTrace();
-        ctx.status(500).json(Map.of("mensaje", "Error en la base de datos: " + e.getMessage()));
-      }
-    });
+          List<String> categorias = coleccionController.getCategorias();
+          model.put("categorias", categorias);
 
-    app.get("/admin/colecciones", ctx -> {
-      Map<String, Object> model = modeloConSesion(ctx);
+          userController.listarColecciones(ctx, model);
+        }
+    );
 
-      List<String> categorias = coleccionController.getCategorias();
-      model.put("categorias", categorias);
+    app.get(
+        "/api/colecciones/buscar", ctx -> {
+          try {
+            String titulo = ctx.queryParam("titulo");
+            String categoria = ctx.queryParam("categoria");
 
-      adminController.listarColecciones(ctx, model);
-    });
-    app.get("/admin/colecciones/{id}",
-            ctx -> adminController.editarColeccion(ctx, modeloConSesion(ctx)));
-    app.post("/admin/colecciones", ctx -> adminController.crearColeccion(ctx));
+            List<Coleccion> resultados = coleccionController.buscarRapido(titulo, categoria);
+
+            List<Map<String, Object>> resultadosDTO = resultados.stream()
+                                                                .map(c -> {
+                                                                  Map<String, Object> dto = new HashMap<>();
+                                                                  dto.put("id", c.getId());
+                                                                  dto.put("titulo", c.getTitulo());
+                                                                  dto.put("nombre", c.getTitulo());
+                                                                  dto.put(
+                                                                      "categoria",
+                                                                      c.getCategoria()
+                                                                  );
+                                                                  dto.put(
+                                                                      "descripcion",
+                                                                      c.getDescripcion()
+                                                                  );
+
+                                                                  if (c.getFuente() != null) {
+                                                                    Map<String, Object> f = new HashMap<>();
+                                                                    f.put(
+                                                                        "id",
+                                                                        c.getFuente()
+                                                                         .getId()
+                                                                    );
+                                                                    f.put(
+                                                                        "nombre",
+                                                                        c.getFuente()
+                                                                         .getNombre()
+                                                                    );
+                                                                    f.put(
+                                                                        "tipo",
+                                                                        fuenteController.determinarTipo(
+                                                                            c.getFuente())
+                                                                    );
+                                                                    dto.put("fuente", f);
+                                                                  }
+                                                                  return dto;
+                                                                })
+                                                                .toList();
+
+            ctx.json(resultadosDTO);
+          } catch (Exception e) {
+            e.printStackTrace();
+            ctx.status(500)
+               .json(Map.of("mensaje", "Error en la base de datos: " + e.getMessage()));
+          }
+        }
+    );
+
+    app.get(
+        "/api/colecciones/{id}",
+        ctx -> userController.hechosColeccion(ctx, modeloConSesion(ctx))
+    );
+    app.post("/api/colecciones/{id}/calcular-consenso", coleccionController::calcularConsensoUsuario);
+
+    app.get(
+        "/api/admin/colecciones/buscar", ctx -> {
+          try {
+            String titulo = ctx.queryParam("titulo");
+            String categoria = ctx.queryParam("categoria");
+
+            List<Coleccion> resultados = coleccionController.buscarRapido(titulo, categoria);
+
+            List<Map<String, Object>> resultadosDTO = resultados.stream()
+                                                                .map(c -> {
+                                                                  Map<String, Object> dto = new HashMap<>();
+                                                                  dto.put("id", c.getId());
+                                                                  dto.put("titulo", c.getTitulo());
+                                                                  dto.put("nombre", c.getTitulo());
+                                                                  dto.put(
+                                                                      "categoria",
+                                                                      c.getCategoria()
+                                                                  );
+                                                                  dto.put(
+                                                                      "descripcion",
+                                                                      c.getDescripcion()
+                                                                  );
+
+                                                                  if (c.getFuente() != null) {
+                                                                    Map<String, Object> f = new HashMap<>();
+                                                                    f.put(
+                                                                        "id",
+                                                                        c.getFuente()
+                                                                         .getId()
+                                                                    );
+                                                                    f.put(
+                                                                        "nombre",
+                                                                        c.getFuente()
+                                                                         .getNombre()
+                                                                    );
+                                                                    f.put(
+                                                                        "tipo",
+                                                                        fuenteController.determinarTipo(
+                                                                            c.getFuente())
+                                                                    );
+                                                                    dto.put("fuente", f);
+                                                                  }
+                                                                  return dto;
+                                                                })
+                                                                .toList();
+
+            ctx.json(resultadosDTO);
+          } catch (Exception e) {
+            e.printStackTrace();
+            ctx.status(500)
+               .json(Map.of("mensaje", "Error en la base de datos: " + e.getMessage()));
+          }
+        }
+    );
+
+    app.get(
+        "/admin/colecciones", ctx -> {
+          Map<String, Object> model = modeloConSesion(ctx);
+
+          List<String> categorias = coleccionController.getCategorias();
+          model.put("categorias", categorias);
+
+          adminController.listarColecciones(ctx, model);
+        }
+    );
+    app.get(
+        "/admin/colecciones/{id}",
+        ctx -> adminController.editarColeccion(ctx, modeloConSesion(ctx))
+    );
+    app.post("/admin/colecciones", adminController::crearColeccion);
     app.post("/admin/colecciones/{id}/configurar", adminController::configurarColeccion);
     app.post("/admin/colecciones/{id}/agregarHecho", adminController::agregarHechoAColeccion);
     app.post("/admin/colecciones/{id}/quitarHecho", adminController::removerHechoDeColeccion);
@@ -446,310 +662,379 @@ public class Router {
     app.post("/admin/colecciones/{id}/eliminar-condicion", coleccionController::eliminarCondicion);
 
     // ==================== ESTADÍSTICAS ====================
-    app.before("/admin/estadisticas", ctx -> {
-      if (!"OPTIONS".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-        tieneRol(Rol.ADMINISTRADOR).handle(ctx);
-      }
-    });
+    app.before(
+        "/admin/estadisticas", ctx -> {
+          if (!"OPTIONS".equalsIgnoreCase(String.valueOf(ctx.method()))) {
+            tieneRol(Rol.ADMINISTRADOR).handle(ctx);
+          }
+        }
+    );
 
-    app.get("/admin/estadisticas", ctx -> {
-      List<Estadistica> todas = estadisticaController.getEstadisticas();
-      Map<String, Object> model = modeloConSesion(ctx);
-      model.put("cantidadHechos", filtrar(todas, "CANTIDAD DE HECHOS"));
-      model.put("solicitudesPendientes", filtrar(todas, "CANTIDAD DE SOLICITUDES PENDIENTES"));
-      model.put("solicitudesSpam", filtrar(todas, "CANTIDAD DE SPAM"));
-      model.put("categorias", hechoController.getCategorias());
-      model.put("colecciones", coleccionController.getColeccionesDTO());
-      ctx.render("estadisticas.hbs", model);
-    });
+    app.get(
+        "/admin/estadisticas", ctx -> {
+          List<Estadistica> todas = estadisticaController.getEstadisticas();
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("cantidadHechos", filtrar(todas, "CANTIDAD DE HECHOS"));
+          model.put("solicitudesPendientes", filtrar(todas, "CANTIDAD DE SOLICITUDES PENDIENTES"));
+          model.put("solicitudesSpam", filtrar(todas, "CANTIDAD DE SPAM"));
+          model.put("categorias", hechoController.getCategorias());
+          model.put("colecciones", coleccionController.getColeccionesDTO());
+          ctx.render("estadisticas.hbs", model);
+        }
+    );
 
-    app.get("/admin/estadisticas/coleccion/{id}", ctx -> {
-      Long id = Long.parseLong(ctx.pathParam("id"));
-      List<Estadistica> todas = estadisticaController.getEstadisticas();
+    app.get(
+        "/admin/estadisticas/coleccion/{id}", ctx -> {
+          Long id = Long.parseLong(ctx.pathParam("id"));
+          List<Estadistica> todas = estadisticaController.getEstadisticas();
 
-      List<Map<String, Object>> resultado = todas.stream()
-                                                 .filter(e -> "HECHOS REPORTADOS POR PROVINCIA Y COLECCION".equals(e.getTipo()))
-                                                 .filter(e -> e.getColeccion() != null && e.getColeccion().getId().equals(id))
-                                                 .map(e -> {
-                                                   Map<String, Object> m = new HashMap<>();
-                                                   m.put("grupo", e.getGrupo());
-                                                   m.put("cantidad", e.getCantidad());
-                                                   return m;
-                                                 })
-                                                 .toList();
+          List<Map<String, Object>> resultado = todas.stream()
+                                                     .filter(e -> "HECHOS REPORTADOS POR PROVINCIA Y COLECCION".equals(
+                                                         e.getTipo()))
+                                                     .filter(e -> e.getColeccion() != null && e.getColeccion()
+                                                                                               .getId()
+                                                                                               .equals(
+                                                                                                   id))
+                                                     .map(e -> {
+                                                       Map<String, Object> m = new HashMap<>();
+                                                       m.put("grupo", e.getGrupo());
+                                                       m.put("cantidad", e.getCantidad());
+                                                       return m;
+                                                     })
+                                                     .toList();
 
-      ctx.json(resultado);
-    });
+          ctx.json(resultado);
+        }
+    );
 
-    app.get("/admin/estadisticas/provincia", ctx -> {
-      String categoria = ctx.queryParam("categoria");
-      List<Estadistica> todas = estadisticaController.getEstadisticas();
+    app.get(
+        "/admin/estadisticas/provincia", ctx -> {
+          String categoria = ctx.queryParam("categoria");
+          List<Estadistica> todas = estadisticaController.getEstadisticas();
 
-      List<Map<String, Object>> resultado = todas.stream()
-                                                 .filter(e -> "HECHOS POR PROVINCIA Y CATEGORIA".equals(e.getTipo()))
-                                                 .filter(e -> categoria == null || categoria.equals(e.getCategoria()))
-                                                 .map(e -> {
-                                                   Map<String, Object> m = new HashMap<>();
-                                                   m.put("grupo", e.getGrupo());
-                                                   m.put("cantidad", e.getCantidad());
-                                                   return m;
-                                                 })
-                                                 .toList();
+          List<Map<String, Object>> resultado = todas.stream()
+                                                     .filter(e -> "HECHOS POR PROVINCIA Y CATEGORIA".equals(
+                                                         e.getTipo()))
+                                                     .filter(e -> categoria == null || categoria.equals(
+                                                         e.getCategoria()))
+                                                     .map(e -> {
+                                                       Map<String, Object> m = new HashMap<>();
+                                                       m.put("grupo", e.getGrupo());
+                                                       m.put("cantidad", e.getCantidad());
+                                                       return m;
+                                                     })
+                                                     .toList();
 
-      ctx.json(resultado);
-    });
+          ctx.json(resultado);
+        }
+    );
 
-    app.get("/admin/estadisticas/hora", ctx -> {
-      String categoria = ctx.queryParam("categoria");
-      List<Estadistica> todas = estadisticaController.getEstadisticas();
+    app.get(
+        "/admin/estadisticas/hora", ctx -> {
+          String categoria = ctx.queryParam("categoria");
+          List<Estadistica> todas = estadisticaController.getEstadisticas();
 
-      List<Map<String, Object>> resultado = todas.stream()
-                                                 .filter(e -> "HECHOS POR HORA Y CATEGORIA".equals(e.getTipo()))
-                                                 .filter(e -> categoria == null || categoria.equals(e.getCategoria()))
-                                                 .map(e -> {
-                                                   Map<String, Object> m = new HashMap<>();
-                                                   m.put("grupo", e.getGrupo());
-                                                   m.put("cantidad", e.getCantidad());
-                                                   return m;
-                                                 })
-                                                 .toList();
+          List<Map<String, Object>> resultado = todas.stream()
+                                                     .filter(e -> "HECHOS POR HORA Y CATEGORIA".equals(
+                                                         e.getTipo()))
+                                                     .filter(e -> categoria == null || categoria.equals(
+                                                         e.getCategoria()))
+                                                     .map(e -> {
+                                                       Map<String, Object> m = new HashMap<>();
+                                                       m.put("grupo", e.getGrupo());
+                                                       m.put("cantidad", e.getCantidad());
+                                                       return m;
+                                                     })
+                                                     .toList();
 
-      ctx.json(resultado);
-    });
+          ctx.json(resultado);
+        }
+    );
 
-    app.get("/admin/estadisticas/categorias", ctx -> {
-      Integer top = ctx.queryParamAsClass("top", Integer.class).getOrDefault(10);
-      String orden = ctx.queryParam("orden");
+    app.get(
+        "/admin/estadisticas/categorias", ctx -> {
+          Integer top = ctx.queryParamAsClass("top", Integer.class)
+                           .getOrDefault(10);
+          String orden = ctx.queryParam("orden");
 
-      List<Estadistica> todas = estadisticaController.getEstadisticas();
+          List<Estadistica> todas = estadisticaController.getEstadisticas();
 
-      List<Map<String, Object>> resultado = todas.stream()
-                                                 .filter(e -> "HECHOS REPORTADOS POR CATEGORIA".equals(e.getTipo()))
-                                                 .sorted((a, b) -> {
-                                                   if ("asc".equalsIgnoreCase(orden)) {
-                                                     return a.getCantidad().compareTo(b.getCantidad());
-                                                   }
-                                                   return b.getCantidad().compareTo(a.getCantidad());
-                                                 })
-                                                 .limit(top)
-                                                 .map(e -> {
-                                                   Map<String, Object> m = new HashMap<>();
-                                                   m.put("categoria", e.getCategoria());
-                                                   m.put("cantidad", e.getCantidad());
-                                                   return m;
-                                                 })
-                                                 .toList();
+          List<Map<String, Object>> resultado = todas.stream()
+                                                     .filter(e -> "HECHOS REPORTADOS POR CATEGORIA".equals(
+                                                         e.getTipo()))
+                                                     .sorted((a, b) -> {
+                                                       if ("asc".equalsIgnoreCase(orden)) {
+                                                         return a.getCantidad()
+                                                                 .compareTo(b.getCantidad());
+                                                       }
+                                                       return b.getCantidad()
+                                                               .compareTo(a.getCantidad());
+                                                     })
+                                                     .limit(top)
+                                                     .map(e -> {
+                                                       Map<String, Object> m = new HashMap<>();
+                                                       m.put("categoria", e.getCategoria());
+                                                       m.put("cantidad", e.getCantidad());
+                                                       return m;
+                                                     })
+                                                     .toList();
 
-      ctx.json(resultado);
-    });
+          ctx.json(resultado);
+        }
+    );
 
-    app.get("/admin/estadisticas/coleccion", ctx -> {
-      List<Estadistica> todas = estadisticaController.getEstadisticas();
+    app.get(
+        "/admin/estadisticas/coleccion", ctx -> {
+          List<Estadistica> todas = estadisticaController.getEstadisticas();
 
-      List<Map<String, Object>> resultado = todas.stream()
-                                                 .filter(e -> "HECHOS REPORTADOS POR PROVINCIA Y COLECCION".equals(e.getTipo()))
-                                                 .map(e -> {
-                                                   Map<String, Object> m = new HashMap<>();
-                                                   m.put("coleccion", e.getColeccion().getTitulo());
-                                                   m.put("provincia", e.getGrupo());
-                                                   m.put("cantidad", e.getCantidad());
-                                                   return m;
-                                                 })
-                                                 .toList();
+          List<Map<String, Object>> resultado = todas.stream()
+                                                     .filter(e -> "HECHOS REPORTADOS POR PROVINCIA Y COLECCION".equals(
+                                                         e.getTipo()))
+                                                     .map(e -> {
+                                                       Map<String, Object> m = new HashMap<>();
+                                                       m.put(
+                                                           "coleccion",
+                                                           e.getColeccion()
+                                                            .getTitulo()
+                                                       );
+                                                       m.put("provincia", e.getGrupo());
+                                                       m.put("cantidad", e.getCantidad());
+                                                       return m;
+                                                     })
+                                                     .toList();
 
-      ctx.json(resultado);
-    });
+          ctx.json(resultado);
+        }
+    );
 
-    app.get("/admin/estadisticas/categorias/todas", ctx -> {
-      List<Estadistica> todas = estadisticaController.getEstadisticas();
+    app.get(
+        "/admin/estadisticas/categorias/todas", ctx -> {
+          List<Estadistica> todas = estadisticaController.getEstadisticas();
 
-      List<Map<String, Object>> resultado = todas.stream()
-                                                 .filter(e -> "HECHOS REPORTADOS POR CATEGORIA".equals(e.getTipo()))
-                                                 .map(e -> {
-                                                   Map<String, Object> m = new HashMap<>();
-                                                   m.put("categoria", e.getCategoria());
-                                                   m.put("cantidad", e.getCantidad());
-                                                   return m;
-                                                 })
-                                                 .toList();
+          List<Map<String, Object>> resultado = todas.stream()
+                                                     .filter(e -> "HECHOS REPORTADOS POR CATEGORIA".equals(
+                                                         e.getTipo()))
+                                                     .map(e -> {
+                                                       Map<String, Object> m = new HashMap<>();
+                                                       m.put("categoria", e.getCategoria());
+                                                       m.put("cantidad", e.getCantidad());
+                                                       return m;
+                                                     })
+                                                     .toList();
 
-      ctx.json(resultado);
-    });
+          ctx.json(resultado);
+        }
+    );
 
-    app.get("/admin/estadisticas/hechos/todas", ctx -> {
-      List<Estadistica> todas = estadisticaController.getEstadisticas();
+    app.get(
+        "/admin/estadisticas/hechos/todas", ctx -> {
+          List<Estadistica> todas = estadisticaController.getEstadisticas();
 
-      Map<String, Object> resultado = new HashMap<>();
+          Map<String, Object> resultado = new HashMap<>();
 
-      List<Map<String, Object>> provincia = todas.stream()
-                                                 .filter(e -> "HECHOS POR PROVINCIA Y CATEGORIA".equals(e.getTipo()))
-                                                 .map(e -> {
-                                                   Map<String, Object> m = new HashMap<>();
-                                                   m.put("provincia", e.getGrupo());
-                                                   m.put("categoria", e.getCategoria());
-                                                   m.put("cantidad", e.getCantidad());
-                                                   return m;
-                                                 })
-                                                 .collect(Collectors.toList());
+          List<Map<String, Object>> provincia = todas.stream()
+                                                     .filter(e -> "HECHOS POR PROVINCIA Y CATEGORIA".equals(
+                                                         e.getTipo()))
+                                                     .map(e -> {
+                                                       Map<String, Object> m = new HashMap<>();
+                                                       m.put("provincia", e.getGrupo());
+                                                       m.put("categoria", e.getCategoria());
+                                                       m.put("cantidad", e.getCantidad());
+                                                       return m;
+                                                     })
+                                                     .collect(Collectors.toList());
 
-      List<Map<String, Object>> hora = todas.stream()
-                                            .filter(e -> "HECHOS POR HORA Y CATEGORIA".equals(e.getTipo()))
-                                            .map(e -> {
-                                              Map<String, Object> m = new HashMap<>();
-                                              m.put("hora", e.getGrupo());
-                                              m.put("categoria", e.getCategoria());
-                                              m.put("cantidad", e.getCantidad());
-                                              return m;
-                                            })
-                                            .collect(Collectors.toList());
+          List<Map<String, Object>> hora = todas.stream()
+                                                .filter(e -> "HECHOS POR HORA Y CATEGORIA".equals(e.getTipo()))
+                                                .map(e -> {
+                                                  Map<String, Object> m = new HashMap<>();
+                                                  m.put("hora", e.getGrupo());
+                                                  m.put("categoria", e.getCategoria());
+                                                  m.put("cantidad", e.getCantidad());
+                                                  return m;
+                                                })
+                                                .collect(Collectors.toList());
 
-      resultado.put("provincia", provincia);
-      resultado.put("hora", hora);
+          resultado.put("provincia", provincia);
+          resultado.put("hora", hora);
 
-      ctx.json(resultado);
-    });
+          ctx.json(resultado);
+        }
+    );
 
-    app.post("/admin/estadisticas", ctx -> {
-      try {
-        var stat = estadisticaController.calcularEstadisticas(ctx.bodyAsClass(EstadisticaDTO.class));
-        ctx.status(200).json(stat);
-      } catch (RuntimeException e) {
-        ctx.status(400).result(e.getMessage());
-      }
-    });
+    app.post(
+        "/admin/estadisticas", ctx -> {
+          try {
+            var stat = estadisticaController.calcularEstadisticas(ctx.bodyAsClass(EstadisticaDTO.class));
+            ctx.status(200)
+               .json(stat);
+          } catch (RuntimeException e) {
+            ctx.status(400)
+               .result(e.getMessage());
+          }
+        }
+    );
 
     // ==================== PERFILES ====================
-    app.get("/perfil", ctx -> {
-      Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
-      if (estaLogueado == null || !estaLogueado) {
-        ctx.redirect("/auth/login?redirect=/perfil");
-        return;
-      }
-      Usuario user = userController.findByName(ctx.sessionAttribute("nombreUsuario"));
-      Map<String, Object> model = modeloConSesion(ctx);
+    app.get(
+        "/perfil", ctx -> {
+          Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
+          if (estaLogueado == null || !estaLogueado) {
+            ctx.redirect("/auth/login?redirect=/perfil");
+            return;
+          }
+          Usuario user = userController.findByName(ctx.sessionAttribute("nombreUsuario"));
+          Map<String, Object> model = modeloConSesion(ctx);
 
-      List<Hecho> ultimosHechos = new ArrayList<>();
-      if (user.getHechos() != null) {
-        ultimosHechos = user.getHechos()
-                            .stream()
-                            .sorted(Comparator.comparing(
-                                Hecho::getFechacarga,
-                                Comparator.nullsLast(Comparator.reverseOrder())
-                            ))
-                            .limit(5)
-                            .collect(Collectors.toList());
-      }
-      model.put("perfil", user);
-      model.put("ultimosHechos", ultimosHechos);
-      ctx.render("perfil.hbs", model);
-    });
+          List<Hecho> ultimosHechos = new ArrayList<>();
+          if (user.getHechos() != null) {
+            ultimosHechos = user.getHechos()
+                                .stream()
+                                .sorted(Comparator.comparing(
+                                    Hecho::getFechacarga,
+                                    Comparator.nullsLast(Comparator.reverseOrder())
+                                ))
+                                .limit(5)
+                                .collect(Collectors.toList());
+          }
+          model.put("perfil", user);
+          model.put("ultimosHechos", ultimosHechos);
+          ctx.render("perfil.hbs", model);
+        }
+    );
+
+    app.post("/perfil/foto", userController::actualizarFoto);
 
     app.get("/usuarios/{id}/foto", userController::obtenerFotoPerfil);
 
-    app.get("/perfiles/{nombre}/", ctx -> {
-      Usuario user = userController.findByName(ctx.pathParam("nombre"));
-      Map<String, Object> model = modeloConSesion(ctx);
-      List<Hecho> ultimosHechos = new ArrayList<>();
-      if (user.getHechos() != null) {
-        ultimosHechos = user.getHechos()
-                            .stream()
-                            .sorted(Comparator.comparing(
-                                Hecho::getFechacarga,
-                                Comparator.nullsLast(Comparator.reverseOrder())
-                            ))
-                            .limit(5)
-                            .collect(Collectors.toList());
-      }
-      model.put("perfil", user);
-      model.put("ultimosHechos", ultimosHechos);
-      ctx.render("perfil.hbs", model);
-    });
+    app.get(
+        "/perfiles/{nombre}/", ctx -> {
+          Usuario user = userController.findByName(ctx.pathParam("nombre"));
+          Map<String, Object> model = modeloConSesion(ctx);
+          List<Hecho> ultimosHechos = new ArrayList<>();
+          if (user.getHechos() != null) {
+            ultimosHechos = user.getHechos()
+                                .stream()
+                                .sorted(Comparator.comparing(
+                                    Hecho::getFechacarga,
+                                    Comparator.nullsLast(Comparator.reverseOrder())
+                                ))
+                                .limit(5)
+                                .collect(Collectors.toList());
+          }
+          model.put("perfil", user);
+          model.put("ultimosHechos", ultimosHechos);
+          ctx.render("perfil.hbs", model);
+        }
+    );
 
     // ==================== REPORTES ====================
-    app.get("/hechos/reporte/{id}/", ctx -> {
-      Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
-      if (estaLogueado == null || !estaLogueado) {
-        ctx.redirect("/auth/login");
-        return;
-      }
-      Hecho hecho = hechoController.findById(Long.parseLong(ctx.pathParam("id")));
-      Map<String, Object> model = modeloConSesion(ctx);
-      model.put("hecho", hecho);
-      ctx.render("reportar.hbs", model);
-    });
+    app.get(
+        "/hechos/reporte/{id}/", ctx -> {
+          Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
+          if (estaLogueado == null || !estaLogueado) {
+            ctx.redirect("/auth/login");
+            return;
+          }
+          Hecho hecho = hechoController.findById(Long.parseLong(ctx.pathParam("id")));
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("hecho", hecho);
+          ctx.render("reportar.hbs", model);
+        }
+    );
 
     app.get("/admin/dashboard", ctx -> adminController.mostrarDashboard(ctx, modeloConSesion(ctx)));
 
     // ==================== ERROR HANDLERS ====================
-    app.error(404, ctx -> {
-      if (ctx.attribute("error-handled") != null) {
-        return;
-      }
+    app.error(
+        404, ctx -> {
+          if (ctx.attribute("error-handled") != null) {
+            return;
+          }
 
-      Map<String, Object> model = modeloConSesion(ctx);
-      model.put("errorMessage", "Página no encontrada");
-      model.put("errorStatus", 404);
-      model.put("timestamp", LocalDateTime.now().toString());
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("errorMessage", "Página no encontrada");
+          model.put("errorStatus", 404);
+          model.put(
+              "timestamp",
+              LocalDateTime.now()
+                           .toString()
+          );
 
-      if (ctx.path().startsWith("/api/")) {
-        ctx.json(model);
-      } else {
-        ctx.render("404.hbs", model);
-      }
-    });
-
-    app.error(500, ctx -> {
-      if (ctx.attribute("error-handled") != null) {
-        return;
-      }
-
-      Map<String, Object> model = modeloConSesion(ctx);
-
-      Throwable error = ctx.attribute("javalin-exception");
-      String errorMessage = "Error interno del servidor";
-      String errorDetails = "";
-
-      if (error != null) {
-        errorMessage = error.getMessage() != null ? error.getMessage() : errorMessage;
-        errorDetails = getStackTraceAsString(error);
-
-        System.err.println("Error 500: " + errorMessage);
-        if (debugMode) {
-          error.printStackTrace();
+          if (ctx.path()
+                 .startsWith("/api/")) {
+            ctx.render("404.hbs", model);
+          } else {
+            ctx.render("404.hbs", model);
+          }
         }
-      }
+    );
 
-      model.put("errorMessage", errorMessage);
-      model.put("errorDetails", errorDetails);
-      model.put("errorStatus", 500);
-      model.put("showDetails", debugMode);
-      model.put("timestamp", LocalDateTime.now().toString());
+    app.error(
+        500, ctx -> {
+          if (ctx.attribute("error-handled") != null) {
+            return;
+          }
 
-      ctx.render("error.hbs", model);
-    });
+          Map<String, Object> model = modeloConSesion(ctx);
 
-    app.error(400, ctx -> {
-      if (ctx.attribute("error-handled") != null) {
-        return;
-      }
+          Throwable error = ctx.attribute("javalin-exception");
+          String errorMessage = "Error interno del servidor";
+          String errorDetails = "";
 
-      if (ctx.path().startsWith("/api/")) {
-        mostrarError(ctx, "Solicitud incorrecta", 400);
-      }
-    });
+          if (error != null) {
+            errorMessage = error.getMessage() != null ? error.getMessage() : errorMessage;
+            errorDetails = getStackTraceAsString(error);
 
-    app.error(403, ctx -> {
-      if (ctx.attribute("error-handled") != null) {
-        return;
-      }
-      mostrarError(ctx, "Acceso denegado", 403);
-    });
+            System.err.println("Error 500: " + errorMessage);
+            if (debugMode) {
+              error.printStackTrace();
+            }
+          }
 
-    app.error(401, ctx -> {
-      if (ctx.attribute("error-handled") != null) {
-        return;
-      }
-      mostrarError(ctx, "No autorizado", 401);
-    });
+          model.put("errorMessage", errorMessage);
+          model.put("errorDetails", errorDetails);
+          model.put("errorStatus", 500);
+          model.put("showDetails", debugMode);
+          model.put(
+              "timestamp",
+              LocalDateTime.now()
+                           .toString()
+          );
+
+          ctx.render("error.hbs", model);
+        }
+    );
+
+    app.error(
+        400, ctx -> {
+          if (ctx.attribute("error-handled") != null) {
+            return;
+          }
+
+          if (ctx.path()
+                 .startsWith("/api/")) {
+            mostrarError(ctx, "Solicitud incorrecta", 400);
+          }
+        }
+    );
+
+    app.error(
+        403, ctx -> {
+          if (ctx.attribute("error-handled") != null) {
+            return;
+          }
+          mostrarError(ctx, "Acceso denegado", 403);
+        }
+    );
+
+    app.error(
+        401, ctx -> {
+          if (ctx.attribute("error-handled") != null) {
+            return;
+          }
+          mostrarError(ctx, "No autorizado", 401);
+        }
+    );
   }
 }

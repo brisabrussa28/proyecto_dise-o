@@ -4,11 +4,7 @@ import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteConHechos;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
-import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
-import ar.edu.utn.frba.dds.model.fuentes.FuenteEstatica;
-import ar.edu.utn.frba.dds.model.fuentes.FuenteExternaAPI;
 import ar.edu.utn.frba.dds.utils.DBUtils;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -27,7 +23,8 @@ public class FuenteRepository {
 
     // Enriquecer hechos antes de guardar si corresponde
     if (fuente instanceof FuenteConHechos) {
-      ((FuenteConHechos) fuente).getHechos().forEach(DBUtils::enriquecerHecho);
+      ((FuenteConHechos) fuente).getHechos()
+                                .forEach(DBUtils::enriquecerHecho);
     }
 
     DBUtils.comenzarTransaccion(em);
@@ -77,7 +74,8 @@ public class FuenteRepository {
       Fuente managedFuente = em.merge(fuente);
 
       if (managedFuente instanceof FuenteConHechos) {
-        ((FuenteConHechos) managedFuente).getHechos().forEach(DBUtils::enriquecerHecho);
+        ((FuenteConHechos) managedFuente).getHechos()
+                                         .forEach(DBUtils::enriquecerHecho);
       }
 
       DBUtils.commit(em);
@@ -126,18 +124,18 @@ public class FuenteRepository {
     try {
       if (fuente instanceof FuenteDeAgregacion) {
         FuenteDeAgregacion agregacion = em.createQuery(
-                                              "SELECT DISTINCT f FROM FuenteDeAgregacion f " +
-                                                  "LEFT JOIN FETCH f.fuentesCargadas " +
-                                                  "WHERE f.id = :id", FuenteDeAgregacion.class)
+                                              "SELECT DISTINCT f FROM FuenteDeAgregacion f " + "LEFT JOIN FETCH f.fuentesCargadas " + "WHERE f.id = :id",
+                                              FuenteDeAgregacion.class
+                                          )
                                           .setParameter("id", fuente.getId())
                                           .getSingleResult();
 
         ((FuenteDeAgregacion) fuente).setFuentesCargadas(agregacion.getFuentesCargadas());
       } else if (fuente instanceof FuenteConHechos) {
         FuenteConHechos conHechos = em.createQuery(
-                                          "SELECT DISTINCT f FROM FuenteConHechos f " +
-                                              "LEFT JOIN FETCH f.hechos " +
-                                              "WHERE f.id = :id", FuenteConHechos.class)
+                                          "SELECT DISTINCT f FROM FuenteConHechos f " + "LEFT JOIN FETCH f.hechos " + "WHERE f.id = :id",
+                                          FuenteConHechos.class
+                                      )
                                       .setParameter("id", fuente.getId())
                                       .getSingleResult();
 
@@ -145,8 +143,7 @@ public class FuenteRepository {
       }
 
     } catch (Exception e) {
-      System.err.println("Advertencia: No se pudieron cargar dependencias lazy para fuente " +
-                             fuente.getNombre() + " (ID: " + fuente.getId() + "): " + e.getMessage());
+      System.err.println("Advertencia: No se pudieron cargar dependencias lazy para fuente " + fuente.getNombre() + " (ID: " + fuente.getId() + "): " + e.getMessage());
     }
   }
 
@@ -171,7 +168,8 @@ public class FuenteRepository {
     // 1. Buscar colecciones que usan esta fuente directamente
     List<Coleccion> coleccionesDirectas = em.createQuery(
                                                 "SELECT c FROM Coleccion c WHERE c.coleccion_fuente.id = :id",
-                                                Coleccion.class)
+                                                Coleccion.class
+                                            )
                                             .setParameter("id", fuente.getId())
                                             .getResultList();
 
@@ -196,7 +194,8 @@ public class FuenteRepository {
     // 4. Buscar fuentes de agregación que contienen esta fuente como hija
     List<FuenteDeAgregacion> padres = em.createQuery(
                                             "SELECT DISTINCT f FROM FuenteDeAgregacion f JOIN f.fuentesCargadas hija WHERE hija.id = :hijoId",
-                                            FuenteDeAgregacion.class)
+                                            FuenteDeAgregacion.class
+                                        )
                                         .setParameter("hijoId", fuente.getId())
                                         .getResultList();
 
@@ -220,7 +219,8 @@ public class FuenteRepository {
     try {
       return em.createQuery(
                    "SELECT DISTINCT f FROM FuenteDeAgregacion f JOIN f.fuentesCargadas hija WHERE hija.id = :hijoId",
-                   FuenteDeAgregacion.class)
+                   FuenteDeAgregacion.class
+               )
                .setParameter("hijoId", hijoId)
                .getResultList();
     } finally {
@@ -232,10 +232,9 @@ public class FuenteRepository {
     EntityManager em = DBUtils.getEntityManager();
     try {
       return em.createQuery(
-                   "SELECT DISTINCT c FROM Coleccion c " +
-                       "WHERE c.coleccion_fuente.id IN " +
-                       "(SELECT f.id FROM FuenteDeAgregacion f JOIN f.fuentesCargadas hija WHERE hija.id = :fuenteId)",
-                   Coleccion.class)
+                   "SELECT DISTINCT c FROM Coleccion c " + "WHERE c.coleccion_fuente.id IN " + "(SELECT f.id FROM FuenteDeAgregacion f JOIN f.fuentesCargadas hija WHERE hija.id = :fuenteId)",
+                   Coleccion.class
+               )
                .setParameter("fuenteId", fuenteId)
                .getResultList();
     } finally {
@@ -246,13 +245,12 @@ public class FuenteRepository {
   public List<Fuente> findByTipo(String tipoDiscriminador) {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      return em.createQuery(
-                   "SELECT f FROM Fuente f WHERE TYPE(f) = :tipo",
-                   Fuente.class)
+      return em.createQuery("SELECT f FROM Fuente f WHERE TYPE(f) = :tipo", Fuente.class)
                .getResultList();
     } catch (IllegalArgumentException e) {
       return findAll().stream()
-                      .filter(f -> f.getTipo().equalsIgnoreCase(tipoDiscriminador))
+                      .filter(f -> f.getTipo()
+                                    .equalsIgnoreCase(tipoDiscriminador))
                       .collect(Collectors.toList());
     } finally {
       em.close();
@@ -264,7 +262,8 @@ public class FuenteRepository {
     try {
       return em.createQuery(
                    "SELECT DISTINCT f FROM FuenteConHechos f JOIN f.hechos h WHERE h.id = :hechoId",
-                   Fuente.class)
+                   Fuente.class
+               )
                .setParameter("hechoId", hechoId)
                .getResultList();
     } finally {
@@ -275,13 +274,39 @@ public class FuenteRepository {
   public Fuente findFuenteByNombre(String nombreFuente) {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      return em.createQuery(
-                   "SELECT f FROM Fuente f WHERE f.fuente_nombre = :nombre",
-                   Fuente.class)
+      return em.createQuery("SELECT f FROM Fuente f WHERE f.fuente_nombre = :nombre", Fuente.class)
                .setParameter("nombre", nombreFuente)
                .getSingleResult();
     } catch (NoResultException e) {
       return null;
+    } finally {
+      em.close();
+    }
+  }
+
+  public Long countAll() {
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      return em.createQuery("SELECT COUNT(DISTINCT f.fuente_id) FROM Fuente f", Long.class)
+               .getSingleResult();
+    } finally {
+      em.close();
+    }
+  }
+
+  public void findAndRemoveHecho(Long idFuente, Long idHecho) {
+    EntityManager em = DBUtils.getEntityManager();
+    DBUtils.comenzarTransaccion(em);
+    try {
+      em.createNativeQuery(
+            "DELETE FROM hecho WHERE fuente_id = :idFuente AND hecho_id = :hechoId")
+        .setParameter("idFuente", idFuente)
+        .setParameter("hechoId", idHecho)
+        .executeUpdate();
+      DBUtils.commit(em);
+    } catch (Exception e) {
+      DBUtils.rollback(em);
+      throw new RuntimeException(e.getMessage());
     } finally {
       em.close();
     }

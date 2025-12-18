@@ -1,0 +1,27 @@
+/* --- DEFINICIÓN DEL TEMA --- */
+:root {
+    /* Paleta Base (Los colores exactos de tu imagen) */
+    --color-darkest: #138AF2; /* Color 1 */
+    --color-medium: #1BA0F2; /* Color 2 */
+    --color-bright: #62ABD9; /* Color 3 */
+    --color-pale: #B3E7F2; /* Color 4 */
+    --color-lightest: #D1B961; /* Color 5 */
+
+    /* Asignación Funcional (Cómo usaremos los colores) */
+
+    /* Fondos */
+    --bg-main: var(--color-lightest); /* Fondo principal de la página */
+    --bg-secondary: var(--color-pale); /* Fondo para secciones o tarjetas */
+    --bg-accent: var(--color-medium); /* Fondo para elementos destacados */
+
+    /* Tipografía (Textos) */
+    --text-primary: var(--color-darkest); /* Color principal del texto para lectura */
+    --text-secondary: var(--color-medium); /* Para subtítulos o textos menos importantes */
+    --text-on-accent: var(--color-lightest); /* Color de texto sobre fondos oscuros */
+
+    /* Elementos de Interfaz (Botones, enlaces, bordes) */
+    --primary-color: var(--color-medium); /* Color principal de acción (ej. botones) */
+    --secondary-color: var(--color-darkest); /* Color secundario */
+    --highlight-color: var(--color-bright); /* Para efectos hover o llamar la atención */
+    --border-color: var(--color-pale); /* Para líneas sutiles y separadores */
+}

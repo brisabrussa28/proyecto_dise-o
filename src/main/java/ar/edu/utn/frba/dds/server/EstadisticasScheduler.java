@@ -1,11 +1,13 @@
 package ar.edu.utn.frba.dds.server;
 
+import ar.edu.utn.frba.dds.controller.ColeccionController;
 import ar.edu.utn.frba.dds.controller.EstadisticaController;
 import ar.edu.utn.frba.dds.dto.EstadisticaDTO;
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -16,11 +18,13 @@ public class EstadisticasScheduler {
 
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
   private final EstadisticaController estadisticaController = new EstadisticaController();
+  private final ColeccionController coleccionController = new ColeccionController();
 
   public void iniciar() {
     System.out.println("Iniciando scheduler de estadísticas...");
 
     recalcularTodas();
+    recalcularConsenso();
 
     scheduler.scheduleAtFixedRate(
         this::recalcularTodas,
@@ -40,7 +44,8 @@ public class EstadisticasScheduler {
       System.out.println("Borrando estadísticas antiguas...");
       em = DBUtils.getEntityManager();
       DBUtils.comenzarTransaccion(em);
-      em.createQuery("DELETE FROM Estadistica").executeUpdate();
+      em.createQuery("DELETE FROM Estadistica")
+        .executeUpdate();
       DBUtils.commit(em);
       em.close();
       System.out.println("Estadísticas antiguas eliminadas");
@@ -83,7 +88,8 @@ public class EstadisticasScheduler {
 
       System.out.println("Cargando colecciones con hechos...");
       // USAR EL REPOSITORIO EN LUGAR DE JPQL DIRECTAMENTE
-      List<Coleccion> colecciones = ColeccionRepository.instance().findAllConFuentesYHechos();
+      List<Coleccion> colecciones = ColeccionRepository.instance()
+                                                       .findAllConFuentesYHechos();
 
       System.out.println("Se cargaron " + colecciones.size() + " colecciones con hechos");
 
@@ -91,9 +97,15 @@ public class EstadisticasScheduler {
         System.out.println("Calculando estadísticas por colección...");
         for (Coleccion col : colecciones) {
           try {
-            if (col.getFuente() != null && !col.getFuente().getHechos().isEmpty()) {
+            if (col.getFuente() != null && !col.getFuente()
+                                               .getHechos()
+                                               .isEmpty()) {
               estadisticaController.calcularEstadisticas(
-                  new EstadisticaDTO("HECHOS REPORTADOS POR PROVINCIA Y COLECCION", null, col.getId())
+                  new EstadisticaDTO(
+                      "HECHOS REPORTADOS POR PROVINCIA Y COLECCION",
+                      null,
+                      col.getId()
+                  )
               );
             }
           } catch (Exception e) {
@@ -120,7 +132,8 @@ public class EstadisticasScheduler {
       e.printStackTrace();
 
       if (em != null && em.isOpen()) {
-        if (em.getTransaction().isActive()) {
+        if (em.getTransaction()
+              .isActive()) {
           try {
             DBUtils.rollback(em);
           } catch (Exception rollbackEx) {
@@ -170,6 +183,44 @@ public class EstadisticasScheduler {
     }
   }
 
+  private void recalcularConsenso() {
+    EntityManager em = null;
+    try {
+      em = DBUtils.getEntityManager();
+      DBUtils.comenzarTransaccion(em);
+      List<Coleccion> colecciones = em.createQuery("SELECT c FROM Coleccion c", Coleccion.class)
+                                      .getResultList();
+
+
+      for (Coleccion col : colecciones) {
+        try {
+          col.recalcularConsenso();
+
+          em.merge(col);
+        } catch (Exception e) {
+          Logger.getLogger("logConsenso")
+                .severe("Error recalculando colección ID " + col.getId() + ": " + e.getMessage());
+        }
+      }
+      DBUtils.commit(em);
+      Logger.getLogger("logConsenso")
+            .info("Consensos recalculados correctamente.");
+
+    } catch (Exception e) {
+      Logger.getLogger("logConsenso")
+            .severe("Error CRÍTICO en job de consensos: " + e.getMessage());
+      e.printStackTrace();
+      if (em != null && em.getTransaction()
+                          .isActive()) {
+        DBUtils.rollback(em);
+      }
+    } finally {
+      if (em != null && em.isOpen()) {
+        em.close();
+      }
+    }
+  }
+
   public void detener() {
     System.out.println("Deteniendo scheduler de estadísticas...");
     scheduler.shutdown();
@@ -179,8 +230,10 @@ public class EstadisticasScheduler {
       }
     } catch (InterruptedException e) {
       scheduler.shutdownNow();
-      Thread.currentThread().interrupt();
+      Thread.currentThread()
+            .interrupt();
     }
     System.out.println("Scheduler detenido");
   }
+
 }

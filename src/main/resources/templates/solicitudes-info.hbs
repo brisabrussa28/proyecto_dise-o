@@ -1,10 +1,9 @@
 {{#partial "nav_izquierda"}}
-    <a href="javascript:history.back()"
-       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
-       title="Volver al panel">
-        <i class="fa-solid fa-arrow-left"></i>
-        <span class="d-none d-sm-block">Volver</span>
-    </a>
+    <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+            onclick="history.back()">
+        <i class="fas fa-arrow-left"></i>
+        <span class="d-none d-md-inline">Volver</span>
+    </button>
 {{/partial}}
 
 {{#partial "contenido"}}
@@ -175,8 +174,9 @@
                             <h5 class="text-muted">No tienes solicitudes registradas</h5>
                             <p class="small text-secondary">Tus reportes o solicitudes de edición
                                 aparecerán aquí.</p>
-                            <a href="/" class="btn btn-outline-primary btn-sm mt-2">
-                                Volver al Mapa
+                            <a href="javascript:history.back()"
+                               class="btn btn-outline-primary btn-sm mt-2">
+                                Volver
                             </a>
                         </div>
                     {{/if}}

@@ -1,10 +1,18 @@
 {{#partial "nav_izquierda"}}
-    <a href="javascript:history.back()"
-       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
-       title="Volver al panel">
-        <i class="fa-solid fa-arrow-left"></i>
-        <span class="d-none d-sm-block">Volver</span>
-    </a>
+    {{#if fuente}}
+        <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+                onclick="history.back()">
+            <i class="fas fa-arrow-left"></i>
+            <span class="d-none d-md-inline">Volver</span>
+        </button>
+    {{else}}
+        <a href="/"
+           class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+           title="Volver al panel">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span class="d-none d-sm-block">Volver</span>
+        </a>
+    {{/if}}
 {{/partial}}
 
 {{#partial "contenido"}}
@@ -16,7 +24,7 @@
                     <div class="card-header bg-white py-3">
                         <h5 class="mb-0"><i class="fa-regular fa-pen-to-square me-2"></i>Nuevo Hecho
                             {{#if fuente}}
-                            <span class="badge bg-info">Para: {{fuente.nombre}}</span>
+                                <span class="badge bg-info">Para: {{fuente.nombre}}</span>
                             {{/if}}
                         </h5>
                     </div>
@@ -26,29 +34,35 @@
 
                             <!-- Campo oculto para fuente_id -->
                             {{#if fuente}}
-                            <input type="hidden" name="fuente_id" value="{{fuente.id}}">
+                                <input type="hidden" name="fuente" value="{{fuente.nombre}}">
+                                <input type="hidden" name="redirectUrl"
+                                       value="/admin/fuentes/{{fuente.id}}">
                             {{/if}}
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Título <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Título <span
+                                        class="text-danger">*</span></label>
                                 <input type="text" name="titulo" class="form-control" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Descripción</label>
-                                <textarea name="descripcion" class="form-control" rows="3"></textarea>
+                                <textarea name="descripcion" class="form-control"
+                                          rows="3"></textarea>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Fecha del Suceso <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-bold">Fecha de ocurrencia <span
+                                            class="text-danger">*</span></label>
                                     <input type="datetime-local" name="fechaSuceso"
                                            class="form-control" required
                                            id="fecha-suceso">
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Categoría <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-bold">Categoría <span
+                                            class="text-danger">*</span></label>
                                     <input type="text" name="categoria" class="form-control"
                                            list="lista-categorias"
                                            placeholder="Ej: Robos, Accidentes, etc..."
@@ -73,7 +87,8 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Ubicación <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Ubicación <span
+                                        class="text-danger">*</span></label>
 
                                 <div class="row">
                                     <div class="col-md-5 mb-2">
@@ -124,7 +139,7 @@
                                            class="form-control bg-light"
                                            value="{{hecho.ubicacion.longitud}}" readonly required>
                                 </div>
-                    </div>
+                            </div>
 
                             <input type="hidden" name="origen" value="PROVISTO_CONTRIBUYENTE">
                             <input type="hidden" name="fuente" value="Fuente {{emailUsuario}}">
@@ -137,12 +152,17 @@
 
                             <div class="d-flex justify-content-end gap-2">
                                 {{#if fuente}}
-                                <a href="/admin/fuentes/{{fuente.id}}" class="btn btn-outline-secondary">Cancelar</a>
-                                <a href="/admin/fuentes/{{fuente.id}}"> <button type="submit" class="btn btn-primary px-4">Guardar Hecho</button>
-                                </a>
+                                    <a href="/admin/fuentes/{{fuente.id}}"
+                                       class="btn btn-outline-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-primary px-4">Guardar
+                                        Hecho
+                                    </button>
                                 {{else}}
-                                <a href="/" class="btn btn-outline-secondary">Cancelar</a>
-                                    <button type="submit" class="btn btn-primary px-4">Guardar Hecho</button>
+                                    <a href="javascript:history.back()"
+                                       class="btn btn-outline-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-primary px-4">Guardar
+                                        Hecho
+                                    </button>
                                 {{/if}}
                             </div>
                         </form>
@@ -163,9 +183,9 @@
 
             // Coordenadas iniciales
             const latInicial = {{#if hecho.ubicacion.latitud}}{{hecho.ubicacion.latitud}}{{else}}
-        -34.6037{{/if}};
+            -34.6037{{/if}};
             const lngInicial = {{#if hecho.ubicacion.longitud}}{{hecho.ubicacion.longitud}}{{else}}
-        -58.3816{{/if}};
+            -58.3816{{/if}};
 
             const selectProvincia = document.getElementById('input-provincia');
             const inputDireccion = document.getElementById('input-direccion');
@@ -176,28 +196,32 @@
 
             // --- 2. CARGAR PROVINCIAS (GEOREF - Lista Oficial) ---
             fetch('https://apis.datos.gob.ar/georef/api/provincias?campos=nombre&orden=nombre')
-                .then(res => res.json())
-                .then(data => {
-                    selectProvincia.innerHTML = '<option value="" disabled selected>Seleccione una provincia...</option>';
-                    data.provincias.forEach(prov => {
-                        const option = document.createElement('option');
-                        option.value = prov.nombre;
-                        option.textContent = prov.nombre;
+                    .then(res => res.json())
+                    .then(data => {
+                        selectProvincia.innerHTML = '<option value="" disabled selected>Seleccione una provincia...</option>';
+                        data.provincias.forEach(prov => {
+                            const option = document.createElement('option');
+                            option.value = prov.nombre;
+                            option.textContent = prov.nombre;
 
-                        // Si editamos, seleccionamos la que estaba guardada
-                        if (provinciaGuardada && prov.nombre === provinciaGuardada) {
-                            option.selected = true;
-                        }
-                        selectProvincia.appendChild(option);
+                            // Si editamos, seleccionamos la que estaba guardada
+                            if (provinciaGuardada && prov.nombre === provinciaGuardada) {
+                                option.selected = true;
+                            }
+                            selectProvincia.appendChild(option);
+                        });
+                    })
+                    .catch(() => {
+                        selectProvincia.innerHTML = '<option value="">Error cargando provincias</option>';
                     });
-                })
-                .catch(() => {
-                    selectProvincia.innerHTML = '<option value="">Error cargando provincias</option>';
-                });
 
             // --- 3. INICIALIZAR MAPA ---
             const map = L.map('map-picker').setView([latInicial, lngInicial], 13);
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+            L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{y}.png', {
+                tms: true,
+                maxZoom: 18,
+                attribution: '&copy; <a href="https://www.ign.gob.ar/">IGN Argentina</a>'
+            }).addTo(map);
 
             let marker;
 
@@ -205,7 +229,7 @@
                 marker = L.marker([latInicial, lngInicial], {draggable: true}).addTo(map);
                 actualizarInputs(latInicial, lngInicial);
 
-                marker.on('dragend', function(e) {
+                marker.on('dragend', function (e) {
                     const pos = e.target.getLatLng();
                     actualizarInputs(pos.lat, pos.lng);
                     obtenerDatosUbicacion(pos.lat, pos.lng);
@@ -234,77 +258,77 @@
                 // Límites aproximados de CABA
                 const CABA_LIMITES = {
                     norte: -34.52,
-                    sur:   -34.72,
-                    este:  -58.33,
+                    sur: -34.72,
+                    este: -58.33,
                     oeste: -58.54
                 };
 
                 // Verificamos si el punto está dentro del cuadro usando los números parseados
                 const esCABA = (latNum <= CABA_LIMITES.norte && latNum >= CABA_LIMITES.sur) &&
-                               (lngNum <= CABA_LIMITES.este  && lngNum >= CABA_LIMITES.oeste);
+                        (lngNum <= CABA_LIMITES.este && lngNum >= CABA_LIMITES.oeste);
 
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data && data.address) {
-                            // A. Dirección
-                            const calle = data.address.road || "";
-                            const altura = data.address.house_number || "";
-                            const barrio = data.address.neighbourhood || "";
-                            let textoDireccion = (calle + " " + altura).trim();
-                            if (!textoDireccion) textoDireccion = barrio;
-                            if (!textoDireccion) textoDireccion = data.display_name.split(',')[0];
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.address) {
+                                // A. Dirección
+                                const calle = data.address.road || "";
+                                const altura = data.address.house_number || "";
+                                const barrio = data.address.neighbourhood || "";
+                                let textoDireccion = (calle + " " + altura).trim();
+                                if (!textoDireccion) textoDireccion = barrio;
+                                if (!textoDireccion) textoDireccion = data.display_name.split(',')[0];
 
-                            inputDireccion.value = textoDireccion;
+                                inputDireccion.value = textoDireccion;
 
-                            // B. Selección de Provincia (LÓGICA HÍBRIDA)
-                            const opciones = selectProvincia.options;
+                                // B. Selección de Provincia (LÓGICA HÍBRIDA)
+                                const opciones = selectProvincia.options;
 
-                            if (esCABA) {
-                                console.log("Detectado CABA por coordenadas");
-                                for (let i = 0; i < opciones.length; i++) {
-                                    const nombre = normalizarTexto(opciones[i].value);
-                                    if (nombre.includes("autonoma") || nombre.includes("ciudad")) {
-                                        selectProvincia.selectedIndex = i;
-                                        return;
-                                    }
-                                }
-                            }
-
-                            // --- CAMINO NORMAL: No es CABA, buscamos por nombre ---
-                            const estadoNominatim = data.address.state || data.address.city;
-                            if (estadoNominatim) {
-                                const nombreMapa = normalizarTexto(estadoNominatim);
-                                let mejorMatch = -1;
-
-                                for (let i = 0; i < opciones.length; i++) {
-                                    const nombreOficial = normalizarTexto(opciones[i].value);
-
-                                    // Si NO es CABA por coordenadas, prohibimos seleccionar CABA
-                                    if (!esCABA && (nombreOficial.includes("autonoma") || nombreOficial.includes("ciudad"))) {
-                                        continue;
-                                    }
-
-                                    if (nombreOficial === nombreMapa) {
-                                        mejorMatch = i;
-                                        break;
-                                    }
-                                    if (nombreOficial.includes(nombreMapa) || nombreMapa.includes(nombreOficial)) {
-                                        mejorMatch = i;
+                                if (esCABA) {
+                                    console.log("Detectado CABA por coordenadas");
+                                    for (let i = 0; i < opciones.length; i++) {
+                                        const nombre = normalizarTexto(opciones[i].value);
+                                        if (nombre.includes("autonoma") || nombre.includes("ciudad")) {
+                                            selectProvincia.selectedIndex = i;
+                                            return;
+                                        }
                                     }
                                 }
 
-                                if (mejorMatch > -1) selectProvincia.selectedIndex = mejorMatch;
-                            }
+                                // --- CAMINO NORMAL: No es CABA, buscamos por nombre ---
+                                const estadoNominatim = data.address.state || data.address.city;
+                                if (estadoNominatim) {
+                                    const nombreMapa = normalizarTexto(estadoNominatim);
+                                    let mejorMatch = -1;
 
-                        } else {
-                            inputDireccion.value = "Ubicación desconocida";
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        inputDireccion.value = "";
-                    });
+                                    for (let i = 0; i < opciones.length; i++) {
+                                        const nombreOficial = normalizarTexto(opciones[i].value);
+
+                                        // Si NO es CABA por coordenadas, prohibimos seleccionar CABA
+                                        if (!esCABA && (nombreOficial.includes("autonoma") || nombreOficial.includes("ciudad"))) {
+                                            continue;
+                                        }
+
+                                        if (nombreOficial === nombreMapa) {
+                                            mejorMatch = i;
+                                            break;
+                                        }
+                                        if (nombreOficial.includes(nombreMapa) || nombreMapa.includes(nombreOficial)) {
+                                            mejorMatch = i;
+                                        }
+                                    }
+
+                                    if (mejorMatch > -1) selectProvincia.selectedIndex = mejorMatch;
+                                }
+
+                            } else {
+                                inputDireccion.value = "Ubicación desconocida";
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            inputDireccion.value = "";
+                        });
             }
 
             function moverMarcador(lat, lng) {
@@ -312,7 +336,7 @@
                     marker.setLatLng([lat, lng]);
                 } else {
                     marker = L.marker([lat, lng], {draggable: true}).addTo(map);
-                    marker.on('dragend', function(e) {
+                    marker.on('dragend', function (e) {
                         const pos = e.target.getLatLng();
                         actualizarInputs(pos.lat, pos.lng);
                         obtenerDatosUbicacion(pos.lat, pos.lng);
@@ -324,7 +348,7 @@
 
             // --- 5. EVENTOS ---
 
-            map.on('click', function(e) {
+            map.on('click', function (e) {
                 const lat = e.latlng.lat;
                 const lng = e.latlng.lng;
                 moverMarcador(lat, lng);
@@ -340,40 +364,45 @@
                     if (alertaError) alertaError.classList.add('d-none');
 
                     if (!calle) {
-                        alert("Ingresa una dirección"); return;
+                        alert("Ingresa una dirección");
+                        return;
                     }
 
                     let url = `https://nominatim.openstreetmap.org/search?format=json&street=${encodeURIComponent(calle)}&country=Argentina`;
 
                     // Si hay provincia seleccionada en el dropdown, la usamos para filtrar
                     if (provSelect && provSelect !== "Cargando provincias...") {
-                         url += `&state=${encodeURIComponent(provSelect)}`;
+                        url += `&state=${encodeURIComponent(provSelect)}`;
                     }
 
                     fetch(url)
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data && data.length > 0) {
-                                const res = data[0];
-                                moverMarcador(res.lat, res.lon);
-                                obtenerDatosUbicacion(res.lat, res.lon);
-                            } else {
-                                mostrarError("Dirección no encontrada");
-                            }
-                        })
-                        .catch(() => mostrarError("Error de conexión"));
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data && data.length > 0) {
+                                    const res = data[0];
+                                    moverMarcador(res.lat, res.lon);
+                                    obtenerDatosUbicacion(res.lat, res.lon);
+                                } else {
+                                    mostrarError("Dirección no encontrada");
+                                }
+                            })
+                            .catch(() => mostrarError("Error de conexión"));
                 });
             }
 
             function mostrarError(msg) {
-                if(textoError && alertaError) {
+                if (textoError && alertaError) {
                     textoError.textContent = msg;
                     alertaError.classList.remove('d-none');
-                    setTimeout(() => { alertaError.classList.add('d-none'); }, 5000);
+                    setTimeout(() => {
+                        alertaError.classList.add('d-none');
+                    }, 5000);
                 }
             }
 
-            setTimeout(() => { map.invalidateSize(); }, 500);
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 500);
 
 
             const inputFechaSuceso = document.getElementById('fecha-suceso');
@@ -385,10 +414,10 @@
                 const year = ahora.getFullYear();
                 const month = pad(ahora.getMonth() + 1); // 0\-based
                 const day = pad(ahora.getDate());
-                const hours = pad(ahora.getHours());
+                const hours = pad(ahora.getHours() + 1);
                 const minutes = pad(ahora.getMinutes());
 
-                const isoLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
+                const isoLocal = `${year}-${month}-${day}T${hours}:00`;
                 inputFechaSuceso.setAttribute('max', isoLocal);
             }
         });

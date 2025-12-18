@@ -2,6 +2,7 @@ package ar.edu.utn.frba.dds.controller;
 
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
+import ar.edu.utn.frba.dds.model.hecho.Estado;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.hecho.Origen;
 import ar.edu.utn.frba.dds.model.hecho.etiqueta.Etiqueta;
@@ -24,7 +25,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -63,40 +63,58 @@ public class HechoController {
                           .countAll();
   }
 
+  // En HechoController.java
+
   public Hecho modificarHecho(Hecho hechoOriginal, Hecho hechoModificado) {
-    if (hechoModificado.getTitulo() != null) {
+    if (hechoModificado.getTitulo() != null && !hechoModificado.getTitulo()
+                                                               .isBlank()) {
       hechoOriginal.setTitulo(hechoModificado.getTitulo());
     }
-    if (hechoModificado.getDescripcion() != null) {
+
+    if (hechoModificado.getDescripcion() != null && !hechoModificado.getDescripcion()
+                                                                    .isBlank()) {
       hechoOriginal.setDescripcion(hechoModificado.getDescripcion());
     }
-    if (hechoModificado.getEtiquetas() != null) {
+
+    if (hechoModificado.getEtiquetas() != null && !hechoModificado.getEtiquetas()
+                                                                  .isEmpty()) {
       hechoOriginal.setEtiquetas(hechoModificado.getEtiquetas());
     }
+
     if (hechoModificado.getUbicacion() != null) {
       hechoOriginal.setUbicacion(hechoModificado.getUbicacion());
     }
+
     if (hechoModificado.getFechaSuceso() != null) {
-      // Permitir cambio de fecha sin restricción estricta de "isBefore" al editar,
-      // pero validando que no sea futuro en validarHecho
       hechoOriginal.setFechasuceso(hechoModificado.getFechaSuceso());
     }
+
     List<Multimedia> fotosNuevas = hechoModificado.getFotos();
     if (fotosNuevas != null && !fotosNuevas.isEmpty()) {
       fotosNuevas.forEach(foto -> hechoOriginal.agregarFoto(foto));
     }
-    if (!hechoModificado.getCategoria()
-                        .isBlank()) {
+
+    if (hechoModificado.getCategoria() != null && !hechoModificado.getCategoria()
+                                                                  .isBlank()) {
       hechoOriginal.setCategoria(hechoModificado.getCategoria());
     }
-    if (!hechoModificado.getDireccion()
-                        .isBlank()) {
+
+    if (hechoModificado.getDireccion() != null && !hechoModificado.getDireccion()
+                                                                  .isBlank()) {
       hechoOriginal.setDireccion(hechoModificado.getDireccion());
     }
+
     if (hechoModificado.getProvincia() != null && !hechoModificado.getProvincia()
                                                                   .isBlank()) {
       hechoOriginal.setProvincia(hechoModificado.getProvincia());
     }
+
+    if (hechoModificado.getEstado() != null && !hechoModificado.getEstado()
+                                                               .toString()
+                                                               .isBlank()) {
+      hechoOriginal.setEstado(hechoModificado.getEstado());
+    }
+
     return hechoOriginal;
   }
 
@@ -138,7 +156,6 @@ public class HechoController {
         model.put("fechaLimite", fechaFormateada);
       }
 
-      // --- VALIDACIÓN DE PERMISOS CORREGIDA ---
       boolean esAutor = false;
       if (hecho.getAutor() != null && idUsuario != null) {
         esAutor = hecho.getAutor()
@@ -146,11 +163,11 @@ public class HechoController {
                        .equals(idUsuario);
       }
 
-      // Permitir si es el autor O si es administrador
-      if (!esAutor && !esAdmin) {
+      if (!esAutor) {
         ctx.status(HttpStatus.FORBIDDEN)
            .result("No tienes permiso para editar este hecho.");
-        return; // Importante detener la ejecución
+        ctx.redirect("/");
+        return;
       }
 
       model.put("hecho", hecho);
@@ -164,10 +181,23 @@ public class HechoController {
         );
         model.put("etiquetasTexto", etiquetasStr);
       }
+
+      if (ctx.pathParamMap()
+             .containsKey("fuenteId")) {
+        try {
+          Long fuenteId = Long.parseLong(ctx.pathParam("fuenteId"));
+          Fuente fuente = fuenteController.findById(fuenteId);
+          model.put("fuente", fuente);
+
+        } catch (NumberFormatException e) {
+          System.out.println("Error parseando fuenteId: " + e.getMessage());
+        }
+      }
+
       ctx.render(
           "hecho-editar.hbs",
           model
-      ); // Ruta relativa corregida (sin / inicial a veces ayuda al resolver)
+      );
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -187,7 +217,14 @@ public class HechoController {
         return;
       }
 
-      // --- VALIDACIÓN DE PERMISOS EN POST ---
+      if (hechoOriginal.getFechacarga()
+                       .isBefore(LocalDateTime.now()
+                                              .minusWeeks(1))) {
+        ctx.status(HttpStatus.FORBIDDEN);
+        ctx.redirect("/");
+        return;
+      }
+
       Long idUsuario = ctx.sessionAttribute("usuario_id");
       Boolean esAdmin = Boolean.TRUE.equals(ctx.sessionAttribute("esAdmin"));
 
@@ -265,22 +302,35 @@ public class HechoController {
 
       String direccion = ctx.formParam("direccion");
       hechoModificado.setDireccion(direccion);
-      Double lat = Double.valueOf(Objects.requireNonNull(ctx.formParam("latitud")));
-      Double lng = Double.valueOf(Objects.requireNonNull(ctx.formParam("longitud")));
 
-      hechoModificado.setUbicacion(new PuntoGeografico(lat, lng));
-      String provincia = ctx.formParam("provincia");
-      if (provincia != null & !provincia.isBlank()) {
-        hechoModificado.setProvincia(provincia);
+      String latStr = ctx.formParam("latitud");
+      String lngStr = ctx.formParam("longitud");
+
+      if (latStr != null && !latStr.isBlank() && lngStr != null && !lngStr.isBlank()) {
+        try {
+          Double lat = Double.valueOf(latStr);
+          Double lng = Double.valueOf(lngStr);
+          hechoModificado.setUbicacion(new PuntoGeografico(lat, lng));
+        } catch (NumberFormatException e) {
+          throw new RuntimeException(e.getMessage());
+        }
       }
+      String provincia = ctx.formParam("provincia");
+      hechoModificado.setProvincia(provincia);
+      hechoModificado.setEstado(Estado.EDITADO);
 
       modificarHecho(hechoOriginal, hechoModificado);
+
       HechoRepository.instance()
                      .save(hechoOriginal);
 
-      // Redirigir al detalle del hecho editado
-      ctx.redirect("/hechos/" + idHecho);
 
+      String redirect = ctx.formParam("redirectUrl");
+      if (redirect != null && !redirect.isBlank()) {
+        ctx.redirect(redirect);
+      } else {
+        ctx.redirect("/hechos/" + idHecho);
+      }
     } catch (Exception e) {
       e.printStackTrace();
       ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -319,19 +369,16 @@ public class HechoController {
     boolean esAdmin = Boolean.TRUE.equals(ctx.sessionAttribute("esAdmin"));
 
     // Lógica segura para determinar propiedad
-    boolean esPropietario = false;
+    boolean esEditable = false;
     if (hecho.getAutor() != null && usuarioId != null) {
-      esPropietario = hecho.getAutor()
+      esEditable = hecho.getAutor()
                            .getId()
-                           .equals(usuarioId);
+                        .equals(usuarioId) && hecho.getFechacarga()
+                                                   .isAfter(LocalDateTime.now()
+                                                                         .minusWeeks(1));
     }
 
-    // Si es admin, también lo consideramos con permisos de propietario (para editar/borrar)
-    if (esAdmin) {
-      esPropietario = true;
-    }
-
-    model.put("esPropietario", esPropietario);
+    model.put("esEditable", esEditable);
 
     if (hecho.getFechaSuceso() != null) {
       java.time.format.DateTimeFormatter formatter =
@@ -346,23 +393,19 @@ public class HechoController {
     ctx.render("hecho-detail.hbs", model);
   }
 
-  // NUEVO MÉTODO PARA CREAR HECHO (con o sin fuente)
   public void crearHecho(Context ctx) {
     try {
-      // Obtener datos del formulario
       String titulo = ctx.formParam("titulo");
       String descripcion = ctx.formParam("descripcion");
       String categoria = ctx.formParam("categoria");
       String direccion = ctx.formParam("direccion");
       String provincia = ctx.formParam("provincia");
 
-      // Parsear fecha
       String fechaSucesoStr = ctx.formParam("fechaSuceso");
       LocalDateTime fechaSuceso = fechaSucesoStr != null && !fechaSucesoStr.isBlank()
                                   ? LocalDateTime.parse(fechaSucesoStr)
                                   : LocalDateTime.now();
 
-      // Parsear coordenadas
       Double lat = ctx.formParam("latitud") != null ?
                    Double.parseDouble(ctx.formParam("latitud")) :
                    null;
@@ -422,7 +465,6 @@ public class HechoController {
       }
       nuevoHecho.setFotos(fotos);
 
-      // Validar hecho
       nuevoHecho.setAutor(UserRepository.instance()
                                         .findById(usuarioId));
       validarHecho(nuevoHecho);
@@ -443,9 +485,15 @@ public class HechoController {
         } else {
           fuenteController.agregarHechoDinamico(fuente, nuevoHecho);
         }
+
       }
 
-      ctx.redirect("/");
+      String redirect = ctx.formParam("redirectUrl");
+      if (redirect != null && !redirect.isEmpty()) {
+        ctx.redirect(redirect);
+      } else {
+        ctx.redirect("/");
+      }
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -454,12 +502,12 @@ public class HechoController {
     }
   }
 
-  // En HechoController.java
   public Map<String, Object> buscarAvanzadoCompleto(
       String titulo,
       String categoria,
       String fuente,
       String coleccion,
+      Long coleccionId,
       String fechaDesdeStr,
       String fechaHastaStr,
       Boolean soloConsensuados,
@@ -467,7 +515,6 @@ public class HechoController {
   ) {
 
     try {
-      // Convertir fechas
       LocalDate fechaDesde = null;
       LocalDate fechaHasta = null;
 
@@ -478,15 +525,13 @@ public class HechoController {
         fechaHasta = LocalDate.parse(fechaHastaStr);
       }
 
-      // Usar el servicio
       List<Hecho> resultados = HechoRepository.instance()
                                               .buscarAvanzadoCompleto(
-                                                  titulo, categoria, fuente, coleccion,
+                                                  titulo, categoria, fuente, coleccion, coleccionId,
                                                   fechaDesde, fechaHasta, soloConsensuados,
                                                   incluirEliminados
                                               );
 
-      // Mapear para frontend
       List<Map<String, Object>> resultadosMapeados = resultados.stream()
                                                                .map(this::mapHechoToFrontend)
                                                                .collect(Collectors.toList());
@@ -510,7 +555,6 @@ public class HechoController {
       int page, int pageSize
   ) {
     try {
-      // Convertir fechas de String a LocalDate
       LocalDate fechaDesde = null;
       LocalDate fechaHasta = null;
 
@@ -521,7 +565,6 @@ public class HechoController {
         fechaHasta = LocalDate.parse(fechaHastaStr);
       }
 
-      // Usar el repositorio paginado
       Map<String, Object> resultadoRepo = HechoRepository.instance()
                                                          .buscarAvanzadoCompletoPaginated(
                                                              titulo,
@@ -536,15 +579,12 @@ public class HechoController {
                                                              pageSize
                                                          );
 
-      // Obtener resultados del repositorio
       List<Hecho> hechos = (List<Hecho>) resultadoRepo.get("resultados");
 
-      // Mapear para el frontend
       List<Map<String, Object>> resultadosMapeados = hechos.stream()
                                                            .map(this::mapHechoToFrontend)
                                                            .collect(Collectors.toList());
 
-      // Construir respuesta con toda la info de paginación
       Map<String, Object> respuesta = new HashMap<>(resultadoRepo);
       respuesta.put("resultados", resultadosMapeados);
 
@@ -560,16 +600,12 @@ public class HechoController {
     List<Hecho> resultados;
 
     if (soloConsensuados != null && soloConsensuados) {
-      // Obtener hechos consensuados
       resultados = ColeccionRepository.instance()
                                       .findHechosConsensuados();
     } else {
-      // Obtener todos los hechos
       resultados = HechoRepository.instance()
                                   .findAll();
     }
-
-    // Filtrar por título si es necesario
     if (titulo != null && !titulo.isBlank()) {
       resultados = resultados.stream()
                              .filter(h -> h.getTitulo() != null &&
@@ -604,7 +640,6 @@ public class HechoController {
         fechaHasta = LocalDate.parse(fechaHastaStr);
       }
 
-      // El repositorio ya tiene un método optimizado para contar
       return HechoRepository.instance()
                             .countByFiltros(categoria, fechaDesde, fechaHasta);
 
@@ -623,20 +658,18 @@ public class HechoController {
     Long id = ctx.pathParamAsClass("id", Long.class)
                  .get();
 
-    // Buscas el item en la lista unificada
     Multimedia item = HechoRepository.instance()
                                      .findById(id)
                                      .getFotos()
                                      .get(index);
 
-    // IMPORTANTE: Definir el Content-Type correcto dinámicamente
     if (item.esVideo()) {
       ctx.contentType("video/mp4");
     } else {
-      ctx.contentType("image/jpeg"); // O image/png según corresponda
+      ctx.contentType("image/jpeg");
     }
 
-    ctx.result(item.getDatos()); // Devuelves los bytes
+    ctx.result(item.getDatos());
   }
 
   private List<Hecho> obtenerHechosFiltrados(
@@ -645,7 +678,6 @@ public class HechoController {
   ) {
     List<Hecho> todos = this.findAll();
 
-    // Parseo seguro de fechas
     LocalDateTime fechaDesde = (fechaDesdeStr != null && !fechaDesdeStr.isBlank()) ?
                                LocalDateTime.parse(fechaDesdeStr + "T00:00:00") :
                                null;
@@ -689,7 +721,6 @@ public class HechoController {
     map.put("hecho_provincia", h.getProvincia());
     map.put("hecho_direccion", h.getDireccion());
 
-    // IMPORTANTE: Agregar ubicación para el mapa
     if (h.getUbicacion() != null) {
       Map<String, Object> ubicacion = new HashMap<>();
       ubicacion.put(
@@ -705,7 +736,6 @@ public class HechoController {
       map.put("hecho_ubicacion", ubicacion);
     }
 
-    // Mapear etiquetas correctamente
     if (h.getEtiquetas() != null) {
       List<Map<String, String>> etiquetasList = h.getEtiquetas()
                                                  .stream()
@@ -718,7 +748,6 @@ public class HechoController {
       map.put("etiquetas", etiquetasList);
     }
 
-    // Mapear colecciones correctamente
     if (h.getColecciones() != null && !h.getColecciones()
                                         .isEmpty()) {
       List<Map<String, Object>> coleccionesList = h.getColecciones()
@@ -735,7 +764,6 @@ public class HechoController {
       map.put("colecciones", new ArrayList<>());
     }
 
-    // Agregar información del autor
     if (h.getAutor() != null) {
       Map<String, Object> autor = new HashMap<>();
       autor.put(
@@ -751,7 +779,6 @@ public class HechoController {
       map.put("autor", autor);
     }
 
-    // Agregar fotos
     if (h.getFotos() != null && !h.getFotos()
                                   .isEmpty()) {
       List<Map<String, Object>> fotosList = new ArrayList<>();
@@ -796,5 +823,10 @@ public class HechoController {
   public List<Hecho> findAllPublicos() {
     return HechoRepository.instance()
                           .findAllPublicos();
+  }
+
+  public void findAndDelete(Long idHecho) {
+    HechoRepository.instance()
+                   .findAndDelete(idHecho);
   }
 }

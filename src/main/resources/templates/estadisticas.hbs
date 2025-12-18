@@ -1,21 +1,21 @@
 {{#partial "nav_izquierda"}}
-    <a href="javascript:history.back()"
-       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
-       title="Volver al panel">
-        <i class="fa-solid fa-arrow-left"></i>
-        <span class="d-none d-sm-block">Volver</span>
-    </a>
+    <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+            onclick="history.back()">
+        <i class="fas fa-arrow-left"></i>
+        <span class="d-none d-md-inline">Volver</span>
+    </button>
 {{/partial}}
 
 {{#partial "contenido"}}
 
-    <div class="container py-4">
-        <div class="container my-5 bg-white bg-opacity-75 rounded p-3">
-            <h1 class="mt-2 fw-bold">
-                <i class="bi bi-kanban"
-                   style="transform: rotate(180deg); display: inline-block;"></i>
-                Estadísticas
-            </h1>
+    <div class="container-sm py-4 mx-auto">
+        <div class="bg-white bg-opacity-75 rounded p-3 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 border-secondary border-opacity-25">
+                <h2 class="fw-bold">
+                    <i class="fa-solid fa-chart-line me-2"></i>
+                    Estadísticas
+                </h2>
+            </div>
 
             <div class="row mb-4">
                 <div class="col-md-4">
@@ -77,24 +77,26 @@
                                         <div class="w-100">
                                             <label class="form-label fw-bold mb-1">Filtrar
                                                 por:</label>
-                                            <label for="selectFiltroHechos"></label><select id="selectFiltroHechos"
-                                                                                            class="form-select w-100">
-                                                <option value="" selected>Filtrar por:
-                                                </option>
-                                                <option value="1">Provincia</option>
-                                                <option value="2">Hora</option>
-                                            </select>
+                                            <label for="selectFiltroHechos"></label><select
+                                                id="selectFiltroHechos"
+                                                class="form-select w-100">
+                                            <option value="" selected>Filtrar por:
+                                            </option>
+                                            <option value="1">Provincia</option>
+                                            <option value="2">Hora</option>
+                                        </select>
                                         </div>
 
                                         <div class="w-100">
                                             <label class="form-label fw-bold mb-1">Categoría:</label>
-                                            <label for="selectCategoriaHechos"></label><select id="selectCategoriaHechos"
-                                                                                               class="form-select w-100">
-                                                <option value="">Seleccione una categoria:</option>
-                                                {{#each categorias}}
-                                                    <option value="{{this}}">{{this}}</option>
-                                                {{/each}}
-                                            </select>
+                                            <label for="selectCategoriaHechos"></label><select
+                                                id="selectCategoriaHechos"
+                                                class="form-select w-100">
+                                            <option value="">Seleccione una categoria:</option>
+                                            {{#each categorias}}
+                                                <option value="{{this}}">{{this}}</option>
+                                            {{/each}}
+                                        </select>
                                         </div>
 
                                         <button type="button"
@@ -135,12 +137,13 @@
                                     <div class="d-flex flex-column gap-3">
                                         <div class="w-100">
                                             <label class="form-label fw-bold mb-1">Colección:</label>
-                                            <label for="selectColeccion"></label><select id="selectColeccion" class="form-select w-100">
-                                                <option value="">Seleccione una colección</option>
-                                                {{#each colecciones}}
-                                                    <option value="{{id}}">{{titulo}}</option>
-                                                {{/each}}
-                                            </select>
+                                            <label for="selectColeccion"></label><select
+                                                id="selectColeccion" class="form-select w-100">
+                                            <option value="">Seleccione una colección</option>
+                                            {{#each colecciones}}
+                                                <option value="{{id}}">{{titulo}}</option>
+                                            {{/each}}
+                                        </select>
                                         </div>
                                         <button type="button"
                                                 class="btn btn-info w-100 mt-2 descargar-csv"
@@ -179,16 +182,17 @@
                                         <div class="w-100">
                                             <label class="form-label fw-bold mb-1">Obtener
                                                 Top:</label>
-                                            <label for="selectTopCategorias"></label><select id="selectTopCategorias"
-                                                                                             class="form-select w-100">
-                                                <option selected>Seleccionar top</option>
-                                                <option value="1">Top 1</option>
-                                                <option value="3">Top 3</option>
-                                                <option value="5">Top 5</option>
-                                                <option value="10">Top 10</option>
-                                                <option value="50">Top 50</option>
-                                                <option value="100">Top 100</option>
-                                            </select>
+                                            <label for="selectTopCategorias"></label><select
+                                                id="selectTopCategorias"
+                                                class="form-select w-100">
+                                            <option selected>Seleccionar top</option>
+                                            <option value="1">Top 1</option>
+                                            <option value="3">Top 3</option>
+                                            <option value="5">Top 5</option>
+                                            <option value="10">Top 10</option>
+                                            <option value="50">Top 50</option>
+                                            <option value="100">Top 100</option>
+                                        </select>
                                         </div>
                                         <button type="button"
                                                 class="btn btn-info w-100 mt-2 descargar-csv"
@@ -241,8 +245,8 @@
                     maintainAspectRatio: false,
                     indexAxis: horizontal ? 'y' : 'x',
                     scales: {
-                        x: { beginAtZero: true },
-                        y: { beginAtZero: true }
+                        x: {beginAtZero: true},
+                        y: {beginAtZero: true}
                     }
                 }
             });
@@ -300,7 +304,9 @@
                 if (chartCategorias) chartCategorias.destroy();
                 // Usamos el ID NUEVO: canvasCategorias
                 chartCategorias = crearGrafico("canvasCategorias", datos, "Hechos por categoría", true);
-            } catch (error) { console.error(error); }
+            } catch (error) {
+                console.error(error);
+            }
         }
 
         // 3. CARGA COLECCIÓN
@@ -314,19 +320,21 @@
                 if (chartColeccion) chartColeccion.destroy();
                 // Usamos el ID NUEVO: canvasColeccion
                 chartColeccion = crearGrafico("canvasColeccion", datos, "Detalle de Colección", false);
-            } catch (error) { console.error(error); }
+            } catch (error) {
+                console.error(error);
+            }
         }
 
         // DESCARGA CSV
         async function descargarCSVCompleto(tipo) {
-             try {
+            try {
                 if (tipo === "hechos") {
                     const resp = await fetch("/admin/estadisticas/hechos/todas");
                     const datos = await resp.json();
                     let csv = "=== Hechos por Provincia ===\nProvincia,Categoría,Cantidad\n";
-                    if(datos.provincia) datos.provincia.forEach(e => csv += `${e.provincia},${e.categoria},${e.cantidad}\n`);
+                    if (datos.provincia) datos.provincia.forEach(e => csv += `${e.provincia},${e.categoria},${e.cantidad}\n`);
                     csv += "\n=== Hechos por Hora ===\nHora,Categoría,Cantidad\n";
-                    if(datos.hora) datos.hora.forEach(e => csv += `${e.hora},${e.categoria},${e.cantidad}\n`);
+                    if (datos.hora) datos.hora.forEach(e => csv += `${e.hora},${e.categoria},${e.cantidad}\n`);
                     downloadBlob(csv, "estadisticas_hechos.csv");
                     return;
                 }
@@ -339,7 +347,9 @@
                 let csv = "Dato,Cantidad\n";
                 datos.forEach(e => csv += `${e.provincia || e.categoria || e.coleccion},${e.cantidad}\n`);
                 downloadBlob(csv, `estadisticas_${tipo}.csv`);
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.error(e);
+            }
         }
 
         function downloadBlob(content, filename) {
@@ -364,7 +374,9 @@
             document.getElementById("selectTopCategorias").addEventListener("change", cargarCategorias);
 
             document.querySelectorAll(".descargar-csv").forEach(btn => {
-                btn.addEventListener("click", () => { descargarCSVCompleto(btn.dataset.type); });
+                btn.addEventListener("click", () => {
+                    descargarCSVCompleto(btn.dataset.type);
+                });
             });
 
             // --- EJECUCIÓN INMEDIATA ---

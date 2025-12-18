@@ -1,21 +1,18 @@
 {{#partial "nav_izquierda"}}
-    <a href="javascript:history.back()"
-       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
-       title="Volver al panel">
-        <i class="fa-solid fa-arrow-left"></i>
-        <span class="d-none d-sm-block">Volver</span>
-    </a>
+    <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+            onclick="history.back()">
+        <i class="fas fa-arrow-left"></i>
+        <span class="d-none d-md-inline">Volver</span>
+    </button>
 {{/partial}}
 
 {{#partial "contenido"}}
     <div class="container-sm py-4 mx-auto">
         <div class="bg-white bg-opacity-75 p-3 rounded shadow-sm">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 border-secondary border-opacity-25">
                 <div>
                     <h2 class="fw-bold"><i class="fa-solid fa-layer-group me-2"></i>Gestión de
                         Colecciones</h2>
-                    <p class="text-muted">Agrupa hechos, define fuentes y aplica algoritmos de
-                        consenso.</p>
                 </div>
             </div>
 
@@ -31,7 +28,9 @@
                         </div>
                         <div class="card-body bg-light">
 
-                            <form action="/admin/colecciones" method="POST" enctype="multipart/form-data" id="formCrearColeccion" onsubmit="prepararEnvioMapeo()">
+                            <form action="/admin/colecciones" method="POST"
+                                  enctype="multipart/form-data" id="formCrearColeccion"
+                                  onsubmit="prepararEnvioMapeo()">
 
                                 <!-- 1. Datos Básicos -->
                                 <div class="mb-4">
@@ -40,13 +39,20 @@
                                     </label>
                                     <div class="bg-white p-3 rounded border">
                                         <div class="mb-2">
-                                            <input type="text" name="nombre" class="form-control form-control-sm" placeholder="Nombre de la colección (Ej: Accidentes 2023)" required>
+                                            <input type="text" name="nombre"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="Nombre de la colección (Ej: Accidentes 2023)"
+                                                   required>
                                         </div>
                                         <div class="mb-2">
-                                            <input type="text" name="categoria" class="form-control form-control-sm" placeholder="Categoría (Ej: Tráfico)">
+                                            <input type="text" name="categoria"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="Categoría (Ej: Tráfico)" required>
                                         </div>
                                         <div>
-                                            <textarea name="descripcion" class="form-control form-control-sm" rows="2" placeholder="Breve descripción..."></textarea>
+                                            <textarea name="descripcion"
+                                                      class="form-control form-control-sm" rows="2"
+                                                      placeholder="Breve descripción..." required></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -60,19 +66,30 @@
                                     <div class="bg-white p-3 rounded border">
                                         <!-- Toggle Fuente -->
                                         <div class="btn-group w-100 mb-3" role="group">
-                                            <input type="radio" class="btn-check" name="modo_fuente" id="modoExistente" value="existente" checked onchange="togglemodo_fuente()">
-                                            <label class="btn btn-outline-secondary btn-sm" for="modoExistente">Existente</label>
+                                            <input type="radio" class="btn-check" name="modo_fuente"
+                                                   id="modoExistente" value="existente" checked
+                                                   onchange="togglemodo_fuente()">
+                                            <label class="btn btn-outline-secondary btn-sm"
+                                                   for="modoExistente">Existente</label>
 
-                                            <input type="radio" class="btn-check" name="modo_fuente" id="modoNueva" value="nueva" onchange="togglemodo_fuente()">
-                                            <label class="btn btn-outline-secondary btn-sm" for="modoNueva">Crear Nueva</label>
+                                            <input type="radio" class="btn-check" name="modo_fuente"
+                                                   id="modoNueva" value="nueva"
+                                                   onchange="togglemodo_fuente()">
+                                            <label class="btn btn-outline-secondary btn-sm"
+                                                   for="modoNueva">Crear Nueva</label>
                                         </div>
 
                                         <!-- A) Fuente Existente -->
                                         <div id="panelFuenteExistente">
-                                            <select name="fuente_id" class="form-select form-select-sm bg-light">
-                                                <option value="" selected disabled>Seleccionar fuente...</option>
+                                            <select name="fuente_id"
+                                                    class="form-select form-select-sm bg-light" required>
+                                                <option value="" selected disabled>Seleccionar
+                                                    fuente...
+                                                </option>
                                                 {{#each fuentes}}
-                                                    <option value="{{this.id}}">{{this.nombre}} ({{this.tipo}})</option>
+                                                    <option value="{{this.id}}">{{this.nombre}}
+                                                        ({{this.tipo}})
+                                                    </option>
                                                 {{/each}}
                                             </select>
                                         </div>
@@ -80,76 +97,117 @@
                                         <!-- B) Fuente Nueva -->
                                         <div id="panelFuenteNueva" class="d-none">
                                             <div class="mb-2">
-                                                <input type="text" name="nueva_fuente_nombre" class="form-control form-control-sm" placeholder="Nombre de la nueva fuente">
+                                                <input type="text" name="nueva_fuente_nombre"
+                                                       class="form-control form-control-sm"
+                                                       placeholder="Nombre de la nueva fuente">
                                             </div>
 
                                             <div class="mb-3">
-                                                <select id="selectorTipoUI" class="form-select form-select-sm" onchange="gestionarCambioTipo()">
-                                                    <option value="DINAMICA" selected>Dinámica (Vacía)</option>
-                                                    <option value="ESTATICA_CSV">Importar CSV</option>
-                                                    <option value="ESTATICA_JSON">Importar JSON</option>
+                                                <select id="selectorTipoUI"
+                                                        class="form-select form-select-sm"
+                                                        onchange="gestionarCambioTipo()">
+                                                    <option value="DINAMICA" selected>Dinámica
+                                                        (Vacía)
+                                                    </option>
+                                                    <option value="ESTATICA_CSV">Importar CSV
+                                                    </option>
+                                                    <option value="ESTATICA_JSON">Importar JSON
+                                                    </option>
                                                     <option value="API">API Externa</option>
                                                     <option value="AGREGACION">Agregación</option>
                                                 </select>
-                                                <input type="hidden" name="nueva_fuente_tipo" id="inputTipoReal" value="DINAMICA">
+                                                <input type="hidden" name="nueva_fuente_tipo"
+                                                       id="inputTipoReal" value="DINAMICA">
                                             </div>
 
                                             <!-- Sub-formularios Dinámicos -->
-                                            <div id="contenedorConfigExtra" class="border-top pt-2 mt-2">
+                                            <div id="contenedorConfigExtra"
+                                                 class="border-top pt-2 mt-2">
 
                                                 <!-- API Config -->
                                                 <div id="camposApi" class="d-none animate-fade">
-                                                    <label class="form-label x-small fw-bold text-muted">Configuración API</label>
-                                                    <input type="text" name="url" class="form-control form-control-sm mb-2" placeholder="URL Endpoint (http://...)">
-                                                    <input type="text" name="token" class="form-control form-control-sm" placeholder="Token Auth (Opcional)">
+                                                    <label class="form-label x-small fw-bold text-muted">Configuración
+                                                        API</label>
+                                                    <input type="text" name="url"
+                                                           class="form-control form-control-sm mb-2"
+                                                           placeholder="URL Endpoint (http://...)">
+                                                    <input type="text" name="token"
+                                                           class="form-control form-control-sm"
+                                                           placeholder="Token Auth (Opcional)">
                                                 </div>
 
                                                 <!-- CSV/JSON Config -->
-                                                <div id="camposEstatica" class="d-none animate-fade">
+                                                <div id="camposEstatica"
+                                                     class="d-none animate-fade">
 
                                                     <div id="configCsv" class="d-none row g-2 mb-2">
                                                         <div class="col-6">
                                                             <label class="form-label x-small mb-0 text-muted">Separador</label>
-                                                            <select name="csv_separador" class="form-select form-select-sm py-0" style="font-size: 0.8rem;">
-                                                                <option value="," selected>Coma (,)</option>
-                                                                <option value=";">Punto y coma (;)</option>
+                                                            <select name="csv_separador"
+                                                                    class="form-select form-select-sm py-0"
+                                                                    style="font-size: 0.8rem;">
+                                                                <option value="," selected>Coma
+                                                                    (,)
+                                                                </option>
+                                                                <option value=";">Punto y coma (;)
+                                                                </option>
                                                                 <option value="|">Barra (|)</option>
                                                             </select>
                                                         </div>
                                                         <div class="col-6">
-                                                            <label class="form-label x-small mb-0 text-muted">Formato Fecha</label>
-                                                            <input type="text" name="csv_formato_fecha" class="form-control form-control-sm py-0" value="dd/MM/yyyy HH:mm" style="font-size: 0.8rem;">
+                                                            <label class="form-label x-small mb-0 text-muted">Formato
+                                                                Fecha</label>
+                                                            <input type="text"
+                                                                   name="csv_formato_fecha"
+                                                                   class="form-control form-control-sm py-0"
+                                                                   value="dd/MM/yyyy HH:mm"
+                                                                   style="font-size: 0.8rem;">
                                                         </div>
                                                     </div>
 
-                                                    <label class="form-label x-small fw-bold text-muted mb-1">Archivo de Datos</label>
-                                                    <input type="file" name="archivo_fuente" id="inputArchivo" class="form-control form-control-sm mb-2">
+                                                    <label class="form-label x-small fw-bold text-muted mb-1">Archivo
+                                                        de Datos</label>
+                                                    <input type="file" name="archivo_fuente"
+                                                           id="inputArchivo"
+                                                           class="form-control form-control-sm mb-2">
 
                                                     <!-- Mapeo Dinámico -->
-                                                    <div id="seccionMapeo" class="d-none bg-light p-2 rounded border mt-2">
+                                                    <div id="seccionMapeo"
+                                                         class="d-none bg-light p-2 rounded border mt-2">
                                                         <h6 class="x-small fw-bold text-success mb-2 border-bottom pb-1">
-                                                            <i class="fa-solid fa-table-columns me-1"></i>Mapeo de Columnas
+                                                            <i class="fa-solid fa-table-columns me-1"></i>Mapeo
+                                                            de Columnas
                                                         </h6>
-                                                        <div id="contenedorFilasMapeo" class="d-grid gap-1"></div>
+                                                        <div id="contenedorFilasMapeo"
+                                                             class="d-grid gap-1"></div>
                                                     </div>
-                                                    <input type="hidden" name="mapeo_columnas_json" id="inputMapeoJson">
+                                                    <input type="hidden" name="mapeo_columnas_json"
+                                                           id="inputMapeoJson">
                                                 </div>
 
                                                 <!-- Agregación Config -->
-                                                <div id="camposAgregacion" class="d-none animate-fade">
-                                                    <label class="form-label x-small fw-bold text-muted">Fuentes a Agrupar</label>
+                                                <div id="camposAgregacion"
+                                                     class="d-none animate-fade">
+                                                    <label class="form-label x-small fw-bold text-muted">Fuentes
+                                                        a Agrupar</label>
                                                     <div class="input-group input-group-sm mb-2">
-                                                        <select id="selectFuenteAgregacion" class="form-select">
+                                                        <select id="selectFuenteAgregacion"
+                                                                class="form-select">
                                                             {{#each fuentes}}
                                                                 <option value="{{this.id}}">{{this.nombre}}</option>
                                                             {{/each}}
                                                         </select>
-                                                        <button type="button" class="btn btn-outline-secondary" onclick="agregarFuenteAgregacion()">
+                                                        <button type="button"
+                                                                class="btn btn-outline-secondary"
+                                                                onclick="agregarFuenteAgregacion()">
                                                             <i class="fa-solid fa-plus"></i>
                                                         </button>
                                                     </div>
-                                                    <ul id="listaAgregacion" class="list-group list-group-flush border rounded bg-white small" style="max-height: 100px; overflow-y: auto;">
-                                                        <li class="list-group-item text-center text-muted fst-italic py-2 small" id="placeholder-agregacion">
+                                                    <ul id="listaAgregacion"
+                                                        class="list-group list-group-flush border rounded bg-white small"
+                                                        style="max-height: 100px; overflow-y: auto;">
+                                                        <li class="list-group-item text-center text-muted fst-italic py-2 small"
+                                                            id="placeholder-agregacion">
                                                             No hay fuentes seleccionadas
                                                         </li>
                                                     </ul>
@@ -166,19 +224,22 @@
                                         <i class="fa-solid fa-gavel me-1"></i>Criterio de Consenso
                                     </label>
                                     <div class="bg-white p-3 rounded border">
-                                        <select name="algoritmo_tipo" class="form-select form-select-sm">
+                                        <select name="algoritmo_tipo"
+                                                class="form-select form-select-sm">
                                             <option value="May_simple">Mayoría Simple</option>
                                             <option value="Absoluta">Unanimidad / Absoluta</option>
-                                            <option value="Mult_menciones">Múltiples Menciones</option>
+                                            <option value="Mult_menciones">Múltiples Menciones
+                                            </option>
                                         </select>
                                         <div class="form-text x-small mt-1 text-muted">
-                                            Define cómo se validan los hechos dentro de la colección.
+                                            Define cómo se validan los hechos dentro de la
+                                            colección.
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="d-grid pt-2">
-                                    <button type="submit" class="btn btn-primary fw-bold shadow-sm">
+                                    <button type="button" class="btn btn-primary fw-bold shadow-sm" id="btnCrearColeccion">
                                         <i class="fa-solid fa-check me-2"></i>Crear Colección
                                     </button>
                                 </div>
@@ -195,20 +256,25 @@
                         <div class="row g-2">
                             <div class="col-md-5">
                                 <div class="input-group">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-search"></i></span>
-                                    <input id="searchInput" type="text" name="titulo" class="form-control border-start-0 ps-0" placeholder="Buscar por título..." value="{{query}}">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i
+                                            class="fa-solid fa-search"></i></span>
+                                    <input id="searchInput" type="text" name="titulo"
+                                           class="form-control border-start-0 ps-0"
+                                           placeholder="Buscar por título..." value="{{query}}">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <select class="form-select" id="categoriaSelect" name="categoria">
                                     <option value="0">Todas las Categorías</option>
                                     {{#each categorias}}
-                                        <option value="{{this}}" {{#if (eq this ../categoriaSeleccionada)}}selected{{/if}}>{{this}}</option>
+                                        <option value="{{this}}"
+                                                {{#if (eq this ../categoriaSeleccionada)}}selected{{/if}}>{{this}}</option>
                                     {{/each}}
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <button class="btn btn-dark w-100 fw-bold" type="submit">Filtrar</button>
+                                <button class="btn btn-dark w-100 fw-bold" type="submit">Filtrar
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -222,29 +288,32 @@
                         </div>
                         <div class="list-group list-group-flush" id="resultsList">
                             {{#each colecciones}}
-                                <div class="list-group-item list-group-item-action p-3 border-start-0 border-end-0">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <div class="d-flex flex-column gap-1">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <h6 class="mb-0 fw-bold text-dark">{{this.titulo}}</h6>
-                                                <span class="badge bg-light text-dark border">{{this.categoria}}</span>
+                                <a href="/admin/colecciones/{{this.id}}"
+                                   class="list-group-item list-group-item-action p-3 border-start-0 border-end-0">
+                                    <div>
+                                        <div class="d-flex w-100 justify-content-between align-items-center">
+                                            <div class="d-flex flex-column gap-1">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <h6 class="mb-0 fw-bold text-dark">{{this.titulo}}</h6>
+                                                    <span class="badge bg-light text-dark border">{{this.categoria}}</span>
+                                                </div>
+                                                <small class="text-muted text-truncate"
+                                                       style="max-width: 450px;">
+                                                    {{#if this.descripcion}}{{this.descripcion}}{{else}}
+                                                        Sin descripción{{/if}}
+                                                </small>
                                             </div>
-                                            <small class="text-muted text-truncate" style="max-width: 450px;">
-                                                {{#if this.descripcion}}{{this.descripcion}}{{else}}Sin descripción{{/if}}
-                                            </small>
                                         </div>
-                                        <a href="/admin/colecciones/{{this.id}}" class="btn btn-sm btn-outline-primary rounded-pill px-3 ms-3">
-                                            Configurar <i class="fa-solid fa-gear ms-1"></i>
-                                        </a>
                                     </div>
-                                </div>
+                                </a>
                             {{else}}
                                 <div class="text-center py-5 text-muted">
                                     <div class="mb-3">
                                         <i class="fa-regular fa-folder-open fa-3x opacity-25"></i>
                                     </div>
                                     <h6 class="fw-bold">No hay colecciones creadas</h6>
-                                    <p class="small mb-0">Utiliza el formulario de la izquierda para comenzar.</p>
+                                    <p class="small mb-0">Utiliza el formulario de la izquierda para
+                                        comenzar.</p>
                                 </div>
                             {{/each}}
                         </div>
@@ -253,111 +322,144 @@
             </div>
         </div>
     </div>
-<style>
-    .x-small { font-size: 0.75rem; }
-    .animate-fade { animation: fadeIn 0.3s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-</style>
 
-<!-- Scripts Lógicos -->
-<script>
-    const CAMPOS_SISTEMA = [
-        { id: "TITULO", label: "Título", required: true },
-        { id: "FECHA_SUCESO", label: "Fecha", required: true },
-        { id: "CATEGORIA", label: "Categoría", required: false },
-        { id: "DESCRIPCION", label: "Descrip.", required: false },
-        { id: "DIRECCION", label: "Dirección", required: false },
-        { id: "PROVINCIA", label: "Provincia", required: false },
-        { id: "LATITUD", label: "Lat", required: false },
-        { id: "LONGITUD", label: "Lng", required: false },
-        { id: "ETIQUETAS", label: "Tags", required: false },
-        { id: "FOTOS", label: "Fotos", required: false }
-    ];
+    <!-- Creacion exitosa -->
+    <div class="modal fade" id="modalExito" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white border-0">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-circle-check me-2"></i>¡Colección creada!
+                    </h5>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <p class="fw-bold mb-3">La colección se creó correctamente.</p>
+                    <p class="text-muted small">Recargando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    document.addEventListener('DOMContentLoaded', function() {
-        togglemodo_fuente();
-        gestionarCambioTipo();
-
-        const inputArchivo = document.getElementById('inputArchivo');
-        if (inputArchivo) inputArchivo.addEventListener('change', procesarArchivo);
-    });
-
-    function togglemodo_fuente() {
-        const modoNueva = document.getElementById('modoNueva').checked;
-        const panelExistente = document.getElementById('panelFuenteExistente');
-        const panelNueva = document.getElementById('panelFuenteNueva');
-        const selectExistente = document.querySelector('select[name="fuente_id"]');
-        const inputNombreNueva = document.querySelector('input[name="nueva_fuente_nombre"]');
-
-        if (modoNueva) {
-            panelExistente.classList.add('d-none');
-            panelNueva.classList.remove('d-none');
-            selectExistente.disabled = true;
-            inputNombreNueva.required = true;
-        } else {
-            panelExistente.classList.remove('d-none');
-            panelNueva.classList.add('d-none');
-            selectExistente.disabled = false;
-            inputNombreNueva.required = false;
+    <style>
+        .x-small {
+            font-size: 0.75rem;
         }
-    }
 
-    function gestionarCambioTipo() {
-        const valorUI = document.getElementById('selectorTipoUI').value;
-        const realInput = document.getElementById('inputTipoReal');
-
-        // Reset
-        ['camposApi', 'camposEstatica', 'camposAgregacion', 'configCsv', 'seccionMapeo'].forEach(id =>
-            document.getElementById(id).classList.add('d-none')
-        );
-
-        if (valorUI === 'ESTATICA_CSV') {
-            realInput.value = 'ESTATICA';
-            document.getElementById('camposEstatica').classList.remove('d-none');
-            document.getElementById('configCsv').classList.remove('d-none');
-            document.getElementById('inputArchivo').accept = ".csv";
-        } else if (valorUI === 'ESTATICA_JSON') {
-            realInput.value = 'ESTATICA';
-            document.getElementById('camposEstatica').classList.remove('d-none');
-            document.getElementById('inputArchivo').accept = ".json";
-        } else if (valorUI === 'API') {
-            realInput.value = 'API';
-            document.getElementById('camposApi').classList.remove('d-none');
-        } else if (valorUI === 'AGREGACION') {
-            realInput.value = 'AGREGACION';
-            document.getElementById('camposAgregacion').classList.remove('d-none');
-        } else {
-            realInput.value = 'DINAMICA';
+        .animate-fade {
+            animation: fadeIn 0.3s ease-in-out;
         }
-    }
 
-    function procesarArchivo(e) {
-        const file = e.target.files[0];
-        const tipo = document.getElementById('selectorTipoUI').value;
-        if (!file || tipo !== 'ESTATICA_CSV') return;
-
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            const lines = evt.target.result.split('\n');
-            if (lines.length > 0) {
-                const sep = document.querySelector('select[name="csv_separador"]').value;
-                const headers = lines[0].split(sep).map(h => h.trim().replace(/^"|"$/g, ''));
-                generarMapeo(headers);
-                document.getElementById('seccionMapeo').classList.remove('d-none');
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
             }
-        };
-        reader.readAsText(file);
-    }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 
-    function generarMapeo(headers) {
-        const cont = document.getElementById('contenedorFilasMapeo');
-        cont.innerHTML = '';
-        const opts = headers.map(h => `<option value="${h}">${h}</option>`).join('');
+    <!-- Scripts Lógicos -->
+    <script>
+        const CAMPOS_SISTEMA = [
+            {id: "TITULO", label: "Título", required: true},
+            {id: "FECHA_SUCESO", label: "Fecha", required: true},
+            {id: "CATEGORIA", label: "Categoría", required: false},
+            {id: "DESCRIPCION", label: "Descrip.", required: false},
+            {id: "DIRECCION", label: "Dirección", required: false},
+            {id: "PROVINCIA", label: "Provincia", required: false},
+            {id: "LATITUD", label: "Lat", required: false},
+            {id: "LONGITUD", label: "Lng", required: false},
+            {id: "ETIQUETAS", label: "Tags", required: false},
+            {id: "FOTOS", label: "Fotos", required: false}
+        ];
 
-        CAMPOS_SISTEMA.forEach(c => {
-            const div = document.createElement('div');
-            div.className = 'row g-1 align-items-center mb-1';
-            div.innerHTML = `
+        document.addEventListener('DOMContentLoaded', function () {
+            togglemodo_fuente();
+            gestionarCambioTipo();
+
+            const inputArchivo = document.getElementById('inputArchivo');
+            if (inputArchivo) inputArchivo.addEventListener('change', procesarArchivo);
+        });
+
+        function togglemodo_fuente() {
+            const modoNueva = document.getElementById('modoNueva').checked;
+            const panelExistente = document.getElementById('panelFuenteExistente');
+            const panelNueva = document.getElementById('panelFuenteNueva');
+            const selectExistente = document.querySelector('select[name="fuente_id"]');
+            const inputNombreNueva = document.querySelector('input[name="nueva_fuente_nombre"]');
+
+            if (modoNueva) {
+                panelExistente.classList.add('d-none');
+                panelNueva.classList.remove('d-none');
+                selectExistente.disabled = true;
+                inputNombreNueva.required = true;
+            } else {
+                panelExistente.classList.remove('d-none');
+                panelNueva.classList.add('d-none');
+                selectExistente.disabled = false;
+                inputNombreNueva.required = false;
+            }
+        }
+
+        function gestionarCambioTipo() {
+            const valorUI = document.getElementById('selectorTipoUI').value;
+            const realInput = document.getElementById('inputTipoReal');
+
+            // Reset
+            ['camposApi', 'camposEstatica', 'camposAgregacion', 'configCsv', 'seccionMapeo'].forEach(id =>
+                    document.getElementById(id).classList.add('d-none')
+            );
+
+            if (valorUI === 'ESTATICA_CSV') {
+                realInput.value = 'ESTATICA';
+                document.getElementById('camposEstatica').classList.remove('d-none');
+                document.getElementById('configCsv').classList.remove('d-none');
+                document.getElementById('inputArchivo').accept = ".csv";
+            } else if (valorUI === 'ESTATICA_JSON') {
+                realInput.value = 'ESTATICA';
+                document.getElementById('camposEstatica').classList.remove('d-none');
+                document.getElementById('inputArchivo').accept = ".json";
+            } else if (valorUI === 'API') {
+                realInput.value = 'API';
+                document.getElementById('camposApi').classList.remove('d-none');
+            } else if (valorUI === 'AGREGACION') {
+                realInput.value = 'AGREGACION';
+                document.getElementById('camposAgregacion').classList.remove('d-none');
+            } else {
+                realInput.value = 'DINAMICA';
+            }
+        }
+
+        function procesarArchivo(e) {
+            const file = e.target.files[0];
+            const tipo = document.getElementById('selectorTipoUI').value;
+            if (!file || tipo !== 'ESTATICA_CSV') return;
+
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                const lines = evt.target.result.split('\n');
+                if (lines.length > 0) {
+                    const sep = document.querySelector('select[name="csv_separador"]').value;
+                    const headers = lines[0].split(sep).map(h => h.trim().replace(/^"|"$/g, ''));
+                    generarMapeo(headers);
+                    document.getElementById('seccionMapeo').classList.remove('d-none');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function generarMapeo(headers) {
+            const cont = document.getElementById('contenedorFilasMapeo');
+            cont.innerHTML = '';
+            const opts = headers.map(h => `<option value="${h}">${h}</option>`).join('');
+
+            CAMPOS_SISTEMA.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'row g-1 align-items-center mb-1';
+                div.innerHTML = `
                 <div class="col-4 text-end"><label class="x-small fw-bold mb-0 text-muted">${c.label}</label></div>
                 <div class="col-8">
                     <select class="form-select form-select-sm py-0 select-mapeo" style="font-size:0.75rem" data-campo="${c.id}" ${c.required ? 'required' : ''}>
@@ -366,80 +468,111 @@
                     </select>
                 </div>
             `;
-            cont.appendChild(div);
-        });
-    }
-
-    function prepararEnvioMapeo() {
-        const modoNueva = document.getElementById('modoNueva').checked;
-        const tipo = document.getElementById('selectorTipoUI').value;
-        if (!modoNueva || tipo !== 'ESTATICA_CSV') {
-            document.getElementById('inputMapeoJson').value = "";
-            return;
+                cont.appendChild(div);
+            });
         }
 
-        const map = {};
-        document.querySelectorAll('.select-mapeo').forEach(s => {
-            if(s.value) map[s.dataset.campo] = [s.value];
-        });
-        document.getElementById('inputMapeoJson').value = JSON.stringify(map);
-    }
-
-    // Funciones de Agregación
-    function agregarFuenteAgregacion() {
-        const sel = document.getElementById('selectFuenteAgregacion');
-        const id = sel.value;
-        const txt = sel.options[sel.selectedIndex].text;
-        if (!id || document.getElementById('agg-'+id)) return;
-
-        const li = document.createElement('li');
-        li.className = 'list-group-item d-flex justify-content-between py-1';
-        li.innerHTML = `<span>${txt}</span> <button type="button" class="btn btn-link text-danger p-0" onclick="this.parentElement.remove(); document.getElementById('agg-${id}').remove();"><i class="fa-solid fa-times"></i></button>`;
-        document.getElementById('listaAgregacion').appendChild(li);
-        document.getElementById('placeholder-agregacion').classList.add('d-none');
-
-        const inp = document.createElement('input');
-        inp.type = 'hidden'; inp.name = 'fuentes_seleccionadas'; inp.value = id; inp.id = 'agg-'+id;
-        document.getElementById('inputsAgregacionContainer').appendChild(inp);
-    }
-
-    // Búsqueda (Preservada del original)
-    document.getElementById('searchForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const titulo = document.getElementById('searchInput').value;
-        const cat = document.getElementById('categoriaSelect').value;
-        const list = document.getElementById('resultsList');
-
-        list.innerHTML = '<div class="text-center p-3 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando...</div>';
-
-        try {
-            const res = await fetch(`/api/admin/colecciones/buscar?titulo=${encodeURIComponent(titulo)}&categoria=${encodeURIComponent(cat)}`);
-            const data = await res.json();
-            list.innerHTML = '';
-
-            if(data.length === 0) {
-                list.innerHTML = '<div class="text-center p-4 text-muted">No se encontraron resultados.</div>';
+        function prepararEnvioMapeo() {
+            const modoNueva = document.getElementById('modoNueva').checked;
+            const tipo = document.getElementById('selectorTipoUI').value;
+            if (!modoNueva || tipo !== 'ESTATICA_CSV') {
+                document.getElementById('inputMapeoJson').value = "";
                 return;
             }
 
-            data.forEach(c => {
-                list.innerHTML += `
-                    <div class="list-group-item list-group-item-action p-3">
-                        <div class="d-flex w-100 justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-0 fw-bold text-primary">${c.titulo || c.coleccion_titulo}</h6>
-                                <span class="badge bg-light text-dark border mt-1">${c.categoria || c.coleccion_categoria}</span>
-                            </div>
-                            <a href="/admin/colecciones/${c.id}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
-                                Configurar <i class="fa-solid fa-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>`;
+            const map = {};
+            document.querySelectorAll('.select-mapeo').forEach(s => {
+                if (s.value) map[s.dataset.campo] = [s.value];
             });
-        } catch (err) {
-            list.innerHTML = `<div class="alert alert-danger m-3">Error: ${err.message}</div>`;
+            document.getElementById('inputMapeoJson').value = JSON.stringify(map);
         }
-    });
-</script>
+
+        // Funciones de Agregación
+        function agregarFuenteAgregacion() {
+            const sel = document.getElementById('selectFuenteAgregacion');
+            const id = sel.value;
+            const txt = sel.options[sel.selectedIndex].text;
+            if (!id || document.getElementById('agg-' + id)) return;
+
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between py-1';
+            li.innerHTML = `<span>${txt}</span> <button type="button" class="btn btn-link text-danger p-0" onclick="this.parentElement.remove(); document.getElementById('agg-${id}').remove();"><i class="fa-solid fa-times"></i></button>`;
+            document.getElementById('listaAgregacion').appendChild(li);
+            document.getElementById('placeholder-agregacion').classList.add('d-none');
+
+            const inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'fuentes_seleccionadas';
+            inp.value = id;
+            inp.id = 'agg-' + id;
+            document.getElementById('inputsAgregacionContainer').appendChild(inp);
+        }
+
+        // Búsqueda (Preservada del original)
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const titulo = document.getElementById('searchInput').value;
+            const cat = document.getElementById('categoriaSelect').value;
+            const list = document.getElementById('resultsList');
+
+            list.innerHTML = '<div class="text-center p-3 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando...</div>';
+
+            try {
+                const res = await fetch(`/api/admin/colecciones/buscar?titulo=${encodeURIComponent(titulo)}&categoria=${encodeURIComponent(cat)}`);
+                const data = await res.json();
+                list.innerHTML = '';
+
+                if (data.length === 0) {
+                    list.innerHTML = '<div class="text-center p-4 text-muted">No se encontraron resultados.</div>';
+                    return;
+                }
+
+                data.forEach(c => {
+                    list.innerHTML += `
+                    <a href="/admin/colecciones/${c.id}" class="list-group-item list-group-item-action p-3 border-start-0 border-end-0">
+                        <div>
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div class="d-flex flex-column gap-1">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <h6 class="mb-0 fw-bold text-dark">${c.titulo}</h6>
+                                        <span class="badge bg-light text-dark border">${c.categoria}</span>
+                                    </div>
+                                    <small class="text-muted text-truncate"
+                                           style="max-width: 450px;">
+                                        ${c.descripcion ? c.descripcion : 'Sin descripción'}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>`;
+                });
+            } catch (err) {
+                list.innerHTML = `<div class="alert alert-danger m-3">Error: ${err.message}</div>`;
+            }
+        });
+
+        const btnCrear = document.getElementById("btnCrearColeccion");
+        const formCrear = document.getElementById("formCrearColeccion");
+
+        if (btnCrear) {
+            btnCrear.addEventListener("click", () => {
+
+                // Validación HTML5 normal
+                if (!formCrear.checkValidity()) {
+                    formCrear.reportValidity();
+                    return;
+                }
+
+                // Mostrar modal de éxito
+                const modal = new bootstrap.Modal(document.getElementById("modalExito"));
+                modal.show();
+
+                // Enviar el formulario después de 1 segundo
+                setTimeout(() => {
+                    formCrear.submit();
+                }, 1000);
+            });
+        }
+    </script>
 {{/partial}}
 {{> templates/layout}}

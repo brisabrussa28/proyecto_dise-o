@@ -1,19 +1,20 @@
 {{#partial "nav_izquierda"}}
-    <a href="javascript:history.back()"
-       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
-       title="Volver al panel">
-        <i class="fa-solid fa-arrow-left"></i>
-        <span class="d-none d-sm-block">Volver</span>
-    </a>
+    <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+            onclick="history.back()">
+        <i class="fas fa-arrow-left"></i>
+        <span class="d-none d-md-inline">Volver</span>
+    </button>
 {{/partial}}
 
 {{#partial "contenido"}}
     <div class="container-sm py-4 mx-auto">
         <div class="bg-white bg-opacity-75 p-3 rounded shadow-sm">
-            <h2 class="fw-bold mb-3 text-black">
-                <i class="fa-solid fa-map-location-dot me-2"></i>
-                Hechos Registrados
-            </h2>
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 border-secondary border-opacity-25">
+                <h2 class="fw-bold">
+                    <i class="fa-solid fa-map-location-dot me-2"></i>
+                    Hechos Registrados
+                </h2>
+            </div>
 
             <form id="searchForm" class="mb-3 p-3 bg-light rounded border">
                 <div class="row g-2 align-items-end">
@@ -28,8 +29,7 @@
                         <select class="form-select" id="categoriaSelect" name="categoria">
                             <option value="0">Todas las categorías</option>
                             {{#each categorias}}
-                                <option value="{{this}}"
-                                        {{#if (eq this ../categoriaSeleccionada)}}selected{{/if}}>{{this}}</option>
+                                <option value="{{this}}">{{this}}</option>
                             {{/each}}
                         </select>
                     </div>
@@ -52,78 +52,16 @@
             </form>
 
             <div class="list-group" id="resultsList">
-                {{# if hechos}}
-
-                    {{#each hechos}}
-                        <a href="/hechos/{{this.id}}"
-                           class="list-group-item list-group-item-action py-3 border">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <div class="d-flex align-items-center mb-1">
-                                        <h6 class="fw-bold text-dark mb-0 me-2">{{titulo}}</h6>
-                                        {{#if colecciones}}
-                                            <span class="badge bg-success"
-                                                  title="Hecho consensuado"><i
-                                                    class="fa-solid fa-check"></i></span>
-                                        {{/if}}
-                                    </div>
-                                    <p class="mb-2 text-muted small">{{descripcion}}</p>
-                                    <div class="mb-2">
-                                        <span class="badge bg-info text-dark">{{categoria}}</span>
-                                        {{#if etiquetas}}
-                                            {{#each etiquetas}}
-                                                <span class="badge bg-secondary">{{nombre}}</span>
-                                            {{/each}}
-                                        {{/if}}
-                                    </div>
-                                    <div class="small text-muted">
-                                        <i class="fa-regular fa-calendar me-1"></i>
-                                        <!-- FIX: Uso de data attribute para renderizado seguro de fechas -->
-                                        <span class="fecha-render" data-fecha="{{fechaSuceso}}">Procesando fecha...</span>
-                                        <br>
-                                        <i class="fa-solid fa-location-dot me-1"></i>
-                                        {{#if provincia}}
-                                            {{provincia}} —
-                                        {{/if}}
-                                        {{direccion}}
-                                    </div>
-                                </div>
-                                <div class="ms-3 align-self-center">
-                                    <i class="fa-solid fa-chevron-right text-muted"></i>
-                                </div>
-                            </div>
-                        </a>
-                    {{/each}}
-                {{else}}
-                    <div class="alert alert-info text-center">
-                        <i class="fa-solid fa-info-circle me-2"></i>
-                        No se encontraron hechos con los criterios seleccionados.
-                    </div>
-                {{/if}}
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Cargando hechos...</p>
+                </div>
             </div>
 
             <nav class="mt-4">
                 <ul class="pagination pagination-sm justify-content-center"
                     id="paginationContainer"
-                    style="display: {{#if (gt totalPaginas 1)}}flex{{else}}none{{/if}}">
-
-                    {{#if (gt paginaActual 1)}}
-                        <li class="page-item">
-                            <a class="page-link" href="#" data-page="{{subtract paginaActual 1}}">Anterior</a>
-                        </li>
-                    {{/if}}
-
-                    {{#each (range 1 totalPaginas)}}
-                        <li class="page-item {{#if (eq this ../paginaActual)}}active{{/if}}">
-                            <a class="page-link" href="#" data-page="{{this}}">{{this}}</a>
-                        </li>
-                    {{/each}}
-
-                    {{#if (lt paginaActual totalPaginas)}}
-                        <li class="page-item">
-                            <a class="page-link" href="#" data-page="{{add paginaActual 1}}">Siguiente</a>
-                        </li>
-                    {{/if}}
+                    style="display: none;">
                 </ul>
             </nav>
         </div>
@@ -138,28 +76,55 @@
             const resultsList = document.getElementById('resultsList');
             const paginationContainer = document.getElementById('paginationContainer');
 
-            // --- Lógica de renderizado de fechas segura ---
-            function renderizarFechas() {
-                document.querySelectorAll('.fecha-render').forEach(span => {
-                    const raw = span.getAttribute('data-fecha');
-                    span.textContent = formatDate(raw);
-                });
+            async function cargarCategorias() {
+                try {
+                    const res = await fetch('/hechos/categorias');
+
+                    if (res.ok) {
+                        const categorias = await res.json();
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const catSeleccionada = urlParams.get('categoria') || '0';
+
+                        while (categoriaSelect.options.length > 1) {
+                            categoriaSelect.remove(1);
+                        }
+
+                        categorias.forEach(cat => {
+                            const option = document.createElement('option');
+                            option.value = cat;
+                            option.textContent = cat;
+                            if (cat === catSeleccionada) option.selected = true;
+                            categoriaSelect.appendChild(option);
+                        });
+                    }
+                } catch (e) {
+                    console.error("Error cargando categorías:", e);
+                }
             }
 
-            // Parseador robusto (acepta Arrays [y,m,d] y Strings ISO)
+            if (categoriaSelect.options.length <= 1) {
+                cargarCategorias();
+            } else {
+                const urlParams = new URLSearchParams(window.location.search);
+                const catSeleccionada = urlParams.get('categoria') || '0';
+                if (catSeleccionada !== '0') {
+                    categoriaSelect.value = catSeleccionada;
+                }
+            }
+
             function formatDate(dateInput) {
                 if (!dateInput) return 'Fecha no disponible';
                 let date;
 
-                // Detectar si es un array formato string "[2023, 10, 1]"
-                if (typeof dateInput === 'string' && dateInput.trim().startsWith('[')) {
+                if (Array.isArray(dateInput)) {
+                    date = new Date(dateInput[0], dateInput[1] - 1, dateInput[2], dateInput[3] || 0, dateInput[4] || 0);
+                } else if (typeof dateInput === 'string' && dateInput.trim().startsWith('[')) {
                     try {
                         const parts = JSON.parse(dateInput);
                         if (Array.isArray(parts)) {
-                            // Mes en JS es base 0
                             date = new Date(parts[0], parts[1] - 1, parts[2], parts[3] || 0, parts[4] || 0);
                         }
-                    } catch (e) { /* Fallback */
+                    } catch (e) {
                     }
                 }
 
@@ -170,19 +135,13 @@
                 if (isNaN(date.getTime())) return 'Fecha inválida';
 
                 return date.toLocaleString('es-AR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
                 });
             }
 
-            // Ejecutar al cargar para renderizar fechas iniciales
-            renderizarFechas();
-
             async function buscarHechos(titulo, categoria, consensuados = false, page = 1) {
-                resultsList.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Buscando hechos...</p></div>';
+                resultsList.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Buscando...</p></div>';
                 paginationContainer.style.display = 'none';
 
                 try {
@@ -193,19 +152,33 @@
                     params.append('page', page);
                     params.append('pageSize', 15);
                     params.append('paginar', 'true');
+                    params.append('_t', Date.now());
 
                     const url = `/api/hechos/buscar-completo?${params.toString()}`;
                     const resp = await fetch(url);
 
-                    if (!resp.ok) throw new Error('Error en la búsqueda');
+                    if (!resp.ok) {
+                        throw new Error(`Error del servidor (${resp.status})`);
+                    }
 
                     const data = await resp.json();
-                    const hechosResultantes = data.resultados || [];
+                    let hechosResultantes = data.resultados || [];
                     const total = data.total || 0;
                     const paginaActual = data.paginaActual || 1;
                     const totalPaginas = data.totalPaginas || 1;
 
                     resultsList.innerHTML = '';
+
+                    hechosResultantes.sort((a, b) => {
+                        const aCols = a.colecciones || a.hecho_colecciones || [];
+                        const bCols = b.colecciones || b.hecho_colecciones || [];
+                        const aEsConsensuado = Array.isArray(aCols) && aCols.length > 0;
+                        const bEsConsensuado = Array.isArray(bCols) && bCols.length > 0;
+
+                        if (aEsConsensuado && !bEsConsensuado) return -1;
+                        if (!aEsConsensuado && bEsConsensuado) return 1;
+                        return 0;
+                    });
 
                     if (hechosResultantes.length === 0) {
                         resultsList.innerHTML = `
@@ -219,28 +192,43 @@
                     }
 
                     hechosResultantes.forEach(hecho => {
-                        const esConsensuado = hecho.colecciones && hecho.colecciones.length > 0;
-                        const fechaFormateada = formatDate(hecho.hecho_fecha_suceso || hecho.fechaSuceso);
-                        const etiquetasHTML = hecho.etiquetas ? hecho.etiquetas.map(e => `<span class="badge bg-secondary me-1">${e.nombre.replace(/,\s*/g, " ")}</span>`) : '';
+                        const titulo = hecho.titulo || hecho.hecho_titulo || 'Sin título';
+                        const descripcion = hecho.descripcion || hecho.hecho_descripcion || 'Sin descripción';
+                        const categoria = hecho.categoria || hecho.hecho_categoria || 'General';
+                        const id = hecho.id || hecho.hecho_id;
+                        const provincia = hecho.provincia || hecho.hecho_provincia || '';
+                        const direccion = hecho.direccion || hecho.hecho_direccion || '';
+                        const fechaRaw = hecho.fechaSuceso || hecho.hecho_fecha_suceso;
+                        const fechaFormateada = formatDate(fechaRaw);
+                        const colecciones = hecho.colecciones || hecho.hecho_colecciones || [];
+                        const esConsensuado = Array.isArray(colecciones) && colecciones.length > 0;
+                        const etiquetas = hecho.etiquetas || hecho.hecho_etiquetas || [];
+                        let etiquetasHTML = '';
+                        if (Array.isArray(etiquetas)) {
+                            etiquetasHTML = etiquetas.map(e => {
+                                const nombre = e.nombre || e;
+                                return `<span class="badge bg-secondary me-1">${nombre ? nombre.toString().replace(/,\s*/g, " ") : ''}</span>`;
+                            }).join('');
+                        }
 
                         const itemHTML = `
-                            <a href="/hechos/${hecho.id}" class="list-group-item list-group-item-action py-3 border-start-0 border-end-0">
+                            <a href="/hechos/${id}" class="list-group-item list-group-item-action py-3 border-start-0 border-end-0">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div class="flex-grow-1">
                                         <div class="d-flex align-items-center mb-1">
-                                            <h6 class="fw-bold text-dark mb-0 me-2">${hecho.hecho_titulo}</h6>
+                                            <h6 class="fw-bold text-dark mb-0 me-2">${titulo}</h6>
                                             ${esConsensuado ? '<span class="badge bg-success" title="Consensuado"><i class="fa-solid fa-check"></i></span>' : ''}
                                         </div>
-                                        <p class="mb-2 text-muted small">${hecho.hecho_descripcion || 'Sin descripción'}</p>
+                                        <p class="mb-2 text-muted small">${descripcion}</p>
                                         <div class="mb-2">
-                                            <span class="badge bg-info text-dark me-1">${hecho.hecho_categoria || 'General'}</span>
+                                            <span class="badge bg-info text-dark me-1">${categoria}</span>
                                             ${etiquetasHTML}
                                         </div>
                                         <div class="small text-muted">
                                             <i class="fa-regular fa-calendar me-1"></i> ${fechaFormateada}
                                             <br>
                                             <i class="fa-solid fa-location-dot me-1"></i>
-                                             ${hecho.hecho_provincia ? hecho.hecho_provincia + ' — ' : ''} ${hecho.hecho_direccion || ''}
+                                             ${provincia ? provincia + ' — ' : ''} ${direccion}
                                         </div>
                                     </div>
                                     <div class="ms-3 align-self-center">
@@ -256,7 +244,9 @@
 
                 } catch (error) {
                     console.error(error);
-                    resultsList.innerHTML = `<div class="alert alert-danger text-center">Error al buscar: ${error.message}</div>`;
+                    resultsList.innerHTML = `<div class="alert alert-danger text-center">
+                        <i class="fa-solid fa-exclamation-triangle me-2"></i> Error al buscar: ${error.message}
+                    </div>`;
                 }
             }
 
@@ -296,8 +286,11 @@
                 });
             }
 
-            searchForm.addEventListener('submit', function (e) {
-                e.preventDefault();
+            function ejecutarFiltros(e) {
+                if (e && e.type === 'submit') {
+                    e.preventDefault();
+                }
+
                 const titulo = searchInput.value.trim();
                 const categoria = categoriaSelect.value;
                 const consensuados = soloConsensuados.checked;
@@ -311,9 +304,10 @@
                 history.replaceState(null, '', `${window.location.pathname}?${urlParams.toString()}`);
 
                 buscarHechos(titulo, categoria, consensuados);
-            });
+            }
 
-            // Inicialización con parámetros URL
+            searchForm.addEventListener('submit', ejecutarFiltros);
+
             const urlParams = new URLSearchParams(window.location.search);
             const tituloInicial = urlParams.get('titulo') || '';
             const categoriaInicial = urlParams.get('categoria') || '0';
@@ -324,9 +318,7 @@
             categoriaSelect.value = categoriaInicial;
             soloConsensuados.checked = consensuadosInicial;
 
-            if (tituloInicial || categoriaInicial !== '0' || consensuadosInicial || pageInicial > 1) {
-                buscarHechos(tituloInicial, categoriaInicial, consensuadosInicial, pageInicial);
-            }
+            buscarHechos(tituloInicial, categoriaInicial, consensuadosInicial, pageInicial);
         });
     </script>
 {{/partial}}

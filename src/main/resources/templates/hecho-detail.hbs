@@ -1,10 +1,9 @@
 {{#partial "nav_izquierda"}}
-    <a href="javascript:history.back()"
-       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
-       title="Volver al panel">
-        <i class="fa-solid fa-arrow-left"></i>
-        <span class="d-none d-sm-block">Volver</span>
-    </a>
+    <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+            onclick="history.back()">
+        <i class="fas fa-arrow-left"></i>
+        <span class="d-none d-md-inline">Volver</span>
+    </button>
 {{/partial}}
 
 <style>
@@ -27,7 +26,7 @@
             <h4>Categoria:
                 <span class="badge bg-primary fs-6">{{hecho.categoria}}</span></h4>
             <div class="d-flex gap-2">
-                {{#if esPropietario}}
+                {{#if esEditable}}
                     <a href="/hechos/{{hecho.id}}/editar" class="btn btn-warning btn-sm">
                         <i class="fa-solid fa-pen"></i> Editar
                     </a>
@@ -56,15 +55,16 @@
                                     <div class="d-flex justify-content-center align-items-center w-100 h-100">
                                         {{#if this.esVideo}}
                                             <video controls class="d-block"
-                                                   style="max-height: 100%; max-width: 100%;">
+                                                   style="max-height: 100%; max-width: 100%;"
+                                                   autoplay muted>
                                                 <source src="/hechos/{{../hecho.id}}/multimedia/{{@index}}"
                                                         type="video/mp4">
                                             </video>
                                         {{else}}
                                             <img src="/hechos/{{../hecho.id}}/multimedia/{{@index}}"
-                                         class="d-block w-100"
+                                                 class="d-block w-100"
                                                  style="height: 500px; object-fit: contain;"
-                                         alt="Foto del suceso">
+                                                 alt="Foto del suceso">
                                         {{/if}}
                                     </div>
                                 </div>
@@ -100,7 +100,7 @@
 
                         {{# if hecho.etiquetas}}
                             <hr>
-                            <div class="d-flex align-items-center gap-2 mt-3">
+                            <div class="d-flex align-items-center gap-2 mt-3" style="flex-wrap: wrap;">
                                 <i class="fa-solid fa-tags text-muted"></i>
                                 {{#each hecho.etiquetas}}
                                     <span class="badge bg-light text-dark border">{{this.nombre}}</span>
@@ -130,7 +130,7 @@
                                         <i class="fa-solid fa-user"></i>
                                     {{/if}}
                                 </div>
-                                <div>
+                                <div style="max-width: 60%">
                                     <h6 class="mb-0 fw-bold">{{hecho.autor.userName}}</h6>
                                     <small class="text-muted">{{hecho.autor.email}}</small>
                                 </div>
@@ -198,14 +198,16 @@
                 scrollWheelZoom: false // Deshabilita zoom con rueda para mejorar UX
             }).setView([lat, lng], 15);
 
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
+            L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{y}.png', {
+                tms: true,
+                maxZoom: 18,
+                attribution: '&copy; <a href="https://www.ign.gob.ar/">IGN Argentina</a>'
             }).addTo(map);
 
             // Marcador Fijo
             L.marker([lat, lng]).addTo(map)
-             .bindPopup("<b>{{hecho.titulo}}</b><br>{{hecho.direccion}}")
-             .openPopup();
+                    .bindPopup("<b>{{hecho.titulo}}</b><br>{{hecho.direccion}}")
+                    .openPopup();
         });
     </script>
 {{/partial}}

@@ -233,9 +233,10 @@
 
             function initMap() {
                 map = L.map('map').setView([-34.6037, -58.3816], 12);
-                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap'
+                L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{y}.png', {
+                    tms: true,
+                    maxZoom: 18,
+                    attribution: '&copy; <a href="https://www.ign.gob.ar/">IGN Argentina</a>'
                 }).addTo(map);
             }
 
@@ -303,15 +304,14 @@
                 if (fotos && fotos.length > 0) {
                     if (fotos[0].esVideo){
                         htmlImagen = `
-                            <div class="d-flex align-items-center justify-content-center bg-black mb-2" style="height: 140px;">
-                                    <a href="/hechos/${hecho.id}"><video src="/hechos/${hecho.id}/multimedia/0"
+                                    <a href="/hechos/${hecho.id}" class="media-link">
+                                    <video src="/hechos/${hecho.id}/multimedia/0"
                                     class="w-100 h-100"
                                     muted
                                     autoplay
                                     loop
-                                    style="object-fit: contain;">
+                                    style="object-fit: cover;">
                                     </video></a>
-                                </div>
                             `;
                     } else {
                         htmlImagen = `
@@ -319,7 +319,7 @@
                             <img src="/hechos/${hecho.id}/multimedia/0"
                                 class="card-img-top mb-2"
                                 alt="Foto"
-                                style="height: 140px; object-fit: fit;">
+                                style="height: 140px; object-fit: cover;">
                             </a>
                         `;
                     }
@@ -684,6 +684,9 @@
                 if (filtrosActivos.coleccion !== "0") params.append('coleccion', filtrosActivos.coleccion);
                 if (filtrosActivos.fechaDesde) params.append('fechaDesde', filtrosActivos.fechaDesde);
                 if (filtrosActivos.fechaHasta) params.append('fechaHasta', filtrosActivos.fechaHasta);
+
+                // CORRECCIÓN: NO enviamos 'paginar=true' ni 'pageSize' para que traiga TODO.
+                // Si el backend recibe 'paginar', paginaría. Si no lo recibe, trae todo.
 
                 actualizarFiltrosTexto();
 

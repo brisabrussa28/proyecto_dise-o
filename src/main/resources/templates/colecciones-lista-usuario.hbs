@@ -1,0 +1,151 @@
+{{#partial "nav_izquierda"}}
+    <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+            onclick="history.back()">
+        <i class="fas fa-arrow-left"></i>
+        <span class="d-none d-md-inline">Volver</span>
+    </button>
+{{/partial}}
+
+{{#partial "contenido"}}
+    <div class="container-sm py-4 mx-auto">
+        <div class="bg-white bg-opacity-75 p-3 rounded shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 border-secondary border-opacity-25">
+                <div>
+                    <h2 class="fw-bold"><i class="fa-solid fa-layer-group me-2"></i>Colecciones</h2>
+                </div>
+            </div>
+
+            <form id="searchForm" class="mb-3 p-3 bg-light rounded border">
+                <div class="row g-2 align-items-end justify-content-between">
+                    <div class="col-md-6">
+                        <label for="searchInput" class="form-label fw-bold">Título</label>
+                        <input id="searchInput" type="text" class="form-control"
+                               placeholder="Buscar por título..."
+                               name="titulo" value="{{query}}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="categoriaSelect" class="form-label fw-bold">Categoría</label>
+                        <select class="form-select" id="categoriaSelect" name="categoria">
+                            <option value="0">Todas las categorías</option>
+                            {{#each categorias}}
+                                <option value="{{this}}"
+                                        {{#if (eq this ../categoriaSeleccionada)}}selected{{/if}}>{{this}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100 fw-bold" type="submit">
+                            <i class="fa-solid fa-search me-1"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
+                    <!-- Lista -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-uppercase text-muted small">
+                                <i class="fa-solid fa-list-ul me-2"></i>Colecciones Disponibles
+                            </h6>
+                        </div>
+                        <div class="list-group list-group-flush" id="resultsList">
+                            {{#each colecciones}}
+                                <a href="/api/colecciones/{{this.id}}"
+                                   class="list-group-item list-group-item-action p-3 border-start-0 border-end-0">
+                                    <div>
+                                        <div class="d-flex w-100 justify-content-between align-items-center">
+                                            <div class="d-flex flex-column gap-1">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <h6 class="mb-0 fw-bold text-dark">{{this.titulo}}</h6>
+                                                    <span class="badge bg-light text-dark border">{{this.categoria}}</span>
+                                                </div>
+                                                <small class="text-muted text-truncate"
+                                                       style="max-width: 450px;">
+                                                    {{#if this.descripcion}}{{this.descripcion}}{{else}}
+                                                        Sin descripción{{/if}}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            {{else}}
+                                <div class="text-center py-5 text-muted">
+                                    <div class="mb-3">
+                                        <i class="fa-regular fa-folder-open fa-3x opacity-25"></i>
+                                    </div>
+                                    <h6 class="fw-bold">No hay colecciones creadas</h6>
+                                </div>
+                            {{/each}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .x-small {
+            font-size: 0.75rem;
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+    <!-- Scripts Lógicos -->
+    <script>
+        // Búsqueda (Preservada del original)
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const titulo = document.getElementById('searchInput').value;
+            const cat = document.getElementById('categoriaSelect').value;
+            const list = document.getElementById('resultsList');
+
+            list.innerHTML = '<div class="text-center p-3 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando...</div>';
+
+            try {
+                const res = await fetch(`/api/colecciones/buscar?titulo=${encodeURIComponent(titulo)}&categoria=${encodeURIComponent(cat)}`);
+                const data = await res.json();
+                list.innerHTML = '';
+
+                if (data.length === 0) {
+                    list.innerHTML = '<div class="text-center p-4 text-muted">No se encontraron resultados.</div>';
+                    return;
+                }
+
+                data.forEach(c => {
+                    list.innerHTML += `
+                    <a href="/api/colecciones/${c.id}" class="list-group-item list-group-item-action p-3 border-start-0 border-end-0">
+                        <div>
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div class="d-flex flex-column gap-1">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <h6 class="mb-0 fw-bold text-dark">${c.titulo}</h6>
+                                        <span class="badge bg-light text-dark border">${c.categoria}</span>
+                                    </div>
+                                    <small class="text-muted text-truncate"
+                                           style="max-width: 450px;">
+                                        ${c.descripcion ? c.descripcion : 'Sin descripción'}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>`;
+                });
+            } catch (err) {
+                list.innerHTML = `<div class="alert alert-danger m-3">Error: ${err.message}</div>`;
+            }
+        });
+    </script>
+{{/partial}}
+{{> templates/layout}}

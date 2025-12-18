@@ -1,8 +1,12 @@
 package ar.edu.utn.frba.dds.controller;
 
+import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
+import ar.edu.utn.frba.dds.model.fuentes.Fuente;
+import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.hecho.multimedia.Multimedia;
 import ar.edu.utn.frba.dds.model.usuario.Rol;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
+import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import ar.edu.utn.frba.dds.repositories.UserRepository;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -18,6 +22,8 @@ import org.hibernate.exception.ConstraintViolationException;
 
 public class UserController {
   private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+  ColeccionController coleccionController = new ColeccionController();
+  FuenteController fuenteController = new FuenteController();
 
   public UserController() {
   }
@@ -41,10 +47,12 @@ public class UserController {
     }
 
     try {
-      Usuario usuario = UserRepository.instance().findByEmail(email);
+      Usuario usuario = UserRepository.instance()
+                                      .findByEmail(email);
 
       // Validación de credenciales
-      if (usuario == null || !DigestUtils.sha256Hex(password).equals(usuario.getPassword())) {
+      if (usuario == null || !DigestUtils.sha256Hex(password)
+                                         .equals(usuario.getPassword())) {
         renderizarLoginConError(ctx, model, "Usuario o contraseña incorrectos.");
         return;
       }
@@ -62,7 +70,9 @@ public class UserController {
   }
 
   public void logout(Context ctx) {
-    ctx.req().getSession().invalidate();
+    ctx.req()
+       .getSession()
+       .invalidate();
     ctx.redirect("/");
   }
 
@@ -94,7 +104,8 @@ public class UserController {
       return;
     }
 
-    if (!EMAIL_PATTERN.matcher(email).matches()) {
+    if (!EMAIL_PATTERN.matcher(email)
+                      .matches()) {
       manejarErrorRegistro(ctx, model, "El email es inválido.", redirigirAlFinal);
       return;
     }
@@ -104,7 +115,8 @@ public class UserController {
       return;
     }
 
-    if (UserRepository.instance().emailExists(email)) {
+    if (UserRepository.instance()
+                      .emailExists(email)) {
       manejarErrorRegistro(ctx, model, "El email ya está en uso.", redirigirAlFinal);
       return;
     }
@@ -114,7 +126,8 @@ public class UserController {
 
     if (foto != null && foto.size() > 0) {
       try {
-        byte[] bytes = foto.content().readAllBytes();
+        byte[] bytes = foto.content()
+                           .readAllBytes();
         fotoDePerfil = new Multimedia("Foto de perfil", foto.contentType(), bytes);
       } catch (IOException e) {
         manejarErrorRegistro(ctx, model, "Error al procesar la imagen.", redirigirAlFinal);
@@ -125,27 +138,31 @@ public class UserController {
     Usuario nuevoUsuario = new Usuario(email, userName, fotoDePerfil, password, rol);
 
     try {
-      UserRepository.instance().guardar(nuevoUsuario);
+      UserRepository.instance()
+                    .guardar(nuevoUsuario);
 
       if (redirigirAlFinal) {
         iniciarSesion(ctx, nuevoUsuario, email);
         String destino = (redirect != null && !redirect.isEmpty()) ? redirect : "/";
         ctx.redirect(destino);
       } else {
-        ctx.status(HttpStatus.CREATED).json(Map.of(
-            "message", "Admin creado con éxito",
-            "id", nuevoUsuario.getId()
-        ));
+        ctx.status(HttpStatus.CREATED)
+           .json(Map.of(
+               "message", "Admin creado con éxito",
+               "id", nuevoUsuario.getId()
+           ));
       }
 
     } catch (PersistenceException e) {
       if (e.getCause() instanceof ConstraintViolationException) {
-        manejarErrorRegistro(ctx, model,
-                             "Error: El usuario '" + userName + "' o el email ya existe.",
-                             redirigirAlFinal);
+        manejarErrorRegistro(
+            ctx, model,
+            "Error: El usuario '" + userName + "' o el email ya existe.",
+            redirigirAlFinal
+        );
       } else {
         e.printStackTrace();
-        manejarErrorRegistro(ctx, model, "Error de base de datos.", redirigirAlFinal);
+        manejarErrorRegistro(ctx, model, "Error: Nombre de usuario no disponible.", redirigirAlFinal);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -153,11 +170,17 @@ public class UserController {
     }
   }
 
-  private void manejarErrorRegistro(Context ctx, Map<String, Object> model, String error, boolean esWeb) {
+  private void manejarErrorRegistro(
+      Context ctx,
+      Map<String, Object> model,
+      String error,
+      boolean esWeb
+  ) {
     if (esWeb) {
       renderizarRegisterConError(ctx, model, error);
     } else {
-      ctx.status(HttpStatus.BAD_REQUEST).json(Map.of("error", error));
+      ctx.status(HttpStatus.BAD_REQUEST)
+         .json(Map.of("error", error));
     }
   }
 
@@ -169,19 +192,23 @@ public class UserController {
   }
 
   public List<Usuario> findAll() {
-    return UserRepository.instance().findAll();
+    return UserRepository.instance()
+                         .findAll();
   }
 
   public Usuario findById(Long id) {
-    return UserRepository.instance().findById(id);
+    return UserRepository.instance()
+                         .findById(id);
   }
 
   public Usuario findByName(String name) {
-    return UserRepository.instance().findByName(name);
+    return UserRepository.instance()
+                         .findByName(name);
   }
 
   private boolean esVacio(String texto) {
-    return texto == null || texto.trim().isEmpty();
+    return texto == null || texto.trim()
+                                 .isEmpty();
   }
 
   private void renderizarRegisterConError(Context ctx, Map<String, Object> model, String error) {
@@ -235,10 +262,71 @@ public class UserController {
     Usuario usuario = findById(id);
 
     if (usuario != null && usuario.getFoto() != null) {
-      ctx.contentType(usuario.getFoto().getMimetype());
-      ctx.result(usuario.getFoto().getDatos());
+      ctx.contentType(usuario.getFoto()
+                             .getMimetype());
+      ctx.result(usuario.getFoto()
+                        .getDatos());
     } else {
       ctx.redirect("/img/default-user.png");
     }
+  }
+
+  public void actualizarFoto(Context ctx) {
+    Long idUsuario = ctx.sessionAttribute("usuario_id");
+    if (idUsuario == null) {
+      ctx.redirect("/auth/login");
+      return;
+    }
+
+    UploadedFile archivo = ctx.uploadedFile("nueva_foto");
+
+    if (archivo != null && archivo.size() > 0) {
+      try {
+        Usuario usuario = UserRepository.instance()
+                                        .findById(idUsuario);
+
+        byte[] bytes = archivo.content()
+                              .readAllBytes();
+        Multimedia nuevaFoto = new Multimedia("Foto de perfil", archivo.contentType(), bytes);
+
+        usuario.setFoto(nuevaFoto);
+        UserRepository.instance()
+                      .guardar(usuario);
+
+      } catch (IOException e) {
+        e.printStackTrace();
+        ctx.sessionAttribute("error", "Error al procesar la imagen.");
+      }
+    }
+    ctx.redirect("/perfil");
+  }
+
+  public void listarColecciones(Context ctx, Map<String, Object> model) {
+    List<Coleccion> colecciones = coleccionController.findAll();
+    List<Fuente> fuentes = fuenteController.findAll();
+    model.put("colecciones", colecciones);
+    model.put("fuentes", fuentes);
+    ctx.render("/colecciones-lista-usuario.hbs", model);
+  }
+
+  public void hechosColeccion(Context ctx, Map<String, Object> model) {
+    Long id = Long.parseLong(ctx.pathParam("id"));
+    Coleccion coleccion = coleccionController.findById(id);
+    List<Hecho> hechosColeccion = HechoRepository.instance()
+                                                 .buscarAvanzadoCompleto(
+                                                     null,
+                                                     null,
+                                                     null,
+                                                     null,
+                                                     id,
+                                                     null,
+                                                     null,
+                                                     false,
+                                                     null
+                                                 );
+
+    model.put("coleccion", coleccion);
+    model.put("hechosColeccion", hechosColeccion);
+    ctx.render("/colecciones-detalle-usuario.hbs", model);
   }
 }

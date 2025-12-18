@@ -15,12 +15,13 @@ import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.FuenteRepository;
 import ar.edu.utn.frba.dds.repositories.HechoRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
+import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import io.javalin.http.Context;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class AdminController {
+public class AdminController implements WithSimplePersistenceUnit {
   ColeccionController coleccionController = new ColeccionController();
   FuenteController fuenteController = new FuenteController();
   HechoController hechoController = new HechoController();
@@ -30,10 +31,12 @@ public class AdminController {
     Long totalHechos = hechoController.countAll();
     Long totalColecciones = coleccionController.countAll();
     Long totalReportes = solicitudController.countAll();
+    Long totalFuentes = fuenteController.countAll();
 
     model.put("cantHechos", totalHechos);
     model.put("cantColecciones", totalColecciones);
     model.put("cantReportes", totalReportes);
+    model.put("cantFuentes", totalFuentes);
     ctx.render("admin/dashboard.hbs", model);
   }
 
@@ -61,40 +64,43 @@ public class AdminController {
   }
 
   public void configurarColeccion(Context ctx) {
-    Long id = Long.parseLong(ctx.pathParam("id"));
-    Coleccion col = coleccionController.findById(id);
+    withTransaction(() -> {
+      Long id = Long.parseLong(ctx.pathParam("id"));
+      Coleccion col = entityManager().find(Coleccion.class, id);
 
-    col.setTitulo(ctx.formParam("titulo"));
-    col.setDescripcion(ctx.formParam("descripcion"));
-    col.setCategoria(ctx.formParam("categoria"));
+      col.setTitulo(ctx.formParam("titulo"));
+      col.setDescripcion(ctx.formParam("descripcion"));
+      col.setCategoria(ctx.formParam("categoria"));
 
-    String fuenteIdStr = ctx.formParam("fuente_id");
-    if (fuenteIdStr != null) {
-      Long fuenteId = Long.parseLong(fuenteIdStr);
-      Fuente nuevaFuente = fuenteController.findById(fuenteId);
-      col.setFuente(nuevaFuente);
-    }
-
-    String algoTipo = ctx.formParam("algoritmo_tipo");
-    if (algoTipo != null) {
-      AlgoritmoDeConsenso nuevoAlgo = null;
-      switch (algoTipo) {
-        case "Absoluta":
-          nuevoAlgo = new Absoluta();
-          break;
-        case "May_simple":
-          nuevoAlgo = new MayoriaSimple();
-          break;
-        case "Mult_menciones":
-          nuevoAlgo = new MultiplesMenciones();
-          break;
+      String fuenteIdStr = ctx.formParam("fuente_id");
+      if (fuenteIdStr != null) {
+        Long fuenteId = Long.parseLong(fuenteIdStr);
+        Fuente nuevaFuente = entityManager().find(Fuente.class, fuenteId);
+        col.setFuente(nuevaFuente);
       }
-      col.setAlgoritmoDeConsenso(nuevoAlgo);
-    }
-    col.recalcularConsenso();
 
-    coleccionController.persist(col);
-    ctx.redirect("/admin/colecciones/" + id);
+      String algoTipo = ctx.formParam("algoritmo_tipo");
+      if (algoTipo != null) {
+        AlgoritmoDeConsenso nuevoAlgo = null;
+        switch (algoTipo) {
+          case "Absoluta":
+            nuevoAlgo = new Absoluta();
+            break;
+          case "May_simple":
+            nuevoAlgo = new MayoriaSimple();
+            break;
+          case "Mult_menciones":
+            nuevoAlgo = new MultiplesMenciones();
+            break;
+        }
+        col.setAlgoritmoDeConsenso(nuevoAlgo);
+      }
+      col.recalcularConsenso();
+
+      entityManager().merge(col);
+    });
+
+    ctx.redirect("/admin/colecciones/" + ctx.pathParam("id"));
   }
 
   public void agregarHechoAColeccion(Context ctx) {
@@ -105,6 +111,7 @@ public class AdminController {
     if (col != null && hecho != null) {
       col.getHechosConsensuados()
          .add(hecho);
+      col.recalcularConsenso();
       coleccionController.persist(col);
     }
     ctx.redirect("/admin/colecciones/" + idColeccion);
@@ -187,6 +194,10 @@ public class AdminController {
     model.put("coleccionesIndirectas", coleccionesIndirectas);
 
     model.put("fuente", fuente);
+    List<Hecho> todosLosHechos = hechoController.findAll();
+    todosLosHechos.removeAll(fuente.getHechos());
+
+    model.put("hechosDisponibles", todosLosHechos);
     ctx.render("admin/fuente-detalle.hbs", model);
   }
 
@@ -287,6 +298,15 @@ public class AdminController {
     Fuente fuente = fuenteController.findById(idFuente);
 
     fuenteController.borrarHechoDinamico(fuente, idHecho);
+    ctx.redirect("/admin/fuentes/" + idFuente);
+  }
+
+  public void agregarHechoDeFuente(Context ctx) {
+    Long idFuente = Long.parseLong(ctx.pathParam("id"));
+    Long idHecho = Long.parseLong(ctx.pathParam("idHecho"));
+    Fuente fuente = fuenteController.findById(idFuente);
+
+    fuenteController.agregarHechoDinamico(fuente, hechoController.findById(idHecho));
     ctx.redirect("/admin/fuentes/" + idFuente);
   }
 

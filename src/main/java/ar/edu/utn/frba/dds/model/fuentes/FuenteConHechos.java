@@ -3,6 +3,7 @@ package ar.edu.utn.frba.dds.model.fuentes;
 import ar.edu.utn.frba.dds.model.geolocalizacion.GeoApi;
 import ar.edu.utn.frba.dds.model.hecho.EnriquecedorDeHechos;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -43,7 +44,7 @@ public abstract class FuenteConHechos extends Fuente {
 
 
   @Override
-  public String getTipo(){
+  public String getTipo() {
     return "CON_HECHOS";
   }
 

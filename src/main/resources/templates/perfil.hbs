@@ -1,13 +1,50 @@
 {{#partial "nav_izquierda"}}
-    <a href="javascript:history.back()"
-       class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
-       title="Volver al panel">
-        <i class="fa-solid fa-arrow-left"></i>
-        <span class="d-none d-sm-block">Volver</span>
-    </a>
+    <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+            onclick="history.back()">
+        <i class="fas fa-arrow-left"></i>
+        <span class="d-none d-md-inline">Volver</span>
+    </button>
 {{/partial}}
 
 {{#partial "contenido"}}
+    <style>
+        /* Contenedor redondo */
+        .profile-image-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        /* La capa oscura con el icono */
+        .hover-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Fondo negro semitransparente */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+            opacity: 0; /* Invisible por defecto */
+            transition: opacity 0.3s ease; /* Transición suave */
+        }
+
+        /* Cuando pasamos el mouse por el contenedor, mostramos la capa */
+        .profile-image-container:hover .hover-overlay {
+            opacity: 1;
+        }
+
+        /* Cursor de manito si es clickable */
+        .cursor-pointer {
+            cursor: pointer;
+        }
+    </style>
+
     <div class="container-fluid justify-content-center d-flex flex-column align-items-center p-0"
          style="min-height: calc(100vh - 60px)">
 
@@ -21,28 +58,58 @@
                 <div class="p-4 text-white text-center text-md-start">
                     <div class="d-flex flex-column flex-md-row align-items-center gap-4">
 
-                        <div class="position-relative">
-                            {{#if perfil.foto}}
-                                <div class="rounded-circle overflow-hidden border border-3 border shadow"
-                                     style="width: 120px; height: 120px;">
-                                    <img src="/usuarios/{{perfil.id}}/foto"
-                                         alt="Foto de perfil"
-                                         class="w-100 h-100"
-                                         style="object-fit: cover;">
-                                </div>
+                        <div class="d-flex flex-column align-items-center">
+
+                            {{#if (eq perfil.id usuarioId)}}
+                                <form action="/perfil/foto" method="POST"
+                                      enctype="multipart/form-data">
+                                    <label class="profile-image-container border border-3 border shadow cursor-pointer">
+
+                                        {{#if perfil.foto}}
+                                            <img src="/usuarios/{{perfil.id}}/foto"
+                                                 class="w-100 h-100 object-fit-cover">
+                                        {{else}}
+                                            <div class="w-100 h-100 bg-secondary d-flex align-items-center justify-content-center text-white">
+                                                {{#if perfil.userName}}
+                                                    <span class="display-4 fw-bold">{{charAt
+                                                            perfil.userName 0}}</span>
+                                                {{else}}
+                                                    <i class="fa-solid fa-user fa-3x"></i>
+                                                {{/if}}
+                                            </div>
+                                        {{/if}}
+
+                                        <div class="hover-overlay">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </div>
+
+                                        <input type="file" name="nueva_foto" class="d-none"
+                                               accept="image/*" onchange="this.form.submit()">
+                                    </label>
+                                </form>
                             {{else}}
-                                <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center border border-3 border shadow"
-                                     style="width: 120px; height: 120px;">
-                                    <i class="fa-solid fa-user text-white"
-                                       style="font-size: 4rem;"></i>
+                                <div class="profile-image-container border border-3 border shadow">
+                                    {{#if perfil.foto}}
+                                        <img src="/usuarios/{{perfil.id}}/foto"
+                                             class="w-100 h-100 object-fit-cover">
+                                    {{else}}
+                                        <div class="w-100 h-100 bg-secondary d-flex align-items-center justify-content-center text-white">
+                                            {{#if perfil.userName}}
+                                                <span class="display-4 fw-bold">{{charAt
+                                                        perfil.userName 0}}</span>
+                                            {{else}}
+                                                <i class="fa-solid fa-user fa-3x"></i>
+                                            {{/if}}
+                                        </div>
+                                    {{/if}}
                                 </div>
                             {{/if}}
                         </div>
 
-                        <div class="flex-grow-1">
-                            <h2 class="fw-bold mb-1 text-black">{{perfil.userName}}</h2>
-                            <p class="mb-2 fs-5 text-black-50">
-                                <i class="fa-regular fa-envelope me-2"></i>{{perfil.email}}
+                        <div class="flex-grow-1" style="max-width: 82%">
+                            <h2 class="fw-bold mb-1 text-black" style="display: inline-block; width: 100%; word-break: break-word; overflow-wrap: break-word;">{{perfil.userName}}</h2>
+                            <p class="mb-2 fs-5 text-black-50" style="display: inline-block; width: 100%; word-break: break-word; overflow-wrap: break-word;">
+                                <i class="fa-regular fa-envelope me-2" ></i>{{perfil.email}}
                             </p>
                             <span class="badge rounded-pill bg-primary border border-white">
                                 {{perfil.rol}}
@@ -93,8 +160,14 @@
     </div>
 
     <style>
-        .hover-effect { transition: transform 0.2s, background-color 0.2s; }
-        .hover-effect:hover { transform: translateX(5px); background-color: rgba(0,0,0,0.7) !important; }
+        .hover-effect {
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .hover-effect:hover {
+            transform: translateX(5px);
+            background-color: rgba(0, 0, 0, 0.7) !important;
+        }
     </style>
 {{/partial}}
 
