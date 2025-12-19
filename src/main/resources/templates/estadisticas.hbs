@@ -221,7 +221,6 @@
         let chartCategorias = null;
         let chartColeccion = null;
 
-        // Función genérica para crear gráficos
         function crearGrafico(idCanvas, datos, label, horizontal = false) {
             const canvas = document.getElementById(idCanvas);
             if (!canvas) {
@@ -252,7 +251,6 @@
             });
         }
 
-        // 1. CARGA HECHOS
         async function cargarHechos() {
             const selectFiltro = document.getElementById("selectFiltroHechos");
             const selectCategoria = document.getElementById("selectCategoriaHechos");
@@ -260,7 +258,6 @@
             let filtro = selectFiltro.value;
             const categoria = selectCategoria.value;
 
-            // Lógica de seguridad para valor por defecto
             if (filtro === "" || filtro === "Seleccionar filtro") {
                 filtro = "1";
                 selectFiltro.value = "1";
@@ -284,14 +281,12 @@
                 const datos = await resp.json();
 
                 if (chartHechos) chartHechos.destroy();
-                // Usamos el ID NUEVO: canvasHechos
                 chartHechos = crearGrafico("canvasHechos", datos, titulo, false);
             } catch (error) {
                 console.error("Error cargando hechos:", error);
             }
         }
 
-        // 2. CARGA CATEGORÍAS
         async function cargarCategorias() {
             const topValue = document.getElementById("selectTopCategorias").value;
             const top = isNaN(parseInt(topValue)) ? null : parseInt(topValue);
@@ -302,14 +297,12 @@
                 const datos = await resp.json();
 
                 if (chartCategorias) chartCategorias.destroy();
-                // Usamos el ID NUEVO: canvasCategorias
                 chartCategorias = crearGrafico("canvasCategorias", datos, "Hechos por categoría", true);
             } catch (error) {
                 console.error(error);
             }
         }
 
-        // 3. CARGA COLECCIÓN
         async function cargarColeccion() {
             const id = document.getElementById("selectColeccion").value;
             if (!id) return;
@@ -325,7 +318,6 @@
             }
         }
 
-        // DESCARGA CSV
         async function descargarCSVCompleto(tipo) {
             try {
                 if (tipo === "hechos") {
@@ -360,9 +352,7 @@
             link.click();
         }
 
-        // INICIALIZACIÓN
         document.addEventListener('DOMContentLoaded', () => {
-            // Listeners
             document.getElementById("panelsStayOpen-collapseOne").addEventListener("shown.bs.collapse", cargarHechos);
             document.getElementById("selectFiltroHechos").addEventListener("change", cargarHechos);
             document.getElementById("selectCategoriaHechos").addEventListener("change", cargarHechos);
@@ -379,7 +369,6 @@
                 });
             });
 
-            // --- EJECUCIÓN INMEDIATA ---
             cargarHechos();
         });
     </script>

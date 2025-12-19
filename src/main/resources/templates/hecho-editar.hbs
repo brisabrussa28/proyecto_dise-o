@@ -282,13 +282,10 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         function toggleSeleccion(elementoDiv) {
-            // 1. Alternar la clase visual 'selected' (pone el borde rojo)
             elementoDiv.classList.toggle('selected');
 
-            // 2. Buscar el checkbox oculto dentro de este div
             const checkbox = elementoDiv.querySelector('input[type="checkbox"]');
 
-            // 3. Cambiar su valor (true/false)
             if (checkbox) {
                 checkbox.checked = !checkbox.checked;
             }
@@ -296,11 +293,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
 
-            // --- 1. CONFIGURACIÓN ---
             const modoEdicion = "{{hecho.id}}" !== "";
             const provinciaGuardada = "{{hecho.provincia}}";
 
-            // Coordenadas iniciales
             const latInicial = {{#if hecho.ubicacion.latitud}}{{hecho.ubicacion.latitud}}{{else}}
             -34.6037{{/if}};
             const lngInicial = {{#if hecho.ubicacion.longitud}}{{hecho.ubicacion.longitud}}{{else}}
@@ -309,11 +304,9 @@
             const selectProvincia = document.getElementById('input-provincia');
             const inputDireccion = document.getElementById('input-direccion');
 
-            // Alertas
             const alertaError = document.getElementById('alerta-error');
             const textoError = document.getElementById('texto-error');
 
-            // --- 2. CARGAR PROVINCIAS (GEOREF - Lista Oficial) ---
             fetch('https://apis.datos.gob.ar/georef/api/provincias?campos=nombre&orden=nombre')
                     .then(res => res.json())
                     .then(data => {
@@ -334,7 +327,6 @@
                         selectProvincia.innerHTML = '<option value="">Error cargando provincias</option>';
                     });
 
-            // --- 3. INICIALIZAR MAPA ---
             const map = L.map('map-picker').setView([latInicial, lngInicial], 13);
             L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{y}.png', {
                 tms: true,
@@ -355,27 +347,21 @@
                 });
             }
 
-            // --- 4. FUNCIONES CLAVE ---
-
             function actualizarInputs(lat, lng) {
                 document.getElementById('lat').value = lat;
                 document.getElementById('lng').value = lng;
             }
 
-            // Función para quitar acentos y minúsculas (para comparar fácil)
             function normalizarTexto(texto) {
                 return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             }
 
-            // Función MODIFICADA con la excepción para CABA vs Buenos Aires
             function obtenerDatosUbicacion(lat, lng) {
                 inputDireccion.value = "Consultando mapa...";
 
-                // --- CORRECCIÓN: Usamos nombres distintos para evitar el error "Identifier already declared" ---
                 const latNum = parseFloat(lat);
                 const lngNum = parseFloat(lng);
 
-                // Límites aproximados de CABA
                 const CABA_LIMITES = {
                     norte: -34.52,
                     sur: -34.72,
@@ -383,7 +369,6 @@
                     oeste: -58.54
                 };
 
-                // Verificamos si el punto está dentro del cuadro usando los números parseados
                 const esCABA = (latNum <= CABA_LIMITES.norte && latNum >= CABA_LIMITES.sur) &&
                         (lngNum <= CABA_LIMITES.este && lngNum >= CABA_LIMITES.oeste);
 
@@ -391,7 +376,6 @@
                         .then(res => res.json())
                         .then(data => {
                             if (data && data.address) {
-                                // A. Dirección
                                 const calle = data.address.road || "";
                                 const altura = data.address.house_number || "";
                                 const barrio = data.address.neighbourhood || "";
@@ -401,7 +385,6 @@
 
                                 inputDireccion.value = textoDireccion;
 
-                                // B. Selección de Provincia (LÓGICA HÍBRIDA)
                                 const opciones = selectProvincia.options;
 
                                 if (esCABA) {
@@ -415,7 +398,6 @@
                                     }
                                 }
 
-                                // --- CAMINO NORMAL: No es CABA, buscamos por nombre ---
                                 const estadoNominatim = data.address.state || data.address.city;
                                 if (estadoNominatim) {
                                     const nombreMapa = normalizarTexto(estadoNominatim);
@@ -424,7 +406,6 @@
                                     for (let i = 0; i < opciones.length; i++) {
                                         const nombreOficial = normalizarTexto(opciones[i].value);
 
-                                        // Si NO es CABA por coordenadas, prohibimos seleccionar CABA
                                         if (!esCABA && (nombreOficial.includes("autonoma") || nombreOficial.includes("ciudad"))) {
                                             continue;
                                         }
@@ -466,8 +447,6 @@
                 actualizarInputs(lat, lng);
             }
 
-            // --- 5. EVENTOS ---
-
             map.on('click', function (e) {
                 const lat = e.latlng.lat;
                 const lng = e.latlng.lng;
@@ -479,7 +458,7 @@
             if (btnBuscar) {
                 btnBuscar.addEventListener('click', () => {
                     const calle = inputDireccion.value;
-                    const provSelect = selectProvincia.value; // Usamos el valor oficial seleccionado
+                    const provSelect = selectProvincia.value;
 
                     if (alertaError) alertaError.classList.add('d-none');
 
@@ -490,7 +469,6 @@
 
                     let url = `https://nominatim.openstreetmap.org/search?format=json&street=${encodeURIComponent(calle)}&country=Argentina`;
 
-                    // Si hay provincia seleccionada en el dropdown, la usamos para filtrar
                     if (provSelect && provSelect !== "Cargando provincias...") {
                         url += `&state=${encodeURIComponent(provSelect)}`;
                     }
@@ -511,7 +489,6 @@
                 });
             }
 
-            // Función auxiliar para errores (si la tienes definida en tu HTML)
             function mostrarError(msg) {
                 if (textoError && alertaError) {
                     textoError.textContent = msg;
@@ -527,13 +504,11 @@
             }, 500);
         });
 
-        // Abrir modal al hacer clic en "Guardar Cambios"
         document.getElementById("btnAbrirModalGuardar").addEventListener("click", () => {
             const modal = new bootstrap.Modal(document.getElementById("modalGuardar"));
             modal.show();
         });
 
-        // Enviar formulario cuando el usuario confirma en el modal
         function confirmarGuardado() {
             const modal = bootstrap.Modal.getInstance(document.getElementById("modalGuardar"));
             modal.hide();

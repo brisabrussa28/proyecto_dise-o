@@ -15,7 +15,6 @@ import java.util.TimeZone;
 
 public class Server {
   public static void main(String[] args) {
-    // Cargar configuración de entorno
     Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
     String timezone = dotenv.get("TIMEZONE", "America/Argentina/Buenos_Aires");
     int port = Integer.parseInt(dotenv.get("PORT", "9001"));
@@ -23,23 +22,18 @@ public class Server {
     String allowedOriginsStr = dotenv.get("ALLOWED_ORIGINS", "http://localhost:3000");
     boolean debugMode = Boolean.parseBoolean(dotenv.get("DEBUG_MODE", "true"));
 
-    // Configurar TimeZone por defecto para toda la JVM
     TimeZone.setDefault(TimeZone.getTimeZone(timezone));
 
-    // --- CONFIGURACIÓN CENTRALIZADA DEL MAPPER ---
     ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule());
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     mapper.registerModule(new Jdk8Module());
 
     Javalin app = Javalin.create(javalinConfig -> {
-      // 1. IMPORTANTE: Usar el mapper configurado arriba para APIs JSON
       javalinConfig.jsonMapper(new JavalinJackson());
 
-      // 2. Registrar el motor de plantillas
       javalinConfig.fileRenderer(new JavalinRenderer().register("hbs", new JavalinHandlebars()));
 
-      // Configurar archivos estáticos
       javalinConfig.staticFiles.add(staticFiles -> {
         staticFiles.hostedPath = "/";
         staticFiles.directory = "/public";
@@ -48,12 +42,10 @@ public class Server {
         staticFiles.skipFileFunction = req -> false;
       });
 
-      // Habilitar registro de rutas para debugging
       if (debugMode) {
         javalinConfig.router.ignoreTrailingSlashes = true;
       }
 
-      // Configuración de CORS
       javalinConfig.bundledPlugins.enableCors(cors -> {
         cors.addRule(it -> {
           if (corsAllowAnyOrigin) {
@@ -74,10 +66,8 @@ public class Server {
       });
     });
 
-    // Configurar rutas
     new Router().configure(app, mapper, debugMode);
 
-    // Iniciar el servidor
     System.out.println("Iniciando servidor en puerto " + port);
     System.out.println("Modo debug: " + (debugMode ? "HABILITADO" : "DESHABILITADO"));
     if (corsAllowAnyOrigin) {
@@ -88,7 +78,6 @@ public class Server {
 
     app.start(port);
 
-    // Iniciar scheduler de estadísticas
     new EstadisticasScheduler().iniciar();
   }
 }

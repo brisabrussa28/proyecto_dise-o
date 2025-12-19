@@ -22,33 +22,34 @@ public class EstadisticasScheduler {
   private static final EstadisticaController estadisticaController = new EstadisticaController();
   private static final ColeccionController coleccionController = new ColeccionController();
 
-  public void iniciar() throws SchedulerException {
+  public void iniciar() {
     logger.info("Iniciando scheduler de estadísticas con Cron...");
 
-    // Ejecutar inmediatamente al iniciar
     recalcularTodas();
     recalcularConsenso();
 
-    // Crear el scheduler de Quartz
-    scheduler = StdSchedulerFactory.getDefaultScheduler();
+    try {
+      scheduler = StdSchedulerFactory.getDefaultScheduler();
 
-    // Crear el Job que ejecuta ambas tareas
-    JobDetail job = JobBuilder.newJob(RecalcularTodasJob.class)
-                              .withIdentity("jobEstadisticas", "groupEstadisticas")
-                              .build();
+      JobDetail job = JobBuilder.newJob(RecalcularTodasJob.class)
+                                .withIdentity("jobEstadisticas", "groupEstadisticas")
+                                .build();
 
-    // Trigger con expresión Cron - Cada 15 minutos
-    CronTrigger trigger = TriggerBuilder.newTrigger()
-                                        .withIdentity("triggerDiario", "groupEstadisticas")
-                                        .withSchedule(CronScheduleBuilder.cronSchedule("0 */15 * * * ?"))
-                                        .build();
+      CronTrigger trigger = TriggerBuilder.newTrigger()
+                                          .withIdentity("triggerDiario", "groupEstadisticas")
+                                          .withSchedule(CronScheduleBuilder.cronSchedule("0 */15 * * * ?"))
+                                          .build();
 
-    scheduler.scheduleJob(job, trigger);
-    scheduler.start();
+      scheduler.scheduleJob(job, trigger);
+      scheduler.start();
 
+      logger.info("Scheduler de estadísticas iniciado correctamente.");
+
+    } catch (SchedulerException e) {
+      logger.log(Level.SEVERE, "No se pudo iniciar el scheduler de estadísticas", e);
+    }
   }
 
-  // Job que ejecuta ambas tareas (estadísticas + consenso)
   public static class RecalcularTodasJob implements Job {
     @Override
     public void execute(JobExecutionContext context) {

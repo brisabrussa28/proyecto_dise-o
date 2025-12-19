@@ -171,7 +171,6 @@
             }
         });
 
-        // Validar también al enviar
         function enviarSolicitud() {
             const motivo = motivoInput.value.trim();
             const hechoId = {{hecho.id}};
@@ -179,7 +178,6 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalReportar'));
             modal.hide();
 
-            // Validación estricta
             if (!motivo || motivo.length < MIN_CHARS) {
                 mostrarMensaje("danger", `El motivo debe tener al menos ${MIN_CHARS} caracteres.`);
                 motivoInput.classList.add('is-invalid');
@@ -192,7 +190,6 @@
                 hecho_solicitado: hechoId
             };
 
-            // Deshabilitar botón para evitar doble click
             if (btnEnviar) btnEnviar.disabled = true;
 
             fetch("/solicitudes", {
@@ -204,11 +201,9 @@
             })
                     .then(async resp => {
                         if (resp.ok) {
-                            // Mostrar modal de éxito
                             const modalExito = new bootstrap.Modal(document.getElementById("modalExitoReporte"));
                             modalExito.show();
 
-                            // Redirigir después de 1.5 segundos
                             setTimeout(() => window.location.href = "/", 1500);
                         } else {
                             const error = await resp.text();
@@ -244,7 +239,6 @@
                 return;
             }
 
-            // Abrir modal manualmente
             const modal = new bootstrap.Modal(document.getElementById('modalReportar'));
             modal.show();
         });

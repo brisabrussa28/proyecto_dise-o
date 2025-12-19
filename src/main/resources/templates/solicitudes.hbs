@@ -245,7 +245,6 @@
 
     <script>
         let solicitudSeleccionada = null;
-        // Función auxiliar para animar la eliminación de la fila
         function removerFila(id) {
             const fila = document.getElementById('fila-' + id);
             if (fila) {
@@ -254,7 +253,6 @@
                 fila.style.transform = 'translateX(20px)';
                 setTimeout(() => fila.remove(), 500);
             }
-            // Cerrar modal si estaba abierto
             const modalEl = document.getElementById('modalDetalle' + id);
             const modalInstance = bootstrap.Modal.getInstance(modalEl);
             if (modalInstance) modalInstance.hide();
@@ -268,7 +266,6 @@
 
                 if (response.ok) {
                     removerFila(id);
-                    // Opcional: Mostrar toast de éxito
                 } else {
                     const errorText = await response.text();
                     alert("Error al rechazar: " + errorText);
