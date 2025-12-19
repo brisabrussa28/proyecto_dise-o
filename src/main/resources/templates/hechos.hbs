@@ -69,6 +69,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            function truncateText(text, maxLength = 100) {
+                if (!text) return '';
+                text = text.toString();
+                return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+            }
+
             const searchForm = document.getElementById('searchForm');
             const searchInput = document.getElementById('searchInput');
             const categoriaSelect = document.getElementById('categoriaSelect');
@@ -92,7 +98,7 @@
                         categorias.forEach(cat => {
                             const option = document.createElement('option');
                             option.value = cat;
-                            option.textContent = cat;
+                            option.textContent = truncateText(cat, 100);
                             if (cat === catSeleccionada) option.selected = true;
                             categoriaSelect.appendChild(option);
                         });
@@ -141,7 +147,10 @@
             }
 
             async function buscarHechos(titulo, categoria, consensuados = false, page = 1) {
-                resultsList.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Buscando...</p></div>';
+                resultsList.innerHTML = '<div class="text-center py-5"><div ' +
+                        'class="spinner-border text-primary" ' +
+                        'role="status"></div><p ' +
+                        'class="mt-2 text-muted">Buscando...</p></div>';
                 paginationContainer.style.display = 'none';
 
                 try {
@@ -149,6 +158,7 @@
                     if (titulo) params.append('titulo', titulo);
                     if (categoria && categoria !== "0") params.append('categoria', categoria);
                     if (consensuados) params.append('soloConsensuados', 'true');
+                    if ({{esAdmin}}) params.append('incluirEliminados', 'true');
                     params.append('page', page);
                     params.append('pageSize', 15);
                     params.append('paginar', 'true');
@@ -192,9 +202,9 @@
                     }
 
                     hechosResultantes.forEach(hecho => {
-                        const titulo = hecho.titulo || hecho.hecho_titulo || 'Sin título';
-                        const descripcion = hecho.descripcion || hecho.hecho_descripcion || 'Sin descripción';
-                        const categoria = hecho.categoria || hecho.hecho_categoria || 'General';
+                        const titulo = truncateText(hecho.titulo || hecho.hecho_titulo || 'Sin título', 100);
+                        const descripcion = truncateText(hecho.descripcion || hecho.hecho_descripcion || 'Sin descripción', 100);
+                        const categoria = truncateText(hecho.categoria || hecho.hecho_categoria || 'General', 100);
                         const id = hecho.id || hecho.hecho_id;
                         const provincia = hecho.provincia || hecho.hecho_provincia || '';
                         const direccion = hecho.direccion || hecho.hecho_direccion || '';
@@ -203,6 +213,8 @@
                         const colecciones = hecho.colecciones || hecho.hecho_colecciones || [];
                         const esConsensuado = Array.isArray(colecciones) && colecciones.length > 0;
                         const etiquetas = hecho.etiquetas || hecho.hecho_etiquetas || [];
+                        const estado = (hecho.estado ?? hecho.hecho_estado ?? '').toString().trim().toUpperCase();
+                        const eliminado = estado === 'ELIMINADO';
                         let etiquetasHTML = '';
                         if (Array.isArray(etiquetas)) {
                             etiquetasHTML = etiquetas.map(e => {
@@ -218,6 +230,7 @@
                                         <div class="d-flex align-items-center mb-1">
                                             <h6 class="fw-bold text-dark mb-0 me-2">${titulo}</h6>
                                             ${esConsensuado ? '<span class="badge bg-success" title="Consensuado"><i class="fa-solid fa-check"></i></span>' : ''}
+                                            ${eliminado ? '<span class="badge bg-danger">ELIMINADO</span>' : ''}
                                         </div>
                                         <p class="mb-2 text-muted small">${descripcion}</p>
                                         <div class="mb-2">

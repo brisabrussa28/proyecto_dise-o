@@ -33,7 +33,10 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
 
   private static final Set<String> CAMPOS_REQUERIDOS = Set.of(
       CampoHecho.TITULO.name(),
-      CampoHecho.FECHA_SUCESO.name()
+      CampoHecho.FECHA_SUCESO.name(),
+      CampoHecho.LATITUD.name(),
+      CampoHecho.LONGITUD.name(),
+      CampoHecho.DIRECCION.name()
   );
 
   private final String dateFormatStr;
@@ -115,23 +118,30 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
     // --- PROCESAMIENTO DE FOTOS ---
     List<String> urlsFotos = obtenerTodosLosValores(fila, CampoHecho.FOTOS.name());
 
-    // Construimos el Hecho base
-    Hecho hechoConstruido = builder.build();
+    try {
+      // Construimos el Hecho base
+      Hecho hechoConstruido = builder.build();
 
-    // Asignación tardía de fotos
-    if (!urlsFotos.isEmpty()) {
-      List<Multimedia> listaMultimedia = new ArrayList<>();
-      for (String valorCelda : urlsFotos) {
-        String[] urlsIndividuales = valorCelda.split("[,|;]");
-        for (String urlStr : urlsIndividuales) {
-          Multimedia m = descargarYCrearMultimedia(urlStr.trim());
-          if (m != null) listaMultimedia.add(m);
+      // Asignación tardía de fotos
+      if (!urlsFotos.isEmpty()) {
+        List<Multimedia> listaMultimedia = new ArrayList<>();
+        for (String valorCelda : urlsFotos) {
+          String[] urlsIndividuales = valorCelda.split("[,|;]");
+          for (String urlStr : urlsIndividuales) {
+            Multimedia m = descargarYCrearMultimedia(urlStr.trim());
+            if (m != null) {
+              listaMultimedia.add(m);
+            }
+          }
         }
+        hechoConstruido.setFotos(listaMultimedia);
       }
-      hechoConstruido.setFotos(listaMultimedia);
-    }
 
-    return hechoConstruido;
+      return hechoConstruido;
+
+    } catch (RuntimeException e) {
+      throw new RuntimeException(e.getMessage());
+    }
   }
 
   /**
@@ -146,10 +156,14 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
       URL url = new URL(urlStr);
 
       String fileName = urlStr.substring(urlStr.lastIndexOf('/') + 1);
-      if (fileName.isEmpty()) fileName = "imagen_importada.jpg";
+      if (fileName.isEmpty()) {
+        fileName = "imagen_importada.jpg";
+      }
 
-      try (InputStream in = url.openStream();
-           ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+      try (
+          InputStream in = url.openStream();
+          ByteArrayOutputStream out = new ByteArrayOutputStream()
+      ) {
 
         byte[] buffer = new byte[1024];
         int n;
@@ -159,7 +173,10 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
         byte[] bytes = out.toByteArray();
 
         String contentType = "image/jpeg";
-        if (fileName.toLowerCase().endsWith(".png")) contentType = "image/png";
+        if (fileName.toLowerCase()
+                    .endsWith(".png")) {
+          contentType = "image/png";
+        }
 
         return new Multimedia(fileName, contentType, bytes);
       }
@@ -252,7 +269,9 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
         "yyyy-MM-dd'T'HH:mm:ss",
         "yyyy-MM-dd HH:mm",
         "dd/MM/yyyy",
-        "yyyy-MM-dd"
+        "yyyy-MM-dd",
+        "yyyy-mm-ddThh:mm:ss.sss",
+        "yyyy-mm-ddYhh:mm:ss.ssssss"
     );
 
     for (String formato : formatosPosibles) {
@@ -269,7 +288,8 @@ public class HechoFilaConverter implements FilaConverter<Hecho> {
       } catch (DateTimeException e) {
         // 2. Si falla, intentar parsear como LocalDate (Solo fecha) y agregar inicio del día
         try {
-          return LocalDate.parse(valor, formatter).atStartOfDay();
+          return LocalDate.parse(valor, formatter)
+                          .atStartOfDay();
         } catch (DateTimeException e2) {
           // Sigue sin coincidir, probar siguiente formato
         }

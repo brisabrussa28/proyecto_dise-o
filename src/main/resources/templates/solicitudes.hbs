@@ -129,14 +129,22 @@
                                 <td class="text-end pe-4">
                                     <div class="btn-group" role="group">
                                         <button class="btn btn-success btn-sm d-flex align-items-center gap-2 shadow-sm"
-                                                onclick="abrirModalAceptar('{{this.id}}')">
+                                                onclick="abrirModalAceptar('{{this.id}}')"
+                                                title="Aceptar y eliminar hecho">
                                             <i class="fa-solid fa-check"></i>
                                             <span class="d-none d-md-inline">Aceptar</span>
                                         </button>
                                         <button class="btn btn-danger btn-sm d-flex align-items-center gap-2 shadow-sm text-white"
-                                                onclick="abrirModalRechazar('{{this.id}}')">
+                                                onclick="abrirModalRechazar('{{this.id}}')"
+                                                title="Rechazar solicitud">
                                             <i class="fa-solid fa-xmark"></i>
                                             <span class="d-none d-md-inline">Rechazar</span>
+                                        </button>
+                                        <button class="btn btn-warning btn-sm d-flex align-items-center gap-2 shadow-sm text-dark"
+                                                onclick="abrirModalSpam('{{this.id}}')"
+                                                title="Marcar como SPAM">
+                                            <i class="fa-solid fa-triangle-exclamation"></i>
+                                            <span class="d-none d-md-inline">Spam</span>
                                         </button>
                                     </div>
                                 </td>
@@ -243,8 +251,50 @@
         </div>
     </div>
 
+    <!-- Modal de Marcar como SPAM -->
+    <div class="modal fade" id="modalSpam" tabindex="-1" aria-labelledby="modalSpamLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-warning text-dark border-0">
+                    <h5 class="modal-title" id="modalSpamLabel">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>Marcar como SPAM
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="text-center mb-3">
+                        <i class="fa-solid fa-robot fa-3x text-warning mb-3"></i>
+                        <h6 class="fw-bold">¿Desea marcar esta solicitud como SPAM?</h6>
+                    </div>
+
+                    <div class="alert alert-light border d-flex align-items-start small text-muted">
+                        <i class="fa-solid fa-info-circle mt-1 me-2"></i>
+                        <div>
+                            <div class="mt-0">
+                                Esto rechazará la solicitud y entrenará al sistema para detectar mensajes similares en el futuro.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="button"
+                            class="btn btn-warning btn-lg text-dark"
+                            onclick="confirmarSpam()">
+                        Confirmar SPAM
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let solicitudSeleccionada = null;
+        // Función auxiliar para animar la eliminación de la fila
         function removerFila(id) {
             const fila = document.getElementById('fila-' + id);
             if (fila) {
@@ -253,6 +303,7 @@
                 fila.style.transform = 'translateX(20px)';
                 setTimeout(() => fila.remove(), 500);
             }
+            // Cerrar modal si estaba abierto
             const modalEl = document.getElementById('modalDetalle' + id);
             const modalInstance = bootstrap.Modal.getInstance(modalEl);
             if (modalInstance) modalInstance.hide();
@@ -262,7 +313,7 @@
             if (!confirm('¿Estás seguro de RECHAZAR esta solicitud? El hecho permanecerá visible.')) return;
 
             try {
-                const response = await fetch(`/admin/solicitudes?id=${id}&aceptada=false`, {method: "PUT"});
+                const response = await fetch(`/admin/solicitudes?id=${id}&decision=RECHAZAR`, {method: "PUT"});
 
                 if (response.ok) {
                     removerFila(id);
@@ -280,7 +331,7 @@
             if (!confirm('¿Estás seguro de ACEPTAR la solicitud? El hecho será ELIMINADO permanentemente.')) return;
 
             try {
-                const response = await fetch(`/admin/solicitudes?id=${id}&aceptada=true`, {method: "PUT"});
+                const response = await fetch(`/admin/solicitudes?id=${id}&decision=ACEPTAR`, {method: "PUT"});
 
                 if (response.ok) {
                     removerFila(id);
@@ -306,18 +357,25 @@
             modal.show();
         }
 
+        function abrirModalSpam(id) {
+            solicitudSeleccionada = id;
+            const modal = new bootstrap.Modal(document.getElementById("modalSpam"));
+            modal.show();
+        }
+
         async function confirmarRechazar() {
             const id = solicitudSeleccionada;
             const modal = bootstrap.Modal.getInstance(document.getElementById("modalRechazar"));
             modal.hide();
 
             try {
-                const response = await fetch(`/admin/solicitudes?id=${id}&aceptada=false`, { method: "PUT" });
+                const response = await fetch(`/admin/solicitudes?id=${id}&decision=RECHAZAR`, { method: "PUT" });
 
                 if (response.ok) {
                     removerFila(id);
                 } else {
-                    alert("Error al rechazar la solicitud");
+                    const errorText = await response.text();
+                    alert("Error al rechazar la solicitud: " + errorText);
                 }
             } catch (err) {
                 alert("Error de conexión");
@@ -330,12 +388,33 @@
             modal.hide();
 
             try {
-                const response = await fetch(`/admin/solicitudes?id=${id}&aceptada=true`, { method: "PUT" });
+                const response = await fetch(`/admin/solicitudes?id=${id}&decision=ACEPTAR`, { method: "PUT" });
 
                 if (response.ok) {
                     removerFila(id);
                 } else {
-                    alert("Error al aceptar la solicitud");
+                    const errorText = await response.text();
+                    alert("Error al aceptar la solicitud: " + errorText);
+                }
+            } catch (err) {
+                alert("Error de conexión");
+            }
+        }
+
+        async function confirmarSpam() {
+            const id = solicitudSeleccionada;
+            const modal = bootstrap.Modal.getInstance(document.getElementById("modalSpam"));
+            modal.hide();
+
+            try {
+                // Envía decision=SPAM
+                const response = await fetch(`/admin/solicitudes?id=${id}&decision=SPAM`, { method: "PUT" });
+
+                if (response.ok) {
+                    removerFila(id);
+                } else {
+                    const errorText = await response.text();
+                    alert("Error al marcar como spam: " + errorText);
                 }
             } catch (err) {
                 alert("Error de conexión");

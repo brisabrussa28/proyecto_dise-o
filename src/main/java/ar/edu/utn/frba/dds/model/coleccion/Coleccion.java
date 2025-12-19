@@ -94,10 +94,12 @@ public class Coleccion {
 
   public void recalcularHechosConsensuados(Filtro filtroExcluyente, List<Fuente> fuentes) {
     List<Hecho> hechosParaAnalizar = this.obtenerHechosFiltrados(filtroExcluyente);
+
+    // CORRECCION: Se elimina el segundo parámetro 'fuentes' ya que el algoritmo las busca internamente
     List<Hecho> aprobados = this.coleccion_algoritmo.listaDeHechosConsensuados(
-        hechosParaAnalizar,
-        fuentes
+        hechosParaAnalizar
     );
+
     this.hechos.clear();
     this.hechos.addAll(aprobados);
   }
@@ -147,9 +149,9 @@ public class Coleccion {
     Filtro filtroNeutro = new Filtro(new CondicionTrue());
     List<Hecho> hechosFiltrados = this.obtenerHechosFiltrados(filtroNeutro);
 
+    // CORRECCION: Se elimina el segundo parámetro List.of(coleccion_fuente)
     List<Hecho> hechosConsensuados = this.coleccion_algoritmo.listaDeHechosConsensuados(
-        hechosFiltrados,
-        List.of(coleccion_fuente)
+        hechosFiltrados
     );
 
     this.hechos.clear();
@@ -157,12 +159,11 @@ public class Coleccion {
   }
 
   // --- Helper para la Vista: Mostrar si hay condición amigable ---
-  // Modificado para retornar null si es CondicionTrue (o sea, sin filtro activo)
   public String getCondicionLegible() {
     if (this.coleccion_condicion == null || this.coleccion_condicion instanceof CondicionTrue) {
       return null;
     }
-    return "Filtros Activos"; // Solo indicamos que existe si NO es CondicionTrue
+    return "Filtros Activos";
   }
 
   public String getAlgoritmoTipo() {
@@ -187,8 +188,6 @@ public class Coleccion {
 
   public void setCondicion(Condicion coleccion_condicion) {
     this.coleccion_condicion = coleccion_condicion;
-    // Para el objeto Filtro en memoria (transient), nunca usamos null.
-    // Si viene null, usamos CondicionTrue para que "pase todo".
     Condicion condicionParaFiltro = (coleccion_condicion != null) ? coleccion_condicion : new CondicionTrue();
 
     if (this.filtro != null) {

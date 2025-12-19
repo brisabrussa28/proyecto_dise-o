@@ -9,10 +9,16 @@
 {{#partial "contenido"}}
     <div class="container-sm py-4 mx-auto">
         <div class="bg-white bg-opacity-75 p-3 rounded shadow-sm">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="border-bottom pb-3 border-secondary border-opacity-25">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 border-secondary border-opacity-25">
+                <div>
                     <h3 class="mb-0"><i class="fa-solid fa-database text-black me-2"></i>
-                        <strong>{{fuente.nombre}}</strong></h3>
+                        <strong>
+                            {{#if (gt fuente.nombre.length 50)}}
+                                {{substring fuente.nombre 0 50}}...
+                            {{else}}
+                                {{fuente.nombre}}
+                            {{/if}}
+                        </strong></h3>
                     <div class="mt-1">
                         <span class="badge bg-secondary">ID: {{fuente.id}}</span>
                         <span class="badge bg-info text-dark">{{tipoFuente}}</span>
@@ -20,22 +26,24 @@
                 </div>
 
 
-                <!-- Botón de Borrar SIN ALERTA (Action directa) -->
                 <form action="/admin/fuentes/{{fuente.id}}/borrar" method="POST">
                     <button type="button"
                             class="btn btn-outline-danger btn-sm transition-hover"
-                            id="btnAbrirModalEliminar">
+                            id="btnAbrirModalEliminar"
+                            {{#if (eq fuente.nombre "Fuente global de hechos")}}disabled{{/if}}>
                         <i class="fa-regular fa-trash-can me-2"></i>Eliminar Fuente
                     </button>
                 </form>
             </div>
 
             <div class="row g-4">
-
-                <!-- COLUMNA PRINCIPAL (Izquierda) -->
+                {{#if (eq fuente.nombre "Fuente global de hechos")}}
+                    <div class="alert alert-warning small mb-3">
+                        Esta es la fuente global. No se puede editar.
+                    </div>
+                {{/if}}
                 <div class="col-lg-8">
 
-                    <!-- 1. TARJETA DE CONFIGURACIÓN -->
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-body p-4">
                             <h6 class="text-uppercase text-muted fw-bold small mb-3">
@@ -49,17 +57,18 @@
                                             de la Fuente</label>
                                         <label>
                                             <input type="text" name="nombre" class="form-control"
-                                                   value="{{fuente.nombre}}" required>
+                                                   value="{{fuente.nombre}}" required
+                                                   {{#if (eq fuente.nombre "Fuente global de hechos")}}disabled{{/if}}>
                                         </label>
                                     </div>
                                     <div class="col-md-3">
-                                        <button type="submit" class="btn btn-primary w-100">
+                                        <button type="submit" class="btn btn-primary w-100"
+                                                {{#if (eq fuente.nombre "Fuente global de hechos")}}disabled{{/if}}>
                                             <i class="fa-solid fa-check me-1"></i> Guardar
                                         </button>
                                     </div>
                                 </div>
 
-                                <!-- Alerta si es API (Solo lectura) -->
                                 {{#if esApi}}
                                     <div class="alert alert-light border d-flex align-items-center mt-3 mb-0 py-2 text-muted small">
                                         <i class="fa-solid fa-server me-2 text-info"></i>
@@ -73,7 +82,6 @@
                         </div>
                     </div>
 
-                    <!-- 2. GESTIÓN DE AGREGACIÓN (Solo si aplica) -->
                     {{#if esAgregacion}}
                         <div class="card border-0 shadow-sm mb-4">
                             <div class="card-header bg-white py-3 border-bottom-0">
@@ -88,7 +96,8 @@
                                         <div class="col-sm-9">
                                             <label>
                                                 <select name="fuente_hija_id"
-                                                        class="form-select form-select-sm">
+                                                        class="form-select form-select-sm"
+                                                        {{#if (eq fuente.nombre "Fuente global de hechos")}}disabled{{/if}}>
                                                     <option value="" disabled selected>Seleccionar
                                                         fuente para agregar...
                                                     </option>
@@ -101,7 +110,8 @@
                                             </label>
                                         </div>
                                         <div class="col-sm-3">
-                                            <button type="submit" class="btn btn-sm btn-dark w-100">
+                                            <button type="submit" class="btn btn-sm btn-dark w-100"
+                                                    {{#if (eq fuente.nombre "Fuente global de hechos")}}disabled{{/if}}>
                                                 Agregar
                                             </button>
                                         </div>
@@ -113,13 +123,20 @@
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <div class="d-flex align-items-center">
                                                 <i class="fa-solid fa-database text-muted me-3"></i>
-                                                <span>{{this.nombre}}</span>
+                                                <span>
+                                                    {{#if (gt this.nombre.length 50)}}
+                                                        {{substring this.nombre 0 50}}...
+                                                    {{else}}
+                                                        {{this.nombre}}
+                                                    {{/if}}
+                                                </span>
                                             </div>
                                             <form action="/admin/fuentes/{{../fuente.id}}/quitar-fuente/{{this.id}}"
                                                   method="POST" class="m-0">
                                                 <button type="submit"
                                                         class="btn btn-link text-danger p-0 text-decoration-none small"
-                                                        title="Quitar">
+                                                        title="Quitar"
+                                                        {{#if (eq fuente.nombre "Fuente global de hechos")}}disabled{{/if}}>
                                                     <span class="fw-bold">Quitar</span> <i
                                                         class="fa-solid fa-times ms-1"></i>
                                                 </button>
@@ -135,24 +152,34 @@
                         </div>
                     {{/if}}
 
-                    <!-- 3. LISTADO DE HECHOS (Solo si es Dinámica o Estática) -->
                     {{#if esDinamica}}
                         <div class="card border-0 shadow-sm">
                             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                                 <h6 class="text-uppercase text-muted fw-bold small mb-0">
                                     <i class="fa-solid fa-list-check me-2"></i>Hechos Registrados
+                                    <span class="badge bg-secondary rounded-pill">
+                                        {{#if fuente.hechos}}
+                                            {{fuente.hechos.size}} {{#if (eq fuente.hechos.size 1)}}
+                                            hecho{{else}}hechos{{/if}}
+                                        {{else}}
+                                            0 hechos
+                                        {{/if}}
+                                    </span>
                                 </h6>
 
                                 <div>
                                     <button type="button"
                                             class="btn btn-sm btn-outline-secondary rounded-pill px-3 me-2"
                                             data-bs-toggle="modal"
-                                            data-bs-target="#modalVincularHecho">
+                                            data-bs-target="#modalVincularHecho"
+                                            {{#if (eq fuente.nombre "Fuente global de hechos")}}disabled{{/if}}>
                                         <i class="fa-solid fa-link me-1"></i> Agregar Hecho
                                     </button>
 
                                     <a href="/hechos/nuevo?fuente_id={{fuente.id}}" class="btn
-                                    btn-sm btn-outline-primary rounded-pill px-3">
+                                    btn-sm btn-outline-primary rounded-pill px-3
+                                    {{#if (eq fuente.nombre "Fuente global de hechos")}}
+                                        disabled{{/if}}">
                                     <i class="fa-solid fa-plus me-1"></i>Nuevo Hecho
                                     </a>
                                 </div>
@@ -172,7 +199,13 @@
                                         <tr style="cursor: pointer;">
                                             <td class="ps-4"
                                                 onclick="window.location.href='/hechos/{{this.id}}'">
-                                                <div class="fw-bold text-dark">{{this.titulo}}</div>
+                                                <div class="fw-bold text-dark">
+                                                    {{#if (gt this.titulo.length 50)}}
+                                                        {{substring this.titulo 0 50}}...
+                                                    {{else}}
+                                                        {{this.titulo}}
+                                                    {{/if}}
+                                                </div>
                                                 <div class="small text-muted text-truncate"
                                                      style="max-width: 300px;">
                                                     {{#if this.descripcion}}{{this.descripcion}}{{else}}
@@ -185,23 +218,22 @@
                                                 </span>
                                             </td>
                                             <td class="text-end pe-4">
-                                                <!-- Botón Editar -->
                                                 {{#if (eq this.autor.id usuarioId)}}
-                                                <a href="/hechos/{{this.id}}/editar/{{fuente.id}}"
-                                                   class="btn btn-link text-muted p-0 me-2 hover-primary"
-                                                   onclick="event.stopPropagation()"
-                                                   title="Editar">
-                                                    <i class="fa-solid fa-pen"></i>
-                                                </a>
+                                                    <a href="/hechos/{{this.id}}/editar/{{fuente.id}}"
+                                                       class="btn btn-link text-muted p-0 me-2 hover-primary"
+                                                       onclick="event.stopPropagation()"
+                                                       title="Editar">
+                                                        <i class="fa-solid fa-pen"></i>
+                                                    </a>
                                                 {{/if}}
-                                                <!-- Botón Borrar (Sin Confirmar) -->
                                                 <form action="/admin/fuentes/{{../fuente.id}}/hechos/{{this.id}}/borrar"
                                                       method="POST"
                                                       class="d-inline"
                                                       onclick="event.stopPropagation()">
                                                     <button type="submit"
                                                             class="btn btn-link text-muted p-0 hover-danger"
-                                                            title="Eliminar">
+                                                            title="Eliminar"
+                                                            {{#if (eq fuente.nombre "Fuente global de hechos")}}disabled{{/if}}>
                                                         <i class="fa-regular fa-trash-can"></i>
                                                     </button>
                                                 </form>
@@ -225,7 +257,17 @@
                             <div class="card border-0 shadow-sm">
                                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                                     <h6 class="text-uppercase text-muted fw-bold small mb-0">
-                                        <i class="fa-solid fa-list-check me-2"></i>Hechos Registrados
+                                        <i class="fa-solid fa-list-check me-2"></i>Hechos
+                                        Registrados
+                                        <span class="badge bg-secondary rounded-pill">
+                                            {{#if fuente.hechos}}
+                                                {{fuente.hechos.size}} {{#if
+                                                    (eq fuente.hechos.size 1)}}
+                                                hecho{{else}}hechos{{/if}}
+                                            {{else}}
+                                                0 hechos
+                                            {{/if}}
+                                        </span>
                                     </h6>
                                 </div>
 
@@ -272,7 +314,6 @@
                     {{/if}}
                 </div>
 
-                <!-- COLUMNA LATERAL (Derecha) - Información de Dependencias -->
                 <div class="col-lg-4">
                     <div class="sticky-top" style="top: 20px; z-index: 1;">
                         <div class="card border shadow-sm">
@@ -282,7 +323,6 @@
                             </div>
                             <div class="card-body">
 
-                                <!-- Alerta de Impacto -->
                                 {{#if (or coleccionesDirectas.size agregacionesPadre.size)}}
                                     <div class="alert alert-warning border-0 d-flex align-items-start small mb-4">
                                         <i class="fa-solid fa-triangle-exclamation mt-1 me-2"></i>
@@ -299,7 +339,6 @@
                                     </div>
                                 {{/if}}
 
-                                <!-- Listado de Colecciones Directas -->
                                 <h6 class="small fw-bold text-uppercase text-muted mb-2">Colecciones
                                     Directas</h6>
                                 <ul class="list-group list-group-flush mb-4 small border rounded">
@@ -319,7 +358,6 @@
                                     {{/each}}
                                 </ul>
 
-                                <!-- Listado de Colecciones Indirectas -->
                                 {{#if coleccionesIndirectas}}
                                     <h6 class="small fw-bold text-uppercase text-muted mb-2">Uso
                                         Indirecto (Heredado)</h6>
@@ -334,7 +372,6 @@
                                     </ul>
                                 {{/if}}
 
-                                <!-- Listado de Agregaciones -->
                                 <h6 class="small fw-bold text-uppercase text-muted mb-2">Pertenece a
                                     Grupos</h6>
                                 <ul class="list-group list-group-flush small border rounded">
@@ -432,7 +469,6 @@
         }
     </style>
 
-    <!-- Modal de Confirmación de Eliminacion de Fuente-->
     <div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel"
          aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -460,7 +496,8 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-outline-secondary btn-lg"
+                            data-bs-dismiss="modal">
                         <i class="fa-solid fa-times me-1"></i>Cancelar
                     </button>
                     <button type="button"
@@ -496,7 +533,7 @@
 
             document.getElementById('formVincularHecho').action = nuevaAction;
         }
-        // Abrir modal al hacer clic en "Eliminar Fuente"
+
         const btnEliminar = document.getElementById("btnAbrirModalEliminar");
 
         if (btnEliminar) {
@@ -506,7 +543,6 @@
             });
         }
 
-        // Confirmar eliminación
         function eliminar() {
             const modal = bootstrap.Modal.getInstance(document.getElementById("modalEliminar"));
             modal.hide();

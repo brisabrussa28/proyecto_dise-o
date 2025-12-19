@@ -97,6 +97,21 @@ public class FuenteRepository {
     }
   }
 
+  /**
+   * Mét0do especial para algoritmos: Trae todas las fuentes con hechos e inicializa
+   * la colección de hechos (JOIN FETCH) para evitar LazyInitializationException.
+   */
+  public List<Fuente> findAllFuentesConHechos() {
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      return em.createQuery(
+                   "SELECT DISTINCT f FROM FuenteConHechos f JOIN FETCH f.hechos", Fuente.class)
+               .getResultList();
+    } finally {
+      em.close();
+    }
+  }
+
   public Fuente findById(Long id) {
     EntityManager em = DBUtils.getEntityManager();
     try {

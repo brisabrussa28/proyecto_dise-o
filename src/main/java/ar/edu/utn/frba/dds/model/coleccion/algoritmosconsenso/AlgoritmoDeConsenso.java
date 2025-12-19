@@ -1,9 +1,9 @@
 package ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso;
 
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
-import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.model.hecho.Estado;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
+import ar.edu.utn.frba.dds.repositories.FuenteRepository;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,81 +25,98 @@ public abstract class AlgoritmoDeConsenso {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long algoritmo_id;
 
-  public List<Hecho> listaDeHechosConsensuados(
-      List<Hecho> listaDeHechos,
-      List<Fuente> fuentes
-  ) {
+  public List<Hecho> listaDeHechosConsensuados(List<Hecho> listaDeHechos) {
 
-    List<Set<Hecho>> hechosPorFuenteEnSets = obtenerListasDeHechos(fuentes);
+    // 1. Traemos todas las fuentes
+    List<Fuente> todasLasFuentes = FuenteRepository.instance().findAllFuentesConHechos();
+
+    if (todasLasFuentes == null || todasLasFuentes.isEmpty()) {
+      return List.of();
+    }
+
+    List<Fuente> fuentesActivas = todasLasFuentes.stream()
+                                                 .filter(f -> f.getHechos() != null && !f.getHechos().isEmpty())
+                                                 .collect(Collectors.toList());
+
+    if (fuentesActivas.isEmpty()) {
+      return List.of();
+    }
+
+    // 3. Mapeamos a Sets de hechos para búsqueda rápida
+    List<Set<Hecho>> hechosPorFuente = fuentesActivas.stream()
+                                                     .map(fuente -> fuente.getHechos().stream()
+                                                                          .filter(h -> h.getEstado() != Estado.ELIMINADO)
+                                                                          .collect(Collectors.toSet()))
+                                                     .collect(Collectors.toList());
 
     return listaDeHechos.stream()
                         .distinct()
-                        .filter(hecho -> esConsensuado(hecho, hechosPorFuenteEnSets))
-                        .toList();
-  }
-
-  /**
-   * Método auxiliar para obtener la lista de fuentes subyacentes.
-   */
-  List<Fuente> obtenerFuentesDelNodo(Fuente fuente) {
-    if (fuente instanceof FuenteDeAgregacion agregador) {
-      return agregador.getFuentesCargadas();
-    } else {
-      return List.of(fuente);
-    }
-  }
-
-  /**
-   * Obtiene la lista de hechos de cada fuente, excluyendo los eliminados.
-   */
-  List<Set<Hecho>> obtenerListasDeHechos(List<Fuente> fuentes) {
-    return fuentes.stream()
-                  .map(fuente ->
-                           fuente.getHechos()
-                                 .stream()
-                                 .filter(hecho -> hecho.getEstado() != Estado.ELIMINADO)
-                                 .collect(Collectors.toSet())
-                  )
-                  .toList();
+                        .filter(hecho -> esConsensuado(hecho, hechosPorFuente))
+                        .collect(Collectors.toList());
   }
 
   protected boolean existeHechoSimilarEnFuente(Set<Hecho> hechosDeLaFuente, Hecho hechoBuscado) {
     return hechosDeLaFuente.stream().anyMatch(h -> sonHechosEquivalentes(h, hechoBuscado));
   }
 
-  /**
-   * Determina si dos hechos son equivalentes comparando múltiples campos clave.
-   * Reglas:
-   * 1. Identidad exacta (equals).
-   * 2. O coincidencia aproximada en: Título + (Dirección O Ubicación) + Fecha.
-   */
-  private boolean sonHechosEquivalentes(Hecho h1, Hecho h2) {
+  // --- LÓGICA DE COMPARACIÓN ROBUSTA ---
+  protected boolean sonHechosEquivalentes(Hecho h1, Hecho h2) {
+    if (h1 == h2) return true;
+    if (h1.getId() != null && h2.getId() != null && h1.getId().equals(h2.getId())) return true;
     if (h1.equals(h2)) return true;
 
-    boolean tituloSimilar = h1.getTitulo() != null && h2.getTitulo() != null
-        && h1.getTitulo().trim().equalsIgnoreCase(h2.getTitulo().trim());
+    // 1. Validar Título (Normalizado)
+    String t1 = normalizarTexto(h1.getTitulo());
+    String t2 = normalizarTexto(h2.getTitulo());
 
-    if (!tituloSimilar) return false;
+    // Si títulos difieren, no hay nada que hacer.
+    if (t1.isEmpty() || t2.isEmpty() || !t1.equals(t2)) return false;
 
-    boolean fechaSimilar = (h1.getFechaSuceso() == null && h2.getFechaSuceso() == null) ||
-        (h1.getFechaSuceso() != null && h2.getFechaSuceso() != null &&
-            h1.getFechaSuceso().equals(h2.getFechaSuceso()));
+    // 2. Validar Fecha (Solo la parte de fecha YYYY-MM-DD, ignorando horas/minutos si fuera timestamp)
+    boolean fechaSimilar = false;
+    if (h1.getFechaSuceso() == null && h2.getFechaSuceso() == null) {
+      fechaSimilar = true;
+    } else if (h1.getFechaSuceso() != null && h2.getFechaSuceso() != null) {
+      // Usamos toString() que suele formatear a YYYY-MM-DD en LocalDate/Date SQL
+      // Esto evita problemas de milisegundos o zonas horarias
+      String f1 = h1.getFechaSuceso().toString().split(" ")[0]; // Quedarse solo con fecha si hay hora
+      String f2 = h2.getFechaSuceso().toString().split(" ")[0];
+      fechaSimilar = f1.equals(f2);
+    }
 
     if (!fechaSimilar) return false;
 
-    boolean ubicacionSimilar = false;
+    // 3. Validar Ubicación (LÓGICA PERMISIVA)
+    // Si coinciden en Título y Fecha, asumimos que es el mismo hecho,
+    // SALVO que las ubicaciones sean explícitamente contradictorias.
 
-    if (h1.getUbicacion() != null && h2.getUbicacion() != null) {
-      double epsilon = 0.0001;
+    boolean h1TieneUbicacion = h1.getUbicacion() != null;
+    boolean h2TieneUbicacion = h2.getUbicacion() != null;
+    boolean h1TieneDireccion = h1.getDireccion() != null;
+    boolean h2TieneDireccion = h2.getDireccion() != null;
+
+    // Caso A: Ambos tienen coordenadas -> Deben coincidir.
+    if (h1TieneUbicacion && h2TieneUbicacion) {
+      double epsilon = 0.0001; // ~11 metros
       boolean latIgual = Math.abs(h1.getUbicacion().getLatitud() - h2.getUbicacion().getLatitud()) < epsilon;
       boolean lngIgual = Math.abs(h1.getUbicacion().getLongitud() - h2.getUbicacion().getLongitud()) < epsilon;
-      ubicacionSimilar = latIgual && lngIgual;
-    } else {
-      ubicacionSimilar = h1.getDireccion() != null && h2.getDireccion() != null
-          && h1.getDireccion().trim().equalsIgnoreCase(h2.getDireccion().trim());
+      if (!latIgual || !lngIgual) return false; // Contradicción explícita
     }
 
-    return ubicacionSimilar;
+    // Caso B: Ambos tienen dirección -> Deben coincidir.
+    if (h1TieneDireccion && h2TieneDireccion) {
+      String d1 = normalizarTexto(h1.getDireccion());
+      String d2 = normalizarTexto(h2.getDireccion());
+      if (!d1.isEmpty() && !d1.equals(d2)) return false; // Contradicción explícita
+    }
+
+
+    return true;
+  }
+
+  protected String normalizarTexto(String input) {
+    if (input == null) return "";
+    return input.trim().replaceAll("\\s+", " ").toLowerCase();
   }
 
   protected abstract boolean esConsensuado(Hecho hecho, List<Set<Hecho>> hechosDeFuentes);

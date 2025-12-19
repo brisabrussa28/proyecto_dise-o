@@ -24,7 +24,14 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4>Categoria:
-                <span class="badge bg-primary fs-6">{{hecho.categoria}}</span></h4>
+                <span class="badge bg-primary fs-6">
+                    {{#if (gt hecho.categoria.length 100)}}
+                        {{substring hecho.categoria 0 100}}...
+                    {{else}}
+                        {{hecho.categoria}}
+                    {{/if}}
+                </span>
+            </h4>
             <div class="d-flex gap-2">
                 {{#if esEditable}}
                     <a href="/hechos/{{hecho.id}}/editar" class="btn btn-warning btn-sm">
@@ -42,7 +49,13 @@
 
             <div class="col-lg-8">
 
-                <h2 class="fw-bold mb-3">{{hecho.titulo}}</h2>
+                <h2 class="fw-bold mb-3">
+                    {{#if (gt hecho.titulo.length 40)}}
+                        {{substring hecho.titulo 0 40}}...
+                    {{else}}
+                        {{hecho.titulo}}
+                    {{/if}}
+                </h2>
 
                 {{#if hecho.fotos}}
                     <div id="carouselHecho"
@@ -120,7 +133,8 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
                             {{# if hecho.autor}}
-                                <div class="bg-secondary rounded-circle d-flex justify-content-center align-items-center text-white me-3"
+                                <div class="bg-secondary rounded-circle d-flex
+                                justify-content-center align-items-center text-white me-3"
                                      style="width: 50px; height: 50px; font-size: 1.5rem;">
                                     {{#if hecho.autor.foto}}
                                         <img src="/usuarios/{{hecho.autor.id}}/foto"

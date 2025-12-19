@@ -162,6 +162,26 @@ public class JavalinHandlebars implements FileRenderer {
           return "";
         }
     );
+
+    handlebars.registerHelper(
+        "substring", (Object context, Options options) -> {
+          if (context == null) {
+            return "";
+          }
+          String str = context.toString();
+          int start = options.param(0, 0);
+          int end = options.param(1, str.length());
+
+          if (start < 0 || start >= str.length()) {
+            return str;
+          }
+          if (end > str.length()) {
+            end = str.length();
+          }
+
+          return str.substring(start, end);
+        }
+    );
   }
 
   @NotNull

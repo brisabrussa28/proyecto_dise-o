@@ -3,19 +3,17 @@ package ar.edu.utn.frba.dds.model.fuentes;
 import ar.edu.utn.frba.dds.model.geolocalizacion.GeoApi;
 import ar.edu.utn.frba.dds.model.hecho.EnriquecedorDeHechos;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
@@ -36,10 +34,12 @@ public abstract class FuenteConHechos extends Fuente {
     super(nombre);
   }
 
-  // FIXED: Cambiado a LAZY para evitar problemas de rendimiento (N+1)
-  // FIXED: Usamos Set para evitar duplicados a nivel de persistencia si no hay orden
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-  @JoinColumn(name = "fuente_id")
+  @ManyToMany
+  @JoinTable(
+      name = "fuente_hecho",
+      joinColumns = @JoinColumn(name = "fuente_id"),
+      inverseJoinColumns = @JoinColumn(name = "hecho_id")
+  )
   protected Set<Hecho> hechos = new HashSet<>();
 
 

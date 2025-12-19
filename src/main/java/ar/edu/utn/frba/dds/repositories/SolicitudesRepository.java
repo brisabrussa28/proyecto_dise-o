@@ -4,7 +4,9 @@ import ar.edu.utn.frba.dds.model.hecho.Hecho;
 import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.utils.DBUtils;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
@@ -17,7 +19,6 @@ public class SolicitudesRepository {
   }
 
   public void guardar(Solicitud solicitud) {
-    // Buscamos primero para no tener transacciones anidadas con EMs distintos
     Solicitud existente = buscarPorHechoYRazon(
         solicitud.getHechoSolicitado(),
         solicitud.getRazonEliminacion()
@@ -123,6 +124,61 @@ public class SolicitudesRepository {
     } catch (PersistenceException e) {
       DBUtils.rollback(em);
       throw new RuntimeException(e.getMessage());
+    } finally {
+      em.close();
+    }
+  }
+
+  // --- QUERIES OPTIMIZADAS ---
+
+  public Map<String, Long> countHechosReportadosPorCategoria() {
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      List<Object[]> resultados = em.createQuery(
+          "SELECT h.categoria, COUNT(s) " +
+              "FROM Solicitud s " +
+              "JOIN s.hechoSolicitado h " +
+              "WHERE h.categoria IS NOT NULL " +
+              "GROUP BY h.categoria", Object[].class
+      ).getResultList();
+
+      Map<String, Long> mapa = new HashMap<>();
+      for (Object[] fila : resultados) {
+        mapa.put((String) fila[0], (Long) fila[1]);
+      }
+      return mapa;
+    } finally {
+      em.close();
+    }
+  }
+
+  public Map<String, Long> countHechosReportadosPorProvinciaYColeccion(Long coleccionId) {
+    EntityManager em = DBUtils.getEntityManager();
+    try {
+      // ESTO SOLUCIONA EL PROBLEMA DE LAZY INITIALIZATION Y N+1
+      // Usamos una subquery para filtrar los hechos que pertenecen a la colección
+      // a través de su Fuente, sin traer objetos a memoria.
+      List<Object[]> resultados = em.createQuery(
+                                        "SELECT h.provincia, COUNT(s) " +
+                                            "FROM Solicitud s " +
+                                            "JOIN s.hechoSolicitado h " +
+                                            "WHERE h.provincia IS NOT NULL " +
+                                            "AND h.id IN (" +
+                                            "   SELECT fh.id FROM Coleccion c " +
+                                            "   JOIN c.fuente f " +
+                                            "   JOIN f.hechos fh " +
+                                            "   WHERE c.id = :coleccionId" +
+                                            ") " +
+                                            "GROUP BY h.provincia", Object[].class
+                                    )
+                                    .setParameter("coleccionId", coleccionId)
+                                    .getResultList();
+
+      Map<String, Long> mapa = new HashMap<>();
+      for (Object[] fila : resultados) {
+        mapa.put((String) fila[0], (Long) fila[1]);
+      }
+      return mapa;
     } finally {
       em.close();
     }

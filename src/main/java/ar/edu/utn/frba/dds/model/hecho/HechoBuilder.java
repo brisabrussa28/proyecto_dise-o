@@ -125,35 +125,40 @@ public class HechoBuilder {
    * @throws IllegalStateException si faltan campos obligatorios o los datos son inconsistentes.
    */
   public Hecho build() {
-    validarCampos();
-    return new Hecho(
-        titulo,
-        descripcion,
-        categoria,
-        direccion,
-        provincia,
-        ubicacion,
-        fechaSuceso,
-        fechaCarga,
-        fuenteOrigen,
-        etiquetas,
-        fotos,
-        autor
-    );
+    try {
+      validarCampos();
+      return new Hecho(
+          titulo,
+          descripcion,
+          categoria,
+          direccion,
+          provincia,
+          ubicacion,
+          fechaSuceso,
+          fechaCarga,
+          fuenteOrigen,
+          etiquetas,
+          fotos,
+          autor
+      );
+    } catch (IllegalStateException e) {
+      throw new RuntimeException(e.getMessage());
+    }
   }
 
   private void validarCampos() {
     if (titulo == null || titulo.isBlank()) {
-      throw new IllegalStateException("El título es obligatorio para crear un Hecho.");
+      throw new IllegalStateException("Hubo un error de mapeo con el titulo del hecho.");
     }
     if (fechaSuceso == null) {
-      throw new IllegalStateException("La fecha del suceso es obligatoria para crear un Hecho.");
+      throw new IllegalStateException("Hubo un error de mapeo con la fecha de suceso del hecho.");
     }
     if (fechaCarga == null) {
-      throw new IllegalStateException("La fecha de carga es obligatoria para crear un Hecho.");
+      throw new IllegalStateException("Hubo un error de mapeo con la fecha de carga del hecho.");
     }
     if (fechaSuceso.isAfter(fechaCarga)) {
-      throw new IllegalStateException("La fecha del suceso no puede ser posterior a la fecha de carga.");
+      throw new IllegalStateException(
+          "La fecha del suceso no puede ser posterior a la fecha de carga.");
     }
     if (fechaSuceso.isAfter(LocalDateTime.now())) {
       throw new IllegalStateException("La fecha del suceso no puede ser una fecha futura.");

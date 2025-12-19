@@ -1,0 +1,65 @@
+{{#partial "contenido"}}
+    <div class="container d-flex justify-content-center align-items-center"
+         style="min-height: 85vh;">
+
+        <div class="card border-0 shadow-lg p-4 p-md-5 text-center bg-white bg-opacity-90 animate-fade-in"
+             style="max-width: 500px; border-radius: 20px;">
+
+            <div class="mb-4">
+                <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex justify-content-center align-items-center"
+                     style="width: 100px; height: 100px;">
+                    <i class="fa-solid fa-user-lock fa-3x text-danger"></i>
+                </div>
+            </div>
+
+            <h6 class="text-uppercase text-muted fw-bold ls-2 mb-2">Error 403</h6>
+            <h2 class="fw-bold text-dark mb-3">Acceso Restringido</h2>
+
+            <p class="text-secondary mb-4">
+                {{#if errorMessage}}
+                    {{errorMessage}}
+                {{else}}
+                    No tenés los permisos suficientes para ver esta sección.
+                {{/if}}
+            </p>
+
+            <div class="d-grid gap-2 d-sm-flex justify-content-center">
+                <a href="/" class="btn btn-outline rounded-pill px-4 fw-bold shadow-sm">
+                    <i class="fa-solid fa-map-location-dot me-2"></i> Volver al Mapa
+                </a>
+
+                {{#unless estaLogueado}}
+                    <a href="/auth/login" class="btn btn-primary rounded-pill px-4 fw-bold">
+                        <i class="fa-solid fa-key me-2"></i> Iniciar Sesión
+                    </a>
+                {{/unless}}
+            </div>
+
+            <div class="mt-4 pt-3 border-top border-light">
+                <small class="text-muted fst-italic">
+                    <span class="font-monospace">{{timestamp}}</span>
+                </small>
+            </div>
+        </div>
+
+    </div>
+
+    <style>
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+{{/partial}}
+
+{{> templates/layout}}

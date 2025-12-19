@@ -52,7 +52,8 @@
                                         <div>
                                             <textarea name="descripcion"
                                                       class="form-control form-control-sm" rows="2"
-                                                      placeholder="Breve descripción..." required></textarea>
+                                                      placeholder="Breve descripción..."
+                                                      required></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -82,7 +83,8 @@
                                         <!-- A) Fuente Existente -->
                                         <div id="panelFuenteExistente">
                                             <select name="fuente_id"
-                                                    class="form-select form-select-sm bg-light" required>
+                                                    class="form-select form-select-sm bg-light"
+                                                    required>
                                                 <option value="" selected disabled>Seleccionar
                                                     fuente...
                                                 </option>
@@ -151,7 +153,6 @@
                                                                 </option>
                                                                 <option value=";">Punto y coma (;)
                                                                 </option>
-                                                                <option value="|">Barra (|)</option>
                                                             </select>
                                                         </div>
                                                         <div class="col-6">
@@ -224,22 +225,24 @@
                                         <i class="fa-solid fa-gavel me-1"></i>Criterio de Consenso
                                     </label>
                                     <div class="bg-white p-3 rounded border">
-                                        <select name="algoritmo_tipo"
+                                        <select name="algoritmo"
                                                 class="form-select form-select-sm">
+                                            <option value="Sin definir">Sin definir</option>
                                             <option value="May_simple">Mayoría Simple</option>
                                             <option value="Absoluta">Unanimidad / Absoluta</option>
                                             <option value="Mult_menciones">Múltiples Menciones
                                             </option>
                                         </select>
                                         <div class="form-text x-small mt-1 text-muted">
-                                            Define cómo se validan los hechos dentro de la
+                                            Define cómo se validarán los hechos dentro de la
                                             colección.
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="d-grid pt-2">
-                                    <button type="button" class="btn btn-primary fw-bold shadow-sm" id="btnCrearColeccion">
+                                    <button type="button" class="btn btn-primary fw-bold shadow-sm"
+                                            id="btnCrearColeccion">
                                         <i class="fa-solid fa-check me-2"></i>Crear Colección
                                     </button>
                                 </div>
@@ -286,7 +289,10 @@
                                 <i class="fa-solid fa-list-ul me-2"></i>Colecciones Disponibles
                             </h6>
                         </div>
-                        <div class="list-group list-group-flush" id="resultsList">
+
+                        <div class="list-group list-group-flush" id="resultsList"
+                             style="max-height: 65vh; overflow-y: auto;">
+
                             {{#each colecciones}}
                                 <a href="/admin/colecciones/{{this.id}}"
                                    class="list-group-item list-group-item-action p-3 border-start-0 border-end-0">
@@ -294,8 +300,20 @@
                                         <div class="d-flex w-100 justify-content-between align-items-center">
                                             <div class="d-flex flex-column gap-1">
                                                 <div class="d-flex align-items-center gap-2">
-                                                    <h6 class="mb-0 fw-bold text-dark">{{this.titulo}}</h6>
-                                                    <span class="badge bg-light text-dark border">{{this.categoria}}</span>
+                                                    <h6 class="mb-0 fw-bold text-dark">
+                                                        {{#if (gt this.titulo.length 50)}}
+                                                            {{substring this.titulo 0 50}}...
+                                                        {{else}}
+                                                            {{this.titulo}}
+                                                        {{/if}}
+                                                    </h6>
+                                                    <span class="badge bg-light text-dark border">
+                                                        {{#if (gt this.categoria.length 50)}}
+                                                            {{substring this.categoria 0 50}}...
+                                                        {{else}}
+                                                            {{this.categoria}}
+                                                        {{/if}}
+                                                    </span>
                                                 </div>
                                                 <small class="text-muted text-truncate"
                                                        style="max-width: 450px;">
@@ -329,12 +347,17 @@
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-success text-white border-0">
                     <h5 class="modal-title">
-                        <i class="fa-solid fa-circle-check me-2"></i>¡Colección creada!
+                        <i class="fa-solid fa-circle-check me-2"></i>Colección creada
                     </h5>
                 </div>
                 <div class="modal-body text-center p-4">
                     <p class="fw-bold mb-3">La colección se creó correctamente.</p>
-                    <p class="text-muted small">Recargando...</p>
+                    <div class="d-flex justify-content-center mt-3" role="status" aria-live="polite"
+                         aria-busy="true">
+                        <div class="spinner-border text-success" role="status"
+                             aria-hidden="true"></div>
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
                 </div>
             </div>
         </div>

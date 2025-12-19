@@ -51,38 +51,4 @@ public class CalculadorScoreTFIDF {
     return productoEscalar;
   }
 
-  // Versión alternativa más explícita (para depuración)
-  public double calcularSimilitudCosenoCompleta(Map<String, Double> a, Map<String, Double> b) {
-    if (a.isEmpty() || b.isEmpty()) {
-      return 0.0;
-    }
-
-    double productoEscalar = 0.0;
-    double normA = 0.0;
-    double normB = 0.0;
-
-    // Usar todos los términos de ambos vectores
-    for (Map.Entry<String, Double> entry : a.entrySet()) {
-      double valA = entry.getValue();
-      normA += valA * valA;
-
-      Double valB = b.get(entry.getKey());
-      if (valB != null) {
-        productoEscalar += valA * valB;
-      }
-    }
-
-    for (double valB : b.values()) {
-      normB += valB * valB;
-    }
-
-    normA = Math.sqrt(normA);
-    normB = Math.sqrt(normB);
-
-    if (normA == 0.0 || normB == 0.0) {
-      return 0.0;
-    }
-
-    return productoEscalar / (normA * normB);
-  }
 }

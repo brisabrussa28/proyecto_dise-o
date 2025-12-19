@@ -47,8 +47,19 @@
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Descripción</label>
-                                <textarea name="descripcion" class="form-control"
+                                <textarea name="descripcion"
+                                          id="descripcionInput"
+                                          class="form-control"
+                                          maxlength="255"
                                           rows="3"></textarea>
+                                <div class="d-flex justify-content-end mt-1">
+                                    <small
+                                            id="contadorDescripcion"
+                                            class="text-muted fw-bold"
+                                            style="font-size: 0.85rem;">
+                                        0 / 255
+                                    </small>
+                                </div>
                             </div>
 
                             <div class="row">
@@ -126,7 +137,9 @@
                                 </div>
 
                                 <div id="map-picker"
-                                     style="height: 400px; width: 100%; border: 1px solid #ced4da; border-radius: 4px; margin-bottom: 10px;"></div>
+                                     style="height: 400px; width: 100%; border: 1px solid #ced4da;
+                                     border-radius: 4px; margin-bottom: 10px;">
+                                </div>
 
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text">Lat</span>
@@ -142,7 +155,6 @@
                             </div>
 
                             <input type="hidden" name="origen" value="PROVISTO_CONTRIBUYENTE">
-                            <input type="hidden" name="fuente" value="Fuente {{emailUsuario}}">
 
                             <div class="mb-4">
                                 <label class="form-label fw-bold">Fotos</label>
@@ -421,6 +433,33 @@
                 inputFechaSuceso.setAttribute('max', isoLocal);
             }
         });
+
+        const descripcionInput = document.getElementById('descripcionInput');
+        const contadorDescripcion = document.getElementById('contadorDescripcion');
+
+        if (descripcionInput && contadorDescripcion) {
+            descripcionInput.addEventListener('input', function () {
+                const largoActual = this.value.length;
+                contadorDescripcion.textContent = `${largoActual} / 255`;
+
+                if (largoActual > 230) {
+                    contadorDescripcion.classList.remove('text-muted', 'text-primary');
+                    contadorDescripcion.classList.add('text-warning');
+                } else if (largoActual > 0) {
+                    contadorDescripcion.classList.remove('text-muted', 'text-warning');
+                    contadorDescripcion.classList.add('text-primary');
+                } else {
+                    contadorDescripcion.classList.remove('text-primary', 'text-warning');
+                    contadorDescripcion.classList.add('text-muted');
+                }
+
+                if (largoActual >= 255) {
+                    this.classList.add('border-warning');
+                } else {
+                    this.classList.remove('border-warning');
+                }
+            });
+        }
     </script>
 {{/partial}}
 {{> templates/layout}}

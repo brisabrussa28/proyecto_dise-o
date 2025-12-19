@@ -9,7 +9,9 @@ import ar.edu.utn.frba.dds.repositories.ColeccionRepository;
 import ar.edu.utn.frba.dds.repositories.EstadisticaRepository;
 import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class EstadisticaController {
 
@@ -21,7 +23,7 @@ public class EstadisticaController {
     CentralDeEstadisticas central = new CentralDeEstadisticas();
     central.setGestor(new GestorDeSolicitudes(SolicitudesRepository.instance()));
 
-    List<Estadistica> resultado;
+    List<Estadistica> resultado = new ArrayList<>();
 
     switch (dto.getTipo()) {
       case "HECHOS POR PROVINCIA Y CATEGORIA":
@@ -37,27 +39,45 @@ public class EstadisticaController {
         break;
 
       case "HECHOS REPORTADOS POR CATEGORIA":
-        resultado = central.hechosPorCategoria();
+        // OPTIMIZADO: Query directa a DB, devuelve Scalar values (no Entidades Hecho)
+        Map<String, Long> conteoPorCategoria = SolicitudesRepository.instance().countHechosReportadosPorCategoria();
+
+        for (Map.Entry<String, Long> entry : conteoPorCategoria.entrySet()) {
+          resultado.add(new Estadistica(
+              null,
+              entry.getValue(),
+              entry.getKey(),
+              null,
+              dto.getTipo()
+          ));
+        }
         break;
 
       case "HECHOS REPORTADOS POR PROVINCIA Y COLECCION":
-        if (dto.getColeccion() == null)
+        Long coleccionId = dto.getColeccion();
+        if (coleccionId == null)
           throw new RuntimeException("Debe especificarse una colección");
 
-        Coleccion col = ColeccionRepository.instance().findById(dto.getColeccion());
-
+        Coleccion col = ColeccionRepository.instance().findById(coleccionId);
         if (col == null)
           throw new RuntimeException("La colección no existe");
 
-        if (col.getFuente() == null) {
-          throw new RuntimeException("La colección no tiene fuente asociada");
-        }
+        // OPTIMIZADO: Query directa respetando flujo Coleccion -> Fuente -> Hecho.
+        // No carga fotos ni hechos en memoria.
+        Map<String, Long> conteoPorProvincia = SolicitudesRepository.instance()
+                                                                    .countHechosReportadosPorProvinciaYColeccion(coleccionId);
 
-        if (col.getFuente().getHechos() != null) {
-          col.getFuente().getHechos().size();
-        }
+        System.out.println("Stats REPORTADOS calculadas para Colección ID " + coleccionId);
 
-        resultado = central.hechosPorProvinciaDeUnaColeccion(col);
+        for (Map.Entry<String, Long> entry : conteoPorProvincia.entrySet()) {
+          resultado.add(new Estadistica(
+              entry.getKey(), // Provincia
+              entry.getValue(), // Cantidad
+              null,
+              col,
+              dto.getTipo()
+          ));
+        }
         break;
 
       case "CANTIDAD DE HECHOS":
@@ -73,7 +93,7 @@ public class EstadisticaController {
         break;
 
       default:
-        throw new RuntimeException("Tipo de estadística no reconocido");
+        throw new RuntimeException("Tipo de estadística no reconocido: " + dto.getTipo());
     }
 
     resultado.forEach(EstadisticaRepository.instance()::save);
@@ -86,6 +106,7 @@ public class EstadisticaController {
   }
 
   public List<Coleccion> getColeccionesConHechos() {
+    // Nota: Usar con cuidado en el frontend, puede ser pesado.
     return ColeccionRepository.instance().findAllConFuentesYHechos();
   }
 
@@ -103,12 +124,22 @@ public class EstadisticaController {
         this.calcularEstadisticas(new EstadisticaDTO("HECHOS POR HORA Y CATEGORIA", categoria, null));
       }
 
-      List<Coleccion> colecciones = ColeccionRepository.instance().findAllConFuentesYHechos();
+      // IMPORTANTE: Aquí estaba el error de N+1.
+      // Cambiamos findAllConFuentesYHechos() por findAll().
+      // No necesitamos traer los hechos ni las fotos para obtener el ID y calcular stats.
+      List<Coleccion> colecciones = ColeccionRepository.instance().findAll();
+
       for (Coleccion col : colecciones) {
-        if (col.getFuente() != null && !col.getFuente().getHechos().isEmpty()) {
-          this.calcularEstadisticas(
-              new EstadisticaDTO("HECHOS REPORTADOS POR PROVINCIA Y COLECCION", null, col.getId())
-          );
+        // Solo intentamos calcular si la colección tiene una fuente asignada
+        // (Verificación rápida sin traer todo el árbol)
+        if (col.getFuente() != null) {
+          try {
+            this.calcularEstadisticas(
+                new EstadisticaDTO("HECHOS REPORTADOS POR PROVINCIA Y COLECCION", null, col.getId())
+            );
+          } catch (Exception ex) {
+            System.err.println("Error calculando stats para colección " + col.getTitulo() + ": " + ex.getMessage());
+          }
         }
       }
 
@@ -119,7 +150,6 @@ public class EstadisticaController {
     } catch (Exception e) {
       System.err.println("Error calculando estadísticas: " + e.getMessage());
       e.printStackTrace();
-      throw new RuntimeException("Error al calcular estadísticas", e);
     }
   }
 }

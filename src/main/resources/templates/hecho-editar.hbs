@@ -77,10 +77,17 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Descripcion</label>
-                                <textarea class="form-control" name="descripcion"
-                                          placeholder="{{hecho.descripcion}}"
+                                <label class="form-label fw-bold">Descripción</label>
+                                <textarea name="descripcion"
+                                          id="descripcionInput"
+                                          class="form-control"
+                                          maxlength="255"
                                           rows="3"></textarea>
+                                <div class="d-flex justify-content-end mt-1">
+                                    <small id="contadorDescripcion" class="text-muted fw-bold" style="font-size: 0.85rem;">
+                                        0 / 255
+                                    </small>
+                                </div>
                             </div>
 
                             <div class="row">
@@ -282,10 +289,13 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         function toggleSeleccion(elementoDiv) {
+            // 1. Alternar la clase visual 'selected' (pone el borde rojo)
             elementoDiv.classList.toggle('selected');
 
+            // 2. Buscar el checkbox oculto dentro de este div
             const checkbox = elementoDiv.querySelector('input[type="checkbox"]');
 
+            // 3. Cambiar su valor (true/false)
             if (checkbox) {
                 checkbox.checked = !checkbox.checked;
             }
@@ -293,9 +303,11 @@
 
         document.addEventListener('DOMContentLoaded', () => {
 
+            // --- 1. CONFIGURACIÓN ---
             const modoEdicion = "{{hecho.id}}" !== "";
             const provinciaGuardada = "{{hecho.provincia}}";
 
+            // Coordenadas iniciales
             const latInicial = {{#if hecho.ubicacion.latitud}}{{hecho.ubicacion.latitud}}{{else}}
             -34.6037{{/if}};
             const lngInicial = {{#if hecho.ubicacion.longitud}}{{hecho.ubicacion.longitud}}{{else}}
@@ -304,9 +316,11 @@
             const selectProvincia = document.getElementById('input-provincia');
             const inputDireccion = document.getElementById('input-direccion');
 
+            // Alertas
             const alertaError = document.getElementById('alerta-error');
             const textoError = document.getElementById('texto-error');
 
+            // --- 2. CARGAR PROVINCIAS (GEOREF - Lista Oficial) ---
             fetch('https://apis.datos.gob.ar/georef/api/provincias?campos=nombre&orden=nombre')
                     .then(res => res.json())
                     .then(data => {
@@ -327,6 +341,7 @@
                         selectProvincia.innerHTML = '<option value="">Error cargando provincias</option>';
                     });
 
+            // --- 3. INICIALIZAR MAPA ---
             const map = L.map('map-picker').setView([latInicial, lngInicial], 13);
             L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{y}.png', {
                 tms: true,
@@ -347,21 +362,27 @@
                 });
             }
 
+            // --- 4. FUNCIONES CLAVE ---
+
             function actualizarInputs(lat, lng) {
                 document.getElementById('lat').value = lat;
                 document.getElementById('lng').value = lng;
             }
 
+            // Función para quitar acentos y minúsculas (para comparar fácil)
             function normalizarTexto(texto) {
                 return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             }
 
+            // Función MODIFICADA con la excepción para CABA vs Buenos Aires
             function obtenerDatosUbicacion(lat, lng) {
                 inputDireccion.value = "Consultando mapa...";
 
+                // --- CORRECCIÓN: Usamos nombres distintos para evitar el error "Identifier already declared" ---
                 const latNum = parseFloat(lat);
                 const lngNum = parseFloat(lng);
 
+                // Límites aproximados de CABA
                 const CABA_LIMITES = {
                     norte: -34.52,
                     sur: -34.72,
@@ -369,6 +390,7 @@
                     oeste: -58.54
                 };
 
+                // Verificamos si el punto está dentro del cuadro usando los números parseados
                 const esCABA = (latNum <= CABA_LIMITES.norte && latNum >= CABA_LIMITES.sur) &&
                         (lngNum <= CABA_LIMITES.este && lngNum >= CABA_LIMITES.oeste);
 
@@ -376,6 +398,7 @@
                         .then(res => res.json())
                         .then(data => {
                             if (data && data.address) {
+                                // A. Dirección
                                 const calle = data.address.road || "";
                                 const altura = data.address.house_number || "";
                                 const barrio = data.address.neighbourhood || "";
@@ -385,6 +408,7 @@
 
                                 inputDireccion.value = textoDireccion;
 
+                                // B. Selección de Provincia (LÓGICA HÍBRIDA)
                                 const opciones = selectProvincia.options;
 
                                 if (esCABA) {
@@ -398,6 +422,7 @@
                                     }
                                 }
 
+                                // --- CAMINO NORMAL: No es CABA, buscamos por nombre ---
                                 const estadoNominatim = data.address.state || data.address.city;
                                 if (estadoNominatim) {
                                     const nombreMapa = normalizarTexto(estadoNominatim);
@@ -406,6 +431,7 @@
                                     for (let i = 0; i < opciones.length; i++) {
                                         const nombreOficial = normalizarTexto(opciones[i].value);
 
+                                        // Si NO es CABA por coordenadas, prohibimos seleccionar CABA
                                         if (!esCABA && (nombreOficial.includes("autonoma") || nombreOficial.includes("ciudad"))) {
                                             continue;
                                         }
@@ -447,6 +473,8 @@
                 actualizarInputs(lat, lng);
             }
 
+            // --- 5. EVENTOS ---
+
             map.on('click', function (e) {
                 const lat = e.latlng.lat;
                 const lng = e.latlng.lng;
@@ -458,7 +486,7 @@
             if (btnBuscar) {
                 btnBuscar.addEventListener('click', () => {
                     const calle = inputDireccion.value;
-                    const provSelect = selectProvincia.value;
+                    const provSelect = selectProvincia.value; // Usamos el valor oficial seleccionado
 
                     if (alertaError) alertaError.classList.add('d-none');
 
@@ -469,6 +497,7 @@
 
                     let url = `https://nominatim.openstreetmap.org/search?format=json&street=${encodeURIComponent(calle)}&country=Argentina`;
 
+                    // Si hay provincia seleccionada en el dropdown, la usamos para filtrar
                     if (provSelect && provSelect !== "Cargando provincias...") {
                         url += `&state=${encodeURIComponent(provSelect)}`;
                     }
@@ -514,6 +543,33 @@
             modal.hide();
 
             document.getElementById("formEditarHecho").submit();
+        }
+
+        const descripcionInput = document.getElementById('descripcionInput');
+        const contadorDescripcion = document.getElementById('contadorDescripcion');
+
+        if (descripcionInput && contadorDescripcion) {
+            descripcionInput.addEventListener('input', function () {
+                const largoActual = this.value.length;
+                contadorDescripcion.textContent = `${largoActual} / 255`;
+
+                if (largoActual > 230) {
+                    contadorDescripcion.classList.remove('text-muted', 'text-primary');
+                    contadorDescripcion.classList.add('text-warning');
+                } else if (largoActual > 0) {
+                    contadorDescripcion.classList.remove('text-muted', 'text-warning');
+                    contadorDescripcion.classList.add('text-primary');
+                } else {
+                    contadorDescripcion.classList.remove('text-primary', 'text-warning');
+                    contadorDescripcion.classList.add('text-muted');
+                }
+
+                if (largoActual >= 255) {
+                    this.classList.add('border-warning');
+                } else {
+                    this.classList.remove('border-warning');
+                }
+            });
         }
     </script>
 {{/partial}}

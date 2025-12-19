@@ -10,7 +10,14 @@
     <div class="d-flex flex-column">
         <div class="d-flex flex-column cabecera shadow bg-white rounded p-3">
             <a href="/hechos/{{hecho.id}}" class="text-decoration-none text-black">
-                <h3 style="font-weight: 600;">Hecho: {{hecho.titulo}}</h3>
+                <h3 style="font-weight: 600;">
+                    Hecho:
+                    {{#if (gt hecho.titulo.length 80)}}
+                        {{substring hecho.titulo 0 80}}...
+                    {{else}}
+                        {{hecho.titulo}}
+                    {{/if}}
+                </h3>
             </a>
             <div class="d-flex flex-column detalles">
 
@@ -99,7 +106,8 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-outline-secondary btn-lg"
+                            data-bs-dismiss="modal">
                         <i class="fa-solid fa-times me-1"></i>Cancelar
                     </button>
                     <button type="button"
@@ -134,7 +142,12 @@
                 </div>
                 <div class="modal-body text-center p-4">
                     <p class="fw-bold mb-3">El reporte fue enviado correctamente.</p>
-                    <p class="text-muted small">Redirigiendo...</p>
+                    <div class="d-flex justify-content-center mt-3" role="status" aria-live="polite"
+                         aria-busy="true">
+                        <div class="spinner-border text-success" role="status"
+                             aria-hidden="true"></div>
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -143,7 +156,6 @@
     <script>
         function vaciarMotivo() {
             document.getElementById('motivoInput').value = "";
-            mostrarMensaje("info", "El motivo fue restablecido.");
         }
 
         const MIN_CHARS = 500;
@@ -171,6 +183,7 @@
             }
         });
 
+        // Validar también al enviar
         function enviarSolicitud() {
             const motivo = motivoInput.value.trim();
             const hechoId = {{hecho.id}};
@@ -178,6 +191,7 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalReportar'));
             modal.hide();
 
+            // Validación estricta
             if (!motivo || motivo.length < MIN_CHARS) {
                 mostrarMensaje("danger", `El motivo debe tener al menos ${MIN_CHARS} caracteres.`);
                 motivoInput.classList.add('is-invalid');
@@ -190,6 +204,7 @@
                 hecho_solicitado: hechoId
             };
 
+            // Deshabilitar botón para evitar doble click
             if (btnEnviar) btnEnviar.disabled = true;
 
             fetch("/solicitudes", {
@@ -201,9 +216,11 @@
             })
                     .then(async resp => {
                         if (resp.ok) {
+                            // Mostrar modal de éxito
                             const modalExito = new bootstrap.Modal(document.getElementById("modalExitoReporte"));
                             modalExito.show();
 
+                            // Redirigir después de 1.5 segundos
                             setTimeout(() => window.location.href = "/", 1500);
                         } else {
                             const error = await resp.text();
@@ -239,6 +256,7 @@
                 return;
             }
 
+            // Abrir modal manualmente
             const modal = new bootstrap.Modal(document.getElementById('modalReportar'));
             modal.show();
         });

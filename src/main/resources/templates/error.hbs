@@ -2,10 +2,12 @@
 <div class="d-flex align-items-center justify-content-center min-vh-100 bg-white">
     <div class="text-center px-4" style="max-width: 700px;">
 
+        <!-- Código de Estado -->
         <h1 class="fw-bold text-dark" style="font-size: 6rem; line-height: 1;">
             {{#if errorStatus}}{{errorStatus}}{{else}}Error{{/if}}
         </h1>
 
+        <!-- Mensaje -->
         <h2 class="h4 text-secondary mb-4 mt-2">
             {{#if errorMessage}}{{errorMessage}}{{else}}Ocurrió un error inesperado{{/if}}
         </h2>
@@ -19,6 +21,7 @@
             </a>
         </div>
 
+        <!-- Detalles Técnicos (Ocultos nativamente) -->
         {{#if errorDetails}}
             <div class="mt-5 text-start">
                 <details class="border rounded p-2 bg-light">

@@ -8,11 +8,21 @@
 
 {{#partial "contenido"}}
     <div class="container-sm py-4 mx-auto">
+
+        {{#if error}}
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                <strong>¡Error!</strong> {{error}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                        aria-label="Close"></button>
+            </div>
+        {{/if}}
+
         <div class="bg-white bg-opacity-75 p-3 rounded shadow-sm">
             <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 border-secondary border-opacity-25">
                 <div>
-                    <h2 class="fw-bold"><i class="fa-solid fa-server me-2"></i>Gestión de
-                        Fuentes</h2>
+                    <h2 class="fw-bold"><i class="fa-solid fa-server me-2"></i>Gestión de Fuentes
+                    </h2>
                 </div>
                 <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapseCrear" aria-expanded="false">
@@ -20,7 +30,6 @@
                 </button>
             </div>
 
-            <!-- PANEL COLAPSABLE DE CREACIÓN (Oculto por defecto) -->
             <div class="collapse mb-4" id="collapseCrear">
                 <div class="card border-0 shadow bg-light">
                     <div class="card-header bg-primary text-white py-2">
@@ -28,8 +37,7 @@
                     </div>
                     <div class="card-body">
                         <form action="/admin/fuentes" method="POST" enctype="multipart/form-data"
-                              id="formCrearFuente" class="row g-3"
-                              onsubmit="prepararEnvioMapeoFuente()">
+                              id="formCrearFuente" class="row g-3">
 
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Nombre de la Fuente</label>
@@ -38,36 +46,26 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Tipo de Origen</label>
-                                <label for="selectorTipoFuente"></label><select
-                                    id="selectorTipoFuente" class="form-select"
-                                    onchange="cambiarTipoFuente()">
-                                <option value="DINAMICA" selected>Dinámica (Editable manualmente)
-                                </option>
-                                <option value="ESTATICA_CSV">Importar Archivo CSV</option>
-                                <option value="ESTATICA_JSON">Importar Archivo JSON</option>
-                                <option value="API">API Externa (Endpoint)</option>
-                                <option value="AGREGACION">Agregación (Grupo de fuentes)</option>
-                            </select>
+                                <select id="selectorTipoFuente" class="form-select"
+                                        onchange="cambiarTipoFuente()">
+                                    <option value="DINAMICA" selected>Dinámica (Manual)</option>
+                                    <option value="ESTATICA_CSV">Importar CSV</option>
+                                    <option value="ESTATICA_JSON">Importar JSON</option>
+                                    <option value="API">API Externa</option>
+                                    <option value="AGREGACION">Agregación</option>
+                                </select>
                                 <input type="hidden" name="nueva_fuente_tipo"
                                        id="inputTipoFuenteReal" value="DINAMICA">
                             </div>
 
-                            <!-- Configuración Específica (Dinámica) -->
                             <div class="col-12 mt-3">
 
-                                <!-- Panel CSV -->
-                                <div id="panelCsv" class="d-none bg-white p-3 rounded border">
+                                <div id="panelEstatica" class="d-none bg-white p-3 rounded border">
                                     <h6 class="small fw-bold border-bottom pb-2 mb-3">Configuración
-                                        CSV</h6>
-                                    <div class="row g-3">
-                                        <div class="col-md-4">
-                                            <label class="form-label x-small text-muted mb-0">Archivo
-                                                CSV</label>
-                                            <input type="file" name="archivo_fuente" id="fileCsv"
-                                                   class="form-control form-control-sm"
-                                                   accept=".csv">
-                                        </div>
-                                        <div class="col-md-3">
+                                        de Archivo</h6>
+
+                                    <div id="configCsv" class="row g-3 mb-3">
+                                        <div class="col-md-6">
                                             <label class="form-label x-small text-muted mb-0">Separador</label>
                                             <select name="csv_separador"
                                                     class="form-select form-select-sm">
@@ -75,7 +73,7 @@
                                                 <option value=";">Punto y coma (;)</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-5">
+                                        <div class="col-md-6">
                                             <label class="form-label x-small text-muted mb-0">Formato
                                                 Fecha</label>
                                             <input type="text" name="csv_formato_fecha"
@@ -83,7 +81,14 @@
                                                    value="dd/MM/yyyy HH:mm">
                                         </div>
                                     </div>
-                                    <!-- Mapeo (Simplificado visualmente) -->
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Archivo de
+                                            Datos</label>
+                                        <input type="file" name="archivo_fuente" id="inputArchivo"
+                                               class="form-control">
+                                    </div>
+
                                     <div id="areaMapeo" class="d-none mt-3 pt-2 border-top">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <span class="badge bg-success">Archivo Leído</span>
@@ -92,46 +97,32 @@
                                         </div>
                                         <div id="gridMapeo" class="row g-2"></div>
                                     </div>
-                                    <input type="hidden" name="mapeo_columnas_json" id="jsonMapeo">
+                                    <small class="text-muted">*: Campo obligatorio</small>
+                                    <div>
+                                        <small class="text-muted">Mientras más columnas asignes más
+                                            preciso es el mapeo</small>
+                                    </div>
                                 </div>
 
-                                <!-- Panel JSON -->
-                                <div id="panelJson"
-                                     class="d-none bg-white p-3 rounded border text-center">
-                                    <i class="fa-solid fa-file-code fa-2x text-muted mb-2"></i>
-                                    <p class="small text-muted mb-2">Sube un archivo JSON con una
-                                        lista de objetos.<br>Las claves deben coincidir con: <code>hecho_titulo</code>,
-                                        <code>hecho_fecha_suceso</code>, etc.</p>
-                                    <input type="file" name="archivo_fuente_json" id="fileJson"
-                                           class="form-control w-50 mx-auto" accept=".json">
-                                </div>
-
-                                <!-- Panel API -->
                                 <div id="panelApi" class="d-none bg-white p-3 rounded border">
                                     <div class="row g-3">
                                         <div class="col-md-8">
                                             <label class="form-label small fw-bold">URL
                                                 Endpoint</label>
-                                            <label>
-                                                <input type="url" name="url" class="form-control"
-                                                       placeholder="https://api.ejemplo.com/v1/incidentes">
-                                            </label>
+                                            <input type="url" name="url" class="form-control"
+                                                   placeholder="https://api.ejemplo.com/v1/incidentes">
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label small fw-bold">Token
                                                 (Bearer)</label>
-                                            <label>
-                                                <input type="text" name="token" class="form-control"
-                                                       placeholder="Opcional">
-                                            </label>
+                                            <input type="text" name="token" class="form-control"
+                                                   placeholder="Opcional">
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Panel Agregación -->
                                 <div id="panelAgg" class="d-none bg-white p-3 rounded border">
-                                    <label class="form-label small fw-bold">Seleccionar fuentes
-                                        hijas:</label>
+                                    <label class="form-label small fw-bold">Fuentes hijas:</label>
                                     <div class="d-flex flex-wrap gap-2">
                                         {{#each fuentes}}
                                             <div class="form-check form-check-inline border rounded px-3 py-1 m-0">
@@ -147,14 +138,16 @@
 
                             </div>
 
+                            <input type="hidden" name="mapeo_columnas_json" id="jsonMapeo">
+
                             <div class="col-12 text-end">
                                 <button type="button"
                                         class="btn btn-link text-muted text-decoration-none me-2"
                                         data-bs-toggle="collapse" data-bs-target="#collapseCrear">
                                     Cancelar
                                 </button>
-                                <button type="button" class="btn btn-success fw-bold px-4" id="btnCrearFuente">
-                                    Crear Fuente
+                                <button type="button" class="btn btn-success fw-bold px-4"
+                                        id="btnCrearFuente">Crear Fuente
                                 </button>
                             </div>
                         </form>
@@ -162,7 +155,6 @@
                 </div>
             </div>
 
-            <!-- LISTADO DE FUENTES -->
             <div class="row g-4">
                 {{#each fuentes}}
                     <div class="col-md-6 col-lg-4">
@@ -170,10 +162,7 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <h5 class="card-title fw-bold text-dark mb-0 text-truncate"
-                                        title="{{this.nombre}}">
-                                        {{this.nombre}}
-                                    </h5>
-                                    <!-- Icono según tipo -->
+                                        title="{{this.nombre}}">{{this.nombre}}</h5>
                                     <div class="text-muted">
                                         {{#if (eq this.tipo "DINAMICA")}}
                                             <i class="fa-solid fa-pen-to-square"
@@ -188,13 +177,11 @@
                                                title="Agregación"></i>{{/if}}
                                     </div>
                                 </div>
-
                                 <p class="card-text small text-muted mb-3">
                                     ID: #{{this.id}} <br>
                                     Tipo: <span
                                         class="badge bg-light text-dark border">{{this.tipo}}</span>
                                 </p>
-
                                 <div class="d-grid">
                                     <a href="/admin/fuentes/{{this.id}}"
                                        class="btn btn-outline-primary btn-sm rounded-pill">
@@ -204,18 +191,11 @@
                             </div>
                         </div>
                     </div>
-                {{else}}
-                    <div class="col-12">
-                        <div class="text-center py-5 text-muted bg-light rounded border border-dashed">
-                            <i class="fa-solid fa-database fa-3x mb-3 opacity-25"></i>
-                            <h4>No hay fuentes creadas</h4>
-                            <p>Comienza creando una nueva fuente de datos arriba.</p>
-                        </div>
-                    </div>
                 {{/each}}
             </div>
         </div>
     </div>
+
     <style>
         .hover-shadow:hover {
             transform: translateY(-3px);
@@ -231,76 +211,105 @@
         }
     </style>
 
-    <!-- Modal de Éxito al Crear Fuente -->
     <div class="modal fade" id="modalExitoFuente" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-success text-white border-0">
-                    <h5 class="modal-title">
-                        <i class="fa-solid fa-circle-check me-2"></i>Fuente creada
-                    </h5>
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title"><i class="fa-solid fa-circle-check me-2"></i>Creando Fuente...</h5>
                 </div>
                 <div class="modal-body text-center p-4">
-                    <p class="fw-bold mb-3">La fuente se creó correctamente.</p>
-                    <p class="text-muted small">Recargando...</p>
+                    <p class="fw-bold mb-3">Se estan validando los datos...</p>
+                    <div class="d-flex justify-content-center mt-3">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Lógica simplificada para cambio de tipo
         function cambiarTipoFuente() {
             const val = document.getElementById('selectorTipoFuente').value;
             const real = document.getElementById('inputTipoFuenteReal');
 
-            ['panelCsv', 'panelJson', 'panelApi', 'panelAgg'].forEach(id => document.getElementById(id).classList.add('d-none'));
+            // Paneles principales
+            const panelEstatica = document.getElementById('panelEstatica');
+            const panelApi = document.getElementById('panelApi');
+            const panelAgg = document.getElementById('panelAgg');
+
+            // Sub-elementos de estática
+            const configCsv = document.getElementById('configCsv');
+            const inputArchivo = document.getElementById('inputArchivo');
+            const areaMapeo = document.getElementById('areaMapeo');
+
+            // Reset visibilidad
+            [panelEstatica, panelApi, panelAgg].forEach(el => el.classList.add('d-none'));
+            configCsv.classList.add('d-none');
+            areaMapeo.classList.add('d-none');
 
             if (val === 'ESTATICA_CSV') {
                 real.value = 'ESTATICA';
-                document.getElementById('panelCsv').classList.remove('d-none');
+                panelEstatica.classList.remove('d-none');
+                configCsv.classList.remove('d-none'); // Mostrar config CSV
+                inputArchivo.accept = ".csv";
             } else if (val === 'ESTATICA_JSON') {
                 real.value = 'ESTATICA';
-                document.getElementById('panelJson').classList.remove('d-none');
+                panelEstatica.classList.remove('d-none');
+                // CSV oculto, Mapeo oculto (se usa default del backend)
+                inputArchivo.accept = ".json";
             } else if (val === 'API') {
                 real.value = 'API';
-                document.getElementById('panelApi').classList.remove('d-none');
+                panelApi.classList.remove('d-none');
             } else if (val === 'AGREGACION') {
                 real.value = 'AGREGACION';
-                document.getElementById('panelAgg').classList.remove('d-none');
+                panelAgg.classList.remove('d-none');
             } else {
                 real.value = 'DINAMICA';
             }
         }
 
-        // Lógica de CSV (Reutilizada pero limpia)
-        document.getElementById('fileCsv').addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        // --- LÓGICA CSV (Solo se activa si el tipo es CSV) ---
+        const inputArchivo = document.getElementById('inputArchivo');
+        if (inputArchivo) {
+            inputArchivo.addEventListener('change', function (e) {
+                const tipo = document.getElementById('selectorTipoFuente').value;
+                // Si NO es CSV, no hacemos mapeo frontend (igual que en colecciones)
+                if (tipo !== 'ESTATICA_CSV') return;
 
-            const reader = new FileReader();
-            reader.onload = function (evt) {
-                const lines = evt.target.result.split('\n');
-                if (lines.length > 0) {
-                    const sep = document.querySelector('select[name="csv_separador"]').value;
-                    const headers = lines[0].split(sep).map(h => h.trim().replace(/^"|"$/g, ''));
-                    dibujarMapeo(headers);
-                }
-            };
-            reader.readAsText(file);
-        });
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    const lines = evt.target.result.split('\n');
+                    if (lines.length > 0) {
+                        const sep = document.querySelector('select[name="csv_separador"]').value;
+                        const headers = lines[0].split(sep).map(h => h.trim().replace(/^"|"$/g, ''));
+                        dibujarMapeo(headers);
+                        document.getElementById('areaMapeo').classList.remove('d-none');
+                    }
+                };
+                reader.readAsText(file);
+            });
+        }
 
         function dibujarMapeo(headers) {
             const grid = document.getElementById('gridMapeo');
-            document.getElementById('areaMapeo').classList.remove('d-none');
             grid.innerHTML = '';
 
-            const options = headers.map(h => `<option value="${h}">${h}</option>`).join('');
+            // Usamos las claves que coinciden con Hecho.java (@JsonProperty)
             const campos = [
-                {k: 'TITULO', l: 'Título *'}, {k: 'FECHA_SUCESO', l: 'Fecha *'},
-                {k: 'LATITUD', l: 'Latitud'}, {k: 'LONGITUD', l: 'Longitud'},
-                {k: 'DESCRIPCION', l: 'Descrip.'}, {k: 'CATEGORIA', l: 'Categoría'}
+                {k: 'TITULO', l: 'Título *'},
+                {k: 'FECHA_SUCESO', l: 'Fecha *'},
+                {k: 'LATITUD', l: 'Latitud *'},
+                {k: 'LONGITUD', l: 'Longitud *'},
+                {k: 'DESCRIPCION', l: 'Descrip.'},
+                {k: 'CATEGORIA', l: 'Categoría'},
+                {k: 'DIRECCION', l: 'Dirección *'},
+                {k: 'PROVINCIA', l: 'Provincia'}
             ];
+
+            const optionsHtml = headers.map(h => `<option value="${h}">${h}</option>`).join('');
 
             campos.forEach(c => {
                 const col = document.createElement('div');
@@ -310,54 +319,50 @@
                     <span class="input-group-text w-25 bg-light text-muted justify-content-end">${c.l}</span>
                     <select class="form-select select-mapeo-fuente" data-campo="${c.k}">
                         <option value="">-- Ignorar --</option>
-                        ${options}
+                        ${optionsHtml}
                     </select>
                 </div>`;
                 grid.appendChild(col);
             });
-
-            const direccionHeader = headers.find(h => h.toLowerCase().includes('direccion') || h.toLowerCase().includes('dirección') || h.toLowerCase().includes('ubicacion') || h.toLowerCase().includes('ubicación'));
-            const inputDireccion = document.createElement('input');
-            inputDireccion.type = 'hidden';
-            inputDireccion.className = 'select-mapeo-fuente';
-            inputDireccion.setAttribute('data-campo', 'DIRECCION');
-            inputDireccion.value = direccionHeader || '';
-            grid.appendChild(inputDireccion);
         }
 
-        function prepararEnvioMapeoFuente() {
-            const tipo = document.getElementById('selectorTipoFuente').value;
-            if (tipo !== 'ESTATICA_CSV') {
-                document.getElementById('jsonMapeo').value = "";
-                return;
-            }
-            const map = {};
-            document.querySelectorAll('.select-mapeo-fuente').forEach(s => {
-                if (s.value) map[s.dataset.campo] = [s.value];
-            });
-            document.getElementById('jsonMapeo').value = JSON.stringify(map);
-        }
+        const btnCrear = document.getElementById("btnCrearFuente");
+        if (btnCrear) {
+            btnCrear.addEventListener("click", (e) => {
+                e.preventDefault();
+                const form = document.getElementById("formCrearFuente");
 
-        const btnCrearFuente = document.getElementById("btnCrearFuente");
-        const formCrearFuente = document.getElementById("formCrearFuente");
-
-        if (btnCrearFuente) {
-            btnCrearFuente.addEventListener("click", () => {
-
-                // Validación HTML5 normal
-                if (!formCrearFuente.checkValidity()) {
-                    formCrearFuente.reportValidity();
+                if (!form.checkValidity()) {
+                    form.reportValidity();
                     return;
                 }
 
-                // Mostrar modal de éxito
+                // Lógica de mapeo: SOLO si es CSV
+                const tipo = document.getElementById('selectorTipoFuente').value;
+                const inputJsonMapeo = document.getElementById('jsonMapeo');
+                inputJsonMapeo.value = ""; // Limpiar siempre por defecto
+
+                if (tipo === 'ESTATICA_CSV') {
+                    const map = {};
+                    let hayMapeo = false;
+                    document.querySelectorAll('.select-mapeo-fuente').forEach(s => {
+                        if (s.value && s.value.trim() !== "") {
+                            map[s.dataset.campo] = [s.value];
+                            hayMapeo = true;
+                        }
+                    });
+                    if (hayMapeo) {
+                        inputJsonMapeo.value = JSON.stringify(map);
+                    }
+                }
+                // Si es JSON, inputJsonMapeo queda vacío, activando el mapeo default del backend
+
                 const modal = new bootstrap.Modal(document.getElementById("modalExitoFuente"));
                 modal.show();
 
-                // Enviar el formulario después de 1 segundo
                 setTimeout(() => {
-                    formCrearFuente.submit();
-                }, 1000);
+                    form.submit();
+                }, 800);
             });
         }
     </script>

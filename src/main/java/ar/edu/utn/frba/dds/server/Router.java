@@ -7,22 +7,20 @@ import ar.edu.utn.frba.dds.controller.FuenteController;
 import ar.edu.utn.frba.dds.controller.HechoController;
 import ar.edu.utn.frba.dds.controller.SolicitudController;
 import ar.edu.utn.frba.dds.controller.UserController;
-import ar.edu.utn.frba.dds.dto.EstadisticaDTO;
 import ar.edu.utn.frba.dds.dto.SolicitudDTO;
 import ar.edu.utn.frba.dds.model.coleccion.Coleccion;
 import ar.edu.utn.frba.dds.model.estadisticas.Estadistica;
 import ar.edu.utn.frba.dds.model.exceptions.RazonInvalidaException;
-import ar.edu.utn.frba.dds.model.fuentes.Fuente;
 import ar.edu.utn.frba.dds.model.hecho.Hecho;
-import ar.edu.utn.frba.dds.model.reportes.EstadoSolicitud;
 import ar.edu.utn.frba.dds.model.reportes.Solicitud;
 import ar.edu.utn.frba.dds.model.usuario.Rol;
 import ar.edu.utn.frba.dds.model.usuario.Usuario;
-import ar.edu.utn.frba.dds.repositories.SolicitudesRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.Handler;
+import io.javalin.http.HandlerType;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
@@ -77,16 +75,28 @@ public class Router {
                 .collect(Collectors.toList());
   }
 
+  // MÉTODO NUEVO: Convierte la entidad Estadistica a un Map simple para JSON
+  // Esto evita ciclos infinitos (Coleccion -> Fuente -> Hechos -> Coleccion...)
+  private Map<String, Object> convertirAJsonSeguro(Estadistica e) {
+    Map<String, Object> map = new HashMap<>();
+    map.put("id", e.getId());
+    map.put("grupo", e.getGrupo());
+    map.put("cantidad", e.getCantidad());
+    map.put("tipo", e.getTipo());
+    map.put("categoria", e.getCategoria());
+    // IMPORTANTE: No incluimos el objeto 'coleccion' completo, solo sus datos básicos si fueran necesarios
+    if (e.getColeccion() != null) {
+      map.put("coleccionId", e.getColeccion().getId());
+      map.put("coleccionTitulo", e.getColeccion().getTitulo());
+    }
+    return map;
+  }
+
   private void mostrarError(Context ctx, String mensaje, int status) {
     ctx.status(status);
-
     if (ctx.path()
            .startsWith("/api/")) {
-      ctx.json(Map.of(
-          "error", true,
-          "mensaje", mensaje,
-          "status", status
-      ));
+      ctx.json(Map.of("error", true, "mensaje", mensaje, "status", status));
     } else {
       Map<String, Object> model = modeloConSesion(ctx);
       model.put("errorMessage", mensaje);
@@ -99,13 +109,13 @@ public class Router {
 
       switch (status) {
         case 404:
-          ctx.render("404.hbs", model);
+          ctx.render("errores/404.hbs", model);
           break;
         case 403:
-          ctx.render("403.hbs", model);
+          ctx.render("errores/403.hbs", model);
           break;
         default:
-          ctx.render("error.hbs", model);
+          ctx.render("errores/error.hbs", model);
       }
     }
   }
@@ -117,7 +127,7 @@ public class Router {
     return sw.toString();
   }
 
-  public void configure(Javalin app, ObjectMapper mapper, boolean debugMode) {
+  public void configure(Javalin app, ObjectMapper mapper, boolean debugMode, String adminToken) {
     HechoController hechoController = new HechoController();
     SolicitudController solicitudController = new SolicitudController();
     ColeccionController coleccionController = new ColeccionController();
@@ -126,26 +136,18 @@ public class Router {
     UserController userController = new UserController();
     AdminController adminController = new AdminController();
 
-    // Middleware de sesión
     app.before(ctx -> {
       Long id = ctx.sessionAttribute("usuario_id");
-
       if (id != null) {
         ctx.sessionAttribute("estaLogueado", true);
         ctx.sessionAttribute("nombreUsuario", ctx.sessionAttribute("usuario_nombre"));
         ctx.sessionAttribute("emailUsuario", ctx.sessionAttribute("usuario_email"));
-
         Rol rol = ctx.sessionAttribute("usuario_rol");
         ctx.sessionAttribute("rolUsuario", rol);
         ctx.sessionAttribute("esAdmin", Rol.ADMINISTRADOR.equals(rol));
         ctx.sessionAttribute("esUsuario", Rol.CONTRIBUYENTE.equals(rol));
       } else {
         ctx.sessionAttribute("estaLogueado", false);
-        ctx.sessionAttribute("nombreUsuario", null);
-        ctx.sessionAttribute("emailUsuario", null);
-        ctx.sessionAttribute("rolUsuario", null);
-        ctx.sessionAttribute("esAdmin", false);
-        ctx.sessionAttribute("esUsuario", false);
       }
     });
 
@@ -154,17 +156,41 @@ public class Router {
           String path = ctx.path();
           if (path.startsWith("/admin/") || path.startsWith("/api/admin/")) {
 
-            Rol rol = ctx.sessionAttribute("usuario_rol");
+            if (ctx.sessionAttribute("estaLogueado")) {
+              Rol rol = ctx.sessionAttribute("usuario_rol");
 
-            if (rol != Rol.ADMINISTRADOR) {
-              if (path.startsWith("/api/")) {
+              if (!rol.equals(Rol.ADMINISTRADOR)) {
                 ctx.status(403)
                    .json(Map.of("error", "Requiere permisos de administrador"));
-              } else {
-                ctx.redirect("/");
+                throw new ForbiddenResponse();
               }
-              ctx.result("Acceso denegado");
+            } else {
+              ctx.redirect("/auth/login?redirect=" + path);
             }
+          }
+        }
+    );
+
+    app.before(ctx -> {
+      String path = ctx.path();
+      if (path.startsWith("/hechos/reporte/")) {
+        boolean estaLogeado = ctx.sessionAttribute("estaLogueado");
+        if (!estaLogeado) {
+          ctx.redirect("/auth/login?redirect=" + path);
+        }
+      }
+    });
+
+    app.before(
+        "/usuarios/administrador", ctx -> {
+          if (ctx.method()
+                 .equals(HandlerType.POST)) {
+            String tokenRecibido = ctx.header("X-Admin-Token");
+
+            if (tokenRecibido == null || !tokenRecibido.equals(adminToken)) {
+              throw new ForbiddenResponse();
+            }
+
           }
         }
     );
@@ -179,8 +205,8 @@ public class Router {
     app.get("/usuarios", ctx -> ctx.json(userController.findAll()));
 
     // ==================== HECHOS ====================
-    app.get("/", ctx -> {
-          // CORRECCIÓN: Usamos buscarAvanzadoCompleto (SIN paginación) para traer TODOS los hechos al mapa
+    app.get(
+        "/", ctx -> {
           Map<String, Object> resultado = hechoController.buscarAvanzadoCompleto(
               null, null, null, null, null, null, null, false, false
           );
@@ -198,7 +224,6 @@ public class Router {
           model.put("fuentes", fuenteController.findAll());
           model.put("totalHechos", resultado.get("total"));
 
-          // Valores dummy para el template, ya que no paginamos en el mapa
           model.put("totalPages", 1);
           model.put("paginaActual", 1);
 
@@ -214,28 +239,21 @@ public class Router {
           int page = ctx.queryParamAsClass("page", Integer.class)
                         .getOrDefault(1);
           int pageSize = 15;
-
           String categoria = ctx.queryParam("categoria");
-
           List<Hecho> hechos = hechoController.findAll();
           int totalHechos = hechos.size();
           int totalPages = (int) Math.ceil((double) totalHechos / pageSize);
-
           int fromIndex = (page - 1) * pageSize;
           int toIndex = Math.min(fromIndex + pageSize, totalHechos);
-
-          List<Hecho> hechosPagina = (fromIndex < totalHechos)
-                                     ? hechos.subList(fromIndex, toIndex)
-                                     : Collections.emptyList();
-
+          List<Hecho> hechosPagina = (fromIndex < totalHechos) ?
+                                     hechos.subList(fromIndex, toIndex) :
+                                     Collections.emptyList();
           Map<String, Object> model = modeloConSesion(ctx);
           model.put("hechos", hechosPagina);
           model.put("paginaActual", page);
           model.put("totalPaginas", totalPages);
-
           model.put("categorias", hechoController.getCategorias());
           model.put("categoriaSeleccionada", categoria);
-
           ctx.render("hechos.hbs", model);
         }
     );
@@ -244,12 +262,7 @@ public class Router {
         "/hechos/nuevo", ctx -> {
           Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
           if (estaLogueado == null || !estaLogueado) {
-            String redirect = "/hechos/nuevo";
-            String fuenteId = ctx.queryParam("fuente_id");
-            if (fuenteId != null) {
-              redirect += "?fuente_id=" + fuenteId;
-            }
-            ctx.redirect("/auth/login?redirect=" + redirect);
+            ctx.redirect("/auth/login?redirect=/hechos/nuevo");
             return;
           }
           Map<String, Object> model = modeloConSesion(ctx);
@@ -257,43 +270,28 @@ public class Router {
                  .containsKey("fuente_id")) {
             String fuente_id = ctx.queryParam("fuente_id");
             if (fuente_id != null && !fuente_id.isEmpty()) {
-              Fuente fuenteOriginal = fuenteController.findById(Long.parseLong(fuente_id));
-              model.put("fuente", fuenteOriginal);
+              model.put("fuente", fuenteController.findById(Long.parseLong(fuente_id)));
             }
           }
-
           ctx.render("hecho-nuevo.hbs", model);
         }
     );
 
-    app.post("/hechos/nuevo", hechoController::crearHecho);
-
-    app.get(
-        "/hechos/{id}", ctx -> {
+    app.post(
+        "/hechos/nuevo", ctx -> {
           Map<String, Object> model = modeloConSesion(ctx);
-          hechoController.verHecho(ctx, model);
+          if (ctx.sessionAttribute("estaLogueado")) {
+            hechoController.crearHecho(ctx);
+          } else {
+            ctx.redirect("/auth/login?redirect=" + ctx.path());
+          }
         }
     );
-
+    app.get("/hechos/{id}", ctx -> hechoController.verHecho(ctx, modeloConSesion(ctx)));
     app.get("/hechos/{id}/multimedia/{indice}", hechoController::getMultimedia);
-
-    app.get(
-        "/hechos/{id}/editar", ctx -> {
-          Map<String, Object> model = modeloConSesion(ctx);
-          hechoController.editarHecho(ctx, model);
-        }
-    );
-
-    app.get(
-        "/hechos/{id}/editar/{fuenteId}", ctx -> {
-          Map<String, Object> model = modeloConSesion(ctx);
-          hechoController.editarHecho(ctx, model);
-        }
-    );
-
+    app.get("/hechos/{id}/editar", ctx -> hechoController.editarHecho(ctx, modeloConSesion(ctx)));
     app.post("/hechos/{id}/editar", hechoController::actualizarHecho);
 
-    // Método alternativo si aún necesitas getFoto para compatibilidad
     app.get(
         "/hechos/{id}/foto/{indice}", ctx -> {
           Long idHecho = Long.parseLong(ctx.pathParam("id"));
@@ -339,12 +337,6 @@ public class Router {
     app.get(
         "/api/hechos/buscar-completo", ctx -> {
           try {
-            System.out.println("=== BÚSQUEDA COMPLETA ===");
-            ctx.queryParamMap()
-               .forEach((key, values) ->
-                            System.out.println("  " + key + " = " + values)
-               );
-
             String titulo = ctx.queryParam("titulo");
             String categoria = ctx.queryParam("categoria");
             String fuente = ctx.queryParam("fuente");
@@ -356,7 +348,6 @@ public class Router {
             Boolean incluirEliminados = ctx.queryParamAsClass("incluirEliminados", Boolean.class)
                                            .getOrDefault(false);
 
-            // CORRECCIÓN: Si 'paginar' es false o null, usamos la búsqueda completa sin límites.
             boolean usarPaginacion = ctx.queryParam("paginar") != null &&
                 Boolean.parseBoolean(ctx.queryParam("paginar"));
 
@@ -382,18 +373,12 @@ public class Router {
 
             ctx.json(resultados);
           } catch (Exception e) {
-            System.err.println("ERROR en búsqueda completa: " + e.getMessage());
-            e.printStackTrace();
-
             ctx.status(400)
                .json(Map.of(
                    "error",
                    true,
                    "mensaje",
-                   e.getMessage(),
-                   "detalle",
-                   e.getClass()
-                    .getName()
+                   e.getMessage()
                ));
           }
         }
@@ -440,8 +425,10 @@ public class Router {
                 ctx,
                 ctx.bodyAsClass(SolicitudDTO.class)
             );
-            ctx.status(201)
-               .json(solicitud);
+            if (solicitud != null) {
+              ctx.status(201)
+                 .json(solicitud);
+            }
           } catch (RazonInvalidaException e) {
             ctx.status(400)
                .result("Error: " + e.getMessage());
@@ -450,44 +437,17 @@ public class Router {
     );
 
     app.get(
-        "/admin/solicitudes", ctx -> {
-          List<Solicitud> pendientes = SolicitudesRepository.instance()
-                                                            .obtenerPorEstado(EstadoSolicitud.PENDIENTE);
-          Map<String, Object> model = modeloConSesion(ctx);
-          model.put("solicitudes", pendientes);
-          ctx.render("solicitudes.hbs", model);
-        }
+        "/admin/solicitudes",
+        ctx -> solicitudController.listarPendientes(ctx, modeloConSesion(ctx))
     );
 
-    app.put("/admin/solicitudes", adminController::atenderSolicitud);
+    app.put("/admin/solicitudes", solicitudController::procesarResolucion);
 
     app.get(
-        "/solicitudes/mis-solicitudes", ctx -> {
-          Boolean estaLogueado = ctx.sessionAttribute("estaLogueado");
-          if (estaLogueado == null || !estaLogueado) {
-            ctx.redirect("/auth/login?redirect=/solicitudes/mis-solicitudes");
-            return;
-          }
-
-          Long usuarioId = ctx.sessionAttribute("usuario_id");
-
-          List<Solicitud> todas = SolicitudesRepository.instance()
-                                                       .findAll();
-          List<Solicitud> misSolicitudes = todas.stream()
-                                                .filter(s -> s.getUsuario() != null && s.getUsuario()
-                                                                                        .getId()
-                                                                                        .equals(
-                                                                                            usuarioId))
-                                                .sorted((a, b) -> b.getId()
-                                                                   .compareTo(a.getId()))
-                                                .collect(Collectors.toList());
-
-          Map<String, Object> model = modeloConSesion(ctx);
-          model.put("solicitudes", misSolicitudes);
-
-          ctx.render("solicitudes-info.hbs", model);
-        }
+        "/solicitudes/mis-solicitudes",
+        ctx -> solicitudController.listarMisSolicitudes(ctx, modeloConSesion(ctx))
     );
+
 
     // ==================== FUENTES ====================
     app.get(
@@ -498,7 +458,7 @@ public class Router {
         }
     );
 
-    app.post("/admin/fuentes", ctx -> adminController.crearFuente(ctx));
+    app.post("/admin/fuentes", adminController::crearFuente);
     app.get("/admin/fuentes", ctx -> adminController.listarFuentes(ctx, modeloConSesion(ctx)));
     app.get("/admin/fuentes/{id}", ctx -> adminController.editarFuente(ctx, modeloConSesion(ctx)));
     app.post("/admin/fuentes/{id}/configurar", adminController::configurarFuente);
@@ -512,6 +472,23 @@ public class Router {
     );
 
     // ==================== COLECCIONES ====================
+    app.get(
+        "/admin/colecciones", ctx -> {
+          Map<String, Object> model = modeloConSesion(ctx);
+          model.put("categorias", coleccionController.getCategorias());
+          adminController.listarColecciones(ctx, model);
+        }
+    );
+    app.get(
+        "/admin/colecciones/{id}",
+        ctx -> adminController.editarColeccion(ctx, modeloConSesion(ctx))
+    );
+    app.post("/admin/colecciones", adminController::crearColeccion);
+    app.post("/admin/colecciones/{id}/configurar", adminController::configurarColeccion);
+    app.post("/admin/colecciones/{id}/agregarHecho", adminController::agregarHechoAColeccion);
+    app.post("/admin/colecciones/{id}/quitarHecho", adminController::removerHechoDeColeccion);
+    app.post("/admin/colecciones/{id}/calcular-consenso", coleccionController::calcularConsenso);
+
     app.get(
         "/api/colecciones", ctx -> {
           Map<String, Object> model = modeloConSesion(ctx);
@@ -577,12 +554,14 @@ public class Router {
           }
         }
     );
-
     app.get(
         "/api/colecciones/{id}",
         ctx -> userController.hechosColeccion(ctx, modeloConSesion(ctx))
     );
-    app.post("/api/colecciones/{id}/calcular-consenso", coleccionController::calcularConsensoUsuario);
+    app.post(
+        "/api/colecciones/{id}/calcular-consenso",
+        coleccionController::calcularConsensoUsuario
+    );
 
     app.get(
         "/api/admin/colecciones/buscar", ctx -> {
@@ -639,37 +618,8 @@ public class Router {
         }
     );
 
-    app.get(
-        "/admin/colecciones", ctx -> {
-          Map<String, Object> model = modeloConSesion(ctx);
 
-          List<String> categorias = coleccionController.getCategorias();
-          model.put("categorias", categorias);
-
-          adminController.listarColecciones(ctx, model);
-        }
-    );
-    app.get(
-        "/admin/colecciones/{id}",
-        ctx -> adminController.editarColeccion(ctx, modeloConSesion(ctx))
-    );
-    app.post("/admin/colecciones", adminController::crearColeccion);
-    app.post("/admin/colecciones/{id}/configurar", adminController::configurarColeccion);
-    app.post("/admin/colecciones/{id}/agregarHecho", adminController::agregarHechoAColeccion);
-    app.post("/admin/colecciones/{id}/quitarHecho", adminController::removerHechoDeColeccion);
-    app.post("/admin/colecciones/{id}/calcular-consenso", coleccionController::calcularConsenso);
-    app.post("/admin/colecciones/{id}/agregar-condicion", coleccionController::agregarCondicion);
-    app.post("/admin/colecciones/{id}/eliminar-condicion", coleccionController::eliminarCondicion);
-
-    // ==================== ESTADÍSTICAS ====================
-    app.before(
-        "/admin/estadisticas", ctx -> {
-          if (!"OPTIONS".equalsIgnoreCase(String.valueOf(ctx.method()))) {
-            tieneRol(Rol.ADMINISTRADOR).handle(ctx);
-          }
-        }
-    );
-
+    // ==================== ESTADÍSTICAS (JSON API) ====================
     app.get(
         "/admin/estadisticas", ctx -> {
           List<Estadistica> todas = estadisticaController.getEstadisticas();
@@ -677,203 +627,98 @@ public class Router {
           model.put("cantidadHechos", filtrar(todas, "CANTIDAD DE HECHOS"));
           model.put("solicitudesPendientes", filtrar(todas, "CANTIDAD DE SOLICITUDES PENDIENTES"));
           model.put("solicitudesSpam", filtrar(todas, "CANTIDAD DE SPAM"));
-          model.put("categorias", hechoController.getCategorias());
-          model.put("colecciones", coleccionController.getColeccionesDTO());
+          model.put("colecciones", coleccionController.findAll()); // Agregado para el select
+          model.put("categorias", hechoController.getCategorias()); // Agregado para el select
           ctx.render("estadisticas.hbs", model);
         }
     );
 
-    app.get(
-        "/admin/estadisticas/coleccion/{id}", ctx -> {
-          Long id = Long.parseLong(ctx.pathParam("id"));
-          List<Estadistica> todas = estadisticaController.getEstadisticas();
-
-          List<Map<String, Object>> resultado = todas.stream()
-                                                     .filter(e -> "HECHOS REPORTADOS POR PROVINCIA Y COLECCION".equals(
-                                                         e.getTipo()))
-                                                     .filter(e -> e.getColeccion() != null && e.getColeccion()
-                                                                                               .getId()
-                                                                                               .equals(
-                                                                                                   id))
-                                                     .map(e -> {
-                                                       Map<String, Object> m = new HashMap<>();
-                                                       m.put("grupo", e.getGrupo());
-                                                       m.put("cantidad", e.getCantidad());
-                                                       return m;
-                                                     })
-                                                     .toList();
-
-          ctx.json(resultado);
-        }
-    );
-
-    app.get(
-        "/admin/estadisticas/provincia", ctx -> {
-          String categoria = ctx.queryParam("categoria");
-          List<Estadistica> todas = estadisticaController.getEstadisticas();
-
-          List<Map<String, Object>> resultado = todas.stream()
-                                                     .filter(e -> "HECHOS POR PROVINCIA Y CATEGORIA".equals(
-                                                         e.getTipo()))
-                                                     .filter(e -> categoria == null || categoria.equals(
-                                                         e.getCategoria()))
-                                                     .map(e -> {
-                                                       Map<String, Object> m = new HashMap<>();
-                                                       m.put("grupo", e.getGrupo());
-                                                       m.put("cantidad", e.getCantidad());
-                                                       return m;
-                                                     })
-                                                     .toList();
-
-          ctx.json(resultado);
-        }
-    );
-
-    app.get(
-        "/admin/estadisticas/hora", ctx -> {
-          String categoria = ctx.queryParam("categoria");
-          List<Estadistica> todas = estadisticaController.getEstadisticas();
-
-          List<Map<String, Object>> resultado = todas.stream()
-                                                     .filter(e -> "HECHOS POR HORA Y CATEGORIA".equals(
-                                                         e.getTipo()))
-                                                     .filter(e -> categoria == null || categoria.equals(
-                                                         e.getCategoria()))
-                                                     .map(e -> {
-                                                       Map<String, Object> m = new HashMap<>();
-                                                       m.put("grupo", e.getGrupo());
-                                                       m.put("cantidad", e.getCantidad());
-                                                       return m;
-                                                     })
-                                                     .toList();
-
-          ctx.json(resultado);
-        }
-    );
-
-    app.get(
-        "/admin/estadisticas/categorias", ctx -> {
-          Integer top = ctx.queryParamAsClass("top", Integer.class)
-                           .getOrDefault(10);
-          String orden = ctx.queryParam("orden");
-
-          List<Estadistica> todas = estadisticaController.getEstadisticas();
-
-          List<Map<String, Object>> resultado = todas.stream()
-                                                     .filter(e -> "HECHOS REPORTADOS POR CATEGORIA".equals(
-                                                         e.getTipo()))
-                                                     .sorted((a, b) -> {
-                                                       if ("asc".equalsIgnoreCase(orden)) {
-                                                         return a.getCantidad()
-                                                                 .compareTo(b.getCantidad());
-                                                       }
-                                                       return b.getCantidad()
-                                                               .compareTo(a.getCantidad());
-                                                     })
-                                                     .limit(top)
-                                                     .map(e -> {
-                                                       Map<String, Object> m = new HashMap<>();
-                                                       m.put("categoria", e.getCategoria());
-                                                       m.put("cantidad", e.getCantidad());
-                                                       return m;
-                                                     })
-                                                     .toList();
-
-          ctx.json(resultado);
-        }
-    );
-
-    app.get(
-        "/admin/estadisticas/coleccion", ctx -> {
-          List<Estadistica> todas = estadisticaController.getEstadisticas();
-
-          List<Map<String, Object>> resultado = todas.stream()
-                                                     .filter(e -> "HECHOS REPORTADOS POR PROVINCIA Y COLECCION".equals(
-                                                         e.getTipo()))
-                                                     .map(e -> {
-                                                       Map<String, Object> m = new HashMap<>();
-                                                       m.put(
-                                                           "coleccion",
-                                                           e.getColeccion()
-                                                            .getTitulo()
-                                                       );
-                                                       m.put("provincia", e.getGrupo());
-                                                       m.put("cantidad", e.getCantidad());
-                                                       return m;
-                                                     })
-                                                     .toList();
-
-          ctx.json(resultado);
-        }
-    );
-
-    app.get(
-        "/admin/estadisticas/categorias/todas", ctx -> {
-          List<Estadistica> todas = estadisticaController.getEstadisticas();
-
-          List<Map<String, Object>> resultado = todas.stream()
-                                                     .filter(e -> "HECHOS REPORTADOS POR CATEGORIA".equals(
-                                                         e.getTipo()))
-                                                     .map(e -> {
-                                                       Map<String, Object> m = new HashMap<>();
-                                                       m.put("categoria", e.getCategoria());
-                                                       m.put("cantidad", e.getCantidad());
-                                                       return m;
-                                                     })
-                                                     .toList();
-
-          ctx.json(resultado);
-        }
-    );
-
-    app.get(
-        "/admin/estadisticas/hechos/todas", ctx -> {
-          List<Estadistica> todas = estadisticaController.getEstadisticas();
-
-          Map<String, Object> resultado = new HashMap<>();
-
-          List<Map<String, Object>> provincia = todas.stream()
-                                                     .filter(e -> "HECHOS POR PROVINCIA Y CATEGORIA".equals(
-                                                         e.getTipo()))
-                                                     .map(e -> {
-                                                       Map<String, Object> m = new HashMap<>();
-                                                       m.put("provincia", e.getGrupo());
-                                                       m.put("categoria", e.getCategoria());
-                                                       m.put("cantidad", e.getCantidad());
-                                                       return m;
-                                                     })
+    // Endpoint API para Provincia
+    app.get("/admin/estadisticas/provincia", ctx -> {
+      String categoria = ctx.queryParam("categoria");
+      List<Estadistica> stats = estadisticaController.getEstadisticas().stream()
+                                                     .filter(e -> "HECHOS POR PROVINCIA Y CATEGORIA".equals(e.getTipo()))
+                                                     .filter(e -> categoria == null || categoria.isEmpty() || categoria.equals(e.getCategoria()))
                                                      .collect(Collectors.toList());
 
-          List<Map<String, Object>> hora = todas.stream()
-                                                .filter(e -> "HECHOS POR HORA Y CATEGORIA".equals(e.getTipo()))
-                                                .map(e -> {
-                                                  Map<String, Object> m = new HashMap<>();
-                                                  m.put("hora", e.getGrupo());
-                                                  m.put("categoria", e.getCategoria());
-                                                  m.put("cantidad", e.getCantidad());
-                                                  return m;
-                                                })
-                                                .collect(Collectors.toList());
+      // CORRECCIÓN: Convertir a Map simple para evitar problemas de JSON
+      ctx.json(stats.stream().map(this::convertirAJsonSeguro).collect(Collectors.toList()));
+    });
 
-          resultado.put("provincia", provincia);
-          resultado.put("hora", hora);
+    // Endpoint API para Hora
+    app.get("/admin/estadisticas/hora", ctx -> {
+      String categoria = ctx.queryParam("categoria");
+      List<Estadistica> stats = estadisticaController.getEstadisticas().stream()
+                                                     .filter(e -> "HECHOS POR HORA Y CATEGORIA".equals(e.getTipo()))
+                                                     .filter(e -> categoria == null || categoria.isEmpty() || categoria.equals(e.getCategoria()))
+                                                     .collect(Collectors.toList());
 
-          ctx.json(resultado);
-        }
-    );
+      // CORRECCIÓN: Convertir a Map simple
+      ctx.json(stats.stream().map(this::convertirAJsonSeguro).collect(Collectors.toList()));
+    });
 
-    app.post(
-        "/admin/estadisticas", ctx -> {
-          try {
-            var stat = estadisticaController.calcularEstadisticas(ctx.bodyAsClass(EstadisticaDTO.class));
-            ctx.status(200)
-               .json(stat);
-          } catch (RuntimeException e) {
-            ctx.status(400)
-               .result(e.getMessage());
-          }
-        }
-    );
+    // Endpoint API para Categorías
+    app.get("/admin/estadisticas/categorias", ctx -> {
+      Integer top = ctx.queryParamAsClass("top", Integer.class).allowNullable().get();
+      List<Estadistica> stats = estadisticaController.getEstadisticas().stream()
+                                                     .filter(e -> "HECHOS REPORTADOS POR CATEGORIA".equals(e.getTipo()))
+                                                     .sorted(Comparator.comparing(Estadistica::getCantidad).reversed())
+                                                     .collect(Collectors.toList());
+
+      if (top != null && top > 0) {
+        stats = stats.stream().limit(top).collect(Collectors.toList());
+      }
+
+      // CORRECCIÓN: Convertir a Map simple
+      ctx.json(stats.stream().map(this::convertirAJsonSeguro).collect(Collectors.toList()));
+    });
+
+    // Endpoint API para Colección
+    app.get("/admin/estadisticas/coleccion/{id}", ctx -> {
+      Long id = Long.parseLong(ctx.pathParam("id"));
+      List<Estadistica> stats = estadisticaController.getEstadisticas().stream()
+                                                     .filter(e -> "HECHOS REPORTADOS POR PROVINCIA Y COLECCION".equals(e.getTipo()))
+                                                     .filter(e -> e.getColeccion() != null && e.getColeccion().getId().equals(id))
+                                                     .collect(Collectors.toList());
+
+      // CORRECCIÓN: Convertir a Map simple (AQUÍ ESTABA EL ERROR PRINCIPAL)
+      ctx.json(stats.stream().map(this::convertirAJsonSeguro).collect(Collectors.toList()));
+    });
+
+    // Endpoints para descarga CSV
+    app.get("/admin/estadisticas/hechos/todas", ctx -> {
+      List<Estadistica> todas = estadisticaController.getEstadisticas();
+      Map<String, List<Map<String, Object>>> response = new HashMap<>();
+
+      response.put("provincia", todas.stream()
+                                     .filter(e -> "HECHOS POR PROVINCIA Y CATEGORIA".equals(e.getTipo()))
+                                     .map(this::convertirAJsonSeguro)
+                                     .collect(Collectors.toList()));
+
+      response.put("hora", todas.stream()
+                                .filter(e -> "HECHOS POR HORA Y CATEGORIA".equals(e.getTipo()))
+                                .map(this::convertirAJsonSeguro)
+                                .collect(Collectors.toList()));
+
+      ctx.json(response);
+    });
+
+    app.get("/admin/estadisticas/categorias/todas", ctx -> {
+      List<Estadistica> stats = estadisticaController.getEstadisticas().stream()
+                                                     .filter(e -> "HECHOS REPORTADOS POR CATEGORIA".equals(e.getTipo()))
+                                                     .collect(Collectors.toList());
+
+      ctx.json(stats.stream().map(this::convertirAJsonSeguro).collect(Collectors.toList()));
+    });
+
+    app.get("/admin/estadisticas/coleccion", ctx -> {
+      List<Estadistica> stats = estadisticaController.getEstadisticas().stream()
+                                                     .filter(e -> "HECHOS REPORTADOS POR PROVINCIA Y COLECCION".equals(e.getTipo()))
+                                                     .collect(Collectors.toList());
+
+      ctx.json(stats.stream().map(this::convertirAJsonSeguro).collect(Collectors.toList()));
+    });
+
 
     // ==================== PERFILES ====================
     app.get(
@@ -885,7 +730,6 @@ public class Router {
           }
           Usuario user = userController.findByName(ctx.sessionAttribute("nombreUsuario"));
           Map<String, Object> model = modeloConSesion(ctx);
-
           List<Hecho> ultimosHechos = new ArrayList<>();
           if (user.getHechos() != null) {
             ultimosHechos = user.getHechos()
@@ -904,29 +748,9 @@ public class Router {
     );
 
     app.post("/perfil/foto", userController::actualizarFoto);
-
     app.get("/usuarios/{id}/foto", userController::obtenerFotoPerfil);
 
-    app.get(
-        "/perfiles/{nombre}/", ctx -> {
-          Usuario user = userController.findByName(ctx.pathParam("nombre"));
-          Map<String, Object> model = modeloConSesion(ctx);
-          List<Hecho> ultimosHechos = new ArrayList<>();
-          if (user.getHechos() != null) {
-            ultimosHechos = user.getHechos()
-                                .stream()
-                                .sorted(Comparator.comparing(
-                                    Hecho::getFechacarga,
-                                    Comparator.nullsLast(Comparator.reverseOrder())
-                                ))
-                                .limit(5)
-                                .collect(Collectors.toList());
-          }
-          model.put("perfil", user);
-          model.put("ultimosHechos", ultimosHechos);
-          ctx.render("perfil.hbs", model);
-        }
-    );
+    app.get("/admin/dashboard", ctx -> adminController.mostrarDashboard(ctx, modeloConSesion(ctx)));
 
     // ==================== REPORTES ====================
     app.get(
@@ -943,97 +767,26 @@ public class Router {
         }
     );
 
-    app.get("/admin/dashboard", ctx -> adminController.mostrarDashboard(ctx, modeloConSesion(ctx)));
-
-    // ==================== ERROR HANDLERS ====================
+    // Error handlers...
     app.error(
         404, ctx -> {
-          if (ctx.attribute("error-handled") != null) {
-            return;
-          }
-
-          Map<String, Object> model = modeloConSesion(ctx);
-          model.put("errorMessage", "Página no encontrada");
-          model.put("errorStatus", 404);
-          model.put(
-              "timestamp",
-              LocalDateTime.now()
-                           .toString()
-          );
-
-          if (ctx.path()
-                 .startsWith("/api/")) {
-            ctx.render("404.hbs", model);
-          } else {
-            ctx.render("404.hbs", model);
+          if (ctx.attribute("error-handled") == null) {
+            ctx.render("errores/404.hbs", modeloConSesion(ctx));
           }
         }
     );
-
     app.error(
         500, ctx -> {
-          if (ctx.attribute("error-handled") != null) {
-            return;
-          }
-
-          Map<String, Object> model = modeloConSesion(ctx);
-
-          Throwable error = ctx.attribute("javalin-exception");
-          String errorMessage = "Error interno del servidor";
-          String errorDetails = "";
-
-          if (error != null) {
-            errorMessage = error.getMessage() != null ? error.getMessage() : errorMessage;
-            errorDetails = getStackTraceAsString(error);
-
-            System.err.println("Error 500: " + errorMessage);
-            if (debugMode) {
-              error.printStackTrace();
-            }
-          }
-
-          model.put("errorMessage", errorMessage);
-          model.put("errorDetails", errorDetails);
-          model.put("errorStatus", 500);
-          model.put("showDetails", debugMode);
-          model.put(
-              "timestamp",
-              LocalDateTime.now()
-                           .toString()
-          );
-
-          ctx.render("error.hbs", model);
-        }
-    );
-
-    app.error(
-        400, ctx -> {
-          if (ctx.attribute("error-handled") != null) {
-            return;
-          }
-
-          if (ctx.path()
-                 .startsWith("/api/")) {
-            mostrarError(ctx, "Solicitud incorrecta", 400);
+          if (ctx.attribute("error-handled") == null) {
+            ctx.render("errores/error.hbs", modeloConSesion(ctx));
           }
         }
     );
-
     app.error(
         403, ctx -> {
-          if (ctx.attribute("error-handled") != null) {
-            return;
+          if (ctx.attribute("error-handled") == null) {
+            ctx.render("errores/403.hbs", modeloConSesion(ctx));
           }
-          mostrarError(ctx, "Acceso denegado", 403);
-        }
-    );
-
-    app.error(
-        401, ctx -> {
-          if (ctx.attribute("error-handled") != null) {
-            return;
-          }
-          mostrarError(ctx, "No autorizado", 401);
         }
     );
   }

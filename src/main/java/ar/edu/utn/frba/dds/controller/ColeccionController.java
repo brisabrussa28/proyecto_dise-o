@@ -5,6 +5,7 @@ import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.Absoluta;
 import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.AlgoritmoDeConsenso;
 import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MayoriaSimple;
 import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.MultiplesMenciones;
+import ar.edu.utn.frba.dds.model.coleccion.algoritmosconsenso.Verdadero;
 import ar.edu.utn.frba.dds.model.filtro.CondicionBuilder;
 import ar.edu.utn.frba.dds.model.filtro.condiciones.CondicionTrue;
 import ar.edu.utn.frba.dds.model.filtro.condiciones.Operador;
@@ -76,7 +77,7 @@ public class ColeccionController implements WithSimplePersistenceUnit {
       case "MAYORIA_SIMPLE" -> new MayoriaSimple();
       case "ABSOLUTA" -> new Absoluta();
       case "MULTIPLES_MENCIONES" -> new MultiplesMenciones();
-      default -> new MayoriaSimple();
+      default -> new Verdadero();
     };
   }
 

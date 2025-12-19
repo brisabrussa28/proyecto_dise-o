@@ -33,10 +33,13 @@ public class MultiplesMenciones extends AlgoritmoDeConsenso {
   }
 
   private boolean esUnConflicto(Hecho hechoOriginal, Hecho otroHecho) {
-    // Es conflicto si tienen mismo título (flexible) pero NO son el mismo hecho (equals estricto)
-    boolean mismoTitulo = hechoOriginal.getTitulo() != null
-        && hechoOriginal.getTitulo().trim().equalsIgnoreCase(otroHecho.getTitulo().trim());
+    // Validar Título
+    String t1 = normalizarTexto(hechoOriginal.getTitulo());
+    String t2 = normalizarTexto(otroHecho.getTitulo());
+    boolean mismoTitulo = !t1.isEmpty() && t1.equals(t2);
 
-    return mismoTitulo && !hechoOriginal.equals(otroHecho);
+    if (!mismoTitulo) return false;
+
+    return !sonHechosEquivalentes(hechoOriginal, otroHecho);
   }
 }

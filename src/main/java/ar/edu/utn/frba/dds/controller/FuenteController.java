@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.dds.controller;
 
 import ar.edu.utn.frba.dds.model.fuentes.Fuente;
+import ar.edu.utn.frba.dds.model.fuentes.FuenteConHechos;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDeAgregacion;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteDinamica;
 import ar.edu.utn.frba.dds.model.fuentes.FuenteEstatica;
@@ -18,6 +19,7 @@ import ar.edu.utn.frba.dds.repositories.FuenteRepository;
 import ar.edu.utn.frba.dds.utils.DBUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.flbulgarelli.jpa.extras.simple.WithSimplePersistenceUnit;
 import io.javalin.http.Context;
 import io.javalin.http.UploadedFile;
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
-public class FuenteController {
+public class FuenteController implements WithSimplePersistenceUnit {
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -46,6 +48,11 @@ public class FuenteController {
                   .collect(Collectors.toList());
     }
     return todas;
+  }
+
+  public Fuente findFuenteGlobal() {
+    return FuenteRepository.instance()
+                           .findFuenteByNombre("Fuente global de hechos");
   }
 
   public Fuente findByName(String nombre) {
@@ -124,10 +131,36 @@ public class FuenteController {
               }
             }
 
-            hechosImportados.forEach(hecho -> hecho.setOrigen(Origen.DATASET));
+            Fuente fuenteGlobal = findFuenteGlobal();
 
-            fuente = new FuenteEstatica(nombreFuente, hechosImportados);
-            FuenteRepository.instance().save(fuente);
+            withTransaction(() -> {
+              FuenteDinamica fuenteTransaccion = entityManager().find(
+                  FuenteDinamica.class,
+                  fuenteGlobal.getId()
+              );
+
+              // Persistir y agregar hechos a la fuente dinámica
+              for (Hecho hecho : hechosImportados) {
+                hecho.setOrigen(Origen.DATASET);
+                entityManager().persist(hecho);
+                entityManager().flush();
+                DBUtils.enriquecerHecho(hecho);
+                fuenteTransaccion.agregarHecho(hecho);
+              }
+
+              entityManager().merge(fuenteTransaccion);
+              entityManager().flush();
+
+              // Crear la fuente estática con los mismos hechos
+              FuenteEstatica fuenteEstatica = new FuenteEstatica(
+                  nombreFuente,
+                  new ArrayList<>(hechosImportados)
+              );
+              entityManager().persist(fuenteEstatica);
+              entityManager().flush();
+            });
+
+
 
           } catch (Exception e) {
             e.printStackTrace();
@@ -210,10 +243,15 @@ public class FuenteController {
   }
 
   public void agregarHechoDinamico(Fuente fuente, Hecho hecho) {
-    if (fuente instanceof FuenteDinamica) {
-      ((FuenteDinamica) fuente).agregarHecho(hecho);
-      FuenteRepository.instance().save(fuente);
-    }
+    withTransaction(() -> {
+      Fuente fuenteManaged = entityManager().find(Fuente.class, fuente.getId());
+      Hecho hechoManaged = entityManager().find(Hecho.class, hecho.getId());
+
+      if (fuenteManaged instanceof FuenteConHechos fuenteConHechos) {
+        fuenteConHechos.agregarHecho(hechoManaged);
+        entityManager().merge(fuenteConHechos);
+      }
+    });
   }
 
   public void borrarHechoDinamico(Fuente fuente, Long idHecho) {
@@ -321,8 +359,7 @@ public class FuenteController {
       char separador = (separadorStr != null && !separadorStr.isEmpty()) ? separadorStr.charAt(0) : ',';
       String formatoFecha = (formatoFechaInput != null && !formatoFechaInput.isBlank()) ? formatoFechaInput : "dd/MM/yyyy HH:mm";
       return new ConfiguracionLectorCsv(separador, formatoFecha, mapeoColumnas);
-    }
-    else if (fileName.toLowerCase().endsWith(".json")) {
+    } else if (fileName.toLowerCase().endsWith(".json")) {
       return new ConfiguracionLectorJson();
     }
 

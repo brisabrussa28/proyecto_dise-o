@@ -104,9 +104,11 @@ public class HechoRepository {
       return em.createQuery(
                    "SELECT DISTINCT h FROM Hecho h " +
                        "LEFT JOIN FETCH h.etiquetas " +
-                       "LEFT JOIN FETCH h.colecciones",
+                       "LEFT JOIN FETCH h.colecciones " +
+                       "WHERE h.estado <> :estadoEliminado",
                    Hecho.class
                )
+               .setParameter("estadoEliminado", Estado.ELIMINADO)
                .getResultList();
     } finally {
       em.close();
@@ -140,8 +142,9 @@ public class HechoRepository {
     int UMBRAL_TOLERANCIA = 3;
 
     String sql = "SELECT * FROM Hecho h " +
-        "WHERE levenshtein(unaccent(LOWER(h.hecho_titulo)), unaccent(LOWER(:queryParam))) <= :umbral " +
-        "   OR unaccent(LOWER(h.hecho_descripcion)) LIKE unaccent(LOWER(:queryParamLike))";
+        "WHERE (levenshtein(unaccent(LOWER(h.hecho_titulo)), unaccent(LOWER(:queryParam))) <= :umbral " +
+        "   OR unaccent(LOWER(h.hecho_descripcion)) LIKE unaccent(LOWER(:queryParamLike))) " +
+        "   AND h.hecho_estado <> 'ELIMINADO'";
 
     try {
       Query q = em.createNativeQuery(sql, Hecho.class);
@@ -166,7 +169,7 @@ public class HechoRepository {
       LocalDate fechaDesde,
       LocalDate fechaHasta,
       Boolean soloConsensuados,
-      Boolean incluirEliminados
+      Boolean incluirEliminados // PARAMETRO RESTAURADO
   ) {
 
     EntityManager em = DBUtils.getEntityManager();
@@ -175,62 +178,36 @@ public class HechoRepository {
 
       if (coleccion != null && !coleccion.isBlank() && !coleccion.equals("0")) {
         try {
-          Fuente fuenteColeccion = em.createQuery(
-                                         "SELECT c.coleccion_fuente FROM Coleccion c WHERE c.coleccion_titulo = :titulo",
-                                         Fuente.class
-                                     )
-                                     .setParameter("titulo", coleccion)
-                                     .getSingleResult();
-
+          Fuente fuenteColeccion = em.createQuery("SELECT c.coleccion_fuente FROM Coleccion c WHERE c.coleccion_titulo = :titulo", Fuente.class)
+                                     .setParameter("titulo", coleccion).getSingleResult();
           Set<Long> idsFuenteEspecifica = new HashSet<>();
           recolectarIdsFuentes(fuenteColeccion, idsFuenteEspecifica, new HashSet<>(), em);
           idsFuentesValidas.retainAll(idsFuenteEspecifica);
-
-        } catch (NoResultException e) {
-          return Collections.emptyList();
-        }
+        } catch (NoResultException e) { return Collections.emptyList(); }
       }
-
       if (coleccionId != null) {
         try {
-          Fuente fuenteColeccion = em.createQuery(
-                                         "SELECT c.coleccion_fuente FROM Coleccion c WHERE c.coleccion_id = :coleccionId",
-                                         Fuente.class
-                                     )
-                                     .setParameter("coleccionId", coleccionId)
-                                     .getSingleResult();
-
+          Fuente fuenteColeccion = em.createQuery("SELECT c.coleccion_fuente FROM Coleccion c WHERE c.coleccion_id = :coleccionId", Fuente.class)
+                                     .setParameter("coleccionId", coleccionId).getSingleResult();
           Set<Long> idsFuenteEspecifica = new HashSet<>();
           recolectarIdsFuentes(fuenteColeccion, idsFuenteEspecifica, new HashSet<>(), em);
           idsFuentesValidas.retainAll(idsFuenteEspecifica);
-
-        } catch (NoResultException e) {
-          return Collections.emptyList();
-        }
+        } catch (NoResultException e) { return Collections.emptyList(); }
       }
-
       if (fuente != null && !fuente.isBlank() && !fuente.equals("0")) {
         try {
-          Fuente fuenteObj = em.createQuery(
-                                   "SELECT f FROM Fuente f WHERE f.fuente_nombre = :nombre", Fuente.class)
-                               .setParameter("nombre", fuente)
-                               .getSingleResult();
-
+          Fuente fuenteObj = em.createQuery("SELECT f FROM Fuente f WHERE f.fuente_nombre = :nombre", Fuente.class)
+                               .setParameter("nombre", fuente).getSingleResult();
           Set<Long> idsFuenteSeleccionada = new HashSet<>();
           recolectarIdsFuentes(fuenteObj, idsFuenteSeleccionada, new HashSet<>(), em);
           idsFuentesValidas.retainAll(idsFuenteSeleccionada);
-
-        } catch (NoResultException e) {
-          return Collections.emptyList();
-        }
+        } catch (NoResultException e) { return Collections.emptyList(); }
       }
 
       if (idsFuentesValidas.isEmpty()) {
         return Collections.emptyList();
       }
 
-      // CORRECCIÓN: Se elimina 'DISTINCT' para evitar error con ORDER BY en Postgres.
-      // La desduplicación se hace en memoria usando LinkedHashSet.
       StringBuilder queryStr = new StringBuilder(
           "SELECT h FROM Hecho h " +
               "LEFT JOIN FETCH h.etiquetas " +
@@ -244,6 +221,7 @@ public class HechoRepository {
       Map<String, Object> params = new HashMap<>();
       params.put("idsFuentesValidas", idsFuentesValidas);
 
+      // LOGICA CONDICIONAL RESTAURADA
       if (incluirEliminados == null || !incluirEliminados) {
         queryStr.append(" AND h.estado <> :estadoEliminado");
         params.put("estadoEliminado", Estado.ELIMINADO);
@@ -295,7 +273,6 @@ public class HechoRepository {
         query.setParameter(entry.getKey(), entry.getValue());
       }
 
-      // Desduplicar resultados manteniendo el orden (LinkedHashSet)
       return new ArrayList<>(new LinkedHashSet<>(query.getResultList()));
 
     } finally {
@@ -303,7 +280,6 @@ public class HechoRepository {
     }
   }
 
-  // --- MÉTODO PAGINADO (CORREGIDO: 2 PASOS, SIN DISTINCT EN IDs, SIN FETCH ANIDADO) ---
   public Map<String, Object> buscarAvanzadoCompletoPaginated(
       String titulo,
       String categoria,
@@ -312,7 +288,7 @@ public class HechoRepository {
       LocalDate fechaDesde,
       LocalDate fechaHasta,
       Boolean soloConsensuados,
-      Boolean incluirEliminados,
+      Boolean incluirEliminados, // PARAMETRO RESTAURADO
       int page,
       int pageSize
   ) {
@@ -321,56 +297,35 @@ public class HechoRepository {
     try {
       Set<Long> idsFuentesValidas = obtenerIdsFuentesValidas(em);
 
-      // --- FILTROS DE RELACIÓN ---
       if (coleccion != null && !coleccion.isBlank() && !coleccion.equals("0")) {
         try {
-          Fuente fuenteColeccion = em.createQuery(
-                                         "SELECT c.coleccion_fuente FROM Coleccion c WHERE c.coleccion_titulo = :titulo",
-                                         Fuente.class
-                                     )
-                                     .setParameter("titulo", coleccion)
-                                     .getSingleResult();
-          Set<Long> idsFuenteEspecifica = new HashSet<>();
-          recolectarIdsFuentes(fuenteColeccion, idsFuenteEspecifica, new HashSet<>(), em);
-          idsFuentesValidas.retainAll(idsFuenteEspecifica);
-        } catch (NoResultException e) {
-          return resultadoVacio(page);
-        }
+          Fuente fc = em.createQuery("SELECT c.coleccion_fuente FROM Coleccion c WHERE c.coleccion_titulo = :t", Fuente.class).setParameter("t", coleccion).getSingleResult();
+          Set<Long> ids = new HashSet<>(); recolectarIdsFuentes(fc, ids, new HashSet<>(), em); idsFuentesValidas.retainAll(ids);
+        } catch (NoResultException e) { return resultadoVacio(page); }
       }
-
       if (fuente != null && !fuente.isBlank() && !fuente.equals("0")) {
         try {
-          Fuente fuenteObj = em.createQuery(
-                                   "SELECT f FROM Fuente f WHERE f.fuente_nombre = :nombre", Fuente.class)
-                               .setParameter("nombre", fuente)
-                               .getSingleResult();
-          Set<Long> idsFuenteSeleccionada = new HashSet<>();
-          recolectarIdsFuentes(fuenteObj, idsFuenteSeleccionada, new HashSet<>(), em);
-          idsFuentesValidas.retainAll(idsFuenteSeleccionada);
-        } catch (NoResultException e) {
-          return resultadoVacio(page);
-        }
+          Fuente fo = em.createQuery("SELECT f FROM Fuente f WHERE f.fuente_nombre = :n", Fuente.class).setParameter("n", fuente).getSingleResult();
+          Set<Long> ids = new HashSet<>(); recolectarIdsFuentes(fo, ids, new HashSet<>(), em); idsFuentesValidas.retainAll(ids);
+        } catch (NoResultException e) { return resultadoVacio(page); }
       }
 
       if (idsFuentesValidas.isEmpty()) {
         return resultadoVacio(page);
       }
 
-      // --- CONSTRUCCIÓN WHERE ---
       StringBuilder whereClause = new StringBuilder(" WHERE 1=1");
-
       Map<String, Object> params = new HashMap<>();
 
-      // Integridad
       whereClause.append(" AND h.id IN (SELECT fh.id FROM FuenteConHechos f JOIN f.hechos fh WHERE f.id IN :idsFuentesValidas)");
       params.put("idsFuentesValidas", idsFuentesValidas);
 
+      // LOGICA CONDICIONAL RESTAURADA
       if (incluirEliminados == null || !incluirEliminados) {
         whereClause.append(" AND h.estado <> :estadoEliminado");
         params.put("estadoEliminado", Estado.ELIMINADO);
       }
 
-      // Filtros de atributos
       int UMBRAL_TOLERANCIA = 3;
 
       if (titulo != null && !titulo.isBlank()) {
@@ -405,7 +360,6 @@ public class HechoRepository {
         whereClause.append(" AND h.id IN (SELECT hc.id FROM Coleccion c JOIN c.hechos hc)");
       }
 
-      // --- PASO 1: COUNT TOTAL ---
       TypedQuery<Long> countQuery = em.createQuery("SELECT COUNT(h.id) FROM Hecho h" + whereClause.toString(), Long.class);
       for (Map.Entry<String, Object> entry : params.entrySet()) {
         countQuery.setParameter(entry.getKey(), entry.getValue());
@@ -416,9 +370,6 @@ public class HechoRepository {
         return resultadoVacio(page);
       }
 
-      // --- PASO 2: OBTENER IDS PAGINADOS ---
-      // IMPORTANTE: SIN DISTINCT PARA EVITAR ERROR POSTGRES EN ORDER BY
-      // Ordenamos por Consensuados (tamaño de colecciones) y Fecha
       String orderByClause = " ORDER BY (CASE WHEN SIZE(h.colecciones) > 0 THEN 1 ELSE 0 END) DESC, h.hecho_fecha_suceso DESC";
 
       TypedQuery<Long> idQuery = em.createQuery("SELECT h.id FROM Hecho h" + whereClause.toString() + orderByClause, Long.class);
@@ -434,8 +385,6 @@ public class HechoRepository {
         return resultadoVacio(page);
       }
 
-      // --- PASO 3: HIDRATAR ENTIDADES ---
-      // IMPORTANTE: CON DISTINCT (para deduplicar por joins) pero SIN fetches anidados (c.algoritmo)
       TypedQuery<Hecho> entityQuery = em.createQuery(
           "SELECT DISTINCT h FROM Hecho h " +
               "LEFT JOIN FETCH h.fotos " +
@@ -446,7 +395,6 @@ public class HechoRepository {
 
       List<Hecho> unorderedHechos = entityQuery.getResultList();
 
-      // --- PASO 4: REORDENAR EN MEMORIA (Y Deduplicar si necesario) ---
       Map<Long, Hecho> hechoMap = new HashMap<>();
       for (Hecho h : unorderedHechos) {
         hechoMap.put(h.getId(), h);
@@ -496,7 +444,9 @@ public class HechoRepository {
           "SELECT DISTINCT h.* FROM Hecho h WHERE 1=1"
       );
 
-      queryStr.append(" AND h.fuente_id IN (:idsFuentes)");
+      queryStr.append(" AND h.hecho_origen_id IN (:idsFuentes)");
+
+      queryStr.append(" AND h.hecho_estado <> 'ELIMINADO'");
 
       Map<String, Object> params = new HashMap<>();
       params.put("idsFuentes", idsFuentesValidas);
@@ -534,63 +484,31 @@ public class HechoRepository {
     }
   }
 
-  // --- SOLUCIÓN DROPDOWN CATEGORÍAS (NATIVE QUERY) ---
   public List<String> getCategorias() {
     EntityManager em = DBUtils.getEntityManager();
     try {
-      // Usamos Native Query para evitar problemas de mapeo JPQL
-      return em.createNativeQuery(
-                   "SELECT DISTINCT hecho_categoria FROM Hecho WHERE hecho_categoria IS NOT NULL ORDER BY hecho_categoria")
-               .getResultList();
-    } finally {
-      em.close();
-    }
+      return em.createNativeQuery("SELECT DISTINCT hecho_categoria FROM Hecho WHERE hecho_categoria IS NOT NULL ORDER BY hecho_categoria").getResultList();
+    } finally { em.close(); }
   }
-
   public List<String> getFuentesDisponibles() {
     EntityManager em = DBUtils.getEntityManager();
-    try {
-      return em.createQuery(
-                   "SELECT DISTINCT f.fuente_nombre FROM Fuente f WHERE f.fuente_nombre IS NOT NULL ORDER BY f.fuente_nombre",
-                   String.class
-               )
-               .getResultList();
-    } finally {
-      em.close();
-    }
+    try { return em.createQuery("SELECT DISTINCT f.fuente_nombre FROM Fuente f WHERE f.fuente_nombre IS NOT NULL ORDER BY f.fuente_nombre", String.class).getResultList(); } finally { em.close(); }
   }
-
   public List<String> getColeccionesDisponibles() {
     EntityManager em = DBUtils.getEntityManager();
-    try {
-      return em.createQuery(
-                   "SELECT DISTINCT c.coleccion_titulo FROM Coleccion c WHERE c.coleccion_titulo IS NOT NULL ORDER BY c.coleccion_titulo",
-                   String.class
-               )
-               .getResultList();
-    } finally {
-      em.close();
-    }
+    try { return em.createQuery("SELECT DISTINCT c.coleccion_titulo FROM Coleccion c WHERE c.coleccion_titulo IS NOT NULL ORDER BY c.coleccion_titulo", String.class).getResultList(); } finally { em.close(); }
   }
-
   public List<String> getEtiquetas() {
     EntityManager em = DBUtils.getEntityManager();
-    try {
-      return em.createNativeQuery(
-                   "SELECT DISTINCT etiquetas_etiqueta_nombre FROM Hecho_etiquetas")
-               .getResultList();
-    } catch (Exception e) {
-      return Collections.emptyList();
-    } finally {
-      em.close();
-    }
+    try { return em.createNativeQuery("SELECT DISTINCT etiquetas_etiqueta_nombre FROM Hecho_etiquetas").getResultList(); } catch (Exception e) { return Collections.emptyList(); } finally { em.close(); }
   }
 
   public Long countAll() {
     EntityManager em = DBUtils.getEntityManager();
     try {
       return em.createQuery(
-                   "SELECT COUNT(DISTINCT h.id) FROM Hecho h", Long.class)
+                   "SELECT COUNT(DISTINCT h.id) FROM Hecho h WHERE h.estado <> :estadoEliminado", Long.class)
+               .setParameter("estadoEliminado", Estado.ELIMINADO)
                .getSingleResult();
     } finally {
       em.close();
@@ -601,10 +519,11 @@ public class HechoRepository {
     EntityManager em = DBUtils.getEntityManager();
     try {
       StringBuilder queryStr = new StringBuilder(
-          "SELECT COUNT(DISTINCT h.id) FROM Hecho h WHERE 1=1"
+          "SELECT COUNT(DISTINCT h.id) FROM Hecho h WHERE h.estado <> :estadoEliminado"
       );
 
       Map<String, Object> params = new HashMap<>();
+      params.put("estadoEliminado", Estado.ELIMINADO);
 
       if (categoria != null && !categoria.isBlank() && !categoria.equals("0")) {
         queryStr.append(" AND LOWER(h.hecho_categoria) = LOWER(:categoria)");
@@ -639,17 +558,6 @@ public class HechoRepository {
     return total != null ? total : 0L;
   }
 
-  public List<Hecho> findAllPublicos() {
-    EntityManager em = DBUtils.getEntityManager();
-    try {
-      return em.createQuery("SELECT h FROM Hecho h WHERE h.estado <> :estadoEliminado", Hecho.class)
-               .setParameter("estadoEliminado", Estado.ELIMINADO)
-               .getResultList();
-    } finally {
-      em.close();
-    }
-  }
-
   public void findAndDelete(Long idHecho) {
     EntityManager em = DBUtils.getEntityManager();
     DBUtils.comenzarTransaccion(em);
@@ -666,6 +574,5 @@ public class HechoRepository {
     } finally {
       em.close();
     }
-
   }
 }

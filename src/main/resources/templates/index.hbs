@@ -196,8 +196,13 @@
          data-bs-backdrop="false"
          data-bs-scroll="true">
         <div class="offcanvas-header sidebar-header-custom">
+            <button type="button" class="btn btn-sm btn-outline-secondary me-2 border-0"
+                    onclick="volverAFiltros()"
+                    title="Volver a los filtros">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
             <h5 class="offcanvas-title sidebar-title" id="offcanvasResultadosLabel">
-                <i class="fa-solid fa-list-ul me-2 text-primary"></i> Resultados
+                Resultados
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
@@ -248,6 +253,12 @@
 
             function updateContador(cantidad) {
                 document.getElementById('contadorNumero').textContent = cantidad;
+            }
+
+            function truncateText(text, maxLength = 100) {
+                if (!text) return '';
+                text = text.toString();
+                return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
             }
 
             function addMarker(hecho) {
@@ -389,11 +400,15 @@
                                     </div>
                                 ` : ''}
 
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <a href="/hechos/${hecho.id}" class="text-decoration-none text-black"><h6 class="card-title fw-bold mb-0" style="font-size: 0.95rem;">
-                                    ${hecho.hecho_titulo}
-                                </h6></a>
+                            <div class="d-flex justify-content-end mb-2">
                                 ${badgeConsensuado}
+                            </div>
+                            <div class="mb-2">
+                                <a href="/hechos/${hecho.id}" class="text-decoration-none text-black">
+                                    <h6 class="card-title fw-bold mb-0" style="font-size: 0.95rem; word-break: break-word;">
+                                        ${truncateText(hecho.hecho_titulo, 40)}
+                                    </h6>
+                                </a>
                             </div>
 
                             <p class="card-text text-muted small mb-2" style="font-size: 0.85rem;">
@@ -402,7 +417,7 @@
 
                             <div class="mb-2">
                                 <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">
-                                    ${hecho.hecho_categoria || 'General'}
+                                    ${truncateText(hecho.hecho_categoria || 'General', 40)}
                                 </span>
                             </div>
 
@@ -573,10 +588,6 @@
                         }
                     });
                 }
-                const offcanvasResultados = bootstrap.Offcanvas.getInstance('#offcanvasResultados');
-                if (offcanvasResultados) {
-                    offcanvasResultados.hide();
-                }
             }
 
             // ---------------------------------------------------------
@@ -615,19 +626,29 @@
                 }
             }
 
-            // Función unificada para búsqueda
-            async function buscarHechos() {
-                const searchInput = document.getElementById('searchInput');
-                const filtroConsensuados = document.getElementById('filtroConsensuados');
+            function buscarHechos() {
+                const input = document.getElementById('searchInput');
+                const texto = input.value.toLowerCase().trim();
+                const soloConsensuados = document.getElementById('filtroConsensuados').checked;
 
-                filtrosActivos.titulo = searchInput.value.trim();
-                filtrosActivos.soloConsensuados = filtroConsensuados.checked;
+                const resultados = hechosData.filter(hecho => {
+                    const coincideTexto = !texto || (hecho.hecho_titulo && hecho.hecho_titulo.toLowerCase().includes(texto));
 
-                // Sincronizar sidebar visualmente
-                const sidebarCheck = document.getElementById('filtroConsensuadosSidebar');
-                if(sidebarCheck && filtroConsensuados) sidebarCheck.checked = filtroConsensuados.checked;
+                    const esConsensuado = hecho.colecciones && hecho.colecciones.length > 0;
+                    const coincideConsenso = !soloConsensuados || esConsensuado;
 
-                await ejecutarBusquedaAPI();
+                    return coincideTexto && coincideConsenso;
+                });
+
+                mostrarHechosEnMapa(resultados);
+
+                mostrarResultadosBusqueda(resultados);
+
+                const panelResultados = document.getElementById('offcanvasResultados');
+                if (panelResultados) {
+                    const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(panelResultados);
+                    bsOffcanvas.show();
+                }
             }
 
             async function aplicarFiltrosAvanzados() {
@@ -662,7 +683,6 @@
                 resetearFiltrosUI();
                 mostrarHechosEnMapa(hechosData); // Restaurar dataset validado original
 
-                // Limpiar panel de resultados
                  const resultadosBody = document.getElementById('resultadosBody');
                 if(resultadosBody) {
                      resultadosBody.innerHTML = `
@@ -761,6 +781,23 @@
             window.aplicarFiltros = aplicarFiltrosAvanzados;
             window.limpiarFiltros = limpiarBusqueda;
         });
+
+        function volverAFiltros() {
+            const elResultados = document.getElementById('offcanvasResultados');
+            const instanceResultados = bootstrap.Offcanvas.getInstance(elResultados);
+            if (instanceResultados) {
+                instanceResultados.hide();
+            }
+
+            const elFiltros = document.getElementById('offcanvasFiltros');
+            if (elFiltros) {
+                let instanceFiltros = bootstrap.Offcanvas.getInstance(elFiltros);
+                if (!instanceFiltros) {
+                    instanceFiltros = new bootstrap.Offcanvas(elFiltros);
+                }
+                instanceFiltros.show();
+            }
+        }
     </script>
 {{/partial}}
 {{> templates/layout}}

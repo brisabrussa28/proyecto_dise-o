@@ -12,15 +12,32 @@
             <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 border-secondary border-opacity-25">
                 <div>
                     <h3><i class="fa-solid fa-folder-open text-warning me-2"></i>
-                        <strong>{{coleccion.titulo}}</strong></h3>
-                    <span class="badge bg-secondary">{{coleccion.categoria}}</span>
-                    <span class="text-muted ms-2 small">{{coleccion.descripcion}}</span>
+                        <strong>
+                            {{#if (gt coleccion.titulo.length 50)}}
+                                {{substring coleccion.titulo 0 50}}...
+                            {{else}}
+                                {{coleccion.titulo}}
+                            {{/if}}
+                        </strong></h3>
+                    <span class="badge bg-secondary">
+                        {{#if (gt coleccion.categoria.length 100)}}
+                            {{substring coleccion.categoria 0 100}}...
+                        {{else}}
+                            {{coleccion.categoria}}
+                        {{/if}}
+                    </span>
+                    <span class="text-muted ms-2 small">
+                        {{#if (gt coleccion.descripcion.length 100)}}
+                            {{substring coleccion.descripcion 0 100}}...
+                        {{else}}
+                            {{coleccion.descripcion}}
+                        {{/if}}
+                    </span>
                 </div>
             </div>
 
             <div class="row g-4">
 
-                <!-- PANEL CONFIGURACIÓN -->
                 <div class="col-lg-4">
                     <div class="card border-0 shadow-sm bg-light">
                         <div class="card-body p-4">
@@ -30,28 +47,41 @@
 
                             <form id="formEditarColeccion" action="/admin/colecciones/{{coleccion.id}}/configurar"
                                   method="POST">
+
+                                {{#if (eq coleccion.titulo "Coleccion global")}}
+                                    <div class="alert alert-warning small mb-3">
+                                        Esta es la colección global. No se puede editar.
+                                    </div>
+                                {{/if}}
+
                                 <!-- Campos de configuración existentes -->
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold">Título</label>
                                     <input type="text" name="titulo" class="form-control"
-                                           value="{{coleccion.titulo}}" required>
+                                           value="{{coleccion.titulo}}" required
+                                        {{#if (eq coleccion.titulo "Coleccion global")}}disabled
+                                           readonly{{/if}}>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold">Categoría</label>
                                     <input type="text" name="categoria" class="form-control"
-                                           value="{{coleccion.categoria}}" required>
+                                           value="{{coleccion.categoria}}" required
+                                           {{#if (eq coleccion.titulo "Coleccion global")}}disabled{{/if}}>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold">Descripción</label>
                                     <textarea name="descripcion" class="form-control" rows="2"
-                                              required>{{coleccion.descripcion}}</textarea>
+                                              required
+                                              {{#if (eq coleccion.titulo "Coleccion global")}}disabled{{/if}}>{{coleccion.descripcion}}</textarea>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold">Fuente de Datos</label>
-                                    <select name="fuente_id" class="form-select" required>
+                                    <select name="fuente_id" class="form-select" required
+                                        {{#if (eq coleccion.titulo "Coleccion global")}}
+                                            disabled{{/if}}>
                                         <option value="" disabled
                                                 {{#unless coleccion.fuente}}selected{{/unless}}>
                                             Seleccionar...
@@ -68,7 +98,10 @@
                                 <div class="mb-4">
                                     <label class="form-label small fw-bold">Algoritmo de
                                         Consenso</label>
-                                    <select name="algoritmo_tipo" class="form-select" required>
+                                    <select name="algoritmo_tipo" class="form-select" required
+                                            {{#if (eq coleccion.titulo "Coleccion global")}}disabled{{/if}}>
+                                        <option value="Sin definir"
+                                                {{#if (eq coleccion.titulo "Coleccion global")}}disabled{{/if}}>Sin definir</option>
                                         <option value="May_simple"
                                                 {{#if (eq coleccion.algoritmoTipo "May_simple")}}selected{{/if}}>
                                             Mayoría Simple
@@ -85,7 +118,9 @@
                                 </div>
 
                                 <div class="d-grid">
-                                    <button type="button" class="btn btn-primary px-4" id="btnAbrirModalGuardar">
+                                    <button type="button" class="btn btn-primary px-4"
+                                            id="btnAbrirModalGuardar"
+                                            {{#if (eq coleccion.titulo "Coleccion global")}}disabled{{/if}}>
                                         Guardar Cambios
                                     </button>
                                 </div>
@@ -108,7 +143,8 @@
                                               method="POST" class="m-0">
                                             <button type="submit"
                                                     class="btn btn-link text-danger p-0 small text-decoration-none"
-                                                    title="Limpiar Filtros">
+                                                    title="Limpiar Filtros"
+                                                    {{#if (eq coleccion.titulo "Coleccion global")}}disabled{{/if}}>
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </form>
@@ -129,7 +165,8 @@
                                   method="POST">
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">Lógica de Unión</label>
-                                    <select name="cond_logica" class="form-select form-select-sm">
+                                    <select name="cond_logica" class="form-select form-select-sm"
+                                            {{#if (eq coleccion.titulo "Coleccion global")}}disabled{{/if}}>
                                         <option value="AND">Y (Cumplir con todo)</option>
                                         <option value="OR">O (Alternativa)</option>
                                     </select>
@@ -142,7 +179,8 @@
                                         <label for="cond_campo"></label><select name="cond_campo"
                                                                                 id="cond_campo"
                                                                                 class="form-select form-select-sm"
-                                                                                onchange="actualizarFormularioCondicion()">
+                                                                                onchange="actualizarFormularioCondicion()"
+                                                                                {{#if (eq coleccion.titulo "Coleccion global")}}disabled{{/if}}>
                                         <option value="titulo" data-tipo="texto">Título</option>
                                         <option value="descripcion" data-tipo="texto">Descripción
                                         </option>
@@ -162,8 +200,8 @@
                                         <label for="cond_operador"></label><select
                                             name="cond_operador" id="cond_operador"
                                             class="form-select form-select-sm"
-                                            onchange="actualizarInputsValor()">
-                                        <!-- Se llena con JS -->
+                                            onchange="actualizarInputsValor()"
+                                            {{#if (eq coleccion.titulo "Coleccion global")}}disabled{{/if}}>
                                         <option value="IGUAL">Igual a</option>
                                         <option value="CONTIENE">Contiene</option>
                                     </select>
@@ -177,7 +215,8 @@
                                                                                  id="cond_valor_1"
                                                                                  class="form-control form-control-sm"
                                                                                  placeholder="Valor"
-                                                                                 required>
+                                                                                 required
+                                                                                 {{#if (eq coleccion.titulo "Coleccion global")}}disabled{{/if}}>
                                     </div>
 
                                     <!-- Contenedor de Valor 2 (Oculto por defecto) -->
@@ -188,12 +227,14 @@
                                                                                  name="cond_valor_2"
                                                                                  id="cond_valor_2"
                                                                                  class="form-control form-control-sm"
-                                                                                 placeholder="Valor máximo">
+                                                                                 placeholder="Valor máximo"
+                                                                                 {{#if (eq coleccion.titulo "Coleccion global")}}disabled{{/if}}>
                                     </div>
                                 </div>
 
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-outline-dark btn-sm">
+                                    <button type="submit" class="btn btn-outline-dark btn-sm"
+                                            {{#if (eq coleccion.titulo "Coleccion global")}}disabled{{/if}}>
                                         <i class="fa-solid fa-plus me-1"></i> Agregar Condición
                                     </button>
                                 </div>
@@ -203,11 +244,14 @@
                 </div>
 
                 <div class="col-lg-8">
-                    <div class="card border-0 shadow-sm h-100">
+
+                    <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                             <span class="fw-bold small text-uppercase text-muted">
-                                Hechos Consensuados ({{#if
-                                    coleccion.hechos}}{{coleccion.hechos.size}}{{else}}0{{/if}})
+                                Hechos Consensuados (
+                                {{#if
+                                    coleccion.hechos}}{{coleccion.hechos.size}}
+                                {{else}}0{{/if}})
                             </span>
 
                             <form action="/admin/colecciones/{{coleccion.id}}/calcular-consenso"
@@ -218,13 +262,19 @@
                             </form>
                         </div>
 
-                        <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
+                        <div class="card-body p-0" style="max-height: 98vh; overflow-y: auto;">
                             <ul class="list-group list-group-flush">
                                 {{#each coleccion.hechos}}
                                     <a href="/hechos/{{this.id}}" style="text-decoration: none">
                                         <li class="list-group-item p-3 item-hecho">
                                             <div class="d-flex w-100 justify-content-between">
-                                                <h6 class="mb-1 fw-bold">{{this.titulo}}</h6>
+                                                <h6 class="mb-1 fw-bold">
+                                                    {{#if (gt this.titulo.length 50)}}
+                                                        {{substring this.titulo 0 50}}...
+                                                    {{else}}
+                                                        {{this.titulo}}
+                                                    {{/if}}
+                                                </h6>
                                                 <small class="text-muted">ID: {{this.id}}</small>
                                             </div>
                                             <p class="mb-1 small text-muted text-truncate">
@@ -267,15 +317,6 @@
                     <div class="text-center mb-3">
                         <i class="fa-regular fa-floppy-disk fa-3x text-primary mb-3"></i>
                         <h6 class="fw-bold">¿Está seguro que desea guardar estos cambios?</h6>
-                    </div>
-
-                    <div class="alert alert-warning border-0 d-flex align-items-start small">
-                        <i class="fa-solid fa-info-circle mt-1 me-2"></i>
-                        <div>
-                            <div class="mt-2 text-muted">
-                                Esta acción no se puede deshacer.
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0 bg-light">

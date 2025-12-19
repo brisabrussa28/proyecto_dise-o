@@ -32,8 +32,7 @@
                 <div class="col-md-4">
                     <div class="card text-white bg-white mb-3 shadow-sm h-100">
                         <div class="card-body d-flex align-items-center justify-content-between">
-                            <h2 class="card-title" style="color: #0d6efd;">Solicitudes
-                                Pendientes</h2>
+                            <h2 class="card-title" style="color: #0d6efd;">Solicitudes Pendientes</h2>
                             <p class="card-text display-6 fw-bold" style="color: #0d6efd;">
                                 {{#each solicitudesPendientes}}{{cantidad}}{{/each}}
                             </p>
@@ -71,17 +70,14 @@
                          aria-labelledby="panelsStayOpen-headingOne">
                         <div class="accordion-body">
                             <div class="row g-4 align-items-start">
-
                                 <div class="col-12 col-lg-3">
                                     <div class="d-flex flex-column gap-3 align-items-center align-items-lg-start">
                                         <div class="w-100">
-                                            <label class="form-label fw-bold mb-1">Filtrar
-                                                por:</label>
+                                            <label class="form-label fw-bold mb-1">Filtrar por:</label>
                                             <label for="selectFiltroHechos"></label><select
                                                 id="selectFiltroHechos"
                                                 class="form-select w-100">
-                                            <option value="" selected>Filtrar por:
-                                            </option>
+                                            <option value="" selected>Filtrar por:</option>
                                             <option value="1">Provincia</option>
                                             <option value="2">Hora</option>
                                         </select>
@@ -102,8 +98,7 @@
                                         <button type="button"
                                                 class="btn btn-info w-100 mt-2 descargar-csv"
                                                 data-type="hechos">
-                                            <i class="fa-solid fa-download me-2"></i>Exportar en
-                                            formato CSV
+                                            <i class="fa-solid fa-download me-2"></i>Exportar en formato CSV
                                         </button>
                                     </div>
                                 </div>
@@ -180,19 +175,17 @@
                                 <div class="col-12 col-lg-3">
                                     <div class="d-flex flex-column gap-3">
                                         <div class="w-100">
-                                            <label class="form-label fw-bold mb-1">Obtener
-                                                Top:</label>
-                                            <label for="selectTopCategorias"></label><select
-                                                id="selectTopCategorias"
-                                                class="form-select w-100">
-                                            <option selected>Seleccionar top</option>
-                                            <option value="1">Top 1</option>
-                                            <option value="3">Top 3</option>
-                                            <option value="5">Top 5</option>
-                                            <option value="10">Top 10</option>
-                                            <option value="50">Top 50</option>
-                                            <option value="100">Top 100</option>
-                                        </select>
+                                            <label class="form-label fw-bold mb-1">Obtener Top:</label>
+                                            <label for="selectTopCategorias"></label>
+                                            <select id="selectTopCategorias" class="form-select w-100">
+                                                <option value="" selected>Seleccionar top</option>
+                                                <option value="1">Top 1</option>
+                                                <option value="3">Top 3</option>
+                                                <option value="5">Top 5</option>
+                                                <option value="10">Top 10</option>
+                                                <option value="50">Top 50</option>
+                                                <option value="100">Top 100</option>
+                                            </select>
                                         </div>
                                         <button type="button"
                                                 class="btn btn-info w-100 mt-2 descargar-csv"
@@ -221,6 +214,7 @@
         let chartCategorias = null;
         let chartColeccion = null;
 
+        // Función genérica para crear gráficos
         function crearGrafico(idCanvas, datos, label, horizontal = false) {
             const canvas = document.getElementById(idCanvas);
             if (!canvas) {
@@ -228,11 +222,21 @@
                 return;
             }
 
+            // [CORRECCIÓN 2] Mejora en la lógica de selección de Labels
+            // Se prioriza 'categoria' si está presente y no es nula, especialmente para el gráfico de categorías.
+            // Para colección, usamos 'coleccionTitulo' si 'grupo' falla (aunque el backend envía 'grupo' para la colección).
+            const labels = datos.map(e => {
+                // Si es el gráfico de categorías (horizontal), forzamos el uso de categoria
+                if (horizontal && e.categoria) return e.categoria;
+                // Si no, usamos la lógica estándar de precedencia
+                return e.grupo || e.categoria || e.coleccionTitulo || "Sin etiqueta";
+            });
+
             const ctx = canvas.getContext('2d');
             return new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: datos.map(e => e.grupo || e.categoria || e.coleccion),
+                    labels: labels,
                     datasets: [{
                         label: label,
                         data: datos.map(e => e.cantidad),
@@ -251,6 +255,7 @@
             });
         }
 
+        // 1. CARGA HECHOS
         async function cargarHechos() {
             const selectFiltro = document.getElementById("selectFiltroHechos");
             const selectCategoria = document.getElementById("selectCategoriaHechos");
@@ -287,8 +292,10 @@
             }
         }
 
+        // 2. CARGA CATEGORÍAS
         async function cargarCategorias() {
             const topValue = document.getElementById("selectTopCategorias").value;
+            // Ahora parseInt("") será NaN, y top será null, lo cual es correcto.
             const top = isNaN(parseInt(topValue)) ? null : parseInt(topValue);
             const url = top ? `/admin/estadisticas/categorias?top=${top}` : `/admin/estadisticas/categorias`;
 
@@ -296,13 +303,19 @@
                 const resp = await fetch(url);
                 const datos = await resp.json();
 
+                if (datos.length === 0) {
+                    console.warn("No hay estadísticas de categorías para mostrar.");
+                }
+
                 if (chartCategorias) chartCategorias.destroy();
+                // Notar que 'horizontal' es true aquí
                 chartCategorias = crearGrafico("canvasCategorias", datos, "Hechos por categoría", true);
             } catch (error) {
                 console.error(error);
             }
         }
 
+        // 3. CARGA COLECCIÓN
         async function cargarColeccion() {
             const id = document.getElementById("selectColeccion").value;
             if (!id) return;
@@ -311,22 +324,22 @@
                 const datos = await resp.json();
 
                 if (chartColeccion) chartColeccion.destroy();
-                // Usamos el ID NUEVO: canvasColeccion
                 chartColeccion = crearGrafico("canvasColeccion", datos, "Detalle de Colección", false);
             } catch (error) {
                 console.error(error);
             }
         }
 
+        // DESCARGA CSV
         async function descargarCSVCompleto(tipo) {
             try {
                 if (tipo === "hechos") {
                     const resp = await fetch("/admin/estadisticas/hechos/todas");
                     const datos = await resp.json();
                     let csv = "=== Hechos por Provincia ===\nProvincia,Categoría,Cantidad\n";
-                    if (datos.provincia) datos.provincia.forEach(e => csv += `${e.provincia},${e.categoria},${e.cantidad}\n`);
+                    if (datos.provincia) datos.provincia.forEach(e => csv += `${e.grupo || ""},${e.categoria || ""},${e.cantidad}\n`);
                     csv += "\n=== Hechos por Hora ===\nHora,Categoría,Cantidad\n";
-                    if (datos.hora) datos.hora.forEach(e => csv += `${e.hora},${e.categoria},${e.cantidad}\n`);
+                    if (datos.hora) datos.hora.forEach(e => csv += `${e.grupo || ""},${e.categoria || ""},${e.cantidad}\n`);
                     downloadBlob(csv, "estadisticas_hechos.csv");
                     return;
                 }
@@ -337,7 +350,8 @@
                 const resp = await fetch(url);
                 const datos = await resp.json();
                 let csv = "Dato,Cantidad\n";
-                datos.forEach(e => csv += `${e.provincia || e.categoria || e.coleccion},${e.cantidad}\n`);
+                // Ajuste para usar el campo correcto en CSV también
+                datos.forEach(e => csv += `${e.grupo || e.categoria || e.coleccionTitulo || ""},${e.cantidad}\n`);
                 downloadBlob(csv, `estadisticas_${tipo}.csv`);
             } catch (e) {
                 console.error(e);
@@ -352,7 +366,9 @@
             link.click();
         }
 
+        // INICIALIZACIÓN
         document.addEventListener('DOMContentLoaded', () => {
+            // Listeners
             document.getElementById("panelsStayOpen-collapseOne").addEventListener("shown.bs.collapse", cargarHechos);
             document.getElementById("selectFiltroHechos").addEventListener("change", cargarHechos);
             document.getElementById("selectCategoriaHechos").addEventListener("change", cargarHechos);
@@ -369,10 +385,10 @@
                 });
             });
 
+            // --- EJECUCIÓN INMEDIATA ---
             cargarHechos();
         });
     </script>
-
 {{/partial}}
 
 {{> templates/layout}}
